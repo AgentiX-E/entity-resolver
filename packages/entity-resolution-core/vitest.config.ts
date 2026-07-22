@@ -5,12 +5,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      // I0 Foundation: 80% coverage. Raised to 100% from I1 onward.
+      // I1+: minimum 95% coverage on all 4 dimensions
       thresholds: {
-        statements: 80,
-        branches: 80,
-        functions: 80,
-        lines: 80,
+        statements: 95,
+        branches: 95,
+        functions: 95,
+        lines: 95,
       },
     },
   },
