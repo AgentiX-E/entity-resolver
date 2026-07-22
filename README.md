@@ -65,3 +65,7 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture document, inclu
 ## License
 
 MIT © Lambertyan — [AgentiX-E](https://github.com/AgentiX-E)
+
+---
+
+📖 [Full Documentation](https://agentix-e.github.io/entity-resolution) — Guides, API Reference, Migration

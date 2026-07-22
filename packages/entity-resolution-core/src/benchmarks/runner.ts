@@ -7,7 +7,6 @@ import { evaluateClustering } from '../evaluation/metrics.js';
 import { nameComparisonSpec } from '../matching/comparison.js';
 import type { Cluster } from '../types/core.js';
 import type { EntityId } from '../types/core.js';
-import type { ScoredPair } from '../types/core.js';
 
 export async function runBenchmark(dataset: BenchmarkDataset): Promise<BenchmarkResult> {
   const startTime = Date.now();
@@ -19,16 +18,14 @@ export async function runBenchmark(dataset: BenchmarkDataset): Promise<Benchmark
     ? [{ fields: fields.slice(0, 2), transforms: ['strip', 'lowercase'] as const }]
     : [{ fields, transforms: ['strip', 'lowercase'] as const }];
 
-  let scoredPairs: ScoredPair[] = [];
-  let predClusters = new Map<EntityId, Cluster>();
+  let predClusters: Map<EntityId, Cluster> = new Map();
   let matchCount = 0;
 
   try {
     const result = await runPipeline(dataset.records, {
       blocking: { passes }, comparisons: comps, matchThreshold: 0.5, autoConfigure: false,
     });
-    scoredPairs = result.scoredPairs;
-    predClusters = result.clusters;
+    predClusters = result.clusters as Map<EntityId, Cluster>;
     matchCount = result.statistics.matchedRecords;
   } catch {
     // Fallback: blocking produced no pairs, treat as no matches

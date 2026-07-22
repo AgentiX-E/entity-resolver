@@ -30,7 +30,6 @@ export class BloomFilter {
 
   /** Add a token to the Bloom filter. */
   add(token: string, secret: string): void {
-    const byteLen = Math.ceil(this.size / 8);
     for (let i = 0; i < this.numHashes; i++) {
       const hash = createHash('sha256')
         .update(`${secret}:${i}:${token}`)
