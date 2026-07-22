@@ -75,3 +75,37 @@ export {
   normalizePhone,
   preprocessRecords,
 } from './preprocessing/cleaner.js';
+
+// Fellegi-Sunter Probability Model
+export type { FSParameters } from './fellegi-sunter/parameters.js';
+export {
+  createDefaultParameters,
+  extractComparisonKeys,
+  cloneParametersMutable,
+  freezeParameters,
+  validateParameters,
+} from './fellegi-sunter/parameters.js';
+
+export type { EMOptions, EMResult } from './fellegi-sunter/em.js';
+export { estimateParameters } from './fellegi-sunter/em.js';
+
+export type { MatchWeightResult } from './fellegi-sunter/match-weight.js';
+export {
+  computeMatchWeight,
+  computeAggregateMatchWeight,
+  weightToProbability,
+  probabilityToWeight,
+  priorWeight,
+  MATCH_WEIGHT_INTERPRETATION,
+} from './fellegi-sunter/match-weight.js';
+
+export type { TermFrequency } from './fellegi-sunter/tf-adjust.js';
+export {
+  buildTermFrequencies,
+  computeTFAdjustment,
+  adjustWeightByTF,
+  TFAdjustmentLookup,
+} from './fellegi-sunter/tf-adjust.js';
+
+export type { CorrelationWarning, CorrelationReport } from './fellegi-sunter/field-independence.js';
+export { analyzeFieldCorrelations } from './fellegi-sunter/field-independence.js';
