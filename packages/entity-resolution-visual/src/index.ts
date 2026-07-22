@@ -26,3 +26,34 @@ export {
   buildEvaluationData,
   buildUnlinkablesData,
 } from './data/api.js';
+
+// Layer 2: Headless Components
+export type {
+  WaterfallState,
+  WaterfallActions,
+  HistogramState,
+  HistogramActions,
+  ClusterExplorerState,
+  ClusterExplorerActions,
+  MuChartState,
+  MuChartActions,
+} from './headless/state-machines.js';
+
+export {
+  useWaterfall,
+  useHistogram,
+  useClusterExplorer,
+  useMuChart,
+} from './headless/state-machines.js';
+
+// Layer 3: Web Components
+export {
+  DEFAULT_THEME,
+  THEME_VARIABLE_COUNT,
+  ErBaseElement,
+  ErWaterfallElement,
+  ErHistogramElement,
+  ErClusterExplorerElement,
+  ErMuChartElement,
+  registerAllElements,
+} from './components/web/elements.js';

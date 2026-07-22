@@ -2,12 +2,7 @@
 // Framework-agnostic, zero rendering dependencies.
 // Consumers render with D3, ECharts, Chart.js, Recharts, or any charting library.
 
-import type {
-  PipelineResult,
-  MatchWeightBin,
-  FieldMuParams,
-  DiagnosticData,
-} from '@agentix-e/entity-resolution-core';
+import type { PipelineResult, MatchWeightBin } from '@agentix-e/entity-resolution-core';
 
 // ══════════════════════════════════════════════════════════════
 // Waterfall Chart Data
@@ -157,7 +152,7 @@ function buildDefaultBins(result: PipelineResult): MatchWeightBin[] {
     bins.push({ minWeight: w, maxWeight: w + binWidth, count });
   }
 
-  return bins;
+  return [...bins];
 }
 
 // ══════════════════════════════════════════════════════════════
