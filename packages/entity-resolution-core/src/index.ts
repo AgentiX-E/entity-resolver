@@ -109,3 +109,28 @@ export {
 
 export type { CorrelationWarning, CorrelationReport } from './fellegi-sunter/field-independence.js';
 export { analyzeFieldCorrelations } from './fellegi-sunter/field-independence.js';
+
+// Blocking
+export type {
+  CandidatePair,
+  BlockingConfig,
+  BlockingPass,
+  BlockingTransform,
+  BlockingResult,
+} from './blocking/types.js';
+export { computeReductionRatio, applyBlockingTransforms } from './blocking/types.js';
+export { standardBlocking, blockOn, blockOnSoundex } from './blocking/standard.js';
+export {
+  tokenBlocking,
+  sortedNeighborhood,
+  multiPassBlocking,
+  blockPurging,
+  comparisonNeighborhoodPruning,
+  metaBlocking,
+} from './blocking/strategies.js';
+export type { BlockingAnalysisResult } from './blocking/analyzer.js';
+export {
+  analyzeBlockingRule,
+  recommendBlockingRules,
+  verifyBlockingRecall,
+} from './blocking/analyzer.js';

@@ -375,6 +375,7 @@ describe('Property: identical strings return 1 for most scorers', () => {
     'soundex', // soundex breaks on non-alphabetic strings
     'double_metaphone', // breaks on single-char strings
     'ensemble', // composite scorers may not return exactly 1
+    'date_diff', // date scorer breaks on non-date strings
     'exact', // returns 0 for empty strings
   ]);
 

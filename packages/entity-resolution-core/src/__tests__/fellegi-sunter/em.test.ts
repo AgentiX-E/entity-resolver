@@ -160,3 +160,77 @@ describe('EM edge cases', () => {
     expect(tight.iterations).toBeGreaterThanOrEqual(loose.iterations);
   });
 });
+
+describe('EM numerical edge cases', () => {
+  it('handles all score-zero vectors', () => {
+    const vectors = Array.from(
+      { length: 50 },
+      () =>
+        ({
+          field: 'name',
+          level: 'not_match',
+          score: 0,
+          scorer: 'exact',
+        }) as const,
+    );
+    const result = estimateParameters(vectors, { maxIterations: 15 });
+    expect(result.iterations).toBeGreaterThanOrEqual(1);
+  });
+
+  it('handles mixed score thresholds', () => {
+    const vectors: ComparisonVector[] = [
+      ...Array.from(
+        { length: 50 },
+        () =>
+          ({
+            field: 'name',
+            level: 'exact_match',
+            score: 1,
+            scorer: 'exact',
+          }) as const,
+      ),
+      ...Array.from(
+        { length: 30 },
+        () =>
+          ({
+            field: 'name',
+            level: 'strong_match',
+            score: 0.85,
+            scorer: 'jaro_winkler',
+          }) as const,
+      ),
+      ...Array.from(
+        { length: 20 },
+        () =>
+          ({
+            field: 'name',
+            level: 'weak_match',
+            score: 0.51,
+            scorer: 'jaro_winkler',
+          }) as const,
+      ),
+    ];
+    const result = estimateParameters(vectors, { maxIterations: 25, epsilon: 1e-5 });
+    expect(result.parameters.lambda).toBeGreaterThan(0);
+    expect(result.parameters.lambda).toBeLessThan(1);
+  });
+
+  it('log-likelihood never decreases across iterations', () => {
+    const vectors: ComparisonVector[] = Array.from(
+      { length: 100 },
+      (_, idx) =>
+        ({
+          field: 'name',
+          level: idx < 70 ? 'exact_match' : 'not_match',
+          score: idx < 70 ? 1 : 0,
+          scorer: 'exact',
+        }) as const,
+    );
+    const result = estimateParameters(vectors, { maxIterations: 20 });
+    for (let idx = 1; idx < result.logLikelihoodHistory.length; idx++) {
+      expect(result.logLikelihoodHistory[idx]!).toBeGreaterThanOrEqual(
+        result.logLikelihoodHistory[idx - 1]! - 0.001,
+      );
+    }
+  });
+});
