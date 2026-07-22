@@ -40,6 +40,7 @@ export {
   numericDiffScorer,
   dateDiffScorer,
   booleanMatchScorer,
+  radialScorer,
   ALL_SCORERS,
   IMPLEMENTED_SCORER_COUNT,
 } from './matching/scorers/js/scorers.js';
@@ -109,6 +110,16 @@ export {
 
 export type { CorrelationWarning, CorrelationReport } from './fellegi-sunter/field-independence.js';
 export { analyzeFieldCorrelations } from './fellegi-sunter/field-independence.js';
+
+// Model Serialization
+export type { SerializedModel, DeserializedModel } from './fellegi-sunter/model-serialization.js';
+export {
+  MODEL_VERSION,
+  serializeModel,
+  serializeFSParamsToJSON,
+  deserializeModel,
+  deserializeFSParamsFromJSON,
+} from './fellegi-sunter/model-serialization.js';
 
 // Blocking
 export type {
@@ -187,12 +198,23 @@ export {
 // Incremental Update
 export { incrementalAdd, incrementalDelete, incrementalModify } from './pipeline/incremental.js';
 
+// Record Linking & Gazetteer
+export type { GazetteerConfig, RecordLinkConfig } from './pipeline/linking.js';
+export { gazetteerMatch, linkRecords } from './pipeline/linking.js';
+
 // Memory reference implementations
 export { MemoryEntityStore } from './memory/entity-store.js';
 
 // PPRL
 export type { PPRLConfig } from './pprl/bloom.js';
-export { BloomFilter, encodePPRL, matchPPRL } from './pprl/bloom.js';
+export {
+  BloomFilter,
+  encodePPRL,
+  encodePPRLAsync,
+  matchPPRL,
+  matchPPRLAsync,
+  sha256Async,
+} from './pprl/bloom.js';
 
 // LLM Scorer
 export type { LLMScorerConfig, LLMScorerResult } from './llm/scorer.js';

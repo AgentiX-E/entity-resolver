@@ -92,9 +92,60 @@ export function applyBlockingTransforms(
       case 'substring:0:1':
         result = result.slice(0, 1);
         break;
+      case 'soundex':
+        result = computeSoundex(result);
+        break;
+      case 'metaphone':
+        result = computeMetaphone(result);
+        break;
       default:
         break;
     }
   }
   return result;
+}
+
+// ─── Soundex encoding ────────────────────────────────────────────
+
+const SOUNDEX_MAP: Record<string, number> = {
+  B: 1, F: 1, P: 1, V: 1,
+  C: 2, G: 2, J: 2, K: 2, Q: 2, S: 2, X: 2, Z: 2,
+  D: 3, T: 3,
+  L: 4,
+  M: 5, N: 5,
+  R: 6,
+};
+
+function computeSoundex(value: string): string {
+  const s = value.toUpperCase().replace(/[^A-Z]/g, '');
+  if (s.length === 0) return '0000';
+  const first = s[0]!;
+  let code = first;
+  let prev = SOUNDEX_MAP[first] ?? 0;
+  for (let i = 1; i < s.length && code.length < 4; i++) {
+    const digit = SOUNDEX_MAP[s[i]!] ?? 0;
+    if (digit !== 0 && digit !== prev) {
+      code += String(digit);
+    }
+    prev = digit;
+  }
+  return (code + '000').slice(0, 4);
+}
+
+// ─── Metaphone encoding (simplified) ──────────────────────────────
+
+function computeMetaphone(value: string): string {
+  const s = value.toUpperCase().replace(/[^A-Z]/g, '');
+  if (s.length === 0) return '';
+  // Simplified Metaphone: keep first char, drop vowels, dedupe
+  let result = s[0]!;
+  let prev = s[0]!;
+  for (let i = 1; i < s.length; i++) {
+    const ch = s[i]!;
+    if ('AEIOU'.includes(ch)) continue;
+    if (ch === prev) continue;
+    result += ch;
+    prev = ch;
+  }
+  return result.slice(0, 6);
 }

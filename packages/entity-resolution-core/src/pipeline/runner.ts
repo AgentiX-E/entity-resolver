@@ -10,7 +10,7 @@ import type {
 } from '../types/core.js';
 import type { FSParameters } from '../fellegi-sunter/parameters.js';
 import type { BlockingConfig, CandidatePair } from '../blocking/types.js';
-import type { ComparisonSpec } from '../matching/comparison.js';
+import type { ComparisonSpec, ComparisonVector } from '../matching/comparison.js';
 import type { ScoredPair } from '../types/core.js';
 import type { ClusteringResult } from '../clustering/algorithms.js';
 import { preprocessRecords } from '../preprocessing/cleaner.js';
@@ -69,11 +69,11 @@ export async function runPipeline(
   const blockingResult = standardBlocking(cleaned, config.blocking);
   const candidates = blockingResult.pairs;
 
-  // Stage 3: Matching — generate comparison vectors
-  const vectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
+  // Stage 3: Matching — generate comparison vectors grouped by pair
+  const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
-  // Stage 3b: Estimate FS parameters via EM
-  const emResult = estimateParameters(vectors, {
+  // Stage 3b: Estimate FS parameters via EM (per-pair posteriors)
+  const emResult = estimateParameters(pairVectors, {
     maxIterations: options?.maxEmIterations ?? 30,
     epsilon: options?.emEpsilon ?? 1e-6,
   });
@@ -93,7 +93,7 @@ export async function runPipeline(
 
   // Build final result
   const statistics = buildStatistics(records.length, clustering, emResult, startTime);
-  const diagnostics = buildDiagnostics(params, vectors);
+  const diagnostics = buildDiagnostics(params, pairVectors);
 
   const result: PipelineResult = {
     clusters: clustering.clusters,
@@ -114,8 +114,7 @@ function generateComparisonVectorsForPairs(
   records: RawRecord[],
   candidates: readonly CandidatePair[],
   comparisons: readonly ComparisonSpec[],
-) {
-  const vectors = [];
+): ComparisonVector[][] {
   const fieldMeta = new Map<string, FieldMetadata>();
   for (const c of comparisons) {
     fieldMeta.set(c.field, {
@@ -125,12 +124,11 @@ function generateComparisonVectorsForPairs(
       isNumeric: false,
     });
   }
-  for (const pair of candidates) {
+  return candidates.map((pair) => {
     const a = records[pair.leftId]!;
     const b = records[pair.rightId]!;
-    vectors.push(...generateComparisonVectors(a, b, comparisons, fieldMeta));
-  }
-  return vectors;
+    return generateComparisonVectors(a, b, comparisons, fieldMeta);
+  });
 }
 
 function computeScoredPairs(
@@ -195,7 +193,10 @@ function buildStatistics(
   };
 }
 
-function buildDiagnostics(params: FSParameters, _vectors: any[]): DiagnosticData {
+function buildDiagnostics(
+  params: FSParameters,
+  _pairVectors: ComparisonVector[][],
+): DiagnosticData {
   const muParams = new Map<string, any>();
   for (const key of params.mProbabilities.keys()) {
     const [field] = key.split(':');
@@ -204,9 +205,29 @@ function buildDiagnostics(params: FSParameters, _vectors: any[]): DiagnosticData
     muParams.get(field!)!.mProbabilities.set(key, params.mProbabilities.get(key)!);
     muParams.get(field!)!.uProbabilities.set(key, params.uProbabilities.get(key)!);
   }
+  // Build match weight histogram from per-pair vector counts
+  const weightBins: Array<{ binMin: number; binMax: number; count: number }> = [];
+  const totalPairs = _pairVectors.length;
+  if (totalPairs > 0) {
+    // Compute approximate match weight bins from parameter distribution
+    for (let bin = 0; bin < 20; bin++) {
+      weightBins.push({ binMin: bin * 5 - 50, binMax: (bin + 1) * 5 - 50, count: 0 });
+    }
+    for (const pair of _pairVectors) {
+      let weight = 0;
+      for (const v of pair) {
+        const key = `${v.field}:${v.level}`;
+        const m = params.mProbabilities.get(key);
+        const u = params.uProbabilities.get(key);
+        if (m && u && u > 0) weight += Math.log2(m / u);
+      }
+      const binIdx = Math.min(Math.max(Math.floor((weight + 50) / 5), 0), 19);
+      if (weightBins[binIdx]) weightBins[binIdx]!.count++;
+    }
+  }
   return {
     muParameters: muParams as any,
-    matchWeightDistribution: [],
+    matchWeightDistribution: weightBins as any,
     unlinkableCount: 0,
   };
 }

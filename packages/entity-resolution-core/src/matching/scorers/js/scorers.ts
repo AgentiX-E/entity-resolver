@@ -372,9 +372,29 @@ export const booleanMatchScorer: IScorer = {
   },
 };
 
+/**
+ * Radial (geospatial) scorer — Haversine distance.
+ * Expects values in "lat,lng" or "lat, lng" format.
+ * Returns similarity in [0, 1] where 1 = same point, 0 = very far.
+ */
+export const radialScorer: IScorer = {
+  name: 'radial',
+  kernelized: false,
+  score(a: unknown, b: unknown, _field: FieldMetadata): number {
+    const coordA = parseCoordinates(a);
+    const coordB = parseCoordinates(b);
+    if (!coordA || !coordB) return 0;
+
+    const distanceKm = haversineDistance(coordA.lat, coordA.lng, coordB.lat, coordB.lng);
+    // Convert distance to similarity: 0 km → 1.0, 1000+ km → ~0
+    // Using exponential decay: similarity = exp(-distance / 50)
+    return Math.max(0, Math.exp(-distanceKm / 50));
+  },
+};
+
 // ─── Aggregated scorer map ─────────────────────────────────────
 
-/** All 19 scorers in a name-indexed map. */
+/** All 20 scorers in a name-indexed map. */
 export const ALL_SCORERS: Readonly<Record<string, IScorer>> = Object.freeze({
   exact: exactScorer,
   levenshtein: levenshteinScorer,
@@ -394,15 +414,50 @@ export const ALL_SCORERS: Readonly<Record<string, IScorer>> = Object.freeze({
   numeric_diff: numericDiffScorer,
   date_diff: dateDiffScorer,
   boolean_match: booleanMatchScorer,
-  // Placeholder for radial — will be implemented in future iteration
-  radial: {
-    name: 'radial',
-    kernelized: false,
-    score(_a: unknown, _b: unknown, _field: FieldMetadata): number {
-      return 0; // TODO: Implement radial similarity (needs haversine/geospatial)
-    },
-  },
+  radial: radialScorer,
 });
 
-/** Number of fully implemented scorers (excluding placeholders). */
-export const IMPLEMENTED_SCORER_COUNT = 19;
+/** Number of fully implemented scorers — runtime-computed. */
+export const IMPLEMENTED_SCORER_COUNT = Object.keys(ALL_SCORERS).length;
+
+// ─── Geospatial helpers ──────────────────────────────────────────
+
+interface Coordinates {
+  lat: number;
+  lng: number;
+}
+
+/** Parse "lat,lng" or "lat, lng" string into coordinates. */
+function parseCoordinates(value: unknown): Coordinates | null {
+  if (typeof value !== 'string') return null;
+  const cleaned = value.replace(/\s/g, '');
+  const parts = cleaned.split(',');
+  if (parts.length < 2) return null;
+  const lat = parseFloat(parts[0]!);
+  const lng = parseFloat(parts[1]!);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
+}
+
+/**
+ * Haversine formula — great-circle distance between two points on Earth.
+ * Returns distance in kilometers.
+ */
+function haversineDistance(
+  lat1: number, lng1: number,
+  lat2: number, lng2: number,
+): number {
+  const R = 6371; // Earth radius in km
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function toRad(deg: number): number {
+  return (deg * Math.PI) / 180;
+}

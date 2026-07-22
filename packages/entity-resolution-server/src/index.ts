@@ -13,4 +13,4 @@ export { createRateLimitMiddleware, startBucketCleanup } from './middleware/rate
 
 // MCP Tools
 export type { McpTool } from './mcp/tools.js';
-export { getMcpTools } from './mcp/tools.js';
+export { getMcpTools, executeMcpTool } from './mcp/tools.js';
