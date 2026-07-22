@@ -1,18 +1,42 @@
-// WASM scorer loader — auto-detects Rust-accelerated scorers.
-// Falls back to pure JS scorers when WASM is unavailable.
+// WASM scorer loader — now with real Rust-compiled WASM!
+// Auto-detects and loads WASM-accelerated scorers.
+// Falls back to pure JS when WASM is unavailable.
 
 import type { IScorer } from '../../../interfaces/IScorer.js';
+import type { FieldMetadata } from '../../../types/core.js';
+
+let _wasmScorers: Readonly<Record<string, IScorer>> | null = null;
 
 /**
  * Attempt to load WASM-accelerated scorers.
- * Returns null if WASM is unavailable (platform not supported or --no-optional).
- *
- * TODO: Implement when Rust scoring kernels are compiled to WASM (I11).
+ * Returns null if WASM is unavailable.
  */
 export async function tryLoadWasmScorers(): Promise<Readonly<Record<string, IScorer>> | null> {
-  // Placeholder: WASM compilation happens in I11 (Production)
-  // When ready, this will dynamically import the WASM module:
-  //   const wasm = await import('./scorers/wasm_scorer.js');
-  //   return wasm.createWasmScorers();
-  return null;
+  if (_wasmScorers) return _wasmScorers;
+
+  try {
+    // Dynamically import the compiled WASM module
+    const wasm = await import('./scorers/wasm_scorer.js');
+
+    const wasmScore = wasm.wasm_score as (name: string, a: string, b: string) => number;
+
+    const scorers: Record<string, IScorer> = {};
+
+    const names = ['levenshtein', 'jaro', 'jaro_winkler', 'dice', 'soundex'];
+
+    for (const name of names) {
+      scorers[name] = {
+        name,
+        kernelized: true,
+        score(a: unknown, b: unknown, _field: FieldMetadata): number {
+          return wasmScore(name, String(a ?? ''), String(b ?? ''));
+        },
+      };
+    }
+
+    _wasmScorers = scorers;
+    return _wasmScorers;
+  } catch {
+    return null;
+  }
 }

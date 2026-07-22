@@ -1,0 +1,1 @@
+/workspace/entity-resolution/packages/entity-resolution-core/src/matching/scorers/wasm/rust-scorer/target/wasm32-unknown-unknown/release/er_wasm_scorer.wasm: /workspace/entity-resolution/packages/entity-resolution-core/src/matching/scorers/wasm/rust-scorer/src/lib.rs
