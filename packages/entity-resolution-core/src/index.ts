@@ -186,3 +186,6 @@ export {
 
 // Incremental Update
 export { incrementalAdd, incrementalDelete, incrementalModify } from './pipeline/incremental.js';
+
+// Memory reference implementations
+export { MemoryEntityStore } from './memory/entity-store.js';
