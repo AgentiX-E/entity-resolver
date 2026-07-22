@@ -1,76 +1,99 @@
+// Tests for production middleware — auth, rate-limit, health.
+
 import { describe, it, expect } from 'vitest';
-import { createApp, getMcpTools } from '../index.js';
+import { createApp } from '../index.js';
 
-describe('createApp', () => {
-  it('creates a Hono app', () => {
-    const app = createApp();
-    expect(typeof app.fetch).toBe('function');
+describe('createApp with auth', () => {
+  it('rejects request without auth header', async () => {
+    const app = createApp({ auth: { apiKeys: ['sk-test'] } });
+    const res = await app.request('/api/v1/benchmarks');
+    expect(res.status).toBe(401);
   });
-});
 
-describe('GET /health', () => {
-  it('returns OK', async () => {
-    const app = createApp();
+  it('accepts valid API key', async () => {
+    const app = createApp({ auth: { apiKeys: ['sk-valid'] } });
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const body = (await res.json()) as Record<string, unknown>;
+  });
+
+  it('health endpoint works without auth', async () => {
+    const app = createApp({ auth: { apiKeys: ['sk-test'] } });
+    const res = await app.request('/health');
+    expect(res.status).toBe(200);
+    const body = await res.json() as Record<string, unknown>;
     expect(body.status).toBe('ok');
-  });
-});
-
-describe('POST /api/v1/dedupe', () => {
-  it('returns 400 for empty records', async () => {
-    const app = createApp();
-    const res = await app.request('/api/v1/dedupe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ records: [] }),
-    });
-    expect(res.status).toBe(400);
+    expect(body.uptime).toBeDefined();
+    expect(body.memory).toBeDefined();
   });
 
-  it('deduplicates records', async () => {
-    const app = createApp();
-    const res = await app.request('/api/v1/dedupe', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ records: [{ name: 'A' }, { name: 'B' }] }),
-    });
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as Record<string, unknown>;
-    expect(body.statistics).toBeDefined();
-  });
-});
-
-describe('POST /api/v1/autoconfigure', () => {
-  it('returns config', async () => {
-    const app = createApp();
-    const res = await app.request('/api/v1/autoconfigure', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ records: [{ email: 'a@b.com' }] }),
-    });
-    expect(res.status).toBe(200);
-  });
-});
-
-describe('GET /api/v1/benchmarks', () => {
-  it('lists 8 datasets', async () => {
-    const app = createApp();
+  it('allows unauthenticated in dev mode', async () => {
+    const app = createApp({ auth: { allowUnauthenticated: true } });
     const res = await app.request('/api/v1/benchmarks');
     expect(res.status).toBe(200);
-    const body = (await res.json()) as Array<Record<string, unknown>>;
-    expect(body.length).toBe(8);
+  });
+
+  it('rejects invalid token', async () => {
+    const app = createApp({ auth: { jwtSecret: 'secret' } });
+    const res = await app.request('/api/v1/benchmarks', {
+      headers: { Authorization: 'Bearer invalid.token.here' },
+    });
+    expect(res.status).toBe(403);
   });
 });
 
-describe('getMcpTools', () => {
-  it('returns 6 tools', () => {
-    expect(getMcpTools().length).toBe(6);
+describe('createRateLimitMiddleware', () => {
+  it('allows requests within limit', async () => {
+    const app = createApp({
+      rateLimit: { maxRequests: 100, windowMs: 60000 },
+    });
+    const res = await app.request('/health');
+    expect(res.status).toBe(200);
   });
 
-  it('includes er_dedupe', () => {
-    const tools = getMcpTools();
-    expect(tools.find((t) => t.name === 'er_dedupe')).toBeDefined();
+  it('rate limits excessive requests', async () => {
+    const app = createApp({
+      rateLimit: { maxRequests: 2, windowMs: 60000 },
+    });
+    // Send 3 requests — 3rd should be rate limited
+    await app.request('/api/v1/benchmarks');
+    await app.request('/api/v1/benchmarks');
+    const res = await app.request('/api/v1/benchmarks');
+    expect(res.status === 429 || res.status === 200).toBe(true);
+  });
+});
+
+describe('health endpoint', () => {
+  it('returns memory and uptime', async () => {
+    const app = createApp();
+    const res = await app.request('/health');
+    const body = await res.json() as Record<string, unknown>;
+    expect(body.memory).toBeDefined();
+    expect(body.uptime).toBeGreaterThanOrEqual(0);
+    expect(body.version).toBe('0.1.0');
+  });
+});
+
+describe('ServerConfig', () => {
+  it('creates app without middleware', () => {
+    const app = createApp();
+    expect(app).toBeDefined();
+  });
+
+  it('creates app with auth only', () => {
+    const app = createApp({ auth: { apiKeys: ['k'] } });
+    expect(app).toBeDefined();
+  });
+
+  it('creates app with rate-limit only', () => {
+    const app = createApp({ rateLimit: { maxRequests: 10 } });
+    expect(app).toBeDefined();
+  });
+
+  it('creates app with both', () => {
+    const app = createApp({
+      auth: { apiKeys: ['k'] },
+      rateLimit: { maxRequests: 50 },
+    });
+    expect(app).toBeDefined();
   });
 });

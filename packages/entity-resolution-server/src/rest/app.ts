@@ -5,19 +5,40 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import {
-  runPipeline,
-  autoConfigure,
-  loadAllBenchmarks,
-  runBenchmark,
+  runPipeline, autoConfigure, loadAllBenchmarks, runBenchmark,
 } from '@agentix-e/entity-resolution-core';
 import type { PipelineConfig } from '@agentix-e/entity-resolution-core';
+import { createAuthMiddleware } from '../middleware/auth.js';
+import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
+import type { AuthConfig } from '../middleware/auth.js';
+import type { RateLimitConfig } from '../middleware/rate-limit.js';
 
-/** Create the entity-resolution Hono app. */
-export function createApp(): Hono {
+/** Server configuration. */
+export interface ServerConfig {
+  readonly auth?: AuthConfig;
+  readonly rateLimit?: RateLimitConfig;
+}
+
+/** Create the entity-resolution Hono app with production middleware. */
+export function createApp(config: ServerConfig = {}): Hono {
   const app = new Hono();
 
-  // Health check
-  app.get('/health', (c: Context) => c.json({ status: 'ok', timestamp: Date.now() }));
+  // Production middleware
+  if (config.auth) {
+    app.use('*', createAuthMiddleware(config.auth));
+  }
+  if (config.rateLimit) {
+    app.use('*', createRateLimitMiddleware(config.rateLimit));
+  }
+
+  // Enhanced health check with dependency status
+  app.get('/health', (c: Context) => c.json({
+    status: 'ok',
+    timestamp: Date.now(),
+    uptime: process.uptime(),
+    memory: process.memoryUsage().heapUsed,
+    version: '0.1.0',
+  }));
 
   // Deduplicate records
   app.post('/api/v1/dedupe', async (c: Context) => {

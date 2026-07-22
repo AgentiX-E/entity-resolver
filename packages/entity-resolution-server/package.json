@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolution-server",
   "version": "0.0.0",
-  "description": "entity-resolution-server \u2014 Entity Resolution sub-package",
+  "description": "entity-resolution-server — Entity Resolution sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",
@@ -24,8 +24,9 @@
     "clean": "rm -rf dist *.tsbuildinfo coverage"
   },
   "dependencies": {
+    "@agentix-e/entity-resolution-core": "workspace:*",
     "hono": "^4.12.31",
-    "@agentix-e/entity-resolution-core": "workspace:*"
+    "pino": "^10.3.1"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.0.0",
