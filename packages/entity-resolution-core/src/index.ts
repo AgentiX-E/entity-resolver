@@ -142,3 +142,22 @@ export { connectedComponents, dbscanClustering, uniqueMapping } from './clusteri
 // Evaluation
 export type { EvaluationMetrics } from './evaluation/metrics.js';
 export { evaluateClustering } from './evaluation/metrics.js';
+
+// Pipeline
+export type { PipelineConfig, PipelineOptions } from './pipeline/runner.js';
+export { runPipeline } from './pipeline/runner.js';
+
+// Benchmarks
+export type { BenchmarkDataset, BenchmarkResult } from './benchmarks/datasets.js';
+export {
+  loadFebrl,
+  loadDblpAcm,
+  loadAbtBuy,
+  loadAmazonGoogle,
+  loadWdcProducts,
+  loadWdcOffers,
+  loadItunesAmazon,
+  loadCora,
+  loadAllBenchmarks,
+} from './benchmarks/datasets.js';
+export { runBenchmark, runAllBenchmarks, formatBenchmarkReport } from './benchmarks/runner.js';
