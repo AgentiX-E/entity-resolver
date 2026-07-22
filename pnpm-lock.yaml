@@ -93,6 +93,17 @@ importers:
         version: 2.1.9(@types/node@25.9.5)(@vitest/ui@4.1.10)(jsdom@29.1.1)
 
   packages/entity-resolution-node:
+    dependencies:
+      '@agentix-e/entity-resolution-core':
+        specifier: workspace:*
+        version: link:../entity-resolution-core
+    optionalDependencies:
+      '@agentix-e/entity-resolution-storage-embed':
+        specifier: workspace:*
+        version: link:../entity-resolution-storage-embed
+      '@agentix-e/entity-resolution-storage-remote':
+        specifier: workspace:*
+        version: link:../entity-resolution-storage-remote
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
@@ -116,6 +127,42 @@ importers:
         specifier: ^4.12.31
         version: 4.12.31
     devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^2.0.0
+        version: 2.1.9(vitest@2.1.9)
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.5
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@25.9.5)(@vitest/ui@4.1.10)(jsdom@29.1.1)
+
+  packages/entity-resolution-storage-embed:
+    devDependencies:
+      '@agentix-e/entity-resolution-core':
+        specifier: workspace:*
+        version: link:../entity-resolution-core
+      '@vitest/coverage-v8':
+        specifier: ^2.0.0
+        version: 2.1.9(vitest@2.1.9)
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.5
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@25.9.5)(@vitest/ui@4.1.10)(jsdom@29.1.1)
+
+  packages/entity-resolution-storage-remote:
+    devDependencies:
+      '@agentix-e/entity-resolution-core':
+        specifier: workspace:*
+        version: link:../entity-resolution-core
       '@vitest/coverage-v8':
         specifier: ^2.0.0
         version: 2.1.9(vitest@2.1.9)

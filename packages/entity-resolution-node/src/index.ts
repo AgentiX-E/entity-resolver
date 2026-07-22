@@ -1,3 +1,5 @@
-// @agentix-e/entity-resolution-node — Placeholder for I0 Foundation
-// This file will be replaced with actual exports in subsequent iterations.
-export const PACKAGE_NAME = '@agentix-e/entity-resolution-node' as const;
+// @agentix-e/entity-resolution-node
+// Node.js runtime adapter — auto-detects storage backends.
+
+export type { ResolvedStorage } from './storage-resolver.js';
+export { resolveStorage } from './storage-resolver.js';

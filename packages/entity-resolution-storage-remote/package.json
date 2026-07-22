@@ -1,21 +1,14 @@
 {
-  "name": "@agentix-e/entity-resolution-node",
+  "name": "@agentix-e/entity-resolution-storage-remote",
   "version": "0.0.0",
-  "description": "entity-resolution-node \u2014 Entity Resolution sub-package",
-  "license": "MIT",
+  "description": "Remote storage backend for entity-resolution using PostgreSQL with mTLS support",
+  "license": "MIT", 
   "author": "Lambertyan",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --coverage",
@@ -23,17 +16,14 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo coverage"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@agentix-e/entity-resolution-core": "workspace:*"
   },
   "devDependencies": {
+    "@agentix-e/entity-resolution-core": "workspace:*",
     "eslint": "^9.0.0",
     "vitest": "^2.0.0",
     "@vitest/coverage-v8": "^2.0.0",
     "typescript": "^5.7.0"
-  },
-  "optionalDependencies": {
-    "@agentix-e/entity-resolution-storage-embed": "workspace:*",
-    "@agentix-e/entity-resolution-storage-remote": "workspace:*"
   }
 }
