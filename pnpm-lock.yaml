@@ -116,6 +116,10 @@ importers:
         version: 2.1.9(@types/node@25.9.5)
 
   packages/entity-resolution-visual:
+    dependencies:
+      '@agentix-e/entity-resolution-core':
+        specifier: workspace:*
+        version: link:../entity-resolution-core
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0

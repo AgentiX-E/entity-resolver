@@ -1,3 +1,28 @@
-// @agentix-e/entity-resolution-visual — Placeholder for I0 Foundation
-// This file will be replaced with actual exports in subsequent iterations.
-export const PACKAGE_NAME = '@agentix-e/entity-resolution-visual' as const;
+// @agentix-e/entity-resolution-visual
+// Framework-agnostic, embeddable diagnostic visualization components.
+
+// Layer 1: Data API — pure JSON output
+export type {
+  WaterfallBar,
+  WaterfallChartData,
+  HistogramBin,
+  HistogramData,
+  MuFieldData,
+  MuLevelData,
+  MuChartData,
+  ClusterTreeNode,
+  ClusterExplorerData,
+  RecordSummary,
+  EvaluationAxis,
+  EvaluationRadarData,
+  UnlinkablesData,
+} from './data/api.js';
+
+export {
+  buildWaterfallData,
+  buildHistogramData,
+  buildMuChartData,
+  buildClusterData,
+  buildEvaluationData,
+  buildUnlinkablesData,
+} from './data/api.js';
