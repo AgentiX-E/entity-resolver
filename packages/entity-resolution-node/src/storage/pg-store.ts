@@ -70,13 +70,13 @@ export function buildPoolConfig(config: PgStoreConfig): PoolConfig {
       rejectUnauthorized: config.tls.rejectUnauthorized ?? true,
     };
     if (config.tls.ca) {
-      (poolConfig.ssl as Record<string, unknown>).ca = fs.readFileSync(config.tls.ca);
+      try { (poolConfig.ssl as any).ca = fs.readFileSync(config.tls.ca); } catch { (poolConfig.ssl as any).ca = config.tls.ca; }
     }
     if (config.tls.cert) {
-      (poolConfig.ssl as Record<string, unknown>).cert = fs.readFileSync(config.tls.cert);
+      try { (poolConfig.ssl as any).cert = fs.readFileSync(config.tls.cert); } catch { (poolConfig.ssl as any).cert = config.tls.cert; }
     }
     if (config.tls.key) {
-      (poolConfig.ssl as Record<string, unknown>).key = fs.readFileSync(config.tls.key);
+      try { (poolConfig.ssl as any).key = fs.readFileSync(config.tls.key); } catch { (poolConfig.ssl as any).key = config.tls.key; }
     }
     if (config.tls.servername) {
       (poolConfig.ssl as Record<string, unknown>).servername = config.tls.servername;

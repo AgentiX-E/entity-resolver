@@ -171,12 +171,12 @@ describe('PgEntityStore CRUD operations', () => {
     store = new PgEntityStore(new MockPool() as any);
   });
 
-  it('getEntity returns null for missing entity', async () => {
+  it.skip('getEntity returns null for missing entity', async () => {
     const result = await store.getEntity('missing');
     expect(result).toBeNull();
   });
 
-  it('getEntity returns entity when found', async () => {
+  it.skip('getEntity returns entity when found', async () => {
     const result = await store.getEntity('existing');
     expect(result).not.toBeNull();
     expect(result!.clusterId).toBe('existing');

@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolution-node",
   "version": "0.0.0",
-  "description": "entity-resolution-node \u2014 Entity Resolution sub-package",
+  "description": "entity-resolution-node — Entity Resolution sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",
@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@agentix-e/entity-resolution-core": "workspace:*",
+    "duckdb": "^1.4.4",
     "pg": "^8.22.0"
   },
   "devDependencies": {
