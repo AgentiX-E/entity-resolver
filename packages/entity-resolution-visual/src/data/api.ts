@@ -100,7 +100,7 @@ export interface HistogramData {
  * Build match weight histogram data from pipeline diagnostics.
  */
 export function buildHistogramData(result: PipelineResult, threshold?: number): HistogramData {
-  const distribution: MatchWeightBin[] =
+  let distribution: readonly MatchWeightBin[] =
     result.diagnostics.matchWeightDistribution.length > 0
       ? result.diagnostics.matchWeightDistribution
       : buildDefaultBins(result);

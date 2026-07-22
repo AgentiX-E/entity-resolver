@@ -183,3 +183,6 @@ export {
   simulateLabeling,
   detectLabelContradictions,
 } from './active-learning/learner.js';
+
+// Incremental Update
+export { incrementalAdd, incrementalDelete, incrementalModify } from './pipeline/incremental.js';
