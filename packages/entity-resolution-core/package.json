@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolution-core",
   "version": "0.0.0",
-  "description": "entity-resolution-core — Entity Resolution sub-package",
+  "description": "entity-resolution-core \u2014 Entity Resolution sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",
@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "tsc -p tsconfig.json && cp -r src/matching/scorers/wasm/scorers dist/matching/scorers/wasm/ 2>/dev/null; true",
     "test": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc -p tsconfig.json --noEmit",

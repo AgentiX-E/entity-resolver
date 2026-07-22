@@ -23,7 +23,7 @@ export async function resolveStorage(options?: {
   if (backend === 'duckdb') {
     try {
       const { DuckDBStore } = await import('./storage/duckdb-store.js');
-      const store = await DuckDBStore.create({ path: options?.duckdbPath });
+      const cfg: any = {}; if (options?.duckdbPath) cfg.path = options.duckdbPath; const store = await DuckDBStore.create(cfg);
       return { backend: 'duckdb', store: store as any };
     } catch {
       return { backend: 'memory', store: new MemoryEntityStore() as any };

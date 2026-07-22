@@ -97,13 +97,13 @@ describe('resolveStorage with DuckDB', () => {
     expect(result.backend).toBe('duckdb');
     expect(result.store).toBeDefined();
     if ('close' in result.store) {
-      await (result.store as DuckDBStore).close();
+      await (result.store as unknown as DuckDBStore).close();
     }
   });
 
   it('duckdb store supports full entity lifecycle', async () => {
     const result = await resolveStorage({ backend: 'duckdb' });
-    const store = result.store as DuckDBStore;
+    const store = result.store as unknown as DuckDBStore;
     await store.upsertEntity({ clusterId: 'lifecycle-test', memberIds: [1], cohesion: 1 });
     const entity = await store.getEntity('lifecycle-test');
     expect(entity!.clusterId).toBe('lifecycle-test');

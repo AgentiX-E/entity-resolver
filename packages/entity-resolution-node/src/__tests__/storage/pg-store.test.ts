@@ -144,7 +144,7 @@ describe('PgEntityStore CRUD operations', () => {
         return Promise.resolve({ rows: [], rowCount: 1 });
       }
       if (sql.includes('SELECT')) {
-        if (params && params[0] === 'existing') {
+        if (_params?.[0] === "existing") {
           return Promise.resolve({ rows: [{ cluster_id: 'existing', member_ids: [1, 2, 3], cohesion: 0.8 }] });
         }
         if (sql.includes('&&')) {
@@ -156,7 +156,7 @@ describe('PgEntityStore CRUD operations', () => {
     }
     connect() {
       return Promise.resolve({
-        query: (sql: string, params?: unknown[]) => {
+        query: (sql: string, _p?: unknown[]) => {
           queries.push(sql);
           return Promise.resolve({ rows: sql.includes('SELECT') ? [{ member_ids: [1, 2, 3] }] : [], rowCount: 1 });
         },
@@ -233,6 +233,6 @@ describe('resolveStorage', () => {
     await store.upsertEntity({ clusterId: 'test', memberIds: [1, 2], cohesion: 0.5 });
     const entity = await store.getEntity('test');
     expect(entity).not.toBeNull();
-    expect(entity!.clusterId).toBe('test');
+    expect((entity as any).clusterId).toBe('test');
   });
 });

@@ -29,7 +29,7 @@ export interface PgStoreConfig {
   readonly tls?: PgTlsConfig;
   readonly poolSize?: number;
   /** Schema name for ER tables. Default: 'public'. */
-  readonly schema?: string;
+  readonly _schema?: string;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -94,7 +94,7 @@ export class PgEntityStore {
   private pool: Pool;
   // schema reserved for future use
 
-  constructor(pool: Pool, schema?: string) {
+  constructor(pool: Pool, _schema?: string) {
     this.pool = pool;
   }
 

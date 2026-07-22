@@ -1,3 +1,4 @@
-// @agentix-e/entity-resolution-browser — Placeholder for I0 Foundation
-// This file will be replaced with actual exports in subsequent iterations.
-export const PACKAGE_NAME = '@agentix-e/entity-resolution-browser' as const;
+// @agentix-e/entity-resolution-browser
+// Browser runtime adapter — DuckDB WASM storage.
+
+export { DuckDBWasmStore } from './storage/duckdb-wasm-store.js';
