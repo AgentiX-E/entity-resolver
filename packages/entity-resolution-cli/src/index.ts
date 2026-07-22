@@ -1,3 +1,12 @@
-// @agentix-e/entity-resolution-cli — Placeholder for I0 Foundation
-// This file will be replaced with actual exports in subsequent iterations.
-export const PACKAGE_NAME = '@agentix-e/entity-resolution-cli' as const;
+// @agentix-e/entity-resolution-cli
+// Command-line tool for entity resolution deduplication, matching, and diagnostics.
+
+// TUI Diagnostics
+export {
+  renderWaterfallTUI,
+  renderHistogramTUI,
+  renderMuTableTUI,
+  renderClusterTreeTUI,
+  renderThresholdTUI,
+  renderNavHint,
+} from './tui/renderers.js';

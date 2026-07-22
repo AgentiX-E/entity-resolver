@@ -22,7 +22,7 @@ importers:
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -34,10 +34,17 @@ importers:
         version: 2.1.9(@types/node@25.9.5)(@vitest/ui@4.1.10)(jsdom@29.1.1)
 
   packages/entity-resolution-cli:
+    dependencies:
+      '@agentix-e/entity-resolution-core':
+        specifier: workspace:*
+        version: link:../entity-resolution-core
+      '@agentix-e/entity-resolution-visual':
+        specifier: workspace:*
+        version: link:../entity-resolution-visual
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -71,7 +78,7 @@ importers:
         version: 3.0.7
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -89,7 +96,7 @@ importers:
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -104,7 +111,7 @@ importers:
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       eslint:
         specifier: ^9.0.0
         version: 9.39.5
@@ -123,7 +130,7 @@ importers:
     devDependencies:
       '@vitest/coverage-v8':
         specifier: ^2.0.0
-        version: 2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))
+        version: 2.1.9(vitest@2.1.9)
       '@vitest/ui':
         specifier: ^4.1.10
         version: 4.1.10(vitest@2.1.9)
@@ -2201,7 +2208,7 @@ snapshots:
     dependencies:
       undici-types: 7.24.6
 
-  '@vitest/coverage-v8@2.1.9(vitest@2.1.9(@types/node@25.9.5)(jsdom@29.1.1))':
+  '@vitest/coverage-v8@2.1.9(vitest@2.1.9)':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3

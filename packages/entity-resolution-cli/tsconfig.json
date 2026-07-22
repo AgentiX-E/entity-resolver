@@ -4,6 +4,15 @@
     "outDir": "dist",
     "rootDir": "src"
   },
-  "include": ["src"],
-  "references": []
+  "include": [
+    "src"
+  ],
+  "references": [
+    {
+      "path": "../entity-resolution-core"
+    },
+    {
+      "path": "../entity-resolution-visual"
+    }
+  ]
 }
