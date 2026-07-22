@@ -134,3 +134,11 @@ export {
   recommendBlockingRules,
   verifyBlockingRecall,
 } from './blocking/analyzer.js';
+
+// Clustering
+export type { ClusteringResult, ClusteringMetadata } from './clustering/algorithms.js';
+export { connectedComponents, dbscanClustering, uniqueMapping } from './clustering/algorithms.js';
+
+// Evaluation
+export type { EvaluationMetrics } from './evaluation/metrics.js';
+export { evaluateClustering } from './evaluation/metrics.js';
