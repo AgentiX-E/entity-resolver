@@ -189,3 +189,11 @@ export { incrementalAdd, incrementalDelete, incrementalModify } from './pipeline
 
 // Memory reference implementations
 export { MemoryEntityStore } from './memory/entity-store.js';
+
+// PPRL
+export type { PPRLConfig } from './pprl/bloom.js';
+export { BloomFilter, encodePPRL, matchPPRL } from './pprl/bloom.js';
+
+// LLM Scorer
+export type { LLMScorerConfig, LLMScorerResult } from './llm/scorer.js';
+export { scoreWithLLM } from './llm/scorer.js';
