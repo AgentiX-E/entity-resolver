@@ -165,3 +165,21 @@ export { runBenchmark, runAllBenchmarks, formatBenchmarkReport } from './benchma
 // Auto-Config
 export type { SemanticType, DetectedField, AutoConfigResult } from './auto-config/detector.js';
 export { detectFields, autoConfigure } from './auto-config/detector.js';
+
+// Active Learning
+export type {
+  LabeledPair,
+  ActiveLearningSession,
+  LogisticClassifier,
+} from './active-learning/learner.js';
+export {
+  selectUncertainPairs,
+  selectDiverseUncertainPairs,
+  trainLogisticClassifier,
+  predictClassifier,
+  createSession,
+  nextLabelingBatch,
+  applyLabels,
+  simulateLabeling,
+  detectLabelContradictions,
+} from './active-learning/learner.js';

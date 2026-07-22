@@ -7,7 +7,6 @@ import {
   loadDblpAcm,
   loadAllBenchmarks,
   runBenchmark,
-  runAllBenchmarks,
   formatBenchmarkReport,
 } from '../../index.js';
 import type { PipelineConfig } from '../../index.js';

@@ -102,15 +102,15 @@ describe('autoConfigure', () => {
   it('generates full config from records', () => {
     const result = autoConfigure(testRecords);
     expect(result.config.comparisons.length).toBeGreaterThan(0);
-    expect(passes?.length ?? 0).toBeGreaterThan(0);
+    expect(result.config.blocking.passes?.length ?? 0).toBeGreaterThan(0);
     expect(result.config.matchThreshold).toBeGreaterThan(0);
     expect(result.confidence).toBeGreaterThan(0);
   });
 
   it('generates blocking passes for high-cardinality fields', () => {
     const result = autoConfigure(testRecords);
-    const { passes } = result.config.blocking;
-    expect(passes?.length ?? 0).toBeGreaterThan(0);
+    const passes = result.config.blocking.passes ?? [];
+    expect(passes.length).toBeGreaterThan(0);
     // Should prefer email as primary pass
     const hasEmailPass = passes.some((p) => p.fields.includes('email'));
     expect(hasEmailPass).toBe(true);
