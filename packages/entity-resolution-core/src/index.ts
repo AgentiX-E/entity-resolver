@@ -161,3 +161,7 @@ export {
   loadAllBenchmarks,
 } from './benchmarks/datasets.js';
 export { runBenchmark, runAllBenchmarks, formatBenchmarkReport } from './benchmarks/runner.js';
+
+// Auto-Config
+export type { SemanticType, DetectedField, AutoConfigResult } from './auto-config/detector.js';
+export { detectFields, autoConfigure } from './auto-config/detector.js';
