@@ -1,0 +1,33 @@
+{
+  "name": "@agentix-e/entity-resolution",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Industry-leading Entity Resolution for Node.js and browser — stateless pure computation engine with WASM acceleration",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AgentiX-E/entity-resolution.git"
+  },
+  "license": "MIT",
+  "author": "Lambertyan",
+  "type": "module",
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck",
+    "format": "prettier --check '**/*.ts'",
+    "format:fix": "prettier --write '**/*.ts'",
+    "clean": "pnpm -r clean",
+    "changeset": "changeset",
+    "ci": "pnpm lint && pnpm typecheck && pnpm test && pnpm format"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.27.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
