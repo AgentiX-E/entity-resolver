@@ -66,18 +66,52 @@ export class DuckDBStore {
     });
   }
 
-  async queryNeighbors(_id: EntityId, _hops?: number): Promise<{ clusterId: string; memberIds: number[]; cohesion: number }[]> {
-    if (!this.ready) return this.fallback.queryNeighbors(_id);
+  async queryNeighbors(id: EntityId, hops: number = 1): Promise<{ clusterId: string; memberIds: number[]; cohesion: number }[]> {
+    if (!this.ready) return this.fallback.queryNeighbors(id, hops);
     return new Promise((resolve) => {
       this.db.all(
         'SELECT cluster_id, members_json, cohesion FROM er_entities',
-        (err: Error | null, rows: any[]) => {
+        (err: Error | null, allRows: any[]) => {
           if (err) { resolve([]); return; }
-          resolve(rows.map((r) => ({
-            clusterId: r.cluster_id,
-            memberIds: JSON.parse(r.members_json ?? '[]') as number[],
-            cohesion: r.cohesion ?? 0,
-          })));
+
+          // Find the target entity
+          const target = allRows.find((r: any) => r.cluster_id === id);
+          if (!target) { resolve([]); return; }
+
+          const targetMembers: number[] = JSON.parse(target.members_json ?? '[]');
+          const result = [{
+            clusterId: target.cluster_id,
+            memberIds: targetMembers,
+            cohesion: target.cohesion ?? 0,
+          }];
+
+          if (hops <= 0) { resolve(result); return; }
+
+          // Find neighbors via member overlap (BFS limited to hops iterations)
+          const visited = new Set<string>([id]);
+          let frontier = new Set<number>(targetMembers);
+          let remaining = hops;
+
+          while (remaining > 0 && frontier.size > 0) {
+            remaining--;
+            const nextFrontier = new Set<number>();
+            for (const row of allRows) {
+              if (visited.has(row.cluster_id)) continue;
+              const members: number[] = JSON.parse(row.members_json ?? '[]');
+              if (members.some((m) => frontier.has(m))) {
+                visited.add(row.cluster_id);
+                result.push({
+                  clusterId: row.cluster_id,
+                  memberIds: members,
+                  cohesion: row.cohesion ?? 0,
+                });
+                members.forEach((m) => nextFrontier.add(m));
+              }
+            }
+            frontier = nextFrontier;
+          }
+
+          resolve(result);
         },
       );
     });

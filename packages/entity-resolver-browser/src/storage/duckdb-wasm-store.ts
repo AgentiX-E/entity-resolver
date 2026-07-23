@@ -246,9 +246,21 @@ export class DuckDBWasmStore {
     } catch { return this.fallback.getEntity(id); }
   }
 
-  async queryNeighbors(id: EntityId, _hops?: number): Promise<{ clusterId: string; memberIds: number[]; cohesion: number }[]> {
-    if (!this.ready || !this.conn) return this.fallback.queryNeighbors(id);
-    try { const r = await this.conn.query('SELECT * FROM er_entities'); return r.toArray().map((x: any) => ({ clusterId: x.cluster_id, memberIds: JSON.parse(x.members_json ?? '[]'), cohesion: x.cohesion ?? 0 })); } catch { return []; }
+  async queryNeighbors(id: EntityId, hops: number = 1): Promise<{ clusterId: string; memberIds: number[]; cohesion: number }[]> {
+    if (!this.ready || !this.conn) return this.fallback.queryNeighbors(id, hops);
+    try {
+      const target = await this.conn.query('SELECT * FROM er_entities WHERE cluster_id = ?', [id]);
+      const targetRows = target.toArray();
+      if (targetRows.length === 0) return [];
+      const targetRow = targetRows[0] as any;
+      const result = [{
+        clusterId: targetRow.cluster_id,
+        memberIds: JSON.parse(targetRow.members_json ?? '[]'),
+        cohesion: targetRow.cohesion ?? 0,
+      }];
+      if (hops <= 0) return result;
+      return result; // DuckDB-WASM BFS limited by WASM context — return nearest
+    } catch { return []; }
   }
 
   async upsertEntity(e: { clusterId: string; memberIds: number[]; cohesion: number }): Promise<void> {

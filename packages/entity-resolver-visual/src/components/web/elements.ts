@@ -205,6 +205,25 @@ export class ErClusterExplorerElement extends ErBaseElement {
     }
   }
 
+  private renderTree(node: import('../../data/api.js').ClusterTreeNode, depth: number): string {
+    const indent = depth * 16;
+    const hasChildren = node.children && node.children.length > 0;
+    const sizeInfo = node.size > 1 ? ` (${node.size} records)` : '';
+    const icon = hasChildren ? '▸' : '•';
+
+    let html = `<div style="padding:2px 0;padding-left:${indent}px;cursor:${hasChildren ? 'pointer' : 'default'};font-size:var(--er-font-size-sm)">
+      ${icon} ${node.label}${sizeInfo}
+    </div>`;
+
+    if (hasChildren) {
+      for (const child of node.children!) {
+        html += this.renderTree(child, depth + 1);
+      }
+    }
+
+    return html;
+  }
+
   private render(): void {
     if (!this._data) {
       this.root.innerHTML =
@@ -214,12 +233,19 @@ export class ErClusterExplorerElement extends ErBaseElement {
 
     const { totalClusters, totalRecords, singletonCount } = this._data;
 
+    let treeHtml = '';
+    if (this._data.tree && this._data.tree.children) {
+      treeHtml = this._data.tree.children
+        .map((c) => this.renderTree(c, 0))
+        .join('');
+    }
+
     this.root.innerHTML = `
       <style>:host { display:block; max-width:var(--er-max-width); font-family:var(--er-font-family); }</style>
       <div style="padding:16px;background:var(--er-color-background);color:var(--er-color-text);border:1px solid var(--er-color-border);border-radius:var(--er-border-radius);box-shadow:var(--er-shadow)">
         <div style="font-size:var(--er-font-size-lg);margin-bottom:8px">Cluster Explorer</div>
         <div style="font-size:var(--er-font-size-sm);margin-bottom:12px">${totalClusters} clusters | ${totalRecords} records | ${singletonCount} singletons</div>
-        <div style="font-size:var(--er-font-size-md);color:var(--er-color-primary)">Expand clusters to explore record composition</div>
+        ${treeHtml || '<div style="font-size:var(--er-font-size-md);color:var(--er-color-primary)">No clusters to display</div>'}
       </div>`;
   }
 }

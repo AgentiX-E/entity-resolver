@@ -80,7 +80,7 @@ export function createApp(config: ServerConfig = {}): Hono {
     app.use('*', createAuthMiddleware(config.auth));
   }
   if (config.rateLimit) {
-    app.use('*', createRateLimitMiddleware(config.rateLimit));
+    app.use('*', createRateLimitMiddleware(config.rateLimit).middleware);
   }
 
   // Enhanced health check
