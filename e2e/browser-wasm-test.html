@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>DuckDB WASM Store Test</title></head>
+<body>
+<div id="results"></div>
+<script type="module">
+  // Browser test harness for DuckDB WASM Store
+  // Tests offline mode CRUD in a real Chromium browser
+  window.__testResults = [];
+
+  function record(name, passed, detail) {
+    window.__testResults.push({ name, passed, detail });
+    document.getElementById('results').innerHTML +=
+      `<div style="color:${passed ? 'green' : 'red'}">${passed ? '✓' : '✗'} ${name}: ${detail}</div>`;
+  }
+
+  try {
+    // Dynamic import of the browser package
+    const { DuckDBWasmStore } = await import('/packages/entity-resolver-browser/dist/index.js');
+    record('import', true, 'Module loaded');
+
+    // Test offline mode init
+    const store = new DuckDBWasmStore({ offline: true });
+    const initResult = await store.init();
+    record('init', !initResult.wasmActive, `tier=${initResult.tier}, wasmActive=${initResult.wasmActive}`);
+
+    // Test CRUD
+    await store.upsertEntity({ clusterId: 'browser-test', memberIds: [1, 2], cohesion: 0.9 });
+    const entity = await store.getEntity('browser-test');
+    record('getEntity', entity !== null, `clusterId=${entity?.clusterId}`);
+
+    // Test queryNeighbors
+    const neighbors = await store.queryNeighbors('browser-test', 1);
+    record('queryNeighbors', neighbors.length > 0, `count=${neighbors.length}`);
+
+    // Test delete
+    await store.deleteEntity('browser-test');
+    const deleted = await store.getEntity('browser-test');
+    record('deleteEntity', deleted === null, 'Entity removed');
+
+    // Test getInitResult
+    const status = store.getInitResult();
+    record('getInitResult', status.tier === 'memory_fallback', `tier=${status.tier}`);
+
+    // Test close
+    await store.close();
+    record('close', true, 'Closed without error');
+  } catch (e) {
+    record('error', false, String(e));
+  }
+</script>
+</body>
+</html>
