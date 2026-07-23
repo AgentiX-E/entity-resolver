@@ -8,6 +8,7 @@ import {
   multiPassBlocking,
   metaBlocking,
   blockOn,
+  blockOnSoundex,
   analyzeBlockingRule,
   recommendBlockingRules,
   verifyBlockingRecall,
@@ -511,5 +512,38 @@ describe('blocking utilities', () => {
 
   it('lowercase transform works', () => {
     expect(applyBlockingTransforms('TEST', ['lowercase'])).toBe('test');
+  });
+});
+
+describe('blockOnSoundex', () => {
+  it('creates a pass with soundex transform', () => {
+    const pass = blockOnSoundex('surname');
+    expect(pass.transforms).toContain('soundex');
+    expect(pass.fields).toContain('surname');
+  });
+});
+
+describe('blocking empty/null field values', () => {
+  it('sortedNeighborhood handles empty string fields', () => {
+    const records = [{ name: '' }, { name: '' }];
+    const result = sortedNeighborhood(records, {
+      fields: ['name'],
+    });
+    expect(result.totalRecords).toBe(2);
+  });
+
+  it('metaBlocking uses default when fields not specified', () => {
+    const records = [{ a: 'x' }, { b: 'y' }];
+    const result = metaBlocking(records, {});
+    expect(result.totalRecords).toBe(2);
+  });
+
+  it('analyzer handles perfectly uniform blocks', async () => {
+    const { analyzeBlockingRule } = await import('../../blocking/analyzer.js');
+    const records = Array.from({ length: 50 }, () => ({ city: 'SameCity' }));
+    const result = analyzeBlockingRule(records, {
+      fields: ['city'], transforms: ['strip', 'lowercase'],
+    });
+    expect(result.estimatedPairCount).toBeGreaterThan(0);
   });
 });

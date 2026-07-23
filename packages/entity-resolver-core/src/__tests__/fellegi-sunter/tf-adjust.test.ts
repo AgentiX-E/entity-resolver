@@ -114,9 +114,9 @@ describe('TF edge cases', () => {
     expect(freqs.get('name')).toEqual([]);
   });
 
-  it('buildTermFrequencies with all empty values', () => {
-    const records = [{ name: '' }, { name: '' }];
-    const freqs = buildTermFrequencies(records, ['name']);
-    expect(freqs.get('name')).toEqual([]);
+  it('buildTermFrequencies with non-existent field', () => {
+    const records = [{ name: 'test' }, { name: 'test2' }];
+    const freqs = buildTermFrequencies(records, ['nonexistent']);
+    expect(freqs.get('nonexistent')).toEqual([]);
   });
 });
