@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../entity-resolver-core" },
+    { "path": "../entity-resolver-node" },
+    { "path": "../entity-resolver-browser" },
+    { "path": "../entity-resolver-server" },
+    { "path": "../entity-resolver-cli" },
+    { "path": "../entity-resolver-visual" }
+  ]
+}

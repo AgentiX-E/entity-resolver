@@ -44,7 +44,7 @@ Every PR and push to `master` must pass **all** checks. No `continue-on-error` o
 |-------|-------------|
 | `lint` | ESLint zero errors |
 | `typecheck` | `tsc --noEmit` zero errors (strict mode) |
-| `test` | All tests pass + 100% coverage on all 4 dimensions (statements, branches, functions, lines) |
+| `test` | All tests pass + coverage meets per-package thresholds (target ≥95% all dimensions) |
 | `format` | Prettier check passes |
 
 ## Code Style

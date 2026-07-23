@@ -151,6 +151,25 @@ describe('renderHistogramTUI', () => {
     expect(output).toContain('Below');
   });
 
+  it('handles undefined threshold (defaults to 0)', () => {
+    const dataWithoutThreshold: HistogramData = {
+      bins: [{ minWeight: -1, maxWeight: 1, count: 1 }],
+      summary: { totalPairs: 1, aboveThreshold: 1, belowThreshold: 0 },
+    };
+    const output = renderHistogramTUI(dataWithoutThreshold);
+    expect(output).toContain('Above threshold (0)');
+  });
+
+  it('handles threshold explicitly set', () => {
+    const dataWithThreshold: HistogramData = {
+      bins: [{ minWeight: -1, maxWeight: 1, count: 1 }],
+      threshold: 0.5,
+      summary: { totalPairs: 1, aboveThreshold: 1, belowThreshold: 0 },
+    };
+    const output = renderHistogramTUI(dataWithThreshold);
+    expect(output).toContain('Above threshold (0.5)');
+  });
+
   it('renders with custom width', () => {
     const output = renderHistogramTUI(mockHistogram, 40);
     expect(output.length).toBeGreaterThan(0);
@@ -213,6 +232,13 @@ describe('renderThresholdTUI', () => {
     expect(output).toContain('25');
   });
 
+  it('handles zero totalPairs gracefully', () => {
+    const output = renderThresholdTUI(0.5, 0, 0);
+    expect(output).toContain('Threshold');
+    expect(output).not.toContain('NaN');
+    expect(output).not.toContain('Infinity');
+  });
+
   it('renders with custom width', () => {
     const output = renderThresholdTUI(0.3, 50, 20, 40);
     expect(output).toContain('Threshold');
@@ -226,5 +252,17 @@ describe('renderNavHint', () => {
     expect(output).toContain('Quit');
     expect(output).toContain('h');
     expect(output).toContain('q');
+  });
+
+  it('returns non-empty string', () => {
+    const output = renderNavHint();
+    expect(output.length).toBeGreaterThan(0);
+  });
+
+  it('contains all navigation keys', () => {
+    const output = renderNavHint();
+    expect(output).toContain('h/j/k/l');
+    expect(output).toContain('Tab');
+    expect(output).toContain('Switch');
   });
 });

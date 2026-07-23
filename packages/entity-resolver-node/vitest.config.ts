@@ -5,13 +5,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      // I0 Foundation: 80% coverage. Raised to 100% from I1 onward.
-      thresholds: {
-        statements: 80,
-        branches: 78,
-        functions: 80,
-        lines: 80,
-      },
+      thresholds: { statements: 83, branches: 78, functions: 83, lines: 83 },
     },
   },
 });

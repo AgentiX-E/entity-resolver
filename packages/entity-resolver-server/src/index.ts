@@ -6,7 +6,7 @@ export { createApp } from './rest/app.js';
 export type { ServerConfig } from './rest/app.js';
 
 // Middleware
-export type { AuthConfig } from './middleware/auth.js';
+export type { AuthConfig, JwtValidationResult } from './middleware/auth.js';
 export { createAuthMiddleware } from './middleware/auth.js';
 export type { RateLimitConfig } from './middleware/rate-limit.js';
 export { createRateLimitMiddleware, startBucketCleanup } from './middleware/rate-limit.js';

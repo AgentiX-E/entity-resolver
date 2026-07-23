@@ -5,8 +5,8 @@ export default defineConfig({
     environment: 'jsdom',
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      thresholds: { statements: 94, branches: 80, functions: 94, lines: 94 },
+      reporter: ['text'],
+      thresholds: { statements: 94, branches: 88, functions: 94, lines: 94 },
     },
   },
 });

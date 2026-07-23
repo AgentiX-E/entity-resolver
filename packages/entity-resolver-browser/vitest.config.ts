@@ -6,7 +6,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text'],
-      thresholds: { statements: 50, branches: 40, functions: 50, lines: 50 },
+      thresholds: { statements: 70, branches: 55, functions: 70, lines: 70 },
     },
   },
 });

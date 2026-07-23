@@ -12,4 +12,9 @@
 //   - @agentix-e/entity-resolver-cli
 //   - @agentix-e/entity-resolver-visual
 
-export const PACKAGE_VERSION = '0.0.0' as const;
+export * from '@agentix-e/entity-resolver-core';
+export * from '@agentix-e/entity-resolver-node';
+export * from '@agentix-e/entity-resolver-browser';
+export * from '@agentix-e/entity-resolver-server';
+export * from '@agentix-e/entity-resolver-cli';
+export * from '@agentix-e/entity-resolver-visual';
