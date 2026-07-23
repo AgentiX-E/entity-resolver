@@ -804,6 +804,15 @@ describe('API endpoints', () => {
     // Pipeline may succeed or return 500 — both are acceptable
     expect([200, 500]).toContain(res.status);
   });
+
+  it('auth middleware returns 403 for various invalid token formats', async () => {
+    const app = createApp({ auth: { jwtSecret: 'secret-min-32-chars-long-key!!' } });
+    // Very long random token
+    const res = await app.request('/api/v1/benchmarks', {
+      headers: { Authorization: `Bearer ${'x'.repeat(5000)}.${'y'.repeat(100)}.${'z'.repeat(100)}` },
+    });
+    expect(res.status).toBe(403);
+  });
 });
 
 // ═══════════════════════════════════════════════════════════════
