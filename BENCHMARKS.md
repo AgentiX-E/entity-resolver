@@ -28,12 +28,12 @@ All 8 datasets processed on a single machine (Node.js 22, pure JS scoring).
 
 | Package | Tests | Stmts | Branch | Funcs | Lines |
 |---------|-------|-------|--------|-------|-------|
-| entity-resolution-core | 396 | 96.0% | 88.0% | 96.9% | 96.0% |
-| entity-resolution-node | 28 | 83.3% | 78.3% | 83.3% | 83.3% |
-| entity-resolution-browser | 8 | 37.4% | 52.2% | 58.8% | 37.4% |
-| entity-resolution-visual | 36 | 94.8% | 88.1% | 94.3% | 94.8% |
-| entity-resolution-server | 6 | — | — | — | — |
-| entity-resolution-cli | 17 | 100% | 92% | 90% | 100% |
+| entity-resolver-core | 396 | 96.0% | 88.0% | 96.9% | 96.0% |
+| entity-resolver-node | 28 | 83.3% | 78.3% | 83.3% | 83.3% |
+| entity-resolver-browser | 8 | 37.4% | 52.2% | 58.8% | 37.4% |
+| entity-resolver-visual | 36 | 94.8% | 88.1% | 94.3% | 94.8% |
+| entity-resolver-server | 6 | — | — | — | — |
+| entity-resolver-cli | 17 | 100% | 92% | 90% | 100% |
 
 ### Key module coverage
 

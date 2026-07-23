@@ -1,11 +1,11 @@
-# @agentix-e/entity-resolution-node
+# @agentix-e/entity-resolver-node
 
 **Node.js runtime adapter — storage backends with mTLS and DuckDB.**
 
 ## Installation
 
 ```bash
-npm install @agentix-e/entity-resolution-node
+npm install @agentix-e/entity-resolver-node
 ```
 
 ## Key Modules
@@ -19,7 +19,7 @@ npm install @agentix-e/entity-resolution-node
 ## Quick Example
 
 ```typescript
-import { resolveStorage } from '@agentix-e/entity-resolution-node';
+import { resolveStorage } from '@agentix-e/entity-resolver-node';
 
 const storage = await resolveStorage({ prefer: 'duckdb', fallback: 'memory' });
 await storage.upsertEntity({ id: '1', fields: { name: 'John' } });

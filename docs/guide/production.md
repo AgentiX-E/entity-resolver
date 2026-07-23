@@ -1,6 +1,6 @@
 # Production Deployment
 
-Deploy `@agentix-e/entity-resolution` in production with confidence.
+Deploy `@agentix-e/entity-resolver` in production with confidence.
 
 ## Deployment Modes
 
@@ -24,18 +24,18 @@ RUN pnpm build
 
 FROM node:22-alpine AS runner
 WORKDIR /app
-COPY --from=builder /app/packages/entity-resolution-server/dist ./dist
+COPY --from=builder /app/packages/entity-resolver-server/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 EXPOSE 3000
 CMD ["node", "dist/index.js"]
 ```
 
 ```bash
-docker build -t entity-resolution:latest -f docker/Dockerfile .
+docker build -t entity-resolver:latest -f docker/Dockerfile .
 docker run -p 3000:3000 \
   -e DEEPSEEK_API_KEY=sk-xxx \
   -e DATABASE_URL=postgresql://user:pass@host:5432/erdb \
-  entity-resolution:latest
+  entity-resolver:latest
 ```
 
 ## REST API Server
@@ -43,7 +43,7 @@ docker run -p 3000:3000 \
 The server package provides a Hono-based REST API:
 
 ```typescript
-import { createApp } from '@agentix-e/entity-resolution-server';
+import { createApp } from '@agentix-e/entity-resolver-server';
 
 const app = createApp({
   port: 3000,
@@ -83,7 +83,7 @@ const app = createApp({
 The server supports **Bearer token authentication** out of the box:
 
 ```typescript
-import { createAuthMiddleware } from '@agentix-e/entity-resolution-server';
+import { createAuthMiddleware } from '@agentix-e/entity-resolver-server';
 
 const auth = createAuthMiddleware({
   type: 'bearer',
@@ -99,7 +99,7 @@ app.use('/api/*', auth);
 Protect your API with configurable rate limiting:
 
 ```typescript
-import { createRateLimitMiddleware, startBucketCleanup } from '@agentix-e/entity-resolution-server';
+import { createRateLimitMiddleware, startBucketCleanup } from '@agentix-e/entity-resolver-server';
 
 const rateLimit = createRateLimitMiddleware({
   windowMs: 60_000,   // 1 minute window
@@ -118,7 +118,7 @@ startBucketCleanup(5 * 60_000);
 For production deployments requiring encrypted database connections:
 
 ```typescript
-import { PgEntityStore, buildPoolConfig } from '@agentix-e/entity-resolution-node';
+import { PgEntityStore, buildPoolConfig } from '@agentix-e/entity-resolver-node';
 import { readFileSync } from 'node:fs';
 
 const poolConfig = buildPoolConfig({

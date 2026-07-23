@@ -6,13 +6,13 @@ Get your first entity resolution pipeline running in under 5 minutes.
 
 ```bash
 # Core computation engine (always required)
-npm install @agentix-e/entity-resolution-core
+npm install @agentix-e/entity-resolver-core
 
 # For Node.js (file I/O, DuckDB, PostgreSQL)
-npm install @agentix-e/entity-resolution-node
+npm install @agentix-e/entity-resolver-node
 
 # For browser (DuckDB WASM)
-npm install @agentix-e/entity-resolution-browser
+npm install @agentix-e/entity-resolver-browser
 ```
 
 ## 5-Minute Quick Start
@@ -20,8 +20,8 @@ npm install @agentix-e/entity-resolution-browser
 ### Node.js: Deduplicate a CSV File
 
 ```typescript
-import { runPipeline } from '@agentix-e/entity-resolution-core';
-import { resolveStorage } from '@agentix-e/entity-resolution-node';
+import { runPipeline } from '@agentix-e/entity-resolver-core';
+import { resolveStorage } from '@agentix-e/entity-resolver-node';
 import { readFileSync } from 'node:fs';
 
 // 1. Read your data
@@ -72,7 +72,7 @@ for (const [cid, cluster] of result.clusters) {
 ### Browser: Deduplicate In-Memory Data
 
 ```typescript
-import { runPipeline } from '@agentix-e/entity-resolution-core';
+import { runPipeline } from '@agentix-e/entity-resolver-core';
 
 const records = [
   { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },

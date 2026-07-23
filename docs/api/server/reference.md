@@ -2,7 +2,7 @@
 
 ### McpTool
 
-Defined in: [mcp/tools.ts:5](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/mcp/tools.ts#L5)
+Defined in: [mcp/tools.ts:5](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/mcp/tools.ts#L5)
 
 MCP tool definition.
 
@@ -14,7 +14,7 @@ MCP tool definition.
 readonly name: string;
 ```
 
-Defined in: [mcp/tools.ts:6](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/mcp/tools.ts#L6)
+Defined in: [mcp/tools.ts:6](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/mcp/tools.ts#L6)
 
 ##### description
 
@@ -22,7 +22,7 @@ Defined in: [mcp/tools.ts:6](https://github.com/AgentiX-E/entity-resolution/blob
 readonly description: string;
 ```
 
-Defined in: [mcp/tools.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/mcp/tools.ts#L7)
+Defined in: [mcp/tools.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/mcp/tools.ts#L7)
 
 ##### parameters
 
@@ -30,13 +30,13 @@ Defined in: [mcp/tools.ts:7](https://github.com/AgentiX-E/entity-resolution/blob
 readonly parameters: Record<string, unknown>;
 ```
 
-Defined in: [mcp/tools.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/mcp/tools.ts#L8)
+Defined in: [mcp/tools.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/mcp/tools.ts#L8)
 
 ***
 
 ### AuthConfig
 
-Defined in: [middleware/auth.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/auth.ts#L7)
+Defined in: [middleware/auth.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/auth.ts#L7)
 
 Auth configuration.
 
@@ -48,7 +48,7 @@ Auth configuration.
 readonly optional apiKeys?: readonly string[];
 ```
 
-Defined in: [middleware/auth.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/auth.ts#L9)
+Defined in: [middleware/auth.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/auth.ts#L9)
 
 Valid API keys. If set, `Authorization: Bearer <key>` is accepted.
 
@@ -58,7 +58,7 @@ Valid API keys. If set, `Authorization: Bearer <key>` is accepted.
 readonly optional jwtSecret?: string;
 ```
 
-Defined in: [middleware/auth.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/auth.ts#L11)
+Defined in: [middleware/auth.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/auth.ts#L11)
 
 JWT secret for token validation. If set, JWT tokens are accepted.
 
@@ -68,7 +68,7 @@ JWT secret for token validation. If set, JWT tokens are accepted.
 readonly optional allowUnauthenticated?: boolean;
 ```
 
-Defined in: [middleware/auth.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/auth.ts#L13)
+Defined in: [middleware/auth.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/auth.ts#L13)
 
 Whether to allow unauthenticated requests (dev mode). Default: false.
 
@@ -76,7 +76,7 @@ Whether to allow unauthenticated requests (dev mode). Default: false.
 
 ### RateLimitConfig
 
-Defined in: [middleware/rate-limit.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L7)
+Defined in: [middleware/rate-limit.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L7)
 
 Rate limit configuration.
 
@@ -88,7 +88,7 @@ Rate limit configuration.
 readonly optional maxRequests?: number;
 ```
 
-Defined in: [middleware/rate-limit.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L9)
+Defined in: [middleware/rate-limit.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L9)
 
 Maximum requests allowed in the window. Default: 100.
 
@@ -98,7 +98,7 @@ Maximum requests allowed in the window. Default: 100.
 readonly optional windowMs?: number;
 ```
 
-Defined in: [middleware/rate-limit.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L11)
+Defined in: [middleware/rate-limit.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L11)
 
 Time window in milliseconds. Default: 60000 (1 minute).
 
@@ -108,7 +108,7 @@ Time window in milliseconds. Default: 60000 (1 minute).
 readonly optional keyGenerator?: (c) => string;
 ```
 
-Defined in: [middleware/rate-limit.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L13)
+Defined in: [middleware/rate-limit.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L13)
 
 Custom key generator (default: IP-based).
 
@@ -126,7 +126,7 @@ Custom key generator (default: IP-based).
 
 ### ServerConfig
 
-Defined in: [rest/app.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/rest/app.ts#L17)
+Defined in: [rest/app.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/rest/app.ts#L17)
 
 Server configuration.
 
@@ -138,7 +138,7 @@ Server configuration.
 readonly optional auth?: AuthConfig;
 ```
 
-Defined in: [rest/app.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/rest/app.ts#L18)
+Defined in: [rest/app.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/rest/app.ts#L18)
 
 ##### rateLimit?
 
@@ -146,7 +146,7 @@ Defined in: [rest/app.ts:18](https://github.com/AgentiX-E/entity-resolution/blob
 readonly optional rateLimit?: RateLimitConfig;
 ```
 
-Defined in: [rest/app.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/rest/app.ts#L19)
+Defined in: [rest/app.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/rest/app.ts#L19)
 
 ## Functions
 
@@ -156,7 +156,7 @@ Defined in: [rest/app.ts:19](https://github.com/AgentiX-E/entity-resolution/blob
 function getMcpTools(): McpTool[];
 ```
 
-Defined in: [mcp/tools.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/mcp/tools.ts#L12)
+Defined in: [mcp/tools.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/mcp/tools.ts#L12)
 
 All available MCP tools.
 
@@ -179,7 +179,7 @@ function createAuthMiddleware(config): (c, next) => Promise<
 }, 403>>;
 ```
 
-Defined in: [middleware/auth.ts:24](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/auth.ts#L24)
+Defined in: [middleware/auth.ts:24](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/auth.ts#L24)
 
 Create an auth middleware.
 
@@ -218,7 +218,7 @@ function createRateLimitMiddleware(config?): (c, next) => Promise<
 }, 429>>;
 ```
 
-Defined in: [middleware/rate-limit.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L28)
+Defined in: [middleware/rate-limit.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L28)
 
 Create a rate limiting middleware using token bucket algorithm.
 
@@ -249,7 +249,7 @@ the bucket return 429 Too Many Requests.
 function startBucketCleanup(intervalMs?): () => void;
 ```
 
-Defined in: [middleware/rate-limit.ts:72](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/middleware/rate-limit.ts#L72)
+Defined in: [middleware/rate-limit.ts:72](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/middleware/rate-limit.ts#L72)
 
 Clean up expired buckets periodically.
 
@@ -271,9 +271,9 @@ Clean up expired buckets periodically.
 function createApp(config?): Hono;
 ```
 
-Defined in: [rest/app.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-server/src/rest/app.ts#L23)
+Defined in: [rest/app.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-server/src/rest/app.ts#L23)
 
-Create the entity-resolution Hono app with production middleware.
+Create the entity-resolver Hono app with production middleware.
 
 #### Parameters
 

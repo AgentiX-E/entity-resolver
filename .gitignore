@@ -3,10 +3,9 @@ dist/
 *.tsbuildinfo
 coverage/
 .cache/
+target/
 .env
 .env.*
 !.env.example
 *.log
 .DS_Store
-.env
-.env.*

@@ -20,32 +20,32 @@ interface PackageEntry {
 const PACKAGES: PackageEntry[] = [
   {
     name: 'core',
-    dir: 'packages/entity-resolution-core',
+    dir: 'packages/entity-resolver-core',
     description: 'Stateless computation engine with WASM acceleration and DI interface contracts.',
   },
   {
     name: 'node',
-    dir: 'packages/entity-resolution-node',
+    dir: 'packages/entity-resolver-node',
     description: 'Node.js adapters — DuckDB embedded store, PostgreSQL store with mTLS, storage resolver.',
   },
   {
     name: 'browser',
-    dir: 'packages/entity-resolution-browser',
+    dir: 'packages/entity-resolver-browser',
     description: 'Browser adapters — DuckDB WASM store with 4-tier enterprise distribution.',
   },
   {
     name: 'server',
-    dir: 'packages/entity-resolution-server',
+    dir: 'packages/entity-resolver-server',
     description: 'Deployable HTTP/gRPC/MCP API service (stateless by default) with auth and rate limiting.',
   },
   {
     name: 'cli',
-    dir: 'packages/entity-resolution-cli',
+    dir: 'packages/entity-resolver-cli',
     description: 'Command-line tool for deduplication, matching, and diagnostics with TUI renderers.',
   },
   {
     name: 'visual',
-    dir: 'packages/entity-resolution-visual',
+    dir: 'packages/entity-resolver-visual',
     description: 'Framework-agnostic diagnostic components (3-layer: Data API + Headless + Web Components).',
   },
 ];

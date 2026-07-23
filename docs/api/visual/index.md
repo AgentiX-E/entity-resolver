@@ -1,4 +1,4 @@
-# @agentix-e/entity-resolution-visual
+# @agentix-e/entity-resolver-visual
 
 **Framework-agnostic, embeddable diagnostic components.**
 
@@ -11,13 +11,13 @@ The visual package provides a 3-layer architecture for entity resolution visuali
 ## Installation
 
 ```bash
-npm install @agentix-e/entity-resolution-visual
+npm install @agentix-e/entity-resolver-visual
 ```
 
 ## Quick Example
 
 ```typescript
-import { createWaterfallChart, createHistogram } from '@agentix-e/entity-resolution-visual';
+import { createWaterfallChart, createHistogram } from '@agentix-e/entity-resolver-visual';
 
 const chart = createWaterfallChart(diagnostics.matchWeightBins);
 document.body.appendChild(chart);

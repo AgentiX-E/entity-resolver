@@ -1,10 +1,10 @@
 # Core Concepts
 
-Understand the architecture and algorithms that power `@agentix-e/entity-resolution`.
+Understand the architecture and algorithms that power `@agentix-e/entity-resolver`.
 
 ## Architecture: Stateless Pure Computation
 
-The core package (`entity-resolution-core`) is a **pure computation engine**. It defines all algorithm logic and DI interface contracts, but performs zero I/O and holds zero mutable state.
+The core package (`entity-resolver-core`) is a **pure computation engine**. It defines all algorithm logic and DI interface contracts, but performs zero I/O and holds zero mutable state.
 
 ```
 f(records) → { clusters, scoredPairs, diagnostics }
@@ -40,7 +40,7 @@ Raw Data
 Data cleaning and normalization before matching:
 
 ```typescript
-import { preprocessRecords, normalizeEmail, normalizePhone, repairUnicode } from '@agentix-e/entity-resolution-core';
+import { preprocessRecords, normalizeEmail, normalizePhone, repairUnicode } from '@agentix-e/entity-resolver-core';
 
 const cleaned = preprocessRecords(rawRecords, {
   lowercase: true,
@@ -62,7 +62,7 @@ Blocking reduces the O(n²) all-pairs comparison space by excluding pairs unlike
 | **Meta-blocking** | Weight edges by block frequency | Noisy blocking keys |
 
 ```typescript
-import { standardBlocking, tokenBlocking, sortedNeighborhood } from '@agentix-e/entity-resolution-core';
+import { standardBlocking, tokenBlocking, sortedNeighborhood } from '@agentix-e/entity-resolver-core';
 
 // Standard: exact match on blocking key
 const pairs = standardBlocking(records, { fields: ['zipcode'] });
@@ -86,7 +86,7 @@ The core matching engine implements the **Fellegi-Sunter probabilistic model** w
 | **Match probability** | 2^M / (1 + 2^M) | Posterior probability given total weight M |
 
 ```typescript
-import { estimateParameters, computeMatchWeight, weightToProbability } from '@agentix-e/entity-resolution-core';
+import { estimateParameters, computeMatchWeight, weightToProbability } from '@agentix-e/entity-resolver-core';
 
 // EM estimation from comparison vectors
 const emResult = estimateParameters(comparisonVectors, {
@@ -137,7 +137,7 @@ const probability = weightToProbability(weight.aggregateWeight);
 Once pairwise scores are computed, clustering groups records into entities:
 
 ```typescript
-import { connectedComponents, dbscanClustering, uniqueMapping } from '@agentix-e/entity-resolution-core';
+import { connectedComponents, dbscanClustering, uniqueMapping } from '@agentix-e/entity-resolver-core';
 
 // Connected Components: transitive closure
 const cc = connectedComponents(scoredPairs, 0.7);
@@ -152,7 +152,7 @@ const um = uniqueMapping(scoredPairs, 0.7);
 ### ⑥ Evaluation: 12 Metrics
 
 ```typescript
-import { evaluateClustering } from '@agentix-e/entity-resolution-core';
+import { evaluateClustering } from '@agentix-e/entity-resolver-core';
 
 const metrics = evaluateClustering(predictedClusters, groundTruthClusters);
 
@@ -199,7 +199,7 @@ interface IEntityStore {
 
 ## WASM Acceleration
 
-WASM is an **internal module** of `entity-resolution-core`. At startup, the scorer registry auto-detects WASM availability:
+WASM is an **internal module** of `entity-resolver-core`. At startup, the scorer registry auto-detects WASM availability:
 
 - **WASM available** → Rust-accelerated scorers (~5x faster)
 - **WASM unavailable** → Pure JS fallback (transparent, zero-config)
@@ -211,7 +211,7 @@ Five scoring kernels are compiled from Rust to WASM: Levenshtein, Jaro, Jaro-Win
 For GDPR/HIPAA compliance, PPRL enables matching without sharing plaintext data:
 
 ```typescript
-import { BloomFilter, encodePPRL, matchPPRL } from '@agentix-e/entity-resolution-core';
+import { BloomFilter, encodePPRL, matchPPRL } from '@agentix-e/entity-resolver-core';
 
 const config = { size: 1024, numHashes: 10, qgramSize: 2 };
 const bf1 = encodePPRL('John Smith', 'my-secret-salt', config);

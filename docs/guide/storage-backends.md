@@ -33,7 +33,7 @@ Start Here
 **Best for**: Prototyping, testing, serverless functions, small datasets.
 
 ```typescript
-import { MemoryEntityStore } from '@agentix-e/entity-resolution-core';
+import { MemoryEntityStore } from '@agentix-e/entity-resolver-core';
 
 const store = new MemoryEntityStore();
 await store.upsertEntity({ id: '1', fields: { name: 'John', city: 'NYC' } });
@@ -51,7 +51,7 @@ const entity = await store.getEntity('1');
 **Best for**: Single-machine deployments, analytics workloads, offline-first apps.
 
 ```typescript
-import { DuckDBStore } from '@agentix-e/entity-resolution-node';
+import { DuckDBStore } from '@agentix-e/entity-resolver-node';
 
 const store = new DuckDBStore({ dbPath: './er.db' });
 await store.upsertEntity({ id: '1', fields: { name: 'John', city: 'NYC' } });
@@ -70,7 +70,7 @@ await store.applyMerge('2', '1');
 **Best for**: Production multi-tenant deployments, high availability, large scale.
 
 ```typescript
-import { PgEntityStore, buildPoolConfig } from '@agentix-e/entity-resolution-node';
+import { PgEntityStore, buildPoolConfig } from '@agentix-e/entity-resolver-node';
 
 const tlsConfig = {
   ca: fs.readFileSync('/etc/ssl/ca.pem'),
@@ -123,7 +123,7 @@ CREATE TABLE IF NOT EXISTS entity_graph (
 **Best for**: Client-side ER in the browser, offline-capable web apps.
 
 ```typescript
-import { DuckDBWasmStore } from '@agentix-e/entity-resolution-browser';
+import { DuckDBWasmStore } from '@agentix-e/entity-resolver-browser';
 
 const store = new DuckDBWasmStore({
   bundle: {

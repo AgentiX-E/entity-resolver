@@ -1,8 +1,8 @@
-# Architecture — @agentix-e/entity-resolution
+# Architecture — @agentix-e/entity-resolver
 
 ## Design Principle: Stateless Core
 
-The `entity-resolution-core` package is a **pure computation engine**. It defines all algorithm logic and DI (Dependency Injection) interface contracts, but performs zero I/O and holds zero mutable state.
+The `entity-resolver-core` package is a **pure computation engine**. It defines all algorithm logic and DI (Dependency Injection) interface contracts, but performs zero I/O and holds zero mutable state.
 
 ```
 f(records) → {clusters, matchPairs, scores, diagnostics}
@@ -12,7 +12,7 @@ This enables the same core to run in Node.js, browsers, Edge Functions, Deno, Bu
 
 ## Interface Contracts (DI)
 
-All I/O and persistence concerns are externalized through interfaces defined in `entity-resolution-core`:
+All I/O and persistence concerns are externalized through interfaces defined in `entity-resolver-core`:
 
 ```typescript
 interface IDataSource {
@@ -49,25 +49,25 @@ Implementations:
 ## Package Dependency Graph
 
 ```
-entity-resolution-core  (stateless, zero I/O)
+entity-resolver-core  (stateless, zero I/O)
   ↑                     ↑
-entity-resolution-node  entity-resolution-browser
+entity-resolver-node  entity-resolver-browser
   ↑                     
-entity-resolution-server
+entity-resolver-server
   ↑
-entity-resolution (umbrella)
+entity-resolver (umbrella)
 ```
 
-`entity-resolution-visual` and `entity-resolution-cli` depend only on `entity-resolution-core` (via its types), not on node/browser/server.
+`entity-resolver-visual` and `entity-resolver-cli` depend only on `entity-resolver-core` (via its types), not on node/browser/server.
 
 ## WASM Acceleration
 
-WASM acceleration is an **internal module** of `entity-resolution-core` (`core/src/matching/scorers/wasm/`). At startup, the `ScorerRegistry` auto-detects WASM availability:
+WASM acceleration is an **internal module** of `entity-resolver-core` (`core/src/matching/scorers/wasm/`). At startup, the `ScorerRegistry` auto-detects WASM availability:
 
 - WASM available → Rust-accelerated scorers (~5x faster)
 - WASM unavailable → Pure JS fallback (transparent, zero-config)
 
-WASM binaries are distributed via platform-specific `optionalDependencies` (`@agentix-e/entity-resolution-core-linux-x64`, etc.). npm automatically installs the matching platform binary.
+WASM binaries are distributed via platform-specific `optionalDependencies` (`@agentix-e/entity-resolver-core-linux-x64`, etc.). npm automatically installs the matching platform binary.
 
 ## Fellegi-Sunter Probabilistic Model
 
@@ -108,7 +108,7 @@ All metrics verified against Python ER-Evaluation output (error < 1e-6).
 
 ## Visual Layer (Framework-Agnostic, Embeddable)
 
-The `entity-resolution-visual` package uses a progressive 3-layer design:
+The `entity-resolver-visual` package uses a progressive 3-layer design:
 
 - **Layer 1: Data API** — Pure functions returning typed JSON (`buildWaterfallData()`, `buildHistogramData()`, etc.). Users render with D3/ECharts/Chart.js/Recharts.
 - **Layer 2: Headless Components** — Renderless state machines (`useWaterfall()`, `useHistogram()`, etc.). Users provide their own rendering.

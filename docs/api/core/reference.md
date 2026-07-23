@@ -2,7 +2,7 @@
 
 ### TFAdjustmentLookup
 
-Defined in: [fellegi-sunter/tf-adjust.ts:97](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L97)
+Defined in: [fellegi-sunter/tf-adjust.ts:97](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L97)
 
 Pre-computed TF adjustment lookup for batch processing.
 
@@ -14,7 +14,7 @@ Pre-computed TF adjustment lookup for batch processing.
 new TFAdjustmentLookup(frequencies): TFAdjustmentLookup;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:100](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L100)
+Defined in: [fellegi-sunter/tf-adjust.ts:100](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L100)
 
 ###### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [fellegi-sunter/tf-adjust.ts:100](https://github.com/AgentiX-E/entit
 getAdjustment(field, value): number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:115](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L115)
+Defined in: [fellegi-sunter/tf-adjust.ts:115](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L115)
 
 Get the TF adjustment factor for a field-value pair.
 Returns 1.0 (no adjustment) if the value is not in the lookup.
@@ -54,7 +54,7 @@ Returns 1.0 (no adjustment) if the value is not in the lookup.
 
 ### MemoryEntityStore
 
-Defined in: [memory/entity-store.ts:6](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L6)
+Defined in: [memory/entity-store.ts:6](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L6)
 
 #### Constructors
 
@@ -82,7 +82,7 @@ getEntity(id): Promise<
 | null>;
 ```
 
-Defined in: [memory/entity-store.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L9)
+Defined in: [memory/entity-store.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L9)
 
 ###### Parameters
 
@@ -110,7 +110,7 @@ queryNeighbors(id, _hops?): Promise<{
 }[]>;
 ```
 
-Defined in: [memory/entity-store.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L14)
+Defined in: [memory/entity-store.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L14)
 
 ###### Parameters
 
@@ -133,7 +133,7 @@ Defined in: [memory/entity-store.ts:14](https://github.com/AgentiX-E/entity-reso
 upsertEntity(entity): Promise<void>;
 ```
 
-Defined in: [memory/entity-store.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L19)
+Defined in: [memory/entity-store.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L19)
 
 ###### Parameters
 
@@ -154,7 +154,7 @@ Defined in: [memory/entity-store.ts:19](https://github.com/AgentiX-E/entity-reso
 deleteEntity(id): Promise<void>;
 ```
 
-Defined in: [memory/entity-store.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L23)
+Defined in: [memory/entity-store.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L23)
 
 ###### Parameters
 
@@ -172,7 +172,7 @@ Defined in: [memory/entity-store.ts:23](https://github.com/AgentiX-E/entity-reso
 applyMerge(from, into): Promise<void>;
 ```
 
-Defined in: [memory/entity-store.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L27)
+Defined in: [memory/entity-store.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L27)
 
 ###### Parameters
 
@@ -191,7 +191,7 @@ Defined in: [memory/entity-store.ts:27](https://github.com/AgentiX-E/entity-reso
 applySplit(entityId, memberGroups): Promise<void>;
 ```
 
-Defined in: [memory/entity-store.ts:36](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/memory/entity-store.ts#L36)
+Defined in: [memory/entity-store.ts:36](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/memory/entity-store.ts#L36)
 
 ###### Parameters
 
@@ -208,7 +208,7 @@ Defined in: [memory/entity-store.ts:36](https://github.com/AgentiX-E/entity-reso
 
 ### BloomFilter
 
-Defined in: [pprl/bloom.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L20)
+Defined in: [pprl/bloom.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L20)
 
 Encoded Bloom filter representation.
 
@@ -220,7 +220,7 @@ Encoded Bloom filter representation.
 new BloomFilter(size, numHashes): BloomFilter;
 ```
 
-Defined in: [pprl/bloom.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L25)
+Defined in: [pprl/bloom.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L25)
 
 ###### Parameters
 
@@ -241,7 +241,7 @@ Defined in: [pprl/bloom.ts:25](https://github.com/AgentiX-E/entity-resolution/bl
 readonly bits: Uint8Array;
 ```
 
-Defined in: [pprl/bloom.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L21)
+Defined in: [pprl/bloom.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L21)
 
 ##### size
 
@@ -249,7 +249,7 @@ Defined in: [pprl/bloom.ts:21](https://github.com/AgentiX-E/entity-resolution/bl
 readonly size: number;
 ```
 
-Defined in: [pprl/bloom.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L22)
+Defined in: [pprl/bloom.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L22)
 
 ##### numHashes
 
@@ -257,7 +257,7 @@ Defined in: [pprl/bloom.ts:22](https://github.com/AgentiX-E/entity-resolution/bl
 readonly numHashes: number;
 ```
 
-Defined in: [pprl/bloom.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L23)
+Defined in: [pprl/bloom.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L23)
 
 #### Methods
 
@@ -267,7 +267,7 @@ Defined in: [pprl/bloom.ts:23](https://github.com/AgentiX-E/entity-resolution/bl
 add(token, secret): void;
 ```
 
-Defined in: [pprl/bloom.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L32)
+Defined in: [pprl/bloom.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L32)
 
 Add a token to the Bloom filter.
 
@@ -288,7 +288,7 @@ Add a token to the Bloom filter.
 similarity(other): number;
 ```
 
-Defined in: [pprl/bloom.ts:46](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L46)
+Defined in: [pprl/bloom.ts:46](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L46)
 
 Compute Dice coefficient similarity with another Bloom filter.
 
@@ -308,7 +308,7 @@ Compute Dice coefficient similarity with another Bloom filter.
 toHex(): string;
 ```
 
-Defined in: [pprl/bloom.ts:60](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L60)
+Defined in: [pprl/bloom.ts:60](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L60)
 
 Export as hex string for transmission.
 
@@ -325,7 +325,7 @@ static fromHex(
    numHashes): BloomFilter;
 ```
 
-Defined in: [pprl/bloom.ts:65](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L65)
+Defined in: [pprl/bloom.ts:65](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L65)
 
 Import from hex string.
 
@@ -345,7 +345,7 @@ Import from hex string.
 
 ### LabeledPair
 
-Defined in: [active-learning/learner.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L11)
+Defined in: [active-learning/learner.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L11)
 
 A labeled pair: match (1) or non-match (0).
 
@@ -357,7 +357,7 @@ A labeled pair: match (1) or non-match (0).
 readonly leftId: number;
 ```
 
-Defined in: [active-learning/learner.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L12)
+Defined in: [active-learning/learner.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L12)
 
 ##### rightId
 
@@ -365,7 +365,7 @@ Defined in: [active-learning/learner.ts:12](https://github.com/AgentiX-E/entity-
 readonly rightId: number;
 ```
 
-Defined in: [active-learning/learner.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L13)
+Defined in: [active-learning/learner.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L13)
 
 ##### label
 
@@ -373,13 +373,13 @@ Defined in: [active-learning/learner.ts:13](https://github.com/AgentiX-E/entity-
 readonly label: number;
 ```
 
-Defined in: [active-learning/learner.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L14)
+Defined in: [active-learning/learner.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L14)
 
 ***
 
 ### ActiveLearningSession
 
-Defined in: [active-learning/learner.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L18)
+Defined in: [active-learning/learner.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L18)
 
 Active learning session state.
 
@@ -391,7 +391,7 @@ Active learning session state.
 readonly labeledPairs: LabeledPair[];
 ```
 
-Defined in: [active-learning/learner.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L19)
+Defined in: [active-learning/learner.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L19)
 
 ##### unlabeledPairs
 
@@ -399,7 +399,7 @@ Defined in: [active-learning/learner.ts:19](https://github.com/AgentiX-E/entity-
 readonly unlabeledPairs: ScoredPair[];
 ```
 
-Defined in: [active-learning/learner.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L20)
+Defined in: [active-learning/learner.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L20)
 
 ##### iteration
 
@@ -407,7 +407,7 @@ Defined in: [active-learning/learner.ts:20](https://github.com/AgentiX-E/entity-
 readonly iteration: number;
 ```
 
-Defined in: [active-learning/learner.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L21)
+Defined in: [active-learning/learner.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L21)
 
 ##### classifier
 
@@ -415,7 +415,7 @@ Defined in: [active-learning/learner.ts:21](https://github.com/AgentiX-E/entity-
 readonly classifier: LogisticClassifier | null;
 ```
 
-Defined in: [active-learning/learner.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L22)
+Defined in: [active-learning/learner.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L22)
 
 ##### converged
 
@@ -423,13 +423,13 @@ Defined in: [active-learning/learner.ts:22](https://github.com/AgentiX-E/entity-
 readonly converged: boolean;
 ```
 
-Defined in: [active-learning/learner.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L23)
+Defined in: [active-learning/learner.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L23)
 
 ***
 
 ### LogisticClassifier
 
-Defined in: [active-learning/learner.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L27)
+Defined in: [active-learning/learner.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L27)
 
 Logistic regression classifier for match prediction.
 
@@ -441,7 +441,7 @@ Logistic regression classifier for match prediction.
 readonly weights: readonly number[];
 ```
 
-Defined in: [active-learning/learner.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L28)
+Defined in: [active-learning/learner.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L28)
 
 ##### bias
 
@@ -449,7 +449,7 @@ Defined in: [active-learning/learner.ts:28](https://github.com/AgentiX-E/entity-
 readonly bias: number;
 ```
 
-Defined in: [active-learning/learner.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L29)
+Defined in: [active-learning/learner.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L29)
 
 ##### accuracy
 
@@ -457,13 +457,13 @@ Defined in: [active-learning/learner.ts:29](https://github.com/AgentiX-E/entity-
 readonly accuracy: number;
 ```
 
-Defined in: [active-learning/learner.ts:30](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L30)
+Defined in: [active-learning/learner.ts:30](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L30)
 
 ***
 
 ### DetectedField
 
-Defined in: [auto-config/detector.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L26)
+Defined in: [auto-config/detector.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L26)
 
 Detected field metadata.
 
@@ -475,7 +475,7 @@ Detected field metadata.
 readonly name: string;
 ```
 
-Defined in: [auto-config/detector.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L27)
+Defined in: [auto-config/detector.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L27)
 
 ##### semanticType
 
@@ -483,7 +483,7 @@ Defined in: [auto-config/detector.ts:27](https://github.com/AgentiX-E/entity-res
 readonly semanticType: SemanticType;
 ```
 
-Defined in: [auto-config/detector.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L28)
+Defined in: [auto-config/detector.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L28)
 
 ##### confidence
 
@@ -491,7 +491,7 @@ Defined in: [auto-config/detector.ts:28](https://github.com/AgentiX-E/entity-res
 readonly confidence: number;
 ```
 
-Defined in: [auto-config/detector.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L29)
+Defined in: [auto-config/detector.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L29)
 
 ##### cardinality
 
@@ -499,7 +499,7 @@ Defined in: [auto-config/detector.ts:29](https://github.com/AgentiX-E/entity-res
 readonly cardinality: number;
 ```
 
-Defined in: [auto-config/detector.ts:30](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L30)
+Defined in: [auto-config/detector.ts:30](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L30)
 
 ##### nullRatio
 
@@ -507,7 +507,7 @@ Defined in: [auto-config/detector.ts:30](https://github.com/AgentiX-E/entity-res
 readonly nullRatio: number;
 ```
 
-Defined in: [auto-config/detector.ts:31](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L31)
+Defined in: [auto-config/detector.ts:31](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L31)
 
 ##### isNumeric
 
@@ -515,7 +515,7 @@ Defined in: [auto-config/detector.ts:31](https://github.com/AgentiX-E/entity-res
 readonly isNumeric: boolean;
 ```
 
-Defined in: [auto-config/detector.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L32)
+Defined in: [auto-config/detector.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L32)
 
 ##### avgLength
 
@@ -523,7 +523,7 @@ Defined in: [auto-config/detector.ts:32](https://github.com/AgentiX-E/entity-res
 readonly avgLength: number;
 ```
 
-Defined in: [auto-config/detector.ts:33](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L33)
+Defined in: [auto-config/detector.ts:33](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L33)
 
 ##### sampleValues
 
@@ -531,13 +531,13 @@ Defined in: [auto-config/detector.ts:33](https://github.com/AgentiX-E/entity-res
 readonly sampleValues: readonly string[];
 ```
 
-Defined in: [auto-config/detector.ts:34](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L34)
+Defined in: [auto-config/detector.ts:34](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L34)
 
 ***
 
 ### AutoConfigResult
 
-Defined in: [auto-config/detector.ts:38](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L38)
+Defined in: [auto-config/detector.ts:38](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L38)
 
 Complete auto-configuration result.
 
@@ -549,7 +549,7 @@ Complete auto-configuration result.
 readonly fields: readonly DetectedField[];
 ```
 
-Defined in: [auto-config/detector.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L39)
+Defined in: [auto-config/detector.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L39)
 
 ##### config
 
@@ -557,7 +557,7 @@ Defined in: [auto-config/detector.ts:39](https://github.com/AgentiX-E/entity-res
 readonly config: PipelineConfig;
 ```
 
-Defined in: [auto-config/detector.ts:40](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L40)
+Defined in: [auto-config/detector.ts:40](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L40)
 
 ##### confidence
 
@@ -565,7 +565,7 @@ Defined in: [auto-config/detector.ts:40](https://github.com/AgentiX-E/entity-res
 readonly confidence: number;
 ```
 
-Defined in: [auto-config/detector.ts:41](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L41)
+Defined in: [auto-config/detector.ts:41](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L41)
 
 ##### warnings
 
@@ -573,13 +573,13 @@ Defined in: [auto-config/detector.ts:41](https://github.com/AgentiX-E/entity-res
 readonly warnings: readonly string[];
 ```
 
-Defined in: [auto-config/detector.ts:42](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L42)
+Defined in: [auto-config/detector.ts:42](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L42)
 
 ***
 
 ### BenchmarkDataset
 
-Defined in: [benchmarks/datasets.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L8)
+Defined in: [benchmarks/datasets.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L8)
 
 A benchmark dataset with records and ground truth clusters.
 
@@ -591,7 +591,7 @@ A benchmark dataset with records and ground truth clusters.
 readonly name: string;
 ```
 
-Defined in: [benchmarks/datasets.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L9)
+Defined in: [benchmarks/datasets.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L9)
 
 ##### description
 
@@ -599,7 +599,7 @@ Defined in: [benchmarks/datasets.ts:9](https://github.com/AgentiX-E/entity-resol
 readonly description: string;
 ```
 
-Defined in: [benchmarks/datasets.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L10)
+Defined in: [benchmarks/datasets.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L10)
 
 ##### recordCount
 
@@ -607,7 +607,7 @@ Defined in: [benchmarks/datasets.ts:10](https://github.com/AgentiX-E/entity-reso
 readonly recordCount: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L11)
+Defined in: [benchmarks/datasets.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L11)
 
 ##### trueMatchCount
 
@@ -615,7 +615,7 @@ Defined in: [benchmarks/datasets.ts:11](https://github.com/AgentiX-E/entity-reso
 readonly trueMatchCount: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L12)
+Defined in: [benchmarks/datasets.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L12)
 
 ##### records
 
@@ -623,7 +623,7 @@ Defined in: [benchmarks/datasets.ts:12](https://github.com/AgentiX-E/entity-reso
 readonly records: RawRecord[];
 ```
 
-Defined in: [benchmarks/datasets.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L13)
+Defined in: [benchmarks/datasets.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L13)
 
 ##### groundTruth
 
@@ -631,13 +631,13 @@ Defined in: [benchmarks/datasets.ts:13](https://github.com/AgentiX-E/entity-reso
 readonly groundTruth: Map<string, number[]>;
 ```
 
-Defined in: [benchmarks/datasets.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L14)
+Defined in: [benchmarks/datasets.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L14)
 
 ***
 
 ### BenchmarkResult
 
-Defined in: [benchmarks/datasets.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L18)
+Defined in: [benchmarks/datasets.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L18)
 
 Result of running a benchmark.
 
@@ -649,7 +649,7 @@ Result of running a benchmark.
 readonly dataset: string;
 ```
 
-Defined in: [benchmarks/datasets.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L19)
+Defined in: [benchmarks/datasets.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L19)
 
 ##### recordCount
 
@@ -657,7 +657,7 @@ Defined in: [benchmarks/datasets.ts:19](https://github.com/AgentiX-E/entity-reso
 readonly recordCount: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L20)
+Defined in: [benchmarks/datasets.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L20)
 
 ##### trueMatchCount
 
@@ -665,7 +665,7 @@ Defined in: [benchmarks/datasets.ts:20](https://github.com/AgentiX-E/entity-reso
 readonly trueMatchCount: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L21)
+Defined in: [benchmarks/datasets.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L21)
 
 ##### foundMatchCount
 
@@ -673,7 +673,7 @@ Defined in: [benchmarks/datasets.ts:21](https://github.com/AgentiX-E/entity-reso
 readonly foundMatchCount: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L22)
+Defined in: [benchmarks/datasets.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L22)
 
 ##### purity
 
@@ -681,7 +681,7 @@ Defined in: [benchmarks/datasets.ts:22](https://github.com/AgentiX-E/entity-reso
 readonly purity: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L23)
+Defined in: [benchmarks/datasets.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L23)
 
 ##### completeness
 
@@ -689,7 +689,7 @@ Defined in: [benchmarks/datasets.ts:23](https://github.com/AgentiX-E/entity-reso
 readonly completeness: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:24](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L24)
+Defined in: [benchmarks/datasets.ts:24](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L24)
 
 ##### executionTimeMs
 
@@ -697,13 +697,13 @@ Defined in: [benchmarks/datasets.ts:24](https://github.com/AgentiX-E/entity-reso
 readonly executionTimeMs: number;
 ```
 
-Defined in: [benchmarks/datasets.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L25)
+Defined in: [benchmarks/datasets.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L25)
 
 ***
 
 ### BlockingAnalysisResult
 
-Defined in: [blocking/analyzer.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L9)
+Defined in: [blocking/analyzer.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L9)
 
 Result of blocking rule analysis.
 
@@ -715,7 +715,7 @@ Result of blocking rule analysis.
 readonly estimatedPairCount: number;
 ```
 
-Defined in: [blocking/analyzer.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L11)
+Defined in: [blocking/analyzer.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L11)
 
 Estimated number of pairs this rule will generate (sampling-based).
 
@@ -725,7 +725,7 @@ Estimated number of pairs this rule will generate (sampling-based).
 readonly estimatedReductionRatio: number;
 ```
 
-Defined in: [blocking/analyzer.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L13)
+Defined in: [blocking/analyzer.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L13)
 
 Reduction ratio estimate.
 
@@ -735,7 +735,7 @@ Reduction ratio estimate.
 readonly hasSkewedBlocks: boolean;
 ```
 
-Defined in: [blocking/analyzer.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L15)
+Defined in: [blocking/analyzer.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L15)
 
 Whether any blocks are skewed (one block dominates).
 
@@ -745,7 +745,7 @@ Whether any blocks are skewed (one block dominates).
 readonly maxBlockRatio: number;
 ```
 
-Defined in: [blocking/analyzer.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L17)
+Defined in: [blocking/analyzer.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L17)
 
 The size ratio of the largest block vs average.
 
@@ -755,7 +755,7 @@ The size ratio of the largest block vs average.
 readonly optional warning?: string;
 ```
 
-Defined in: [blocking/analyzer.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L19)
+Defined in: [blocking/analyzer.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L19)
 
 Human-readable warning if skew is detected.
 
@@ -763,7 +763,7 @@ Human-readable warning if skew is detected.
 
 ### CandidatePair
 
-Defined in: [blocking/types.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L7)
+Defined in: [blocking/types.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L7)
 
 A candidate pair of record IDs to be compared in the matching phase.
 
@@ -775,7 +775,7 @@ A candidate pair of record IDs to be compared in the matching phase.
 readonly leftId: number;
 ```
 
-Defined in: [blocking/types.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L8)
+Defined in: [blocking/types.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L8)
 
 ##### rightId
 
@@ -783,13 +783,13 @@ Defined in: [blocking/types.ts:8](https://github.com/AgentiX-E/entity-resolution
 readonly rightId: number;
 ```
 
-Defined in: [blocking/types.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L9)
+Defined in: [blocking/types.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L9)
 
 ***
 
 ### BlockingConfig
 
-Defined in: [blocking/types.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L13)
+Defined in: [blocking/types.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L13)
 
 Configuration for a blocking strategy.
 
@@ -801,7 +801,7 @@ Configuration for a blocking strategy.
 readonly optional fields?: readonly string[];
 ```
 
-Defined in: [blocking/types.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L15)
+Defined in: [blocking/types.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L15)
 
 Fields to block on.
 
@@ -811,7 +811,7 @@ Fields to block on.
 readonly optional passes?: readonly BlockingPass[];
 ```
 
-Defined in: [blocking/types.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L17)
+Defined in: [blocking/types.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L17)
 
 Number of passes for multi-pass strategies.
 
@@ -821,7 +821,7 @@ Number of passes for multi-pass strategies.
 readonly optional windowSize?: number;
 ```
 
-Defined in: [blocking/types.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L19)
+Defined in: [blocking/types.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L19)
 
 Window size for sorted neighborhood.
 
@@ -831,7 +831,7 @@ Window size for sorted neighborhood.
 readonly optional transforms?: readonly BlockingTransform[];
 ```
 
-Defined in: [blocking/types.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L21)
+Defined in: [blocking/types.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L21)
 
 Transforms to apply to blocking keys.
 
@@ -839,7 +839,7 @@ Transforms to apply to blocking keys.
 
 ### BlockingPass
 
-Defined in: [blocking/types.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L25)
+Defined in: [blocking/types.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L25)
 
 A single blocking pass in a multi-pass strategy.
 
@@ -851,7 +851,7 @@ A single blocking pass in a multi-pass strategy.
 readonly fields: readonly string[];
 ```
 
-Defined in: [blocking/types.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L26)
+Defined in: [blocking/types.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L26)
 
 ##### transforms
 
@@ -859,13 +859,13 @@ Defined in: [blocking/types.ts:26](https://github.com/AgentiX-E/entity-resolutio
 readonly transforms: readonly BlockingTransform[];
 ```
 
-Defined in: [blocking/types.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L27)
+Defined in: [blocking/types.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L27)
 
 ***
 
 ### BlockingResult
 
-Defined in: [blocking/types.ts:43](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L43)
+Defined in: [blocking/types.ts:43](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L43)
 
 Result of a blocking operation.
 
@@ -877,7 +877,7 @@ Result of a blocking operation.
 readonly pairs: readonly CandidatePair[];
 ```
 
-Defined in: [blocking/types.ts:45](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L45)
+Defined in: [blocking/types.ts:45](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L45)
 
 Candidate pairs generated.
 
@@ -887,7 +887,7 @@ Candidate pairs generated.
 readonly totalRecords: number;
 ```
 
-Defined in: [blocking/types.ts:47](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L47)
+Defined in: [blocking/types.ts:47](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L47)
 
 Total records processed.
 
@@ -897,7 +897,7 @@ Total records processed.
 readonly reductionRatio: number;
 ```
 
-Defined in: [blocking/types.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L49)
+Defined in: [blocking/types.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L49)
 
 Reduction ratio: 1 - (pairs / (n*(n-1)/2)).
 
@@ -907,7 +907,7 @@ Reduction ratio: 1 - (pairs / (n*(n-1)/2)).
 readonly blockCount: number;
 ```
 
-Defined in: [blocking/types.ts:51](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L51)
+Defined in: [blocking/types.ts:51](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L51)
 
 This many clusters (blocks) were created.
 
@@ -915,7 +915,7 @@ This many clusters (blocks) were created.
 
 ### ClusteringResult
 
-Defined in: [clustering/algorithms.ts:6](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L6)
+Defined in: [clustering/algorithms.ts:6](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L6)
 
 #### Properties
 
@@ -925,7 +925,7 @@ Defined in: [clustering/algorithms.ts:6](https://github.com/AgentiX-E/entity-res
 readonly clusters: ReadonlyMap<string, Cluster>;
 ```
 
-Defined in: [clustering/algorithms.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L7)
+Defined in: [clustering/algorithms.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L7)
 
 ##### singletons
 
@@ -933,7 +933,7 @@ Defined in: [clustering/algorithms.ts:7](https://github.com/AgentiX-E/entity-res
 readonly singletons: readonly number[];
 ```
 
-Defined in: [clustering/algorithms.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L8)
+Defined in: [clustering/algorithms.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L8)
 
 ##### metadata
 
@@ -941,13 +941,13 @@ Defined in: [clustering/algorithms.ts:8](https://github.com/AgentiX-E/entity-res
 readonly metadata: ClusteringMetadata;
 ```
 
-Defined in: [clustering/algorithms.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L9)
+Defined in: [clustering/algorithms.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L9)
 
 ***
 
 ### ClusteringMetadata
 
-Defined in: [clustering/algorithms.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L12)
+Defined in: [clustering/algorithms.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L12)
 
 #### Properties
 
@@ -957,7 +957,7 @@ Defined in: [clustering/algorithms.ts:12](https://github.com/AgentiX-E/entity-re
 readonly numClusters: number;
 ```
 
-Defined in: [clustering/algorithms.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L13)
+Defined in: [clustering/algorithms.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L13)
 
 ##### numSingletons
 
@@ -965,7 +965,7 @@ Defined in: [clustering/algorithms.ts:13](https://github.com/AgentiX-E/entity-re
 readonly numSingletons: number;
 ```
 
-Defined in: [clustering/algorithms.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L14)
+Defined in: [clustering/algorithms.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L14)
 
 ##### averageClusterSize
 
@@ -973,7 +973,7 @@ Defined in: [clustering/algorithms.ts:14](https://github.com/AgentiX-E/entity-re
 readonly averageClusterSize: number;
 ```
 
-Defined in: [clustering/algorithms.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L15)
+Defined in: [clustering/algorithms.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L15)
 
 ##### maxClusterSize
 
@@ -981,7 +981,7 @@ Defined in: [clustering/algorithms.ts:15](https://github.com/AgentiX-E/entity-re
 readonly maxClusterSize: number;
 ```
 
-Defined in: [clustering/algorithms.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L16)
+Defined in: [clustering/algorithms.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L16)
 
 ##### totalRecords
 
@@ -989,13 +989,13 @@ Defined in: [clustering/algorithms.ts:16](https://github.com/AgentiX-E/entity-re
 readonly totalRecords: number;
 ```
 
-Defined in: [clustering/algorithms.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L17)
+Defined in: [clustering/algorithms.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L17)
 
 ***
 
 ### EvaluationMetrics
 
-Defined in: [evaluation/metrics.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L10)
+Defined in: [evaluation/metrics.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L10)
 
 Complete evaluation metrics for a clustering result.
 
@@ -1007,7 +1007,7 @@ Complete evaluation metrics for a clustering result.
 readonly pairwisePrecision: number;
 ```
 
-Defined in: [evaluation/metrics.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L12)
+Defined in: [evaluation/metrics.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L12)
 
 ##### pairwiseRecall
 
@@ -1015,7 +1015,7 @@ Defined in: [evaluation/metrics.ts:12](https://github.com/AgentiX-E/entity-resol
 readonly pairwiseRecall: number;
 ```
 
-Defined in: [evaluation/metrics.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L13)
+Defined in: [evaluation/metrics.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L13)
 
 ##### pairwiseF1
 
@@ -1023,7 +1023,7 @@ Defined in: [evaluation/metrics.ts:13](https://github.com/AgentiX-E/entity-resol
 readonly pairwiseF1: number;
 ```
 
-Defined in: [evaluation/metrics.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L14)
+Defined in: [evaluation/metrics.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L14)
 
 ##### clusterPrecision
 
@@ -1031,7 +1031,7 @@ Defined in: [evaluation/metrics.ts:14](https://github.com/AgentiX-E/entity-resol
 readonly clusterPrecision: number;
 ```
 
-Defined in: [evaluation/metrics.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L17)
+Defined in: [evaluation/metrics.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L17)
 
 ##### clusterRecall
 
@@ -1039,7 +1039,7 @@ Defined in: [evaluation/metrics.ts:17](https://github.com/AgentiX-E/entity-resol
 readonly clusterRecall: number;
 ```
 
-Defined in: [evaluation/metrics.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L18)
+Defined in: [evaluation/metrics.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L18)
 
 ##### clusterF1
 
@@ -1047,7 +1047,7 @@ Defined in: [evaluation/metrics.ts:18](https://github.com/AgentiX-E/entity-resol
 readonly clusterF1: number;
 ```
 
-Defined in: [evaluation/metrics.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L19)
+Defined in: [evaluation/metrics.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L19)
 
 ##### bCubedPrecision
 
@@ -1055,7 +1055,7 @@ Defined in: [evaluation/metrics.ts:19](https://github.com/AgentiX-E/entity-resol
 readonly bCubedPrecision: number;
 ```
 
-Defined in: [evaluation/metrics.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L22)
+Defined in: [evaluation/metrics.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L22)
 
 ##### bCubedRecall
 
@@ -1063,7 +1063,7 @@ Defined in: [evaluation/metrics.ts:22](https://github.com/AgentiX-E/entity-resol
 readonly bCubedRecall: number;
 ```
 
-Defined in: [evaluation/metrics.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L23)
+Defined in: [evaluation/metrics.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L23)
 
 ##### bCubedF1
 
@@ -1071,7 +1071,7 @@ Defined in: [evaluation/metrics.ts:23](https://github.com/AgentiX-E/entity-resol
 readonly bCubedF1: number;
 ```
 
-Defined in: [evaluation/metrics.ts:24](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L24)
+Defined in: [evaluation/metrics.ts:24](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L24)
 
 ##### adjustedRandIndex
 
@@ -1079,7 +1079,7 @@ Defined in: [evaluation/metrics.ts:24](https://github.com/AgentiX-E/entity-resol
 readonly adjustedRandIndex: number;
 ```
 
-Defined in: [evaluation/metrics.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L27)
+Defined in: [evaluation/metrics.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L27)
 
 ##### fowlkesMallowsIndex
 
@@ -1087,7 +1087,7 @@ Defined in: [evaluation/metrics.ts:27](https://github.com/AgentiX-E/entity-resol
 readonly fowlkesMallowsIndex: number;
 ```
 
-Defined in: [evaluation/metrics.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L28)
+Defined in: [evaluation/metrics.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L28)
 
 ##### vMeasure
 
@@ -1095,7 +1095,7 @@ Defined in: [evaluation/metrics.ts:28](https://github.com/AgentiX-E/entity-resol
 readonly vMeasure: number;
 ```
 
-Defined in: [evaluation/metrics.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L29)
+Defined in: [evaluation/metrics.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L29)
 
 ##### clusterHomogeneity
 
@@ -1103,7 +1103,7 @@ Defined in: [evaluation/metrics.ts:29](https://github.com/AgentiX-E/entity-resol
 readonly clusterHomogeneity: number;
 ```
 
-Defined in: [evaluation/metrics.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L32)
+Defined in: [evaluation/metrics.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L32)
 
 ##### clusterCompleteness
 
@@ -1111,7 +1111,7 @@ Defined in: [evaluation/metrics.ts:32](https://github.com/AgentiX-E/entity-resol
 readonly clusterCompleteness: number;
 ```
 
-Defined in: [evaluation/metrics.ts:33](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L33)
+Defined in: [evaluation/metrics.ts:33](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L33)
 
 ##### numPredictedClusters
 
@@ -1119,7 +1119,7 @@ Defined in: [evaluation/metrics.ts:33](https://github.com/AgentiX-E/entity-resol
 readonly numPredictedClusters: number;
 ```
 
-Defined in: [evaluation/metrics.ts:36](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L36)
+Defined in: [evaluation/metrics.ts:36](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L36)
 
 ##### numReferenceClusters
 
@@ -1127,7 +1127,7 @@ Defined in: [evaluation/metrics.ts:36](https://github.com/AgentiX-E/entity-resol
 readonly numReferenceClusters: number;
 ```
 
-Defined in: [evaluation/metrics.ts:37](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L37)
+Defined in: [evaluation/metrics.ts:37](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L37)
 
 ##### totalRecords
 
@@ -1135,13 +1135,13 @@ Defined in: [evaluation/metrics.ts:37](https://github.com/AgentiX-E/entity-resol
 readonly totalRecords: number;
 ```
 
-Defined in: [evaluation/metrics.ts:38](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L38)
+Defined in: [evaluation/metrics.ts:38](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L38)
 
 ***
 
 ### EMOptions
 
-Defined in: [fellegi-sunter/em.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L9)
+Defined in: [fellegi-sunter/em.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L9)
 
 Configuration for the EM algorithm.
 
@@ -1153,7 +1153,7 @@ Configuration for the EM algorithm.
 readonly optional maxIterations?: number;
 ```
 
-Defined in: [fellegi-sunter/em.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L11)
+Defined in: [fellegi-sunter/em.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L11)
 
 Maximum number of iterations (default: 30).
 
@@ -1163,7 +1163,7 @@ Maximum number of iterations (default: 30).
 readonly optional epsilon?: number;
 ```
 
-Defined in: [fellegi-sunter/em.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L13)
+Defined in: [fellegi-sunter/em.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L13)
 
 Convergence threshold: stop when delta log-likelihood < epsilon.
 
@@ -1173,7 +1173,7 @@ Convergence threshold: stop when delta log-likelihood < epsilon.
 readonly optional seed?: number;
 ```
 
-Defined in: [fellegi-sunter/em.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L15)
+Defined in: [fellegi-sunter/em.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L15)
 
 Random seed for reproducibility.
 
@@ -1181,7 +1181,7 @@ Random seed for reproducibility.
 
 ### EMResult
 
-Defined in: [fellegi-sunter/em.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L19)
+Defined in: [fellegi-sunter/em.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L19)
 
 Result of EM parameter estimation.
 
@@ -1193,7 +1193,7 @@ Result of EM parameter estimation.
 readonly parameters: FSParameters;
 ```
 
-Defined in: [fellegi-sunter/em.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L21)
+Defined in: [fellegi-sunter/em.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L21)
 
 Estimated FS parameters.
 
@@ -1203,7 +1203,7 @@ Estimated FS parameters.
 readonly iterations: number;
 ```
 
-Defined in: [fellegi-sunter/em.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L23)
+Defined in: [fellegi-sunter/em.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L23)
 
 Number of iterations performed.
 
@@ -1213,7 +1213,7 @@ Number of iterations performed.
 readonly converged: boolean;
 ```
 
-Defined in: [fellegi-sunter/em.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L25)
+Defined in: [fellegi-sunter/em.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L25)
 
 Whether the algorithm converged (vs hit maxIterations).
 
@@ -1223,7 +1223,7 @@ Whether the algorithm converged (vs hit maxIterations).
 readonly logLikelihood: number;
 ```
 
-Defined in: [fellegi-sunter/em.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L27)
+Defined in: [fellegi-sunter/em.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L27)
 
 Final log-likelihood.
 
@@ -1233,7 +1233,7 @@ Final log-likelihood.
 readonly logLikelihoodHistory: readonly number[];
 ```
 
-Defined in: [fellegi-sunter/em.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L29)
+Defined in: [fellegi-sunter/em.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L29)
 
 History of log-likelihoods per iteration.
 
@@ -1241,7 +1241,7 @@ History of log-likelihoods per iteration.
 
 ### CorrelationWarning
 
-Defined in: [fellegi-sunter/field-independence.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L7)
+Defined in: [fellegi-sunter/field-independence.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L7)
 
 Correlation warning for a pair of fields.
 
@@ -1253,7 +1253,7 @@ Correlation warning for a pair of fields.
 readonly fieldA: string;
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L8)
+Defined in: [fellegi-sunter/field-independence.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L8)
 
 ##### fieldB
 
@@ -1261,7 +1261,7 @@ Defined in: [fellegi-sunter/field-independence.ts:8](https://github.com/AgentiX-
 readonly fieldB: string;
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L9)
+Defined in: [fellegi-sunter/field-independence.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L9)
 
 ##### cramersV
 
@@ -1269,7 +1269,7 @@ Defined in: [fellegi-sunter/field-independence.ts:9](https://github.com/AgentiX-
 readonly cramersV: number;
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L11)
+Defined in: [fellegi-sunter/field-independence.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L11)
 
 Cramér's V measure of association (0 = independent, 1 = perfect association).
 
@@ -1279,7 +1279,7 @@ Cramér's V measure of association (0 = independent, 1 = perfect association).
 readonly severity: "low" | "medium" | "high";
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L13)
+Defined in: [fellegi-sunter/field-independence.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L13)
 
 Severity of the correlation violation.
 
@@ -1287,7 +1287,7 @@ Severity of the correlation violation.
 
 ### CorrelationReport
 
-Defined in: [fellegi-sunter/field-independence.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L19)
+Defined in: [fellegi-sunter/field-independence.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L19)
 
 Complete field correlation report.
 
@@ -1299,7 +1299,7 @@ Complete field correlation report.
 readonly warnings: readonly CorrelationWarning[];
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L20)
+Defined in: [fellegi-sunter/field-independence.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L20)
 
 ##### hasSevereViolations
 
@@ -1307,13 +1307,13 @@ Defined in: [fellegi-sunter/field-independence.ts:20](https://github.com/AgentiX
 readonly hasSevereViolations: boolean;
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L21)
+Defined in: [fellegi-sunter/field-independence.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L21)
 
 ***
 
 ### MatchWeightResult
 
-Defined in: [fellegi-sunter/match-weight.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L11)
+Defined in: [fellegi-sunter/match-weight.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L11)
 
 Result of match weight calculation for a pair of records.
 
@@ -1325,7 +1325,7 @@ Result of match weight calculation for a pair of records.
 readonly priorWeight: number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L13)
+Defined in: [fellegi-sunter/match-weight.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L13)
 
 Prior weight: log2(lambda / (1 - lambda)).
 
@@ -1335,7 +1335,7 @@ Prior weight: log2(lambda / (1 - lambda)).
 readonly fieldWeights: ReadonlyMap<string, number>;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L15)
+Defined in: [fellegi-sunter/match-weight.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L15)
 
 Per-field match weights { fieldName: weight }.
 
@@ -1345,7 +1345,7 @@ Per-field match weights { fieldName: weight }.
 readonly totalWeight: number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L17)
+Defined in: [fellegi-sunter/match-weight.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L17)
 
 Total match weight: prior + sum(fieldWeights).
 
@@ -1355,7 +1355,7 @@ Total match weight: prior + sum(fieldWeights).
 readonly probability: number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L19)
+Defined in: [fellegi-sunter/match-weight.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L19)
 
 Match probability derived from totalWeight: 2^M / (1 + 2^M).
 
@@ -1363,7 +1363,7 @@ Match probability derived from totalWeight: 2^M / (1 + 2^M).
 
 ### FSParameters
 
-Defined in: [fellegi-sunter/parameters.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L13)
+Defined in: [fellegi-sunter/parameters.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L13)
 
 Fellegi-Sunter model parameters.
 
@@ -1379,7 +1379,7 @@ lambda: P(match) — prior probability that any two records match
 readonly lambda: number;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L15)
+Defined in: [fellegi-sunter/parameters.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L15)
 
 Prior match probability. Range: (0, 1).
 
@@ -1389,7 +1389,7 @@ Prior match probability. Range: (0, 1).
 readonly mProbabilities: ReadonlyMap<string, number>;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L21)
+Defined in: [fellegi-sunter/parameters.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L21)
 
 m-probabilities keyed by "field:level".
 E.g., "name:exact_match" => 0.95 means: when records match,
@@ -1401,7 +1401,7 @@ there's a 95% chance the name field is an exact match.
 readonly uProbabilities: ReadonlyMap<string, number>;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L27)
+Defined in: [fellegi-sunter/parameters.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L27)
 
 u-probabilities keyed by "field:level".
 E.g., "name:exact_match" => 0.01 means: when records DON'T match,
@@ -1411,7 +1411,7 @@ there's only a 1% chance the name field coincidentally matches exactly.
 
 ### TermFrequency
 
-Defined in: [fellegi-sunter/tf-adjust.ts:7](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L7)
+Defined in: [fellegi-sunter/tf-adjust.ts:7](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L7)
 
 Term frequency statistics for a single field-value pair.
 
@@ -1423,7 +1423,7 @@ Term frequency statistics for a single field-value pair.
 readonly field: string;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L9)
+Defined in: [fellegi-sunter/tf-adjust.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L9)
 
 The field name.
 
@@ -1433,7 +1433,7 @@ The field name.
 readonly value: string;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L11)
+Defined in: [fellegi-sunter/tf-adjust.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L11)
 
 The value being analyzed.
 
@@ -1443,7 +1443,7 @@ The value being analyzed.
 readonly frequency: number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L13)
+Defined in: [fellegi-sunter/tf-adjust.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L13)
 
 How many times this value appears in the dataset.
 
@@ -1453,7 +1453,7 @@ How many times this value appears in the dataset.
 readonly totalRecords: number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L15)
+Defined in: [fellegi-sunter/tf-adjust.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L15)
 
 Total number of records in the dataset.
 
@@ -1463,7 +1463,7 @@ Total number of records in the dataset.
 readonly ratio: number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L17)
+Defined in: [fellegi-sunter/tf-adjust.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L17)
 
 Frequency ratio: frequency / totalRecords.
 
@@ -1471,7 +1471,7 @@ Frequency ratio: frequency / totalRecords.
 
 ### IScorer
 
-Defined in: [interfaces/IScorer.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/interfaces/IScorer.ts#L14)
+Defined in: [interfaces/IScorer.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/interfaces/IScorer.ts#L14)
 
 A scoring function that computes similarity between two field values.
 All implementations return a score in [0, 1] where 1.0 means perfect match.
@@ -1488,7 +1488,7 @@ Implemented by:
 readonly name: string;
 ```
 
-Defined in: [interfaces/IScorer.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/interfaces/IScorer.ts#L16)
+Defined in: [interfaces/IScorer.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/interfaces/IScorer.ts#L16)
 
 Unique name of this scorer (e.g., "levenshtein", "jaro_winkler").
 
@@ -1498,7 +1498,7 @@ Unique name of this scorer (e.g., "levenshtein", "jaro_winkler").
 readonly kernelized: boolean;
 ```
 
-Defined in: [interfaces/IScorer.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/interfaces/IScorer.ts#L26)
+Defined in: [interfaces/IScorer.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/interfaces/IScorer.ts#L26)
 
 Whether this scorer uses WASM acceleration (false for pure JS).
 
@@ -1513,7 +1513,7 @@ score(
    field): number;
 ```
 
-Defined in: [interfaces/IScorer.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/interfaces/IScorer.ts#L23)
+Defined in: [interfaces/IScorer.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/interfaces/IScorer.ts#L23)
 
 Compute similarity between two field values.
 
@@ -1539,7 +1539,7 @@ Never — scorers must handle all input gracefully and return 0 for edge cases.
 
 ### LLMScorerConfig
 
-Defined in: [llm/scorer.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L8)
+Defined in: [llm/scorer.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L8)
 
 LLM scorer configuration.
 
@@ -1551,7 +1551,7 @@ LLM scorer configuration.
 readonly candidateLo: number;
 ```
 
-Defined in: [llm/scorer.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L10)
+Defined in: [llm/scorer.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L10)
 
 Minimum score threshold to consider for LLM review.
 
@@ -1561,7 +1561,7 @@ Minimum score threshold to consider for LLM review.
 readonly candidateHi: number;
 ```
 
-Defined in: [llm/scorer.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L12)
+Defined in: [llm/scorer.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L12)
 
 Maximum score threshold. Pairs in [lo, hi] are sent to LLM.
 
@@ -1571,7 +1571,7 @@ Maximum score threshold. Pairs in [lo, hi] are sent to LLM.
 readonly optional apiBaseUrl?: string;
 ```
 
-Defined in: [llm/scorer.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L14)
+Defined in: [llm/scorer.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L14)
 
 API base URL. Default: DeepSeek API.
 
@@ -1581,7 +1581,7 @@ API base URL. Default: DeepSeek API.
 readonly optional model?: string;
 ```
 
-Defined in: [llm/scorer.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L16)
+Defined in: [llm/scorer.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L16)
 
 Model name. Default: deepseek-chat.
 
@@ -1591,7 +1591,7 @@ Model name. Default: deepseek-chat.
 readonly optional maxTokens?: number;
 ```
 
-Defined in: [llm/scorer.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L18)
+Defined in: [llm/scorer.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L18)
 
 Max tokens for LLM response.
 
@@ -1599,7 +1599,7 @@ Max tokens for LLM response.
 
 ### LLMScorerResult
 
-Defined in: [llm/scorer.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L22)
+Defined in: [llm/scorer.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L22)
 
 Result from LLM scoring a record pair.
 
@@ -1611,7 +1611,7 @@ Result from LLM scoring a record pair.
 readonly leftId: number;
 ```
 
-Defined in: [llm/scorer.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L23)
+Defined in: [llm/scorer.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L23)
 
 ##### rightId
 
@@ -1619,7 +1619,7 @@ Defined in: [llm/scorer.ts:23](https://github.com/AgentiX-E/entity-resolution/bl
 readonly rightId: number;
 ```
 
-Defined in: [llm/scorer.ts:24](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L24)
+Defined in: [llm/scorer.ts:24](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L24)
 
 ##### originalScore
 
@@ -1627,7 +1627,7 @@ Defined in: [llm/scorer.ts:24](https://github.com/AgentiX-E/entity-resolution/bl
 readonly originalScore: number;
 ```
 
-Defined in: [llm/scorer.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L25)
+Defined in: [llm/scorer.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L25)
 
 ##### llmScore
 
@@ -1635,7 +1635,7 @@ Defined in: [llm/scorer.ts:25](https://github.com/AgentiX-E/entity-resolution/bl
 readonly llmScore: number;
 ```
 
-Defined in: [llm/scorer.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L26)
+Defined in: [llm/scorer.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L26)
 
 ##### reasoning
 
@@ -1643,13 +1643,13 @@ Defined in: [llm/scorer.ts:26](https://github.com/AgentiX-E/entity-resolution/bl
 readonly reasoning: string;
 ```
 
-Defined in: [llm/scorer.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L27)
+Defined in: [llm/scorer.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L27)
 
 ***
 
 ### ComparisonLevel
 
-Defined in: [matching/comparison.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L8)
+Defined in: [matching/comparison.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L8)
 
 A single comparison level with a threshold.
 
@@ -1661,7 +1661,7 @@ A single comparison level with a threshold.
 readonly label: string;
 ```
 
-Defined in: [matching/comparison.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L10)
+Defined in: [matching/comparison.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L10)
 
 Label for diagnostics (e.g., "exact_match", "levenshtein<2").
 
@@ -1671,7 +1671,7 @@ Label for diagnostics (e.g., "exact_match", "levenshtein<2").
 readonly threshold: number;
 ```
 
-Defined in: [matching/comparison.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L12)
+Defined in: [matching/comparison.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L12)
 
 Score threshold for this level. Values >= threshold are assigned to this level.
 
@@ -1679,7 +1679,7 @@ Score threshold for this level. Values >= threshold are assigned to this level.
 
 ### ComparisonSpec
 
-Defined in: [matching/comparison.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L16)
+Defined in: [matching/comparison.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L16)
 
 Configuration for comparing a single field.
 
@@ -1691,7 +1691,7 @@ Configuration for comparing a single field.
 readonly field: string;
 ```
 
-Defined in: [matching/comparison.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L18)
+Defined in: [matching/comparison.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L18)
 
 The field being compared.
 
@@ -1701,7 +1701,7 @@ The field being compared.
 readonly scorerName: string;
 ```
 
-Defined in: [matching/comparison.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L20)
+Defined in: [matching/comparison.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L20)
 
 Scorer name (from registry).
 
@@ -1711,7 +1711,7 @@ Scorer name (from registry).
 readonly levels: readonly ComparisonLevel[];
 ```
 
-Defined in: [matching/comparison.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L22)
+Defined in: [matching/comparison.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L22)
 
 Ordered comparison levels (first match wins).
 
@@ -1719,7 +1719,7 @@ Ordered comparison levels (first match wins).
 
 ### ComparisonVector
 
-Defined in: [matching/comparison.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L29)
+Defined in: [matching/comparison.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L29)
 
 A comparison vector — the comparison result for a single field
 between two records.
@@ -1732,7 +1732,7 @@ between two records.
 readonly field: string;
 ```
 
-Defined in: [matching/comparison.ts:31](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L31)
+Defined in: [matching/comparison.ts:31](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L31)
 
 Field name.
 
@@ -1742,7 +1742,7 @@ Field name.
 readonly level: string;
 ```
 
-Defined in: [matching/comparison.ts:33](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L33)
+Defined in: [matching/comparison.ts:33](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L33)
 
 The comparison level that matched (first level whose threshold was met).
 
@@ -1752,7 +1752,7 @@ The comparison level that matched (first level whose threshold was met).
 readonly score: number;
 ```
 
-Defined in: [matching/comparison.ts:35](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L35)
+Defined in: [matching/comparison.ts:35](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L35)
 
 The raw similarity score.
 
@@ -1762,7 +1762,7 @@ The raw similarity score.
 readonly scorer: string;
 ```
 
-Defined in: [matching/comparison.ts:37](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L37)
+Defined in: [matching/comparison.ts:37](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L37)
 
 The scorer used.
 
@@ -1770,7 +1770,7 @@ The scorer used.
 
 ### PipelineConfig
 
-Defined in: [pipeline/runner.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L25)
+Defined in: [pipeline/runner.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L25)
 
 Pipeline configuration.
 
@@ -1782,7 +1782,7 @@ Pipeline configuration.
 readonly blocking: BlockingConfig;
 ```
 
-Defined in: [pipeline/runner.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L27)
+Defined in: [pipeline/runner.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L27)
 
 Blocking strategy configuration.
 
@@ -1792,7 +1792,7 @@ Blocking strategy configuration.
 readonly comparisons: readonly ComparisonSpec[];
 ```
 
-Defined in: [pipeline/runner.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L29)
+Defined in: [pipeline/runner.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L29)
 
 Comparison specs for matching.
 
@@ -1802,7 +1802,7 @@ Comparison specs for matching.
 readonly matchThreshold: number;
 ```
 
-Defined in: [pipeline/runner.ts:31](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L31)
+Defined in: [pipeline/runner.ts:31](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L31)
 
 Match threshold for clustering.
 
@@ -1812,7 +1812,7 @@ Match threshold for clustering.
 readonly optional tfFields?: readonly string[];
 ```
 
-Defined in: [pipeline/runner.ts:33](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L33)
+Defined in: [pipeline/runner.ts:33](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L33)
 
 Fields to use for term frequency adjustment.
 
@@ -1822,7 +1822,7 @@ Fields to use for term frequency adjustment.
 readonly optional autoConfigure?: boolean;
 ```
 
-Defined in: [pipeline/runner.ts:35](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L35)
+Defined in: [pipeline/runner.ts:35](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L35)
 
 Whether to run auto-configure (simplified in I5).
 
@@ -1830,7 +1830,7 @@ Whether to run auto-configure (simplified in I5).
 
 ### PipelineOptions
 
-Defined in: [pipeline/runner.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L39)
+Defined in: [pipeline/runner.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L39)
 
 Pipeline execution options.
 
@@ -1842,7 +1842,7 @@ Pipeline execution options.
 readonly optional maxEmIterations?: number;
 ```
 
-Defined in: [pipeline/runner.ts:41](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L41)
+Defined in: [pipeline/runner.ts:41](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L41)
 
 Maximum EM iterations.
 
@@ -1852,7 +1852,7 @@ Maximum EM iterations.
 readonly optional emEpsilon?: number;
 ```
 
-Defined in: [pipeline/runner.ts:43](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L43)
+Defined in: [pipeline/runner.ts:43](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L43)
 
 EM convergence epsilon.
 
@@ -1860,7 +1860,7 @@ EM convergence epsilon.
 
 ### PPRLConfig
 
-Defined in: [pprl/bloom.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L8)
+Defined in: [pprl/bloom.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L8)
 
 PPRL configuration for Bloom filter encoding.
 
@@ -1872,7 +1872,7 @@ PPRL configuration for Bloom filter encoding.
 readonly optional filterSize?: number;
 ```
 
-Defined in: [pprl/bloom.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L10)
+Defined in: [pprl/bloom.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L10)
 
 Bloom filter size in bits. Default: 1024. Larger = more secure, slower.
 
@@ -1882,7 +1882,7 @@ Bloom filter size in bits. Default: 1024. Larger = more secure, slower.
 readonly optional numHashes?: number;
 ```
 
-Defined in: [pprl/bloom.ts:12](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L12)
+Defined in: [pprl/bloom.ts:12](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L12)
 
 Number of hash functions. Default: 15. More = lower false positive rate.
 
@@ -1892,7 +1892,7 @@ Number of hash functions. Default: 15. More = lower false positive rate.
 readonly secretKey: string;
 ```
 
-Defined in: [pprl/bloom.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L14)
+Defined in: [pprl/bloom.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L14)
 
 Secret key for salted hashing. Must be shared between matching parties.
 
@@ -1902,7 +1902,7 @@ Secret key for salted hashing. Must be shared between matching parties.
 readonly optional qgramSize?: number;
 ```
 
-Defined in: [pprl/bloom.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L16)
+Defined in: [pprl/bloom.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L16)
 
 Q-gram size for tokenization. Default: 2 (bigrams).
 
@@ -1910,7 +1910,7 @@ Q-gram size for tokenization. Default: 2 (bigrams).
 
 ### FieldMetadata
 
-Defined in: [types/core.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L14)
+Defined in: [types/core.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L14)
 
 Metadata describing a data field.
 
@@ -1922,7 +1922,7 @@ Metadata describing a data field.
 readonly name: string;
 ```
 
-Defined in: [types/core.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L16)
+Defined in: [types/core.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L16)
 
 Field name as it appears in the data source.
 
@@ -1932,7 +1932,7 @@ Field name as it appears in the data source.
 readonly semanticType: string;
 ```
 
-Defined in: [types/core.ts:18](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L18)
+Defined in: [types/core.ts:18](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L18)
 
 Detected semantic type (e.g., "email", "name", "date").
 
@@ -1942,7 +1942,7 @@ Detected semantic type (e.g., "email", "name", "date").
 readonly cardinality: number;
 ```
 
-Defined in: [types/core.ts:20](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L20)
+Defined in: [types/core.ts:20](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L20)
 
 Number of distinct values observed in sample.
 
@@ -1952,7 +1952,7 @@ Number of distinct values observed in sample.
 readonly isNumeric: boolean;
 ```
 
-Defined in: [types/core.ts:22](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L22)
+Defined in: [types/core.ts:22](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L22)
 
 Whether the field appears to contain numeric data.
 
@@ -1960,7 +1960,7 @@ Whether the field appears to contain numeric data.
 
 ### ScoredPair
 
-Defined in: [types/core.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L26)
+Defined in: [types/core.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L26)
 
 A scored candidate pair produced by the matching phase.
 
@@ -1972,7 +1972,7 @@ A scored candidate pair produced by the matching phase.
 readonly leftId: number;
 ```
 
-Defined in: [types/core.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L27)
+Defined in: [types/core.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L27)
 
 ##### rightId
 
@@ -1980,7 +1980,7 @@ Defined in: [types/core.ts:27](https://github.com/AgentiX-E/entity-resolution/bl
 readonly rightId: number;
 ```
 
-Defined in: [types/core.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L28)
+Defined in: [types/core.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L28)
 
 ##### score
 
@@ -1988,7 +1988,7 @@ Defined in: [types/core.ts:28](https://github.com/AgentiX-E/entity-resolution/bl
 readonly score: number;
 ```
 
-Defined in: [types/core.ts:30](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L30)
+Defined in: [types/core.ts:30](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L30)
 
 Aggregate similarity score in [0, 1].
 
@@ -1998,7 +1998,7 @@ Aggregate similarity score in [0, 1].
 readonly optional probability?: number;
 ```
 
-Defined in: [types/core.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L32)
+Defined in: [types/core.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L32)
 
 Match probability from the Fellegi-Sunter model, if available.
 
@@ -2006,7 +2006,7 @@ Match probability from the Fellegi-Sunter model, if available.
 
 ### Cluster
 
-Defined in: [types/core.ts:36](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L36)
+Defined in: [types/core.ts:36](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L36)
 
 A cluster of records representing one real-world entity.
 
@@ -2018,7 +2018,7 @@ A cluster of records representing one real-world entity.
 readonly clusterId: string;
 ```
 
-Defined in: [types/core.ts:37](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L37)
+Defined in: [types/core.ts:37](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L37)
 
 ##### memberIds
 
@@ -2026,7 +2026,7 @@ Defined in: [types/core.ts:37](https://github.com/AgentiX-E/entity-resolution/bl
 readonly memberIds: number[];
 ```
 
-Defined in: [types/core.ts:38](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L38)
+Defined in: [types/core.ts:38](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L38)
 
 ##### cohesion
 
@@ -2034,7 +2034,7 @@ Defined in: [types/core.ts:38](https://github.com/AgentiX-E/entity-resolution/bl
 readonly cohesion: number;
 ```
 
-Defined in: [types/core.ts:40](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L40)
+Defined in: [types/core.ts:40](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L40)
 
 Average pairwise similarity within the cluster.
 
@@ -2042,7 +2042,7 @@ Average pairwise similarity within the cluster.
 
 ### PipelineResult
 
-Defined in: [types/core.ts:44](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L44)
+Defined in: [types/core.ts:44](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L44)
 
 The complete result of an entity resolution run.
 
@@ -2054,7 +2054,7 @@ The complete result of an entity resolution run.
 readonly clusters: ReadonlyMap<string, Cluster>;
 ```
 
-Defined in: [types/core.ts:45](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L45)
+Defined in: [types/core.ts:45](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L45)
 
 ##### scoredPairs
 
@@ -2062,7 +2062,7 @@ Defined in: [types/core.ts:45](https://github.com/AgentiX-E/entity-resolution/bl
 readonly scoredPairs: readonly ScoredPair[];
 ```
 
-Defined in: [types/core.ts:46](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L46)
+Defined in: [types/core.ts:46](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L46)
 
 ##### singletons
 
@@ -2070,7 +2070,7 @@ Defined in: [types/core.ts:46](https://github.com/AgentiX-E/entity-resolution/bl
 readonly singletons: readonly number[];
 ```
 
-Defined in: [types/core.ts:47](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L47)
+Defined in: [types/core.ts:47](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L47)
 
 ##### statistics
 
@@ -2078,7 +2078,7 @@ Defined in: [types/core.ts:47](https://github.com/AgentiX-E/entity-resolution/bl
 readonly statistics: PipelineStatistics;
 ```
 
-Defined in: [types/core.ts:48](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L48)
+Defined in: [types/core.ts:48](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L48)
 
 ##### diagnostics
 
@@ -2086,13 +2086,13 @@ Defined in: [types/core.ts:48](https://github.com/AgentiX-E/entity-resolution/bl
 readonly diagnostics: DiagnosticData;
 ```
 
-Defined in: [types/core.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L49)
+Defined in: [types/core.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L49)
 
 ***
 
 ### PipelineStatistics
 
-Defined in: [types/core.ts:53](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L53)
+Defined in: [types/core.ts:53](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L53)
 
 Summary statistics for a pipeline run.
 
@@ -2104,7 +2104,7 @@ Summary statistics for a pipeline run.
 readonly totalRecords: number;
 ```
 
-Defined in: [types/core.ts:54](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L54)
+Defined in: [types/core.ts:54](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L54)
 
 ##### totalClusters
 
@@ -2112,7 +2112,7 @@ Defined in: [types/core.ts:54](https://github.com/AgentiX-E/entity-resolution/bl
 readonly totalClusters: number;
 ```
 
-Defined in: [types/core.ts:55](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L55)
+Defined in: [types/core.ts:55](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L55)
 
 ##### matchedRecords
 
@@ -2120,7 +2120,7 @@ Defined in: [types/core.ts:55](https://github.com/AgentiX-E/entity-resolution/bl
 readonly matchedRecords: number;
 ```
 
-Defined in: [types/core.ts:56](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L56)
+Defined in: [types/core.ts:56](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L56)
 
 ##### matchRate
 
@@ -2128,7 +2128,7 @@ Defined in: [types/core.ts:56](https://github.com/AgentiX-E/entity-resolution/bl
 readonly matchRate: number;
 ```
 
-Defined in: [types/core.ts:57](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L57)
+Defined in: [types/core.ts:57](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L57)
 
 ##### averageClusterSize
 
@@ -2136,7 +2136,7 @@ Defined in: [types/core.ts:57](https://github.com/AgentiX-E/entity-resolution/bl
 readonly averageClusterSize: number;
 ```
 
-Defined in: [types/core.ts:58](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L58)
+Defined in: [types/core.ts:58](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L58)
 
 ##### maxClusterSize
 
@@ -2144,7 +2144,7 @@ Defined in: [types/core.ts:58](https://github.com/AgentiX-E/entity-resolution/bl
 readonly maxClusterSize: number;
 ```
 
-Defined in: [types/core.ts:59](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L59)
+Defined in: [types/core.ts:59](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L59)
 
 ##### executionTimeMs
 
@@ -2152,13 +2152,13 @@ Defined in: [types/core.ts:59](https://github.com/AgentiX-E/entity-resolution/bl
 readonly executionTimeMs: number;
 ```
 
-Defined in: [types/core.ts:60](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L60)
+Defined in: [types/core.ts:60](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L60)
 
 ***
 
 ### DiagnosticData
 
-Defined in: [types/core.ts:64](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L64)
+Defined in: [types/core.ts:64](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L64)
 
 Diagnostic data for model introspection.
 
@@ -2170,7 +2170,7 @@ Diagnostic data for model introspection.
 readonly muParameters: ReadonlyMap<string, FieldMuParams>;
 ```
 
-Defined in: [types/core.ts:66](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L66)
+Defined in: [types/core.ts:66](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L66)
 
 Per-field m/u parameters from the Fellegi-Sunter model.
 
@@ -2180,7 +2180,7 @@ Per-field m/u parameters from the Fellegi-Sunter model.
 readonly matchWeightDistribution: readonly MatchWeightBin[];
 ```
 
-Defined in: [types/core.ts:68](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L68)
+Defined in: [types/core.ts:68](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L68)
 
 Match weight distribution across all candidate pairs.
 
@@ -2190,7 +2190,7 @@ Match weight distribution across all candidate pairs.
 readonly unlinkableCount: number;
 ```
 
-Defined in: [types/core.ts:70](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L70)
+Defined in: [types/core.ts:70](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L70)
 
 Pairs that were blocked but scored below threshold.
 
@@ -2198,7 +2198,7 @@ Pairs that were blocked but scored below threshold.
 
 ### FieldMuParams
 
-Defined in: [types/core.ts:74](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L74)
+Defined in: [types/core.ts:74](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L74)
 
 m-probability and u-probability for a single field.
 
@@ -2210,7 +2210,7 @@ m-probability and u-probability for a single field.
 readonly mProbabilities: ReadonlyMap<string, number>;
 ```
 
-Defined in: [types/core.ts:75](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L75)
+Defined in: [types/core.ts:75](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L75)
 
 ##### uProbabilities
 
@@ -2218,13 +2218,13 @@ Defined in: [types/core.ts:75](https://github.com/AgentiX-E/entity-resolution/bl
 readonly uProbabilities: ReadonlyMap<string, number>;
 ```
 
-Defined in: [types/core.ts:76](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L76)
+Defined in: [types/core.ts:76](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L76)
 
 ***
 
 ### MatchWeightBin
 
-Defined in: [types/core.ts:80](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L80)
+Defined in: [types/core.ts:80](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L80)
 
 A histogram bin for match weight distribution.
 
@@ -2236,7 +2236,7 @@ A histogram bin for match weight distribution.
 readonly minWeight: number;
 ```
 
-Defined in: [types/core.ts:81](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L81)
+Defined in: [types/core.ts:81](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L81)
 
 ##### maxWeight
 
@@ -2244,7 +2244,7 @@ Defined in: [types/core.ts:81](https://github.com/AgentiX-E/entity-resolution/bl
 readonly maxWeight: number;
 ```
 
-Defined in: [types/core.ts:82](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L82)
+Defined in: [types/core.ts:82](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L82)
 
 ##### count
 
@@ -2252,7 +2252,7 @@ Defined in: [types/core.ts:82](https://github.com/AgentiX-E/entity-resolution/bl
 readonly count: number;
 ```
 
-Defined in: [types/core.ts:83](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L83)
+Defined in: [types/core.ts:83](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L83)
 
 ## Type Aliases
 
@@ -2275,7 +2275,7 @@ type SemanticType =
   | "text";
 ```
 
-Defined in: [auto-config/detector.ts:10](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L10)
+Defined in: [auto-config/detector.ts:10](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L10)
 
 Semantic type inferred for a field.
 
@@ -2296,7 +2296,7 @@ type BlockingTransform =
   | "metaphone";
 ```
 
-Defined in: [blocking/types.ts:31](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L31)
+Defined in: [blocking/types.ts:31](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L31)
 
 Transforms applied to blocking key values.
 
@@ -2308,7 +2308,7 @@ Transforms applied to blocking key values.
 type ScorerFactory = () => IScorer;
 ```
 
-Defined in: [interfaces/IScorer.ts:30](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/interfaces/IScorer.ts#L30)
+Defined in: [interfaces/IScorer.ts:30](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/interfaces/IScorer.ts#L30)
 
 Factory type for creating scorers.
 
@@ -2324,7 +2324,7 @@ Factory type for creating scorers.
 type RecordId = number;
 ```
 
-Defined in: [types/core.ts:5](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L5)
+Defined in: [types/core.ts:5](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L5)
 
 Unique identifier for a record within a dataset.
 
@@ -2336,7 +2336,7 @@ Unique identifier for a record within a dataset.
 type EntityId = string;
 ```
 
-Defined in: [types/core.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L8)
+Defined in: [types/core.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L8)
 
 Unique identifier for an entity (cluster) across datasets.
 
@@ -2348,7 +2348,7 @@ Unique identifier for an entity (cluster) across datasets.
 type RawRecord = Record<string, unknown>;
 ```
 
-Defined in: [types/core.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/types/core.ts#L11)
+Defined in: [types/core.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L11)
 
 A raw record — any object with string-indexable fields.
 
@@ -2366,7 +2366,7 @@ const MATCH_WEIGHT_INTERPRETATION: {
 };
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:140](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L140)
+Defined in: [fellegi-sunter/match-weight.ts:140](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L140)
 
 Interpreting match weights (for diagnostics):
 - M = 0  → 50% probability
@@ -2379,11 +2379,11 @@ Interpreting match weights (for diagnostics):
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-neutral"></a> `NEUTRAL` | `0` | `0` | [fellegi-sunter/match-weight.ts:141](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L141) |
-| <a id="property-weak"></a> `WEAK` | `2` | `2` | [fellegi-sunter/match-weight.ts:142](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L142) |
-| <a id="property-moderate"></a> `MODERATE` | `3` | `3` | [fellegi-sunter/match-weight.ts:143](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L143) |
-| <a id="property-strong"></a> `STRONG` | `4` | `4` | [fellegi-sunter/match-weight.ts:144](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L144) |
-| <a id="property-very_strong"></a> `VERY_STRONG` | `7` | `7` | [fellegi-sunter/match-weight.ts:145](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L145) |
+| <a id="property-neutral"></a> `NEUTRAL` | `0` | `0` | [fellegi-sunter/match-weight.ts:141](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L141) |
+| <a id="property-weak"></a> `WEAK` | `2` | `2` | [fellegi-sunter/match-weight.ts:142](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L142) |
+| <a id="property-moderate"></a> `MODERATE` | `3` | `3` | [fellegi-sunter/match-weight.ts:143](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L143) |
+| <a id="property-strong"></a> `STRONG` | `4` | `4` | [fellegi-sunter/match-weight.ts:144](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L144) |
+| <a id="property-very_strong"></a> `VERY_STRONG` | `7` | `7` | [fellegi-sunter/match-weight.ts:145](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L145) |
 
 ***
 
@@ -2410,7 +2410,7 @@ const COMPARISON_LEVELS: {
 };
 ```
 
-Defined in: [matching/comparison.ts:85](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L85)
+Defined in: [matching/comparison.ts:85](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L85)
 
 Common comparison level presets.
 
@@ -2418,18 +2418,18 @@ Common comparison level presets.
 
 | Name | Type | Default value | Defined in |
 | ------ | ------ | ------ | ------ |
-| <a id="property-exact_match"></a> `EXACT_MATCH` | \{ `label`: `"exact_match"`; `threshold`: `0.99`; \} | - | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L86) |
-| `EXACT_MATCH.label` | `"exact_match"` | `'exact_match'` | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L86) |
-| `EXACT_MATCH.threshold` | `0.99` | `0.99` | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L86) |
-| <a id="property-strong_match"></a> `STRONG_MATCH` | \{ `label`: `"strong_match"`; `threshold`: `0.85`; \} | - | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L87) |
-| `STRONG_MATCH.label` | `"strong_match"` | `'strong_match'` | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L87) |
-| `STRONG_MATCH.threshold` | `0.85` | `0.85` | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L87) |
-| <a id="property-moderate_match"></a> `MODERATE_MATCH` | \{ `label`: `"moderate_match"`; `threshold`: `0.7`; \} | - | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L88) |
-| `MODERATE_MATCH.label` | `"moderate_match"` | `'moderate_match'` | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L88) |
-| `MODERATE_MATCH.threshold` | `0.7` | `0.7` | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L88) |
-| <a id="property-weak_match"></a> `WEAK_MATCH` | \{ `label`: `"weak_match"`; `threshold`: `0.5`; \} | - | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L89) |
-| `WEAK_MATCH.label` | `"weak_match"` | `'weak_match'` | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L89) |
-| `WEAK_MATCH.threshold` | `0.5` | `0.5` | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L89) |
+| <a id="property-exact_match"></a> `EXACT_MATCH` | \{ `label`: `"exact_match"`; `threshold`: `0.99`; \} | - | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L86) |
+| `EXACT_MATCH.label` | `"exact_match"` | `'exact_match'` | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L86) |
+| `EXACT_MATCH.threshold` | `0.99` | `0.99` | [matching/comparison.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L86) |
+| <a id="property-strong_match"></a> `STRONG_MATCH` | \{ `label`: `"strong_match"`; `threshold`: `0.85`; \} | - | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L87) |
+| `STRONG_MATCH.label` | `"strong_match"` | `'strong_match'` | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L87) |
+| `STRONG_MATCH.threshold` | `0.85` | `0.85` | [matching/comparison.ts:87](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L87) |
+| <a id="property-moderate_match"></a> `MODERATE_MATCH` | \{ `label`: `"moderate_match"`; `threshold`: `0.7`; \} | - | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L88) |
+| `MODERATE_MATCH.label` | `"moderate_match"` | `'moderate_match'` | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L88) |
+| `MODERATE_MATCH.threshold` | `0.7` | `0.7` | [matching/comparison.ts:88](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L88) |
+| <a id="property-weak_match"></a> `WEAK_MATCH` | \{ `label`: `"weak_match"`; `threshold`: `0.5`; \} | - | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L89) |
+| `WEAK_MATCH.label` | `"weak_match"` | `'weak_match'` | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L89) |
+| `WEAK_MATCH.threshold` | `0.5` | `0.5` | [matching/comparison.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L89) |
 
 ***
 
@@ -2439,7 +2439,7 @@ Common comparison level presets.
 const exactScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:57](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L57)
+Defined in: [matching/scorers/js/scorers.ts:57](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L57)
 
 Exact match: 1.0 if equal after trimming, 0.0 otherwise.
 Best for: identifiers, emails, phone numbers (after normalization).
@@ -2452,7 +2452,7 @@ Best for: identifiers, emails, phone numbers (after normalization).
 const levenshteinScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:71](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L71)
+Defined in: [matching/scorers/js/scorers.ts:71](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L71)
 
 Normalized Levenshtein similarity [0, 1].
 Best for: general text with typos.
@@ -2465,7 +2465,7 @@ Best for: general text with typos.
 const damerauLevenshteinScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:85](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L85)
+Defined in: [matching/scorers/js/scorers.ts:85](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L85)
 
 Normalized Damerau-Levenshtein similarity (includes transpositions).
 Best for: text with character-swap errors (e.g., "CAKE" vs "ACKE").
@@ -2478,7 +2478,7 @@ Best for: text with character-swap errors (e.g., "CAKE" vs "ACKE").
 const jaroScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:97](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L97)
+Defined in: [matching/scorers/js/scorers.ts:97](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L97)
 
 Jaro similarity [0, 1].
 Best for: short strings like ID numbers where character order matters less.
@@ -2491,7 +2491,7 @@ Best for: short strings like ID numbers where character order matters less.
 const jaroWinklerScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:109](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L109)
+Defined in: [matching/scorers/js/scorers.ts:109](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L109)
 
 Jaro-Winkler similarity — Jaro with prefix bonus.
 Best for: personal names (MARTHA vs MARHTA = 0.961).
@@ -2504,7 +2504,7 @@ Best for: personal names (MARTHA vs MARHTA = 0.961).
 const diceScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:121](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L121)
+Defined in: [matching/scorers/js/scorers.ts:121](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L121)
 
 Dice coefficient — bigram overlap [0, 1].
 Best for: multi-word text, company names.
@@ -2517,7 +2517,7 @@ Best for: multi-word text, company names.
 const jaccardScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:133](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L133)
+Defined in: [matching/scorers/js/scorers.ts:133](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L133)
 
 Jaccard similarity — n-gram set overlap [0, 1].
 Best for: sets, addresses split into tokens.
@@ -2530,7 +2530,7 @@ Best for: sets, addresses split into tokens.
 const overlapScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:145](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L145)
+Defined in: [matching/scorers/js/scorers.ts:145](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L145)
 
 Overlap coefficient [0, 1].
 Best for: cases where subset/superset relationship matters.
@@ -2543,7 +2543,7 @@ Best for: cases where subset/superset relationship matters.
 const lcsScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:157](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L157)
+Defined in: [matching/scorers/js/scorers.ts:157](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L157)
 
 Longest Common Subsequence similarity [0, 1].
 Best for: preserving order in long text comparisons.
@@ -2556,7 +2556,7 @@ Best for: preserving order in long text comparisons.
 const soundexScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:169](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L169)
+Defined in: [matching/scorers/js/scorers.ts:169](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L169)
 
 Soundex phonetic match: 1.0 if same Soundex code, 0.0 otherwise.
 Best for: English surnames — Robert vs Rupert share R163.
@@ -2569,7 +2569,7 @@ Best for: English surnames — Robert vs Rupert share R163.
 const doubleMetaphoneScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:188](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L188)
+Defined in: [matching/scorers/js/scorers.ts:188](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L188)
 
 Double Metaphone fuzzy phonetic match.
 Best for: non-English names, complex phonetic variations.
@@ -2582,7 +2582,7 @@ Best for: non-English names, complex phonetic variations.
 const tokenSortScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:212](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L212)
+Defined in: [matching/scorers/js/scorers.ts:212](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L212)
 
 Token Sort Ratio: tokenize both strings, sort alphabetically, then
 compute Jaro-Winkler on the joined sorted tokens.
@@ -2596,7 +2596,7 @@ Best for: word-order-independent comparisons (names, addresses).
 const tfidfCosineScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:230](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L230)
+Defined in: [matching/scorers/js/scorers.ts:230](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L230)
 
 TF-IDF Cosine similarity using character bigrams as tokens.
 Best for: product names, short text where bigram patterns matter.
@@ -2609,7 +2609,7 @@ Best for: product names, short text where bigram patterns matter.
 const qgramTfIdfScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:274](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L274)
+Defined in: [matching/scorers/js/scorers.ts:274](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L274)
 
 Q-gram TF-IDF: tokenize into q-grams and compute Jaccard on the sets.
 Best for: pyJedAI-compatible token-based comparisons.
@@ -2622,7 +2622,7 @@ Best for: pyJedAI-compatible token-based comparisons.
 const ensembleScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:300](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L300)
+Defined in: [matching/scorers/js/scorers.ts:300](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L300)
 
 Ensemble scorer: weighted combination of jaro_winkler + levenshtein + token_sort + dice.
 Best for: general-purpose name matching (GoldenMatch's recommended ensemble).
@@ -2635,7 +2635,7 @@ Best for: general-purpose name matching (GoldenMatch's recommended ensemble).
 const numericDiffScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:323](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L323)
+Defined in: [matching/scorers/js/scorers.ts:323](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L323)
 
 Numeric difference scorer: 1.0 if equal, linear decay otherwise.
 Best for: numeric fields (age, quantity, price).
@@ -2648,7 +2648,7 @@ Best for: numeric fields (age, quantity, price).
 const dateDiffScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:341](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L341)
+Defined in: [matching/scorers/js/scorers.ts:341](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L341)
 
 Date difference scorer: similarity based on days between two dates.
 Best for: date of birth, event dates.
@@ -2661,7 +2661,7 @@ Best for: date of birth, event dates.
 const booleanMatchScorer: IScorer;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:365](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L365)
+Defined in: [matching/scorers/js/scorers.ts:365](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L365)
 
 Boolean match: 1.0 if both truthy or both falsy.
 Best for: binary flags, yes/no fields.
@@ -2674,7 +2674,7 @@ Best for: binary flags, yes/no fields.
 const ALL_SCORERS: Readonly<Record<string, IScorer>>;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:378](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L378)
+Defined in: [matching/scorers/js/scorers.ts:378](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L378)
 
 All 19 scorers in a name-indexed map.
 
@@ -2686,7 +2686,7 @@ All 19 scorers in a name-indexed map.
 const IMPLEMENTED_SCORER_COUNT: 19 = 19;
 ```
 
-Defined in: [matching/scorers/js/scorers.ts:408](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/js/scorers.ts#L408)
+Defined in: [matching/scorers/js/scorers.ts:408](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/js/scorers.ts#L408)
 
 Number of fully implemented scorers (excluding placeholders).
 
@@ -2698,7 +2698,7 @@ Number of fully implemented scorers (excluding placeholders).
 function selectUncertainPairs(pairs, count): number[];
 ```
 
-Defined in: [active-learning/learner.ts:45](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L45)
+Defined in: [active-learning/learner.ts:45](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L45)
 
 Select the most uncertain pairs for labeling.
 Uncertainty = 1 - |2 * probability - 1| (maximal at probability = 0.5)
@@ -2724,7 +2724,7 @@ Indices of the most uncertain pairs (sorted by uncertainty descending)
 function selectDiverseUncertainPairs(pairs, count): number[];
 ```
 
-Defined in: [active-learning/learner.ts:63](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L63)
+Defined in: [active-learning/learner.ts:63](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L63)
 
 Select a diverse batch of uncertain pairs using greedy diversity sampling.
 After picking the most uncertain pair, subsequent picks are penalized if
@@ -2752,7 +2752,7 @@ function trainLogisticClassifier(
    options?): LogisticClassifier;
 ```
 
-Defined in: [active-learning/learner.ts:105](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L105)
+Defined in: [active-learning/learner.ts:105](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L105)
 
 Train a logistic regression classifier on labeled pairs.
 Uses gradient descent with sigmoid activation.
@@ -2779,7 +2779,7 @@ Uses gradient descent with sigmoid activation.
 function predictClassifier(classifier, pair): number;
 ```
 
-Defined in: [active-learning/learner.ts:176](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L176)
+Defined in: [active-learning/learner.ts:176](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L176)
 
 Predict match probability for a pair using a trained classifier.
 
@@ -2802,7 +2802,7 @@ Predict match probability for a pair using a trained classifier.
 function createSession(pairs): ActiveLearningSession;
 ```
 
-Defined in: [active-learning/learner.ts:189](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L189)
+Defined in: [active-learning/learner.ts:189](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L189)
 
 Create a new active learning session.
 
@@ -2824,7 +2824,7 @@ Create a new active learning session.
 function nextLabelingBatch(session, batchSize): number[];
 ```
 
-Defined in: [active-learning/learner.ts:203](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L203)
+Defined in: [active-learning/learner.ts:203](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L203)
 
 Select the next batch of pairs to label and update the session.
 Returns the indices (into the original pairs array) to label next.
@@ -2848,7 +2848,7 @@ Returns the indices (into the original pairs array) to label next.
 function applyLabels(session, labels): void;
 ```
 
-Defined in: [active-learning/learner.ts:211](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L211)
+Defined in: [active-learning/learner.ts:211](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L211)
 
 Apply labels to the session and retrain the classifier.
 
@@ -2874,7 +2874,7 @@ function simulateLabeling(
    groundTruth): LabeledPair[];
 ```
 
-Defined in: [active-learning/learner.ts:231](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L231)
+Defined in: [active-learning/learner.ts:231](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L231)
 
 Simulate labeling by using ground truth data.
 Returns labeled pairs for the given indices.
@@ -2902,7 +2902,7 @@ function detectLabelContradictions(labeled): {
 };
 ```
 
-Defined in: [active-learning/learner.ts:249](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L249)
+Defined in: [active-learning/learner.ts:249](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L249)
 
 Assess labeling quality by detecting contradictory labels.
 Contradiction: the same pair labeled differently, or a transitive
@@ -2925,8 +2925,8 @@ contradiction (A≈B labeled 1, B≈C labeled 1, but A≈C labeled 0).
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `contradictions` | `string`[] | [active-learning/learner.ts:250](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L250) |
-| `hasContradiction` | `boolean` | [active-learning/learner.ts:251](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/active-learning/learner.ts#L251) |
+| `contradictions` | `string`[] | [active-learning/learner.ts:250](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L250) |
+| `hasContradiction` | `boolean` | [active-learning/learner.ts:251](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/active-learning/learner.ts#L251) |
 
 ***
 
@@ -2936,7 +2936,7 @@ contradiction (A≈B labeled 1, B≈C labeled 1, but A≈C labeled 0).
 function detectFields(records): DetectedField[];
 ```
 
-Defined in: [auto-config/detector.ts:124](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L124)
+Defined in: [auto-config/detector.ts:124](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L124)
 
 Analyze a dataset and detect field semantics.
 Uses combined name-pattern + value-distribution matching.
@@ -2959,7 +2959,7 @@ Uses combined name-pattern + value-distribution matching.
 function autoConfigure(records): AutoConfigResult;
 ```
 
-Defined in: [auto-config/detector.ts:202](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/auto-config/detector.ts#L202)
+Defined in: [auto-config/detector.ts:202](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/auto-config/detector.ts#L202)
 
 Auto-generate a PipelineConfig from detected fields.
 
@@ -2981,7 +2981,7 @@ Auto-generate a PipelineConfig from detected fields.
 function loadFebrl(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L32)
+Defined in: [benchmarks/datasets.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L32)
 
 #### Returns
 
@@ -2995,7 +2995,7 @@ Defined in: [benchmarks/datasets.ts:32](https://github.com/AgentiX-E/entity-reso
 function loadDblpAcm(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:163](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L163)
+Defined in: [benchmarks/datasets.ts:163](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L163)
 
 #### Returns
 
@@ -3009,7 +3009,7 @@ Defined in: [benchmarks/datasets.ts:163](https://github.com/AgentiX-E/entity-res
 function loadAbtBuy(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:254](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L254)
+Defined in: [benchmarks/datasets.ts:254](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L254)
 
 #### Returns
 
@@ -3023,7 +3023,7 @@ Defined in: [benchmarks/datasets.ts:254](https://github.com/AgentiX-E/entity-res
 function loadAmazonGoogle(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:258](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L258)
+Defined in: [benchmarks/datasets.ts:258](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L258)
 
 #### Returns
 
@@ -3037,7 +3037,7 @@ Defined in: [benchmarks/datasets.ts:258](https://github.com/AgentiX-E/entity-res
 function loadWdcProducts(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:262](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L262)
+Defined in: [benchmarks/datasets.ts:262](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L262)
 
 #### Returns
 
@@ -3051,7 +3051,7 @@ Defined in: [benchmarks/datasets.ts:262](https://github.com/AgentiX-E/entity-res
 function loadWdcOffers(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:266](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L266)
+Defined in: [benchmarks/datasets.ts:266](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L266)
 
 #### Returns
 
@@ -3065,7 +3065,7 @@ Defined in: [benchmarks/datasets.ts:266](https://github.com/AgentiX-E/entity-res
 function loadItunesAmazon(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:270](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L270)
+Defined in: [benchmarks/datasets.ts:270](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L270)
 
 #### Returns
 
@@ -3079,7 +3079,7 @@ Defined in: [benchmarks/datasets.ts:270](https://github.com/AgentiX-E/entity-res
 function loadCora(): BenchmarkDataset;
 ```
 
-Defined in: [benchmarks/datasets.ts:274](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L274)
+Defined in: [benchmarks/datasets.ts:274](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L274)
 
 #### Returns
 
@@ -3093,7 +3093,7 @@ Defined in: [benchmarks/datasets.ts:274](https://github.com/AgentiX-E/entity-res
 function loadAllBenchmarks(): BenchmarkDataset[];
 ```
 
-Defined in: [benchmarks/datasets.ts:279](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/datasets.ts#L279)
+Defined in: [benchmarks/datasets.ts:279](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/datasets.ts#L279)
 
 Load all 8 benchmark datasets.
 
@@ -3109,7 +3109,7 @@ Load all 8 benchmark datasets.
 function runBenchmark(dataset): Promise<BenchmarkResult>;
 ```
 
-Defined in: [benchmarks/runner.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/runner.ts#L11)
+Defined in: [benchmarks/runner.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/runner.ts#L11)
 
 #### Parameters
 
@@ -3132,7 +3132,7 @@ function runAllBenchmarks(): Promise<{
 }>;
 ```
 
-Defined in: [benchmarks/runner.ts:50](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/runner.ts#L50)
+Defined in: [benchmarks/runner.ts:50](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/runner.ts#L50)
 
 #### Returns
 
@@ -3149,7 +3149,7 @@ Defined in: [benchmarks/runner.ts:50](https://github.com/AgentiX-E/entity-resolu
 function formatBenchmarkReport(results): string;
 ```
 
-Defined in: [benchmarks/runner.ts:58](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/benchmarks/runner.ts#L58)
+Defined in: [benchmarks/runner.ts:58](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/benchmarks/runner.ts#L58)
 
 #### Parameters
 
@@ -3172,7 +3172,7 @@ function analyzeBlockingRule(
    options?): BlockingAnalysisResult;
 ```
 
-Defined in: [blocking/analyzer.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L26)
+Defined in: [blocking/analyzer.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L26)
 
 Analyze a blocking rule without generating all pairs.
 Uses sampling to estimate pair count and detect skew.
@@ -3198,7 +3198,7 @@ Uses sampling to estimate pair count and detect skew.
 function recommendBlockingRules(records, candidatePasses): BlockingPass[];
 ```
 
-Defined in: [blocking/analyzer.ts:84](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L84)
+Defined in: [blocking/analyzer.ts:84](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L84)
 
 Analyze all blocking rules in a config and return recommendations.
 
@@ -3221,7 +3221,7 @@ Analyze all blocking rules in a config and return recommendations.
 function verifyBlockingRecall(pairs, trueMatchPairs): number;
 ```
 
-Defined in: [blocking/analyzer.ts:117](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/analyzer.ts#L117)
+Defined in: [blocking/analyzer.ts:117](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/analyzer.ts#L117)
 
 Verify that a set of blocking rules captures a target percentage of true matches.
 This is a verification function, not optimization.
@@ -3245,7 +3245,7 @@ This is a verification function, not optimization.
 function standardBlocking(records, config): BlockingResult;
 ```
 
-Defined in: [blocking/standard.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/standard.ts#L14)
+Defined in: [blocking/standard.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/standard.ts#L14)
 
 Standard blocking: groups records by blocking key and produces
 all pairwise combinations within each group.
@@ -3272,7 +3272,7 @@ it matches ANY pass).
 function blockOn(...fields): BlockingPass;
 ```
 
-Defined in: [blocking/standard.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/standard.ts#L89)
+Defined in: [blocking/standard.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/standard.ts#L89)
 
 Convenience function: create a blocking pass config.
 Usage: blockOn("first_name", "surname") — Splink-style
@@ -3295,7 +3295,7 @@ Usage: blockOn("first_name", "surname") — Splink-style
 function blockOnSoundex(...fields): BlockingPass;
 ```
 
-Defined in: [blocking/standard.ts:99](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/standard.ts#L99)
+Defined in: [blocking/standard.ts:99](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/standard.ts#L99)
 
 Convenience: block with soundex phonetic matching.
 
@@ -3317,7 +3317,7 @@ Convenience: block with soundex phonetic matching.
 function tokenBlocking(records, config): BlockingResult;
 ```
 
-Defined in: [blocking/strategies.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L14)
+Defined in: [blocking/strategies.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L14)
 
 Token Blocking: each token in a field value creates a block.
 A record can belong to multiple blocks (lazy overlapping blocks).
@@ -3343,7 +3343,7 @@ This is the first stage of pyJedAI's multi-stage pipeline.
 function sortedNeighborhood(records, config): BlockingResult;
 ```
 
-Defined in: [blocking/strategies.ts:65](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L65)
+Defined in: [blocking/strategies.ts:65](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L65)
 
 Sorted Neighborhood: sort records by a key, then slide a window
 of size `windowSize` over the sorted list, comparing records within
@@ -3368,7 +3368,7 @@ each window.
 function multiPassBlocking(records, config): BlockingResult;
 ```
 
-Defined in: [blocking/strategies.ts:109](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L109)
+Defined in: [blocking/strategies.ts:109](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L109)
 
 Multi-pass Blocking: multiple independent passes (exact + soundex + substring).
 Pairs are the UNION of all passes.
@@ -3392,7 +3392,7 @@ Pairs are the UNION of all passes.
 function blockPurging(blocks, maxBlockSize?): Map<string, number[]>;
 ```
 
-Defined in: [blocking/strategies.ts:178](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L178)
+Defined in: [blocking/strategies.ts:178](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L178)
 
 Block Purging: remove blocks that are too large (oversized).
 Oversized blocks contribute many comparisons but few matches.
@@ -3416,7 +3416,7 @@ Oversized blocks contribute many comparisons but few matches.
 function comparisonNeighborhoodPruning(blocks, minNeighborWeight?): Set<string>;
 ```
 
-Defined in: [blocking/strategies.ts:198](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L198)
+Defined in: [blocking/strategies.ts:198](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L198)
 
 Comparison Neighborhood Pruning (CNP): for each entity, keep only
 the most promising comparisons based on neighborhood weight.
@@ -3443,7 +3443,7 @@ where the weighted overlap meets a threshold.
 function metaBlocking(records, config): BlockingResult;
 ```
 
-Defined in: [blocking/strategies.ts:228](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/strategies.ts#L228)
+Defined in: [blocking/strategies.ts:228](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/strategies.ts#L228)
 
 Full Meta-blocking pipeline (pyJedAI-style):
   Token Blocking → Block Purging → CNP
@@ -3467,7 +3467,7 @@ Full Meta-blocking pipeline (pyJedAI-style):
 function computeReductionRatio(pairCount, totalRecords): number;
 ```
 
-Defined in: [blocking/types.ts:59](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L59)
+Defined in: [blocking/types.ts:59](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L59)
 
 Compute the blocking reduction ratio.
 ratio = 1 - (pairs / totalPossiblePairs)
@@ -3492,7 +3492,7 @@ where totalPossiblePairs = n * (n - 1) / 2 for deduplication
 function applyBlockingTransforms(value, transforms): string;
 ```
 
-Defined in: [blocking/types.ts:67](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/blocking/types.ts#L67)
+Defined in: [blocking/types.ts:67](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/blocking/types.ts#L67)
 
 Apply transforms to a field value for blocking key generation.
 
@@ -3518,7 +3518,7 @@ function connectedComponents(
    threshold): ClusteringResult;
 ```
 
-Defined in: [clustering/algorithms.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L39)
+Defined in: [clustering/algorithms.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L39)
 
 #### Parameters
 
@@ -3544,7 +3544,7 @@ function dbscanClustering(
    minPts): ClusteringResult;
 ```
 
-Defined in: [clustering/algorithms.ts:57](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L57)
+Defined in: [clustering/algorithms.ts:57](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L57)
 
 #### Parameters
 
@@ -3570,7 +3570,7 @@ function uniqueMapping(
    threshold): ClusteringResult;
 ```
 
-Defined in: [clustering/algorithms.ts:105](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/clustering/algorithms.ts#L105)
+Defined in: [clustering/algorithms.ts:105](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/clustering/algorithms.ts#L105)
 
 #### Parameters
 
@@ -3592,7 +3592,7 @@ Defined in: [clustering/algorithms.ts:105](https://github.com/AgentiX-E/entity-r
 function evaluateClustering(predicted, reference): EvaluationMetrics;
 ```
 
-Defined in: [evaluation/metrics.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/evaluation/metrics.ts#L49)
+Defined in: [evaluation/metrics.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/evaluation/metrics.ts#L49)
 
 Evaluate a predicted clustering against a reference (ground truth) clustering.
 Only records that appear in BOTH clusterings are considered (inner join).
@@ -3616,7 +3616,7 @@ Only records that appear in BOTH clusterings are considered (inner join).
 function estimateParameters(vectors, options?): EMResult;
 ```
 
-Defined in: [fellegi-sunter/em.ts:40](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/em.ts#L40)
+Defined in: [fellegi-sunter/em.ts:40](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/em.ts#L40)
 
 Run the EM algorithm to estimate Fellegi-Sunter parameters
 from a set of comparison vectors.
@@ -3642,7 +3642,7 @@ Estimated parameters and convergence diagnostics
 function analyzeFieldCorrelations(records, fields): CorrelationReport;
 ```
 
-Defined in: [fellegi-sunter/field-independence.ts:36](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/field-independence.ts#L36)
+Defined in: [fellegi-sunter/field-independence.ts:36](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/field-independence.ts#L36)
 
 Analyze field correlations in a dataset.
 
@@ -3674,7 +3674,7 @@ Severity thresholds (based on Cramér's V):
 function computeMatchWeight(vector, params): MatchWeightResult;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L29)
+Defined in: [fellegi-sunter/match-weight.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L29)
 
 Compute the match weight for a comparison vector using
 estimated FS parameters.
@@ -3701,7 +3701,7 @@ Probability = 2^M / (1 + 2^M)
 function computeAggregateMatchWeight(vectors, params): MatchWeightResult;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:72](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L72)
+Defined in: [fellegi-sunter/match-weight.ts:72](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L72)
 
 Compute the aggregate match weight for a full set of comparison vectors.
 Assumes field independence — match weights are additive across fields.
@@ -3725,7 +3725,7 @@ Assumes field independence — match weights are additive across fields.
 function weightToProbability(weight): number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:106](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L106)
+Defined in: [fellegi-sunter/match-weight.ts:106](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L106)
 
 Convert a match weight to a match probability.
 Formula: P = 2^M / (1 + 2^M)
@@ -3748,7 +3748,7 @@ Formula: P = 2^M / (1 + 2^M)
 function probabilityToWeight(probability): number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:119](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L119)
+Defined in: [fellegi-sunter/match-weight.ts:119](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L119)
 
 Convert a match probability to a match weight.
 Formula: M = log2(P / (1 - P))
@@ -3771,7 +3771,7 @@ Formula: M = log2(P / (1 - P))
 function priorWeight(lambda): number;
 ```
 
-Defined in: [fellegi-sunter/match-weight.ts:128](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/match-weight.ts#L128)
+Defined in: [fellegi-sunter/match-weight.ts:128](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/match-weight.ts#L128)
 
 Compute prior weight from lambda.
 Formula: M_prior = log2(lambda / (1 - lambda))
@@ -3794,7 +3794,7 @@ Formula: M_prior = log2(lambda / (1 - lambda))
 function createDefaultParameters(comparisonKeys, options?): FSParameters;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:34](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L34)
+Defined in: [fellegi-sunter/parameters.ts:34](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L34)
 
 Default/initial parameters for EM algorithm.
 Uses reasonable defaults based on Fellegi-Sunter literature.
@@ -3821,7 +3821,7 @@ Uses reasonable defaults based on Fellegi-Sunter literature.
 function extractComparisonKeys(vectors): string[];
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:62](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L62)
+Defined in: [fellegi-sunter/parameters.ts:62](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L62)
 
 Extract all unique "field:level" keys from a set of comparison vectors.
 
@@ -3847,7 +3847,7 @@ function cloneParametersMutable(params): {
 };
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:75](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L75)
+Defined in: [fellegi-sunter/parameters.ts:75](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L75)
 
 Clone FSParameters with mutable Maps for EM iteration.
 
@@ -3869,9 +3869,9 @@ Clone FSParameters with mutable Maps for EM iteration.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `lambda` | `number` | [fellegi-sunter/parameters.ts:76](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L76) |
-| `mProbabilities` | `Map`\<`string`, `number`\> | [fellegi-sunter/parameters.ts:77](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L77) |
-| `uProbabilities` | `Map`\<`string`, `number`\> | [fellegi-sunter/parameters.ts:78](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L78) |
+| `lambda` | `number` | [fellegi-sunter/parameters.ts:76](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L76) |
+| `mProbabilities` | `Map`\<`string`, `number`\> | [fellegi-sunter/parameters.ts:77](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L77) |
+| `uProbabilities` | `Map`\<`string`, `number`\> | [fellegi-sunter/parameters.ts:78](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L78) |
 
 ***
 
@@ -3881,7 +3881,7 @@ Clone FSParameters with mutable Maps for EM iteration.
 function freezeParameters(params): FSParameters;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:90](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L90)
+Defined in: [fellegi-sunter/parameters.ts:90](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L90)
 
 Freeze mutable parameter maps into an immutable FSParameters.
 
@@ -3906,7 +3906,7 @@ Freeze mutable parameter maps into an immutable FSParameters.
 function validateParameters(params): void;
 ```
 
-Defined in: [fellegi-sunter/parameters.ts:108](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/parameters.ts#L108)
+Defined in: [fellegi-sunter/parameters.ts:108](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/parameters.ts#L108)
 
 Validate that m/u parameters are physically meaningful.
 In a valid FS model: m > u for exact_match levels (match evidence),
@@ -3931,7 +3931,7 @@ Throws if parameters are invalid.
 function buildTermFrequencies(records, fields): Map<string, TermFrequency[]>;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L23)
+Defined in: [fellegi-sunter/tf-adjust.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L23)
 
 Build term frequency statistics for a set of records.
 
@@ -3954,7 +3954,7 @@ Build term frequency statistics for a set of records.
 function computeTFAdjustment(frequency, totalRecords): number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:69](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L69)
+Defined in: [fellegi-sunter/tf-adjust.ts:69](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L69)
 
 Compute the term frequency adjustment factor for a value.
 
@@ -3988,7 +3988,7 @@ function adjustWeightByTF(
    totalRecords): number;
 ```
 
-Defined in: [fellegi-sunter/tf-adjust.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/fellegi-sunter/tf-adjust.ts#L89)
+Defined in: [fellegi-sunter/tf-adjust.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/fellegi-sunter/tf-adjust.ts#L89)
 
 Adjust a match weight by term frequency.
 
@@ -4019,7 +4019,7 @@ function scoreWithLLM(
 config): Promise<LLMScorerResult[]>;
 ```
 
-Defined in: [llm/scorer.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/llm/scorer.ts#L39)
+Defined in: [llm/scorer.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/llm/scorer.ts#L39)
 
 Score ambiguous boundary pairs using an LLM.
 
@@ -4053,7 +4053,7 @@ function generateComparisonVectors(
    fieldMetadata): ComparisonVector[];
 ```
 
-Defined in: [matching/comparison.ts:45](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L45)
+Defined in: [matching/comparison.ts:45](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L45)
 
 Generate comparison vectors for a pair of records given comparison specs.
 For each spec, compares the two records' field values and assigns
@@ -4080,7 +4080,7 @@ the first matching level.
 function nameComparisonSpec(field): ComparisonSpec;
 ```
 
-Defined in: [matching/comparison.ts:93](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L93)
+Defined in: [matching/comparison.ts:93](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L93)
 
 Generate a standard Splink-style ComparisonSpec for a name field.
 
@@ -4102,7 +4102,7 @@ Generate a standard Splink-style ComparisonSpec for a name field.
 function emailComparisonSpec(field): ComparisonSpec;
 ```
 
-Defined in: [matching/comparison.ts:107](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L107)
+Defined in: [matching/comparison.ts:107](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L107)
 
 Generate a standard Splink-style ComparisonSpec for an email field.
 
@@ -4124,7 +4124,7 @@ Generate a standard Splink-style ComparisonSpec for an email field.
 function dateComparisonSpec(field): ComparisonSpec;
 ```
 
-Defined in: [matching/comparison.ts:116](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/comparison.ts#L116)
+Defined in: [matching/comparison.ts:116](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/comparison.ts#L116)
 
 Generate a standard Splink-style ComparisonSpec for a date field.
 
@@ -4146,7 +4146,7 @@ Generate a standard Splink-style ComparisonSpec for a date field.
 function getScorers(): Readonly<Record<string, IScorer>>;
 ```
 
-Defined in: [matching/scorers/registry.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L14)
+Defined in: [matching/scorers/registry.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L14)
 
 Get all available scorers, preferring WASM-accelerated versions when available.
 Pure JS scorers are always the fallback.
@@ -4163,7 +4163,7 @@ Pure JS scorers are always the fallback.
 function getScorer(name): IScorer;
 ```
 
-Defined in: [matching/scorers/registry.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L29)
+Defined in: [matching/scorers/registry.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L29)
 
 Get a single scorer by name.
 
@@ -4189,7 +4189,7 @@ If the scorer name is not registered.
 function scorerCount(): number;
 ```
 
-Defined in: [matching/scorers/registry.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L39)
+Defined in: [matching/scorers/registry.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L39)
 
 Number of scorers currently loaded.
 
@@ -4205,7 +4205,7 @@ Number of scorers currently loaded.
 function resetScorerCache(): void;
 ```
 
-Defined in: [matching/scorers/registry.ts:44](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L44)
+Defined in: [matching/scorers/registry.ts:44](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L44)
 
 Reset the scorer cache (for testing).
 
@@ -4224,7 +4224,7 @@ function validateScorerRegistry(): {
 };
 ```
 
-Defined in: [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L49)
+Defined in: [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L49)
 
 Validate that all 19 scorers are loaded and functional.
 
@@ -4239,8 +4239,8 @@ Validate that all 19 scorers are loaded and functional.
 
 | Name | Type | Defined in |
 | ------ | ------ | ------ |
-| `valid` | `boolean` | [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L49) |
-| `errors` | `string`[] | [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/registry.ts#L49) |
+| `valid` | `boolean` | [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L49) |
+| `errors` | `string`[] | [matching/scorers/registry.ts:49](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/registry.ts#L49) |
 
 ***
 
@@ -4250,7 +4250,7 @@ Validate that all 19 scorers are loaded and functional.
 function tryLoadWasmScorers(): Promise<Readonly<Record<string, IScorer>> | null>;
 ```
 
-Defined in: [matching/scorers/wasm/loader.ts:14](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/matching/scorers/wasm/loader.ts#L14)
+Defined in: [matching/scorers/wasm/loader.ts:14](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/matching/scorers/wasm/loader.ts#L14)
 
 Attempt to load WASM-accelerated scorers.
 Returns null if WASM is unavailable.
@@ -4272,7 +4272,7 @@ function incrementalAdd(
 threshold): Promise<ClusteringResult>;
 ```
 
-Defined in: [pipeline/incremental.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/incremental.ts#L17)
+Defined in: [pipeline/incremental.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/incremental.ts#L17)
 
 Incrementally add new records to an existing clustering.
 Only new records are compared against existing clusters.
@@ -4305,7 +4305,7 @@ function incrementalDelete(
    threshold): ClusteringResult;
 ```
 
-Defined in: [pipeline/incremental.ts:51](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/incremental.ts#L51)
+Defined in: [pipeline/incremental.ts:51](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/incremental.ts#L51)
 
 Incrementally delete records from an existing clustering.
 Removes deleted records and re-clusters affected entities.
@@ -4335,7 +4335,7 @@ function incrementalModify(
    threshold): ClusteringResult;
 ```
 
-Defined in: [pipeline/incremental.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/incremental.ts#L86)
+Defined in: [pipeline/incremental.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/incremental.ts#L86)
 
 Incrementally modify records in an existing clustering.
 Modified records are re-compared against all other records.
@@ -4365,7 +4365,7 @@ function runPipeline(
 _groundTruth?): Promise<PipelineResult>;
 ```
 
-Defined in: [pipeline/runner.ts:56](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pipeline/runner.ts#L56)
+Defined in: [pipeline/runner.ts:56](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L56)
 
 Run the full entity resolution pipeline on a set of records.
 
@@ -4397,7 +4397,7 @@ Pipeline stages:
 function encodePPRL(value, config): BloomFilter;
 ```
 
-Defined in: [pprl/bloom.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L89)
+Defined in: [pprl/bloom.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L89)
 
 Encode a field value into a Bloom filter for PPRL.
 
@@ -4426,7 +4426,7 @@ function matchPPRL(
 config): Record<string, number>;
 ```
 
-Defined in: [pprl/bloom.ts:114](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/pprl/bloom.ts#L114)
+Defined in: [pprl/bloom.ts:114](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pprl/bloom.ts#L114)
 
 Compare two records using PPRL-encoded Bloom filters.
 
@@ -4455,7 +4455,7 @@ Returns similarity in [0, 1].
 function repairUnicode(input): string;
 ```
 
-Defined in: [preprocessing/cleaner.ts:61](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/preprocessing/cleaner.ts#L61)
+Defined in: [preprocessing/cleaner.ts:61](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/preprocessing/cleaner.ts#L61)
 
 Repair common Unicode issues in a string (ftfy-equivalent).
 - Replaces smart quotes, dashes, and other confusables
@@ -4483,7 +4483,7 @@ The repaired string.
 function normalize(value): string;
 ```
 
-Defined in: [preprocessing/cleaner.ts:89](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/preprocessing/cleaner.ts#L89)
+Defined in: [preprocessing/cleaner.ts:89](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/preprocessing/cleaner.ts#L89)
 
 Normalize a string value for comparison:
 - Repair Unicode
@@ -4508,7 +4508,7 @@ Normalize a string value for comparison:
 function normalizeEmail(value): string;
 ```
 
-Defined in: [preprocessing/cleaner.ts:101](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/preprocessing/cleaner.ts#L101)
+Defined in: [preprocessing/cleaner.ts:101](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/preprocessing/cleaner.ts#L101)
 
 Normalize an email address:
 - Lowercase
@@ -4533,7 +4533,7 @@ Normalize an email address:
 function normalizePhone(value): string;
 ```
 
-Defined in: [preprocessing/cleaner.ts:116](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/preprocessing/cleaner.ts#L116)
+Defined in: [preprocessing/cleaner.ts:116](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/preprocessing/cleaner.ts#L116)
 
 Normalize a phone number:
 - Strip all non-digit characters
@@ -4556,7 +4556,7 @@ Normalize a phone number:
 function preprocessRecords(records, options?): void;
 ```
 
-Defined in: [preprocessing/cleaner.ts:124](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-core/src/preprocessing/cleaner.ts#L124)
+Defined in: [preprocessing/cleaner.ts:124](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/preprocessing/cleaner.ts#L124)
 
 Apply preprocessing to a batch of records.
 Each record's string fields are repaired and normalized in-place.

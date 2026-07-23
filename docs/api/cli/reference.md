@@ -6,7 +6,7 @@
 function renderWaterfallTUI(data, maxWidth?): string;
 ```
 
-Defined in: [renderers.ts:59](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L59)
+Defined in: [renderers.ts:59](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L59)
 
 #### Parameters
 
@@ -27,7 +27,7 @@ Defined in: [renderers.ts:59](https://github.com/AgentiX-E/entity-resolution/blo
 function renderHistogramTUI(data, maxWidth?): string;
 ```
 
-Defined in: [renderers.ts:84](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L84)
+Defined in: [renderers.ts:84](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L84)
 
 #### Parameters
 
@@ -48,7 +48,7 @@ Defined in: [renderers.ts:84](https://github.com/AgentiX-E/entity-resolution/blo
 function renderMuTableTUI(data, maxWidth?): string;
 ```
 
-Defined in: [renderers.ts:114](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L114)
+Defined in: [renderers.ts:114](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L114)
 
 #### Parameters
 
@@ -69,7 +69,7 @@ Defined in: [renderers.ts:114](https://github.com/AgentiX-E/entity-resolution/bl
 function renderClusterTreeTUI(data, maxWidth?): string;
 ```
 
-Defined in: [renderers.ts:143](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L143)
+Defined in: [renderers.ts:143](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L143)
 
 #### Parameters
 
@@ -94,7 +94,7 @@ function renderThresholdTUI(
    maxWidth?): string;
 ```
 
-Defined in: [renderers.ts:170](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L170)
+Defined in: [renderers.ts:170](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L170)
 
 #### Parameters
 
@@ -117,7 +117,7 @@ Defined in: [renderers.ts:170](https://github.com/AgentiX-E/entity-resolution/bl
 function renderNavHint(): string;
 ```
 
-Defined in: [renderers.ts:209](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-cli/src/tui/renderers.ts#L209)
+Defined in: [renderers.ts:209](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L209)
 
 #### Returns
 

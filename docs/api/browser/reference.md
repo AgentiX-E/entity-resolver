@@ -2,7 +2,7 @@
 
 ### DuckDBWasmStore
 
-Defined in: [duckdb-wasm-store.ts:67](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L67)
+Defined in: [duckdb-wasm-store.ts:67](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L67)
 
 #### Constructors
 
@@ -12,7 +12,7 @@ Defined in: [duckdb-wasm-store.ts:67](https://github.com/AgentiX-E/entity-resolu
 new DuckDBWasmStore(options?): DuckDBWasmStore;
 ```
 
-Defined in: [duckdb-wasm-store.ts:80](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L80)
+Defined in: [duckdb-wasm-store.ts:80](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L80)
 
 ###### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [duckdb-wasm-store.ts:80](https://github.com/AgentiX-E/entity-resolu
 getInitResult(): DuckDBWasmInitResult;
 ```
 
-Defined in: [duckdb-wasm-store.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L86)
+Defined in: [duckdb-wasm-store.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L86)
 
 Get initialization result for health monitoring.
 
@@ -46,7 +46,7 @@ Get initialization result for health monitoring.
 init(): Promise<DuckDBWasmInitResult>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:101](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L101)
+Defined in: [duckdb-wasm-store.ts:101](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L101)
 
 Initialize DuckDB WASM with enterprise distribution model.
 
@@ -74,7 +74,7 @@ getEntity(id): Promise<
 | null>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:238](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L238)
+Defined in: [duckdb-wasm-store.ts:238](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L238)
 
 ###### Parameters
 
@@ -102,7 +102,7 @@ queryNeighbors(id, _hops?): Promise<{
 }[]>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:249](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L249)
+Defined in: [duckdb-wasm-store.ts:249](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L249)
 
 ###### Parameters
 
@@ -125,7 +125,7 @@ Defined in: [duckdb-wasm-store.ts:249](https://github.com/AgentiX-E/entity-resol
 upsertEntity(e): Promise<void>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:254](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L254)
+Defined in: [duckdb-wasm-store.ts:254](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L254)
 
 ###### Parameters
 
@@ -146,7 +146,7 @@ Defined in: [duckdb-wasm-store.ts:254](https://github.com/AgentiX-E/entity-resol
 deleteEntity(id): Promise<void>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:259](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L259)
+Defined in: [duckdb-wasm-store.ts:259](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L259)
 
 ###### Parameters
 
@@ -164,7 +164,7 @@ Defined in: [duckdb-wasm-store.ts:259](https://github.com/AgentiX-E/entity-resol
 applyMerge(from, into): Promise<void>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:264](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L264)
+Defined in: [duckdb-wasm-store.ts:264](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L264)
 
 ###### Parameters
 
@@ -183,7 +183,7 @@ Defined in: [duckdb-wasm-store.ts:264](https://github.com/AgentiX-E/entity-resol
 applySplit(id, groups): Promise<void>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:269](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L269)
+Defined in: [duckdb-wasm-store.ts:269](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L269)
 
 ###### Parameters
 
@@ -202,7 +202,7 @@ Defined in: [duckdb-wasm-store.ts:269](https://github.com/AgentiX-E/entity-resol
 close(): Promise<void>;
 ```
 
-Defined in: [duckdb-wasm-store.ts:273](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-browser/src/storage/duckdb-wasm-store.ts#L273)
+Defined in: [duckdb-wasm-store.ts:273](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-browser/src/storage/duckdb-wasm-store.ts#L273)
 
 ###### Returns
 

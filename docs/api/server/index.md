@@ -1,11 +1,11 @@
-# @agentix-e/entity-resolution-server
+# @agentix-e/entity-resolver-server
 
 **Deployable HTTP/gRPC/MCP API service (stateless by default).**
 
 ## Installation
 
 ```bash
-npm install @agentix-e/entity-resolution-server
+npm install @agentix-e/entity-resolver-server
 ```
 
 ## Key Modules
@@ -20,7 +20,7 @@ npm install @agentix-e/entity-resolution-server
 ## Quick Example
 
 ```typescript
-import { createApp } from '@agentix-e/entity-resolution-server';
+import { createApp } from '@agentix-e/entity-resolver-server';
 
 const app = createApp({
   port: 3000,

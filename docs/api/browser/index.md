@@ -1,11 +1,11 @@
-# @agentix-e/entity-resolution-browser
+# @agentix-e/entity-resolver-browser
 
 **Browser adapters — DuckDB WASM store with 4-tier enterprise distribution.**
 
 ## Installation
 
 ```bash
-npm install @agentix-e/entity-resolution-browser
+npm install @agentix-e/entity-resolver-browser
 ```
 
 ## Key Modules
@@ -17,7 +17,7 @@ npm install @agentix-e/entity-resolution-browser
 ## Quick Example
 
 ```typescript
-import { DuckDBWasmStore } from '@agentix-e/entity-resolution-browser';
+import { DuckDBWasmStore } from '@agentix-e/entity-resolver-browser';
 
 const store = new DuckDBWasmStore();
 await store.initialize();

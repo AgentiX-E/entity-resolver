@@ -30,7 +30,7 @@ export default defineConfig({
       {
         text: 'v0.1.0',
         items: [
-          { text: 'GitHub', link: 'https://github.com/AgentiX-E/entity-resolution' },
+          { text: 'GitHub', link: 'https://github.com/AgentiX-E/entity-resolver' },
           { text: 'npm', link: 'https://www.npmjs.com/org/agentix-e' },
         ],
       },
@@ -64,7 +64,7 @@ export default defineConfig({
       ],
       '/api/core/': [
         {
-          text: '@agentix-e/entity-resolution-core',
+          text: '@agentix-e/entity-resolver-core',
           items: [
             { text: 'Overview', link: '/api/core/' },
             { text: 'API Reference', link: '/api/core/reference' },
@@ -73,7 +73,7 @@ export default defineConfig({
       ],
       '/api/node/': [
         {
-          text: '@agentix-e/entity-resolution-node',
+          text: '@agentix-e/entity-resolver-node',
           items: [
             { text: 'Overview', link: '/api/node/' },
             { text: 'API Reference', link: '/api/node/reference' },
@@ -82,7 +82,7 @@ export default defineConfig({
       ],
       '/api/browser/': [
         {
-          text: '@agentix-e/entity-resolution-browser',
+          text: '@agentix-e/entity-resolver-browser',
           items: [
             { text: 'Overview', link: '/api/browser/' },
             { text: 'API Reference', link: '/api/browser/reference' },
@@ -91,7 +91,7 @@ export default defineConfig({
       ],
       '/api/server/': [
         {
-          text: '@agentix-e/entity-resolution-server',
+          text: '@agentix-e/entity-resolver-server',
           items: [
             { text: 'Overview', link: '/api/server/' },
             { text: 'API Reference', link: '/api/server/reference' },
@@ -100,7 +100,7 @@ export default defineConfig({
       ],
       '/api/cli/': [
         {
-          text: '@agentix-e/entity-resolution-cli',
+          text: '@agentix-e/entity-resolver-cli',
           items: [
             { text: 'Overview', link: '/api/cli/' },
             { text: 'API Reference', link: '/api/cli/reference' },
@@ -109,7 +109,7 @@ export default defineConfig({
       ],
       '/api/visual/': [
         {
-          text: '@agentix-e/entity-resolution-visual',
+          text: '@agentix-e/entity-resolver-visual',
           items: [
             { text: 'Overview', link: '/api/visual/' },
             { text: 'API Reference', link: '/api/visual/reference' },
@@ -119,7 +119,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/AgentiX-E/entity-resolution' },
+      { icon: 'github', link: 'https://github.com/AgentiX-E/entity-resolver' },
     ],
 
     search: {
@@ -132,11 +132,11 @@ export default defineConfig({
     },
 
     editLink: {
-      pattern: 'https://github.com/AgentiX-E/entity-resolution/edit/master/docs/:path',
+      pattern: 'https://github.com/AgentiX-E/entity-resolver/edit/master/docs/:path',
       text: 'Edit this page on GitHub',
     },
   },
 
   // GitHub Pages base
-  base: '/entity-resolution/',
+  base: '/entity-resolver/',
 });

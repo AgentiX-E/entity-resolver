@@ -1,10 +1,10 @@
-# @agentix-e/entity-resolution
+# @agentix-e/entity-resolver
 
 **Industry-leading Entity Resolution for Node.js and Browser**
 
 A stateless, pure-computation Entity Resolution engine with WASM acceleration. Built for TypeScript first, designed for any JavaScript runtime.
 
-[![CI](https://github.com/AgentiX-E/entity-resolution/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolution/actions/workflows/ci.yml)
+[![CI](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
 
@@ -16,19 +16,19 @@ A stateless, pure-computation Entity Resolution engine with WASM acceleration. B
 
 | Package | Description | npm |
 |---------|-------------|-----|
-| `entity-resolution-core` | Stateless computation engine with WASM acceleration and DI interface contracts | `@agentix-e/entity-resolution-core` |
-| `entity-resolution-node` | Node.js adapters (FileDataSource, SqliteEntityStore, FileConfigStore) | `@agentix-e/entity-resolution-node` |
-| `entity-resolution-browser` | Browser adapters (FetchDataSource, IndexedDBEntityStore, LocalStorageConfigStore) | `@agentix-e/entity-resolution-browser` |
-| `entity-resolution-server` | Deployable HTTP/gRPC/MCP API service (stateless by default) | `@agentix-e/entity-resolution-server` |
-| `entity-resolution-cli` | Command-line tool for deduplication, matching, and diagnostics | `@agentix-e/entity-resolution-cli` |
-| `entity-resolution-visual` | Framework-agnostic, embeddable diagnostic components (3-layer: Data API + Headless + Web Components) | `@agentix-e/entity-resolution-visual` |
-| `entity-resolution` | Umbrella facade — one import, all packages | `@agentix-e/entity-resolution` |
+| `entity-resolver-core` | Stateless computation engine with WASM acceleration and DI interface contracts | `@agentix-e/entity-resolver-core` |
+| `entity-resolver-node` | Node.js adapters (FileDataSource, SqliteEntityStore, FileConfigStore) | `@agentix-e/entity-resolver-node` |
+| `entity-resolver-browser` | Browser adapters (FetchDataSource, IndexedDBEntityStore, LocalStorageConfigStore) | `@agentix-e/entity-resolver-browser` |
+| `entity-resolver-server` | Deployable HTTP/gRPC/MCP API service (stateless by default) | `@agentix-e/entity-resolver-server` |
+| `entity-resolver-cli` | Command-line tool for deduplication, matching, and diagnostics | `@agentix-e/entity-resolver-cli` |
+| `entity-resolver-visual` | Framework-agnostic, embeddable diagnostic components (3-layer: Data API + Headless + Web Components) | `@agentix-e/entity-resolver-visual` |
+| `entity-resolver` | Umbrella facade — one import, all packages | `@agentix-e/entity-resolver` |
 
 ## Quick Start
 
 ```typescript
 // Pure computation — zero I/O, runs anywhere
-import { dedupe } from '@agentix-e/entity-resolution-core';
+import { dedupe } from '@agentix-e/entity-resolver-core';
 
 const records = [
   { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },
@@ -44,7 +44,7 @@ const result = await dedupe(records);
 
 ```typescript
 // Node.js — with file I/O and SQLite persistence
-import { dedupeFromFile } from '@agentix-e/entity-resolution-node';
+import { dedupeFromFile } from '@agentix-e/entity-resolver-node';
 
 const result = await dedupeFromFile('customers.csv', {
   entityStore: 'sqlite:mydb.sqlite',
@@ -68,4 +68,4 @@ MIT © Lambertyan — [AgentiX-E](https://github.com/AgentiX-E)
 
 ---
 
-📖 [Full Documentation](https://agentix-e.github.io/entity-resolution) — Guides, API Reference, Migration
+📖 [Full Documentation](https://agentix-e.github.io/entity-resolver) — Guides, API Reference, Migration

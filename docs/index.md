@@ -14,7 +14,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/AgentiX-E/entity-resolution
+      link: https://github.com/AgentiX-E/entity-resolver
 
 features:
   - icon: 🧠
@@ -46,7 +46,7 @@ features:
 ## Quick Example
 
 ```typescript
-import { runPipeline } from '@agentix-e/entity-resolution-core';
+import { runPipeline } from '@agentix-e/entity-resolver-core';
 
 const records = [
   { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },

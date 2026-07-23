@@ -1,4 +1,4 @@
-# Contributing to @agentix-e/entity-resolution
+# Contributing to @agentix-e/entity-resolver
 
 ## Development Setup
 
@@ -8,8 +8,8 @@ node >= 22.0.0
 pnpm >= 9.15.0
 
 # Clone and install
-git clone https://github.com/AgentiX-E/entity-resolution.git
-cd entity-resolution
+git clone https://github.com/AgentiX-E/entity-resolver.git
+cd entity-resolver
 pnpm install
 
 # Build all packages
@@ -27,13 +27,13 @@ pnpm format     # format check
 
 ```
 packages/
-├── entity-resolution-core/      # Stateless computation engine
-├── entity-resolution-node/      # Node.js adapters
-├── entity-resolution-browser/   # Browser adapters
-├── entity-resolution-server/    # HTTP/gRPC/MCP API
-├── entity-resolution-cli/       # CLI tool
-├── entity-resolution-visual/    # Framework-agnostic visualization
-└── entity-resolution/           # Umbrella facade
+├── entity-resolver-core/      # Stateless computation engine
+├── entity-resolver-node/      # Node.js adapters
+├── entity-resolver-browser/   # Browser adapters
+├── entity-resolver-server/    # HTTP/gRPC/MCP API
+├── entity-resolver-cli/       # CLI tool
+├── entity-resolver-visual/    # Framework-agnostic visualization
+└── entity-resolver/           # Umbrella facade
 ```
 
 ## CI Gate

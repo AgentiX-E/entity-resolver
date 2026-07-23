@@ -1,4 +1,4 @@
-# @agentix-e/entity-resolution-core
+# @agentix-e/entity-resolver-core
 
 **Stateless computation engine with WASM acceleration and DI interface contracts.**
 
@@ -7,7 +7,7 @@ The core package is the heart of the entity resolution system. It defines all al
 ## Installation
 
 ```bash
-npm install @agentix-e/entity-resolution-core
+npm install @agentix-e/entity-resolver-core
 ```
 
 ## Key Modules
@@ -32,7 +32,7 @@ npm install @agentix-e/entity-resolution-core
 ## Quick Example
 
 ```typescript
-import { runPipeline } from '@agentix-e/entity-resolution-core';
+import { runPipeline } from '@agentix-e/entity-resolver-core';
 
 const result = await runPipeline(records, {
   blocking: { passes: [{ fields: ['name'], transforms: ['strip', 'lowercase'] }] },

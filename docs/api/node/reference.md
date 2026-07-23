@@ -2,7 +2,7 @@
 
 ### DuckDBStore
 
-Defined in: [storage/duckdb-store.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L16)
+Defined in: [storage/duckdb-store.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L16)
 
 DuckDB-backed IEntityStore.
 Member IDs are stored as JSON strings for DuckDB Node.js binding compatibility.
@@ -15,7 +15,7 @@ Member IDs are stored as JSON strings for DuckDB Node.js binding compatibility.
 new DuckDBStore(db): DuckDBStore;
 ```
 
-Defined in: [storage/duckdb-store.ts:21](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L21)
+Defined in: [storage/duckdb-store.ts:21](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L21)
 
 ###### Parameters
 
@@ -35,7 +35,7 @@ Defined in: [storage/duckdb-store.ts:21](https://github.com/AgentiX-E/entity-res
 static create(config?): Promise<DuckDBStore>;
 ```
 
-Defined in: [storage/duckdb-store.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L26)
+Defined in: [storage/duckdb-store.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L26)
 
 ###### Parameters
 
@@ -59,7 +59,7 @@ getEntity(id): Promise<
 | null>;
 ```
 
-Defined in: [storage/duckdb-store.ts:50](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L50)
+Defined in: [storage/duckdb-store.ts:50](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L50)
 
 ###### Parameters
 
@@ -87,7 +87,7 @@ queryNeighbors(_id, _hops?): Promise<{
 }[]>;
 ```
 
-Defined in: [storage/duckdb-store.ts:69](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L69)
+Defined in: [storage/duckdb-store.ts:69](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L69)
 
 ###### Parameters
 
@@ -110,7 +110,7 @@ Defined in: [storage/duckdb-store.ts:69](https://github.com/AgentiX-E/entity-res
 upsertEntity(entity): Promise<void>;
 ```
 
-Defined in: [storage/duckdb-store.ts:86](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L86)
+Defined in: [storage/duckdb-store.ts:86](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L86)
 
 ###### Parameters
 
@@ -131,7 +131,7 @@ Defined in: [storage/duckdb-store.ts:86](https://github.com/AgentiX-E/entity-res
 deleteEntity(id): Promise<void>;
 ```
 
-Defined in: [storage/duckdb-store.ts:97](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L97)
+Defined in: [storage/duckdb-store.ts:97](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L97)
 
 ###### Parameters
 
@@ -149,7 +149,7 @@ Defined in: [storage/duckdb-store.ts:97](https://github.com/AgentiX-E/entity-res
 applyMerge(from, into): Promise<void>;
 ```
 
-Defined in: [storage/duckdb-store.ts:104](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L104)
+Defined in: [storage/duckdb-store.ts:104](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L104)
 
 ###### Parameters
 
@@ -168,7 +168,7 @@ Defined in: [storage/duckdb-store.ts:104](https://github.com/AgentiX-E/entity-re
 applySplit(entityId, memberGroups): Promise<void>;
 ```
 
-Defined in: [storage/duckdb-store.ts:115](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L115)
+Defined in: [storage/duckdb-store.ts:115](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L115)
 
 ###### Parameters
 
@@ -187,7 +187,7 @@ Defined in: [storage/duckdb-store.ts:115](https://github.com/AgentiX-E/entity-re
 close(): Promise<void>;
 ```
 
-Defined in: [storage/duckdb-store.ts:127](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L127)
+Defined in: [storage/duckdb-store.ts:127](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L127)
 
 ###### Returns
 
@@ -197,7 +197,7 @@ Defined in: [storage/duckdb-store.ts:127](https://github.com/AgentiX-E/entity-re
 
 ### PgEntityStore
 
-Defined in: [storage/pg-store.ts:93](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L93)
+Defined in: [storage/pg-store.ts:93](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L93)
 
 #### Constructors
 
@@ -207,7 +207,7 @@ Defined in: [storage/pg-store.ts:93](https://github.com/AgentiX-E/entity-resolut
 new PgEntityStore(pool, _schema?): PgEntityStore;
 ```
 
-Defined in: [storage/pg-store.ts:97](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L97)
+Defined in: [storage/pg-store.ts:97](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L97)
 
 ###### Parameters
 
@@ -228,7 +228,7 @@ Defined in: [storage/pg-store.ts:97](https://github.com/AgentiX-E/entity-resolut
 static create(config): Promise<PgEntityStore>;
 ```
 
-Defined in: [storage/pg-store.ts:102](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L102)
+Defined in: [storage/pg-store.ts:102](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L102)
 
 Create a store from configuration. Connects with full mTLS support.
 
@@ -248,7 +248,7 @@ Create a store from configuration. Connects with full mTLS support.
 migrate(): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:112](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L112)
+Defined in: [storage/pg-store.ts:112](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L112)
 
 Run schema migration.
 
@@ -268,7 +268,7 @@ getEntity(id): Promise<
 | null>;
 ```
 
-Defined in: [storage/pg-store.ts:117](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L117)
+Defined in: [storage/pg-store.ts:117](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L117)
 
 Get an entity by its cluster ID.
 
@@ -298,7 +298,7 @@ queryNeighbors(id, hops?): Promise<{
 }[]>;
 ```
 
-Defined in: [storage/pg-store.ts:128](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L128)
+Defined in: [storage/pg-store.ts:128](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L128)
 
 Query neighboring entities by member overlap.
 
@@ -323,7 +323,7 @@ Query neighboring entities by member overlap.
 upsertEntity(entity): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:142](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L142)
+Defined in: [storage/pg-store.ts:142](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L142)
 
 Upsert an entity.
 
@@ -346,7 +346,7 @@ Upsert an entity.
 deleteEntity(id): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:155](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L155)
+Defined in: [storage/pg-store.ts:155](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L155)
 
 Delete an entity.
 
@@ -366,7 +366,7 @@ Delete an entity.
 applyMerge(from, into): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:160](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L160)
+Defined in: [storage/pg-store.ts:160](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L160)
 
 Merge two entities.
 
@@ -387,7 +387,7 @@ Merge two entities.
 applySplit(entityId, memberGroups): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:187](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L187)
+Defined in: [storage/pg-store.ts:187](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L187)
 
 Split an entity into multiple groups.
 
@@ -408,7 +408,7 @@ Split an entity into multiple groups.
 close(): Promise<void>;
 ```
 
-Defined in: [storage/pg-store.ts:208](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L208)
+Defined in: [storage/pg-store.ts:208](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L208)
 
 Close the connection pool gracefully.
 
@@ -420,7 +420,7 @@ Close the connection pool gracefully.
 
 ### ResolvedStorage
 
-Defined in: [storage-resolver.ts:3](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage-resolver.ts#L3)
+Defined in: [storage-resolver.ts:3](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage-resolver.ts#L3)
 
 #### Properties
 
@@ -430,7 +430,7 @@ Defined in: [storage-resolver.ts:3](https://github.com/AgentiX-E/entity-resoluti
 readonly backend: "postgres" | "duckdb" | "memory";
 ```
 
-Defined in: [storage-resolver.ts:4](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage-resolver.ts#L4)
+Defined in: [storage-resolver.ts:4](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage-resolver.ts#L4)
 
 ##### store
 
@@ -446,7 +446,7 @@ readonly store: Record<string, unknown> & {
 };
 ```
 
-Defined in: [storage-resolver.ts:5](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage-resolver.ts#L5)
+Defined in: [storage-resolver.ts:5](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage-resolver.ts#L5)
 
 ###### Type Declaration
 
@@ -563,7 +563,7 @@ optional close?: () => Promise<void>;
 
 ### DuckDBStoreConfig
 
-Defined in: [storage/duckdb-store.ts:8](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L8)
+Defined in: [storage/duckdb-store.ts:8](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L8)
 
 #### Properties
 
@@ -573,13 +573,13 @@ Defined in: [storage/duckdb-store.ts:8](https://github.com/AgentiX-E/entity-reso
 readonly optional path?: string;
 ```
 
-Defined in: [storage/duckdb-store.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/duckdb-store.ts#L9)
+Defined in: [storage/duckdb-store.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/duckdb-store.ts#L9)
 
 ***
 
 ### PgTlsConfig
 
-Defined in: [storage/pg-store.ts:9](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L9)
+Defined in: [storage/pg-store.ts:9](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L9)
 
 mTLS configuration — all paths in PEM format.
 
@@ -591,7 +591,7 @@ mTLS configuration — all paths in PEM format.
 readonly optional ca?: string;
 ```
 
-Defined in: [storage/pg-store.ts:11](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L11)
+Defined in: [storage/pg-store.ts:11](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L11)
 
 Path to CA certificate (PEM).
 
@@ -601,7 +601,7 @@ Path to CA certificate (PEM).
 readonly optional cert?: string;
 ```
 
-Defined in: [storage/pg-store.ts:13](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L13)
+Defined in: [storage/pg-store.ts:13](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L13)
 
 Path to client certificate for mutual TLS (PEM).
 
@@ -611,7 +611,7 @@ Path to client certificate for mutual TLS (PEM).
 readonly optional key?: string;
 ```
 
-Defined in: [storage/pg-store.ts:15](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L15)
+Defined in: [storage/pg-store.ts:15](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L15)
 
 Path to client private key for mutual TLS (PEM).
 
@@ -621,7 +621,7 @@ Path to client private key for mutual TLS (PEM).
 readonly optional servername?: string;
 ```
 
-Defined in: [storage/pg-store.ts:17](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L17)
+Defined in: [storage/pg-store.ts:17](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L17)
 
 Server Name Indication override.
 
@@ -631,7 +631,7 @@ Server Name Indication override.
 readonly optional rejectUnauthorized?: boolean;
 ```
 
-Defined in: [storage/pg-store.ts:19](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L19)
+Defined in: [storage/pg-store.ts:19](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L19)
 
 Reject unauthorized certificates (default: true).
 
@@ -639,7 +639,7 @@ Reject unauthorized certificates (default: true).
 
 ### PgStoreConfig
 
-Defined in: [storage/pg-store.ts:23](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L23)
+Defined in: [storage/pg-store.ts:23](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L23)
 
 PostgreSQL connection configuration.
 
@@ -651,7 +651,7 @@ PostgreSQL connection configuration.
 readonly optional host?: string;
 ```
 
-Defined in: [storage/pg-store.ts:24](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L24)
+Defined in: [storage/pg-store.ts:24](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L24)
 
 ##### port?
 
@@ -659,7 +659,7 @@ Defined in: [storage/pg-store.ts:24](https://github.com/AgentiX-E/entity-resolut
 readonly optional port?: number;
 ```
 
-Defined in: [storage/pg-store.ts:25](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L25)
+Defined in: [storage/pg-store.ts:25](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L25)
 
 ##### database
 
@@ -667,7 +667,7 @@ Defined in: [storage/pg-store.ts:25](https://github.com/AgentiX-E/entity-resolut
 readonly database: string;
 ```
 
-Defined in: [storage/pg-store.ts:26](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L26)
+Defined in: [storage/pg-store.ts:26](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L26)
 
 ##### user?
 
@@ -675,7 +675,7 @@ Defined in: [storage/pg-store.ts:26](https://github.com/AgentiX-E/entity-resolut
 readonly optional user?: string;
 ```
 
-Defined in: [storage/pg-store.ts:27](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L27)
+Defined in: [storage/pg-store.ts:27](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L27)
 
 ##### password?
 
@@ -683,7 +683,7 @@ Defined in: [storage/pg-store.ts:27](https://github.com/AgentiX-E/entity-resolut
 readonly optional password?: string;
 ```
 
-Defined in: [storage/pg-store.ts:28](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L28)
+Defined in: [storage/pg-store.ts:28](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L28)
 
 ##### tls?
 
@@ -691,7 +691,7 @@ Defined in: [storage/pg-store.ts:28](https://github.com/AgentiX-E/entity-resolut
 readonly optional tls?: PgTlsConfig;
 ```
 
-Defined in: [storage/pg-store.ts:29](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L29)
+Defined in: [storage/pg-store.ts:29](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L29)
 
 ##### poolSize?
 
@@ -699,7 +699,7 @@ Defined in: [storage/pg-store.ts:29](https://github.com/AgentiX-E/entity-resolut
 readonly optional poolSize?: number;
 ```
 
-Defined in: [storage/pg-store.ts:30](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L30)
+Defined in: [storage/pg-store.ts:30](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L30)
 
 ##### \_schema?
 
@@ -707,7 +707,7 @@ Defined in: [storage/pg-store.ts:30](https://github.com/AgentiX-E/entity-resolut
 readonly optional _schema?: string;
 ```
 
-Defined in: [storage/pg-store.ts:32](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L32)
+Defined in: [storage/pg-store.ts:32](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L32)
 
 Schema name for ER tables. Default: 'public'.
 
@@ -719,7 +719,7 @@ Schema name for ER tables. Default: 'public'.
 const ER_SCHEMA_SQL: "\nCREATE TABLE IF NOT EXISTS er_entities (\n  cluster_id   TEXT PRIMARY KEY,\n  member_ids   INTEGER[] NOT NULL DEFAULT '{}',\n  cohesion     DOUBLE PRECISION DEFAULT 0,\n  created_at   TIMESTAMPTZ DEFAULT NOW(),\n  updated_at   TIMESTAMPTZ DEFAULT NOW()\n);\n\nCREATE INDEX IF NOT EXISTS idx_er_entities_updated\n  ON er_entities (updated_at DESC);\n";
 ```
 
-Defined in: [storage/pg-store.ts:39](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L39)
+Defined in: [storage/pg-store.ts:39](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L39)
 
 ## Functions
 
@@ -729,7 +729,7 @@ Defined in: [storage/pg-store.ts:39](https://github.com/AgentiX-E/entity-resolut
 function resolveStorage(options?): Promise<ResolvedStorage>;
 ```
 
-Defined in: [storage-resolver.ts:16](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage-resolver.ts#L16)
+Defined in: [storage-resolver.ts:16](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage-resolver.ts#L16)
 
 #### Parameters
 
@@ -752,7 +752,7 @@ Defined in: [storage-resolver.ts:16](https://github.com/AgentiX-E/entity-resolut
 function buildPoolConfig(config): PoolConfig;
 ```
 
-Defined in: [storage/pg-store.ts:56](https://github.com/AgentiX-E/entity-resolution/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolution-node/src/storage/pg-store.ts#L56)
+Defined in: [storage/pg-store.ts:56](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-node/src/storage/pg-store.ts#L56)
 
 Build a pg PoolConfig from our config with mTLS support.
 This is a pure function — testable without a real database.

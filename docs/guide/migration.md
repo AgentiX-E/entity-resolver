@@ -1,12 +1,12 @@
 # Migrating from Splink / GoldenMatch
 
-## Splink → @agentix-e/entity-resolution
+## Splink → @agentix-e/entity-resolver
 
 Splink (Python, PySpark) is the most popular open-source ER library. Our TypeScript/Node.js engine provides architectural parity with a different runtime.
 
 ### Conceptual Mapping
 
-| Splink Concept | entity-resolution Equivalent |
+| Splink Concept | entity-resolver Equivalent |
 |---------------|------------------------------|
 | `Linker` | `runPipeline()` |
 | `SettingsCreator` | `PipelineConfig` (comparisons, blocking rules) |
@@ -47,9 +47,9 @@ results = linker.predict()
 clusters = linker.cluster_pairwise_predictions_at_threshold(results, 0.9)
 ```
 
-**entity-resolution (TypeScript):**
+**entity-resolver (TypeScript):**
 ```typescript
-import { runPipeline, estimateParameters } from '@agentix-e/entity-resolution-core';
+import { runPipeline, estimateParameters } from '@agentix-e/entity-resolver-core';
 
 const result = await runPipeline(records, {
   blocking: {
@@ -66,7 +66,7 @@ const result = await runPipeline(records, {
 
 ### Key Differences
 
-| Feature | Splink | entity-resolution |
+| Feature | Splink | entity-resolver |
 |---------|--------|-------------------|
 | **Language** | Python (PySpark optional) | TypeScript/Node.js |
 | **Backend** | DuckDB / Spark / Athena | DuckDB / PostgreSQL / Memory / WASM |
@@ -80,13 +80,13 @@ const result = await runPipeline(records, {
 | **MCP Tools** | ❌ Not available | ✅ Built-in MCP server |
 | **mTLS** | Depends on driver | ✅ First-class support |
 
-## GoldenMatch → @agentix-e/entity-resolution
+## GoldenMatch → @agentix-e/entity-resolver
 
 GoldenMatch is a commercial ER product. Our engine matches or exceeds its core capabilities.
 
 ### Conceptual Mapping
 
-| GoldenMatch Concept | entity-resolution Equivalent |
+| GoldenMatch Concept | entity-resolver Equivalent |
 |--------------------|------------------------------|
 | Match Engine | `runPipeline()` |
 | Scoring Suite (20+ algorithms) | 19 scorers (all modern algorithms covered) |
@@ -102,7 +102,7 @@ GoldenMatch is a commercial ER product. Our engine matches or exceeds its core c
 
 ### Architecture Differences
 
-| Dimension | GoldenMatch | entity-resolution |
+| Dimension | GoldenMatch | entity-resolver |
 |-----------|-------------|-------------------|
 | **License** | Commercial | MIT |
 | **Core Design** | Stateful service | Stateless pure functions |
@@ -137,5 +137,5 @@ GoldenMatch is a commercial ER product. Our engine matches or exceeds its core c
 ## Getting Help
 
 - [API Reference](/api/core/) — Full typed API documentation
-- [GitHub Issues](https://github.com/AgentiX-E/entity-resolution/issues)
+- [GitHub Issues](https://github.com/AgentiX-E/entity-resolver/issues)
 - [Core Concepts](/guide/core-concepts) — Algorithm deep-dives
