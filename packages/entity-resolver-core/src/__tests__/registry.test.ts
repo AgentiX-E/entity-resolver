@@ -78,4 +78,8 @@ describe('Registry edge cases', () => {
     const scorers = getScorers();
     expect(Object.keys(scorers).length).toBe(19);
   });
+
+  it('getScorer throws for unknown scorer name', () => {
+    expect(() => getScorer('nonexistent_scorer_xyz')).toThrow('Unknown scorer');
+  });
 });

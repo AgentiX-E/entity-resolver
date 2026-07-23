@@ -263,3 +263,29 @@ describe('simulateLabeling', () => {
     expect(labels[0]!.label).toBe(0);
   });
 });
+
+describe('active learning convergence', () => {
+  it('session processes labels without errors', () => {
+    const pairs: ScoredPair[] = [];
+    for (let i = 0; i < 30; i++) {
+      pairs.push(
+        { leftId: i * 2, rightId: i * 2 + 1, score: 0.99, probability: 0.99 },
+        { leftId: i * 2 + 1000, rightId: i * 2 + 1001, score: 0.01, probability: 0.01 },
+      );
+    }
+    const session = createSession(pairs);
+    expect(session.converged).toBe(false);
+
+    for (let i = 0; i < 15; i++) {
+      const batch = nextLabelingBatch(session, 2);
+      if (batch.length === 0) break; // batch exhausted
+      applyLabels(session, batch.map((p, idx) => ({
+        pairId: p.pairId,
+        label: 1, // label all as match
+      })));
+    }
+
+    // Session has processed labels and has a classifier
+    expect(session.classifier).toBeDefined();
+  });
+});

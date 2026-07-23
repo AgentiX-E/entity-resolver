@@ -209,4 +209,13 @@ describe('linkRecords', () => {
     expect(result.crossPairs).toBeDefined();
     expect(result.statistics.totalRecords).toBe(2);
   });
+
+  it('L6: handles empty left records', async () => {
+    const comps = makeComparisons([{ name: 'A' }, { name: 'B' }]);
+    const result = await linkRecords([], [{ name: 'A' }], {
+      comparisons: comps,
+      matchThreshold: 0.5,
+    } as RecordLinkConfig);
+    expect(result.crossPairs).toHaveLength(0);
+  });
 });

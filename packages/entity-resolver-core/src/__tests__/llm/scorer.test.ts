@@ -76,3 +76,41 @@ describe('LLM scorer config validation', () => {
     expect(config.maxTokens).toBe(100);
   });
 });
+
+describe('LLM scorer with mocked fetch', () => {
+  it('handles successful API response', async () => {
+    process.env['DEEPSEEK_API_KEY'] = 'test-key';
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      return new Response(JSON.stringify({
+        choices: [{ message: { content: JSON.stringify({ matches: [{ idA: 0, idB: 1, score: 0.52 }] }) } }],
+      }), { status: 200 });
+    }) as typeof globalThis.fetch;
+    try {
+      const pairs = [{ leftId: 0, rightId: 1, score: 0.5 }];
+      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], { candidateLo: 0.4, candidateHi: 0.6 });
+      expect(Array.isArray(results)).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env['DEEPSEEK_API_KEY'];
+    }
+  });
+
+  it('handles malformed JSON in API response', async () => {
+    process.env['DEEPSEEK_API_KEY'] = 'test-key';
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      return new Response(JSON.stringify({
+        choices: [{ message: { content: 'not-valid-json' } }],
+      }), { status: 200 });
+    }) as typeof globalThis.fetch;
+    try {
+      const pairs = [{ leftId: 0, rightId: 1, score: 0.5 }];
+      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], { candidateLo: 0.4, candidateHi: 0.6 });
+      expect(Array.isArray(results)).toBe(true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      delete process.env['DEEPSEEK_API_KEY'];
+    }
+  });
+});

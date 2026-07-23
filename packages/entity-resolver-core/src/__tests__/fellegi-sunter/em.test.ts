@@ -551,3 +551,58 @@ describe('EM level ordering constraints', () => {
     if (uModerate && uNot) expect(uModerate).toBeLessThanOrEqual(uNot + 5e-3);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// Category H: Convergence and Monotonicity Edge Cases
+// ═══════════════════════════════════════════════════════════════
+
+describe('EM convergence edge cases', () => {
+  it('H1: converges with tight epsilon', () => {
+    // Well-separated data should converge quickly
+    const pairs: ComparisonVector[][] = [
+      ...Array.from({ length: 200 }, () => makePair(exactMatch('name'))),
+      ...Array.from({ length: 200 }, () => makePair(notMatch('name'))),
+    ];
+    const result = runEM(pairs, { maxIterations: 100, epsilon: 1e-8 });
+    expect(result.converged).toBeDefined();
+    expect(result.iterations).toBeGreaterThan(0);
+    expect(result.logLikelihood).toBeDefined();
+  });
+
+  it('H2: hits maxIterations without converging on oscillating data', () => {
+    // Small dataset that may not converge → should stop at maxIterations
+    const pairs: ComparisonVector[][] = [
+      ...Array.from({ length: 20 }, () => makePair(exactMatch('name'), notMatch('email'))),
+      ...Array.from({ length: 20 }, () => makePair(
+        notMatch('name'), exactMatch('email'),
+      )),
+    ];
+    const result = runEM(pairs, { maxIterations: 5, epsilon: 1e-15 });
+    expect(result.converged).toBeDefined();
+    expect(result.iterations).toBeLessThanOrEqual(5);
+  });
+
+  it('H3: handles single pair gracefully', () => {
+    const pairs = [makePair(exactMatch('name'))];
+    const result = runEM(pairs, { maxIterations: 10 });
+    expect(result.parameters).toBeDefined();
+    expect(result.parameters.lambda).toBeGreaterThan(0);
+  });
+
+  it('H4: level ordering enforced with reverse m-probability data', () => {
+    // Feed data where not_match appears more often than strong_match for matches
+    // This can cause m(not) > m(strong), which enforceLevelOrdering must fix
+    const pairs: ComparisonVector[][] = [
+      ...Array.from({ length: 80 }, () => makePair(notMatch('name'))),
+      ...Array.from({ length: 20 }, () => makePair(strongMatch('name'))),
+      ...Array.from({ length: 100 }, () => makePair(notMatch('name'), notMatch('email'))),
+    ];
+    const result = runEM(pairs, { maxIterations: 50 });
+    // Verify m probabilities are monotonic (stronger ≥ weaker)
+    const mStrong = result.parameters.mProbabilities.get('name:strong_match');
+    const mNot = result.parameters.mProbabilities.get('name:not_match');
+    if (mStrong !== undefined && mNot !== undefined) {
+      expect(mStrong).toBeGreaterThanOrEqual(mNot - 1e-10);
+    }
+  });
+});

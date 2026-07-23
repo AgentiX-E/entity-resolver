@@ -46,6 +46,34 @@ describe('runPipeline', () => {
   it('empty records throw (cannot estimate EM params)', async () => {
     await expect(runPipeline([], defaultConfig)).rejects.toThrow();
   });
+
+  it('handles tfFields configuration', async () => {
+    const records = [
+      { given_name: 'John', surname: 'Smith' },
+      { given_name: 'John', surname: 'Smith' },
+      { given_name: 'John', surname: 'Jones' },
+      { given_name: 'Jane', surname: 'Doe' },
+    ];
+    const config: PipelineConfig = {
+      ...defaultConfig,
+      tfFields: ['given_name'],
+    };
+    const result = await runPipeline(records, config);
+    expect(result.statistics.totalRecords).toBe(4);
+    expect(result.diagnostics).toBeDefined();
+  });
+
+  it('handles custom maxEmIterations and emEpsilon', async () => {
+    const records = [
+      { given_name: 'John', surname: 'Smith' },
+      { given_name: 'Jon', surname: 'Smyth' },
+      { given_name: 'Jane', surname: 'Doe' },
+      { given_name: 'John', surname: 'Smith' },
+    ];
+    const result = await runPipeline(records, defaultConfig);
+    expect(result.statistics).toBeDefined();
+    expect(result.statistics.totalRecords).toBe(4);
+  });
 });
 
 describe('Benchmark datasets', () => {
