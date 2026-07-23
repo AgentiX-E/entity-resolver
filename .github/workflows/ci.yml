@@ -67,9 +67,24 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format
 
-  # Future jobs (placeholders for I7-I11):
-  # integration:  er-visual cross-framework testing (React 18/Vue 3/Svelte 4/Vanilla HTML)
-  # snapshots:    er-visual Web Components 3-browser snapshot consistency
-  # browser:      er-browser adapters tested in jsdom environment
-  # server-e2e:   er-server API endpoint integration tests (REST + gRPC + MCP)
-  # cli-e2e:      er-cli CLI invocation integration tests
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/cache@v4
+        with:
+          path: e2e/wasm-cache
+          key: duckdb-wasm-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: duckdb-wasm-
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: npx playwright install chromium --with-deps
+      - run: npx playwright test

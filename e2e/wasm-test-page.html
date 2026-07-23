@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>DuckDB WASM Store Test</title></head>
+<body>
+<div id="results"></div>
+<script type="module">
+  window.__testResults = [];
+  function record(name, passed, detail) {
+    window.__testResults.push({ name, passed, detail });
+    document.getElementById('results').innerHTML +=
+      `<div style="color:${passed ? 'green' : 'red'}">${passed ? '✓' : '✗'} ${name}: ${detail}</div>`;
+  }
+
+  async function runTests() {
+    try {
+      const wasmUrl = new URLSearchParams(window.location.search).get('wasmUrl') || '';
+      // Dynamic import from the served dist directory
+      const mod = await import('/packages/entity-resolver-browser/dist/index.js');
+
+      // Offline mode
+      const offlineStore = new mod.DuckDBWasmStore({ offline: true });
+      const offlineResult = await offlineStore.init();
+      record('offline_init', !offlineResult.wasmActive, `tier=${offlineResult.tier}`);
+
+      // WASM mode (if WASM URL is provided)
+      if (wasmUrl) {
+        const store = new mod.DuckDBWasmStore({ wasmUrl, downloadTimeout: 30000 });
+        const initResult = await store.init();
+        record('wasm_init', initResult.status !== '', `tier=${initResult.tier}`);
+
+        // CRUD
+        await store.upsertEntity({ clusterId: 'browser-test', memberIds: [1, 2, 3], cohesion: 0.9 });
+        const entity = await store.getEntity('browser-test');
+        record('wasm_crud', entity !== null, `clusterId=${entity?.clusterId}`);
+
+        // Query neighbors
+        const neighbors = await store.queryNeighbors('browser-test', 1);
+        record('wasm_query', Array.isArray(neighbors), `count=${neighbors.length}`);
+
+        // Delete
+        await store.deleteEntity('browser-test');
+        const deleted = await store.getEntity('browser-test');
+        record('wasm_delete', deleted === null, 'entity removed');
+
+        // Merge
+        await store.upsertEntity({ clusterId: 'merge-src', memberIds: [1, 2], cohesion: 0.5 });
+        await store.upsertEntity({ clusterId: 'merge-dst', memberIds: [3], cohesion: 0.5 });
+        await store.applyMerge('merge-src', 'merge-dst');
+        const merged = await store.getEntity('merge-dst');
+        record('wasm_merge', merged !== null && merged.memberIds.length >= 2, `members=${merged?.memberIds?.length}`);
+
+        await store.close();
+        record('wasm_close', true, 'closed without error');
+      }
+    } catch (e) {
+      record('error', false, String(e));
+    }
+  }
+
+  runTests();
+</script>
+</body>
+</html>
