@@ -1,7 +1,10 @@
 // Tests for PPRL Bloom filter encoding and matching.
 
 import { describe, it, expect } from 'vitest';
-import { BloomFilter, encodePPRL, matchPPRL } from '../../index.js';
+import {
+  BloomFilter, encodePPRL, matchPPRL,
+  encodePPRLAsync, matchPPRLAsync, sha256Async,
+} from '../../index.js';
 
 const SECRET = 'test-secret-key-for-pprl';
 
@@ -138,5 +141,120 @@ describe('matchPPRL', () => {
     );
     expect(scores.name).toBeDefined();
     expect(scores.extra).toBeUndefined();
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════
+// Async PPRL paths
+// ═══════════════════════════════════════════════════════════════
+
+describe('encodePPRLAsync', () => {
+  it('encodes a value asynchronously', async () => {
+    const filter = await encodePPRLAsync('test', { secretKey: SECRET });
+    expect(filter).toBeInstanceOf(BloomFilter);
+    expect(filter.size).toBeGreaterThan(0);
+  });
+
+  it('produces same result as sync version', async () => {
+    const syncFilter = encodePPRL('hello-world', { secretKey: SECRET });
+    const asyncFilter = await encodePPRLAsync('hello-world', { secretKey: SECRET });
+    expect(Buffer.from(asyncFilter.bits).toString('hex'))
+      .toBe(Buffer.from(syncFilter.bits).toString('hex'));
+  });
+
+  it('handles empty string', async () => {
+    const filter = await encodePPRLAsync('', { secretKey: SECRET });
+    expect(filter).toBeInstanceOf(BloomFilter);
+  });
+});
+
+describe('matchPPRLAsync', () => {
+  it('matches identical records asynchronously', async () => {
+    const scores = await matchPPRLAsync(
+      { name: 'John' },
+      { name: 'John' },
+      { secretKey: SECRET },
+    );
+    expect(scores.name).toBeGreaterThan(0);
+  });
+
+  it('different records have low match score', async () => {
+    const scores = await matchPPRLAsync(
+      { name: 'Alice' },
+      { name: 'Bob' },
+      { secretKey: SECRET },
+    );
+    expect(scores.name).toBeLessThan(1);
+  });
+});
+
+describe('sha256Async', () => {
+  it('produces consistent hash', async () => {
+    const hash1 = await sha256Async('test');
+    const hash2 = await sha256Async('test');
+    expect(Buffer.from(hash1).toString('hex'))
+      .toBe(Buffer.from(hash2).toString('hex'));
+  });
+
+  it('different inputs produce different hashes', async () => {
+    const hash1 = await sha256Async('a');
+    const hash2 = await sha256Async('b');
+    expect(Buffer.from(hash1).toString('hex'))
+      .not.toBe(Buffer.from(hash2).toString('hex'));
+  });
+});
+
+describe('BloomFilter serialization', () => {
+  it('toHex and fromHex roundtrip', () => {
+    const bf = encodePPRL('test-data', { secretKey: SECRET });
+    const hex = bf.toHex();
+    const restored = BloomFilter.fromHex(hex, bf.size, bf.numHashes);
+    expect(restored.size).toBe(bf.size);
+    expect(restored.numHashes).toBe(bf.numHashes);
+    expect(Buffer.from(restored.bits).toString('hex'))
+      .toBe(Buffer.from(bf.bits).toString('hex'));
+  });
+
+  it('toBase64 and fromBase64 roundtrip', () => {
+    const bf = encodePPRL('test-data', { secretKey: SECRET });
+    const b64 = bf.toBase64();
+    const restored = BloomFilter.fromBase64(b64, bf.size, bf.numHashes);
+    expect(restored.size).toBe(bf.size);
+    expect(restored.numHashes).toBe(bf.numHashes);
+    expect(Buffer.from(restored.bits).toString('hex'))
+      .toBe(Buffer.from(bf.bits).toString('hex'));
+  });
+});
+
+describe('BloomFilter edge cases', () => {
+  it('addAsync adds tokens asynchronously', async () => {
+    const bf = new BloomFilter(512, 8);
+    const before = Buffer.from(bf.bits).toString('hex');
+    await bf.addAsync('async-test', SECRET);
+    const after = Buffer.from(bf.bits).toString('hex');
+    expect(before).not.toBe(after);
+  });
+
+  it('custom qgramSize works', () => {
+    const bf = encodePPRL('abcdef', { secretKey: SECRET, qgramSize: 3 });
+    expect(bf).toBeInstanceOf(BloomFilter);
+  });
+
+  it('similarity of identical filters is 1', () => {
+    const bf1 = encodePPRL('same', { secretKey: SECRET });
+    const bf2 = encodePPRL('same', { secretKey: SECRET });
+    expect(bf1.similarity(bf2)).toBe(1);
+  });
+
+  it('similarity of completely different filters is low', () => {
+    const bf1 = encodePPRL('aaaaaaaaaaaaaaaaaaaa', { secretKey: SECRET, filterSize: 256 });
+    const bf2 = encodePPRL('bbbbbbbbbbbbbbbbbbbb', { secretKey: SECRET, filterSize: 256 });
+    expect(bf1.similarity(bf2)).toBeLessThan(1);
+  });
+
+  it('encodePPRL with minimal config', () => {
+    const bf = encodePPRL('minimal', { secretKey: SECRET, filterSize: 64, numHashes: 4 });
+    expect(bf.size).toBe(64);
+    expect(bf.numHashes).toBe(4);
   });
 });

@@ -111,4 +111,26 @@ describe('resolveStorage with DuckDB', () => {
     expect(await store.getEntity('lifecycle-test')).toBeNull();
     await store.close();
   });
+
+  it('applyMerge handles non-existent from entity', async () => {
+    const result = await resolveStorage({ backend: 'duckdb' });
+    const store = result.store as unknown as DuckDBStore;
+    await store.upsertEntity({ clusterId: 'target', memberIds: [1], cohesion: 1 });
+    // from entity doesn't exist — should not throw
+    await store.applyMerge('nonexistent', 'target');
+    const target = await store.getEntity('target');
+    expect(target).not.toBeNull();
+    await store.close();
+  });
+
+  it('applyMerge handles non-existent into entity', async () => {
+    const result = await resolveStorage({ backend: 'duckdb' });
+    const store = result.store as unknown as DuckDBStore;
+    await store.upsertEntity({ clusterId: 'source', memberIds: [1], cohesion: 1 });
+    // into entity doesn't exist
+    await store.applyMerge('source', 'nonexistent');
+    const source = await store.getEntity('source');
+    expect(source).not.toBeNull();
+    await store.close();
+  });
 });

@@ -187,4 +187,26 @@ describe('DuckDBWasmStore — edge cases', () => {
     expect((await store.getEntity('c0.5'))!.cohesion).toBe(0.5);
     expect((await store.getEntity('c0.99'))!.cohesion).toBe(0.99);
   });
+
+  it('applyMerge handles non-existent from entity', async () => {
+    const store = new DuckDBWasmStore({ offline: true });
+    await store.init();
+    await store.upsertEntity({ clusterId: 'dst', memberIds: [1], cohesion: 1 });
+    await store.applyMerge('nonexistent', 'dst');
+    const dst = await store.getEntity('dst');
+    expect(dst).not.toBeNull();
+  });
+
+  it('queryNeighbors for non-existent entity returns empty', async () => {
+    const store = new DuckDBWasmStore({ offline: true });
+    await store.init();
+    const result = await store.queryNeighbors('nonexistent', 1);
+    expect(result).toEqual([]);
+  });
+
+  it('close when WASM is inactive does not throw', async () => {
+    const store = new DuckDBWasmStore({ offline: true });
+    await store.init();
+    await store.close(); // should not throw
+  });
 });

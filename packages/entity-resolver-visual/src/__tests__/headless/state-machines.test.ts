@@ -123,6 +123,16 @@ describe('useHistogram', () => {
     expect(state.threshold).toBe(0);
   });
 
+  it('loads data with undefined threshold defaults to 0', () => {
+    const { state, actions } = useHistogram();
+    const dataWithoutThreshold: HistogramData = {
+      bins: [{ minWeight: -1, maxWeight: 1, count: 1 }],
+      summary: { totalPairs: 1, aboveThreshold: 1, belowThreshold: 0 },
+    };
+    actions.loadData(dataWithoutThreshold);
+    expect(state.threshold).toBe(0);
+  });
+
   it('sets threshold manually', () => {
     const { state, actions } = useHistogram();
     actions.setThreshold(5);
@@ -175,6 +185,14 @@ describe('useClusterExplorer', () => {
     expect(state.expandedNodes.size).toBeGreaterThan(1);
     actions.collapseAll();
     expect(state.expandedNodes.size).toBe(1);
+    expect(state.expandedNodes.has('root')).toBe(true);
+  });
+
+  it('expandAll without data handles gracefully', () => {
+    const { state, actions } = useClusterExplorer();
+    // expandAll before loadData should not throw
+    actions.expandAll();
+    expect(state.expandedNodes.size).toBeGreaterThanOrEqual(1);
     expect(state.expandedNodes.has('root')).toBe(true);
   });
 });

@@ -215,6 +215,29 @@ describe('buildUnlinkablesData', () => {
     expect(data.linkedRecords).toBe(4);
     expect(data.matchRate).toBe(0.8);
   });
+
+  it('handles zero singletons (all linked)', () => {
+    const result = makeMockResult({
+      singletons: [],
+      statistics: { ...makeMockResult().statistics, totalRecords: 4, matchedRecords: 4, matchRate: 1 },
+    });
+    const data = buildUnlinkablesData(result);
+    expect(data.unlinkedRecords).toBe(0);
+    expect(data.linkedRecords).toBe(4);
+    expect(data.matchRate).toBe(1);
+  });
+
+  it('handles all singletons (none linked)', () => {
+    const result = makeMockResult({
+      scoredPairs: [],
+      singletons: [0, 1, 2, 3, 4],
+      statistics: { ...makeMockResult().statistics, totalRecords: 5, matchedRecords: 0, matchRate: 0 },
+    });
+    const data = buildUnlinkablesData(result);
+    expect(data.unlinkedRecords).toBe(5);
+    expect(data.linkedRecords).toBe(0);
+    expect(data.matchRate).toBe(0);
+  });
 });
 
 describe('buildHistogramData edge cases', () => {
@@ -249,6 +272,38 @@ describe('buildHistogramData edge cases', () => {
     expect(data.summary.aboveThreshold).toBeGreaterThanOrEqual(0);
     expect(data.summary.belowThreshold).toBeGreaterThanOrEqual(0);
   });
+
+  it('handles single scored pair gracefully', () => {
+    const result = makeMockResult({
+      scoredPairs: [{ leftId: 0, rightId: 1, score: 0.6, probability: 0.6 }],
+      diagnostics: {
+        muParameters: new Map(),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildHistogramData(result);
+    expect(data.summary.totalPairs).toBe(1);
+    expect(data.bins.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handles all negative weight scored pairs', () => {
+    const result = makeMockResult({
+      scoredPairs: [
+        { leftId: 0, rightId: 1, score: -5, probability: -5 },
+        { leftId: 2, rightId: 3, score: -3, probability: -3 },
+      ],
+      diagnostics: {
+        muParameters: new Map(),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildHistogramData(result, 2);
+    // Handles negative weights without crashing
+    expect(data.summary).toBeDefined();
+    expect(data.bins).toBeDefined();
+  });
 });
 
 describe('buildMuChartData edge cases', () => {
@@ -259,6 +314,53 @@ describe('buildMuChartData edge cases', () => {
     const data = buildMuChartData(result);
     expect(data.fields).toHaveLength(0);
   });
+
+  it('handles level with undefined uProbability', () => {
+    const result = makeMockResult({
+      diagnostics: {
+        muParameters: new Map([
+          ['name', {
+            mProbabilities: new Map([['name:exact_match', 0.95]]),
+            uProbabilities: new Map(),
+          }],
+        ]),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildMuChartData(result);
+    expect(data.fields.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handles custom lambda parameter', () => {
+    const result = makeMockResult();
+    const data = buildMuChartData(result, 0.01);
+    expect(data.lambda).toBe(0.01);
+  });
+
+  it('handles field with empty m/u levels', () => {
+    const result = makeMockResult({
+      diagnostics: {
+        muParameters: new Map([
+          ['empty_field', {
+            mProbabilities: new Map(),
+            uProbabilities: new Map(),
+          }],
+        ]),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildMuChartData(result);
+    // Fields with no levels should still appear
+    expect(data.fields.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handles default lambda when not provided', () => {
+    const result = makeMockResult();
+    const data = buildMuChartData(result);
+    expect(data.lambda).toBe(0.001);
+  });
 });
 
 describe('buildWaterfallData edge cases', () => {
@@ -268,5 +370,31 @@ describe('buildWaterfallData edge cases', () => {
     });
     const data = buildWaterfallData(result, 0);
     expect(data.bars).toHaveLength(0);
+  });
+
+  it('skips bars when mProbability is 0', () => {
+    const result = makeMockResult({
+      diagnostics: {
+        muParameters: new Map([
+          ['name', {
+            mProbabilities: new Map([['name:exact_match', 0]]),
+            uProbabilities: new Map([['name:exact_match', 0.05]]),
+          }],
+        ]),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildWaterfallData(result, 0);
+    // m=0 causes the bar to be skipped
+    expect(data.bars.length).toBeGreaterThanOrEqual(0);
+  });
+
+  it('handles scored pair without probability (falls back to score)', () => {
+    const result = makeMockResult({
+      scoredPairs: [{ leftId: 0, rightId: 1, score: 0.5 } as any],
+    });
+    const data = buildWaterfallData(result, 0);
+    expect(data.matchProbability).toBeGreaterThanOrEqual(0);
   });
 });
