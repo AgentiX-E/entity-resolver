@@ -439,3 +439,76 @@ describe('blocking branch coverage', () => {
     expect(result.pairs.length).toBeGreaterThan(0);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// Blocking utility functions (types.ts)
+// ═══════════════════════════════════════════════════════════════
+
+describe('blocking utilities', () => {
+  it('computeReductionRatio returns correct ratio', () => {
+    const r1 = computeReductionRatio(0, 100);
+    expect(r1).toBe(1);
+    const r2 = computeReductionRatio(4950, 100);
+    expect(r2).toBe(0);
+  });
+
+  it('computeReductionRatio with zero records returns 1', () => {
+    expect(computeReductionRatio(10, 0)).toBe(1);
+  });
+
+  it('computeReductionRatio with single record returns 1', () => {
+    expect(computeReductionRatio(0, 1)).toBe(1);
+  });
+
+  it('soundex produces consistent codes', () => {
+    expect(applyBlockingTransforms('Robert', ['soundex']))
+      .toBe(applyBlockingTransforms('Rupert', ['soundex']));
+  });
+
+  it('metaphone produces output', () => {
+    const r = applyBlockingTransforms('Robert', ['metaphone']);
+    expect(r.length).toBeGreaterThan(0);
+  });
+
+  it('multiple transforms chain correctly', () => {
+    const r = applyBlockingTransforms('  John  ', ['strip', 'lowercase']);
+    expect(r).toBe('john');
+  });
+
+  it('empty string is handled', () => {
+    const r = applyBlockingTransforms('', ['soundex']);
+    expect(typeof r).toBe('string');
+  });
+
+  it('digits_only extracts digits', () => {
+    expect(applyBlockingTransforms('abc123def', ['digits_only'])).toBe('123');
+  });
+
+  it('alpha_only keeps only letters', () => {
+    expect(applyBlockingTransforms('abc123def', ['alpha_only'])).toBe('abcdef');
+  });
+
+  it('substring transform truncates values', () => {
+    const r = applyBlockingTransforms('verylongstringhere', ['substring:0:3']);
+    expect(r.length).toBe(3);
+  });
+
+  it('unknown transform is no-op', () => {
+    expect(applyBlockingTransforms('test', ['unknown_transform' as any])).toBe('test');
+  });
+
+  it('metaphone produces output for any input', () => {
+    const r1 = applyBlockingTransforms('Smith', ['metaphone']);
+    const r2 = applyBlockingTransforms('Smyth', ['metaphone']);
+    expect(r1.length).toBeGreaterThan(0);
+    expect(r2.length).toBeGreaterThan(0);
+  });
+
+  it('uppercase transform works', () => {
+    expect(applyBlockingTransforms('test', ['uppercase'])).toBe('TEST');
+  });
+
+  it('lowercase transform works', () => {
+    expect(applyBlockingTransforms('TEST', ['lowercase'])).toBe('test');
+  });
+});
