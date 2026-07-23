@@ -1,5 +1,5 @@
 // @agentix-e/entity-resolver-core
-// Stateless Entity Resolution computation engine.
+// Stateless Entity Resolver computation engine.
 // Pure functions — zero I/O, zero side effects.
 
 // Types

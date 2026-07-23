@@ -1,5 +1,5 @@
 // @agentix-e/entity-resolver-cli
-// Command-line tool for entity resolution deduplication, matching, and diagnostics.
+// Command-line tool for entity resolver deduplication, matching, and diagnostics.
 
 // TUI Diagnostics
 export {

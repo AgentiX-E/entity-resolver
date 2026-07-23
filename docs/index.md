@@ -2,12 +2,12 @@
 layout: home
 
 hero:
-  name: Entity Resolution
+  name: Entity Resolver
   text: Industry-Leading ER for Node.js & Browser
   tagline: Stateless pure-computation engine with WASM acceleration. TypeScript-first. Zero I/O in core. Runs anywhere.
   image:
     src: /logo.svg
-    alt: Entity Resolution
+    alt: Entity Resolver
   actions:
     - theme: brand
       text: Get Started

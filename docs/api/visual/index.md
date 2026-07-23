@@ -2,7 +2,7 @@
 
 **Framework-agnostic, embeddable diagnostic components.**
 
-The visual package provides a 3-layer architecture for entity resolution visualization and diagnostics:
+The visual package provides a 3-layer architecture for entity resolver visualization and diagnostics:
 
 1. **Data API** — Framework-agnostic data layer
 2. **Headless** — Logic layer with state machines

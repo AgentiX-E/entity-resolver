@@ -57,7 +57,7 @@ export async function runAllBenchmarks(): Promise<{ results: BenchmarkResult[]; 
 
 export function formatBenchmarkReport(results: BenchmarkResult[]): string {
   const lines: string[] = [
-    '='.repeat(70), '  Entity Resolution Benchmark Report', '='.repeat(70), '',
+    '='.repeat(70), '  Entity Resolver Benchmark Report', '='.repeat(70), '',
     '  Dataset             | Records | Matches | Purity  | Completeness | Time',
     '  ' + '-'.repeat(67),
   ];

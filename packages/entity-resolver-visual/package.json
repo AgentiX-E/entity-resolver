@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolver-visual",
   "version": "0.0.0",
-  "description": "entity-resolver-visual — Entity Resolution sub-package",
+  "description": "entity-resolver-visual — Entity Resolver sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",

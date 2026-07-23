@@ -115,7 +115,7 @@ async function callLLM(
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: 'You are an entity resolution assistant. Respond only with valid JSON.' },
+        { role: 'system', content: 'You are an entity resolver assistant. Respond only with valid JSON.' },
         { role: 'user', content: prompt },
       ],
       max_tokens: maxTokens,

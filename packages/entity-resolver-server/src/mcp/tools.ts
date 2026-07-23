@@ -22,7 +22,7 @@ export function getMcpTools(): McpTool[] {
     {
       name: 'er_dedupe',
       description:
-        'Deduplicate records using entity resolution. Accepts an array of records and returns clusters of matching entities.',
+        'Deduplicate records using entity resolver. Accepts an array of records and returns clusters of matching entities.',
       parameters: {
         type: 'object',
         properties: {
@@ -84,7 +84,7 @@ export function getMcpTools(): McpTool[] {
     },
     {
       name: 'er_benchmark',
-      description: 'Run entity resolution benchmarks against standard datasets.',
+      description: 'Run entity resolver benchmarks against standard datasets.',
       parameters: {
         type: 'object',
         properties: {

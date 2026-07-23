@@ -2044,7 +2044,7 @@ Average pairwise similarity within the cluster.
 
 Defined in: [types/core.ts:44](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/types/core.ts#L44)
 
-The complete result of an entity resolution run.
+The complete result of an entity resolver run.
 
 #### Properties
 
@@ -4367,7 +4367,7 @@ _groundTruth?): Promise<PipelineResult>;
 
 Defined in: [pipeline/runner.ts:56](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-core/src/pipeline/runner.ts#L56)
 
-Run the full entity resolution pipeline on a set of records.
+Run the full entity resolver pipeline on a set of records.
 
 Pipeline stages:
 1. Preprocessing — Unicode repair, normalization

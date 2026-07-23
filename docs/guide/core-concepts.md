@@ -12,7 +12,7 @@ f(records) → { clusters, scoredPairs, diagnostics }
 
 This enables the same core to run in Node.js, browsers, Edge Functions, Deno, Bun, and Cloudflare Workers — without modification.
 
-## Entity Resolution Pipeline
+## Entity Resolver Pipeline
 
 The standard ER pipeline has 5 stages:
 

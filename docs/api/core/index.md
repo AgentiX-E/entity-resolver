@@ -2,7 +2,7 @@
 
 **Stateless computation engine with WASM acceleration and DI interface contracts.**
 
-The core package is the heart of the entity resolution system. It defines all algorithm logic and DI interface contracts, but performs **zero I/O** and holds **zero mutable state**.
+The core package is the heart of the entity resolver system. It defines all algorithm logic and DI interface contracts, but performs **zero I/O** and holds **zero mutable state**.
 
 ## Installation
 

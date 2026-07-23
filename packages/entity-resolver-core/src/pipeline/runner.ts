@@ -1,4 +1,4 @@
-// Entity Resolution Pipeline — end-to-end orchestration.
+// Entity Resolver Pipeline — end-to-end orchestration.
 // Wires together preprocessing, blocking, matching (FS EM), clustering, and evaluation.
 
 import type {
@@ -44,7 +44,7 @@ export interface PipelineOptions {
 }
 
 /**
- * Run the full entity resolution pipeline on a set of records.
+ * Run the full entity resolver pipeline on a set of records.
  *
  * Pipeline stages:
  * 1. Preprocessing — Unicode repair, normalization

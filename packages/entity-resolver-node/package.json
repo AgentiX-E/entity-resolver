@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolver-node",
   "version": "0.0.0",
-  "description": "entity-resolver-node — Entity Resolution sub-package",
+  "description": "entity-resolver-node — Entity Resolver sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",

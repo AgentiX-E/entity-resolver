@@ -40,7 +40,7 @@ export interface Cluster {
   readonly cohesion: number;
 }
 
-/** The complete result of an entity resolution run. */
+/** The complete result of an entity resolver run. */
 export interface PipelineResult {
   readonly clusters: ReadonlyMap<EntityId, Cluster>;
   readonly scoredPairs: readonly ScoredPair[];

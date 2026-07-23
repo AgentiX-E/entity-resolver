@@ -164,7 +164,7 @@ export function loadDblpAcm(): BenchmarkDataset {
   const records: RawRecord[] = [];
   const truth = new Map<string, number[]>();
   const titles = [
-    'efficient entity resolution',
+    'efficient entity resolver',
     'scalable record linkage',
     'deep learning for matching',
     'probabilistic deduplication',

@@ -1,7 +1,7 @@
 {
   "name": "@agentix-e/entity-resolver-browser",
   "version": "0.0.0",
-  "description": "entity-resolver-browser \u2014 Entity Resolution sub-package",
+  "description": "entity-resolver-browser \u2014 Entity Resolver sub-package",
   "license": "MIT",
   "author": "Lambertyan",
   "type": "module",

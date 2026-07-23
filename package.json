@@ -2,7 +2,7 @@
   "name": "@agentix-e/entity-resolver",
   "version": "0.0.0",
   "private": true,
-  "description": "Industry-leading Entity Resolution for Node.js and browser — stateless pure computation engine with WASM acceleration",
+  "description": "Entity Resolver for Node.js and browser — stateless pure computation engine with WASM acceleration",
   "repository": {
     "type": "git",
     "url": "https://github.com/AgentiX-E/entity-resolver.git"

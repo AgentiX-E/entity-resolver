@@ -1,6 +1,6 @@
 # Storage Backends
 
-Choose the right storage backend for your entity resolution deployment.
+Choose the right storage backend for your entity resolver deployment.
 
 ## Backend Comparison
 

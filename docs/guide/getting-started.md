@@ -1,6 +1,6 @@
 # Getting Started
 
-Get your first entity resolution pipeline running in under 5 minutes.
+Get your first entity resolver pipeline running in under 5 minutes.
 
 ## Installation
 

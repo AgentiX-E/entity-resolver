@@ -2,9 +2,9 @@ import { defineConfig } from 'vitepress';
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  title: 'Entity Resolution',
+  title: 'Entity Resolver',
   description:
-    'Industry-leading Entity Resolution for Node.js and Browser — stateless, WASM-accelerated, TypeScript-first',
+    'Entity Resolver for Node.js and Browser — stateless, WASM-accelerated, TypeScript-first',
   lang: 'en-US',
 
   head: [['link', { rel: 'icon', href: '/favicon.ico' }]],

@@ -1,8 +1,8 @@
 # @agentix-e/entity-resolver
 
-**Industry-leading Entity Resolution for Node.js and Browser**
+**Entity Resolver for Node.js and Browser**
 
-A stateless, pure-computation Entity Resolution engine with WASM acceleration. Built for TypeScript first, designed for any JavaScript runtime.
+A stateless, pure-computation entity resolver engine with WASM acceleration. Built for TypeScript first, designed for any JavaScript runtime.
 
 [![CI](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -10,7 +10,7 @@ A stateless, pure-computation Entity Resolution engine with WASM acceleration. B
 
 ## Philosophy
 
-**Entity Resolution is pure computation.** `f(records) → {clusters, matchPairs, scores}`. No side effects. No I/O. No internal mutable state. Runs anywhere JavaScript runs.
+**Entity Resolver is pure computation.** `f(records) → {clusters, matchPairs, scores}`. No side effects. No I/O. No internal mutable state. Runs anywhere JavaScript runs.
 
 ## Packages
 

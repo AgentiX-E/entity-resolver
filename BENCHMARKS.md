@@ -1,4 +1,4 @@
-# Entity Resolution Benchmarks
+# Entity Resolver Benchmarks
 
 ## Pipeline Performance
 

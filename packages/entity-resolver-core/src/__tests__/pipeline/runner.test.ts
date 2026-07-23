@@ -1,4 +1,4 @@
-// Tests for the entity resolution pipeline and benchmarks.
+// Tests for the entity resolver pipeline and benchmarks.
 
 import { describe, it, expect } from 'vitest';
 import {
