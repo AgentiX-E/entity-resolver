@@ -226,6 +226,6 @@ export async function executeMcpTool(
     }
 
     default:
-      return { error: `Unknown tool: ${toolName}` };
+      throw new Error(`Unknown tool: ${toolName}`);
   }
 }

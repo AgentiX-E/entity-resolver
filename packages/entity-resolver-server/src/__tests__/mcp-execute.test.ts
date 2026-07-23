@@ -34,8 +34,8 @@ describe('MCP tools execution', () => {
 
   it('executes er_link tool', async () => {
     const result = await mcp.executeMcpTool('er_link', {
-      leftRecords: [{ name: 'A' }],
-      rightRecords: [{ name: 'A' }, { name: 'B' }],
+      left: [{ name: 'A' }],
+      right: [{ name: 'A' }, { name: 'B' }],
     });
     expect(result).toBeDefined();
   }, 15000);

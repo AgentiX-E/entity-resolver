@@ -14,3 +14,27 @@ export { createRateLimitMiddleware, startBucketCleanup } from './middleware/rate
 // MCP Tools
 export type { McpTool } from './mcp/tools.js';
 export { getMcpTools, executeMcpTool } from './mcp/tools.js';
+
+// MCP JSON-RPC 2.0 Server
+export { createMcpApp, resetMcpState } from './mcp/server.js';
+export type {
+  JsonRpcRequest,
+  JsonRpcResponse,
+  JsonRpcErrorResponse,
+  JsonRpcError,
+  JsonRpcNotification,
+  McpServerInfo,
+  McpCapabilities,
+  McpInitializeResult,
+  McpToolsListResult,
+  McpToolsCallResult,
+  McpToolDefinition,
+  McpContent,
+} from './mcp/jsonrpc.js';
+export {
+  isJsonRpcRequest,
+  isJsonRpcNotification,
+  buildResponse,
+  buildErrorResponse,
+  JSONRPC_ERRORS,
+} from './mcp/jsonrpc.js';
