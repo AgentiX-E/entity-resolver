@@ -1,14 +1,15 @@
-// Placeholder WASM bridge — built via `cargo build --target wasm32-unknown-unknown`
-// and post-processed with wasm-bindgen / wasm-pack.
-// This file is replaced by the CI build pipeline.
+// WASM bridge — delegates to compiled Rust WASM via wasm-bindgen.
+// Initializes the WASM module synchronously on import.
 
-let _wasmInstance: WebAssembly.Instance | null = null;
+import { initSync, wasm_score } from './er_wasm_scorer.js';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-export async function default(): Promise<void> {
-  // In production, loads the compiled .wasm binary
-}
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const wasmBytes = readFileSync(join(__dirname, 'er_wasm_scorer_bg.wasm'));
+initSync({ module: wasmBytes });
 
-export function wasm_score(name: string, a: string, b: string): number {
-  // Fallback: WASM not loaded
-  throw new Error('WASM module not loaded — use JS fallback scorers');
-}
+// Re-export wasm_score and a default init (no-op — already initialized)
+export default async function init() { /* already initialized synchronously */ }
+export { wasm_score };
