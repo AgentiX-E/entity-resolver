@@ -219,3 +219,12 @@ export {
 // LLM Scorer
 export type { LLMScorerConfig, LLMScorerResult } from './llm/scorer.js';
 export { scoreWithLLM } from './llm/scorer.js';
+
+// Golden Record Survivorship
+export type {
+  SurvivorStrategy,
+  FieldSurvivorRule,
+  GoldenRecordConfig,
+  GoldenRecordResult,
+} from './golden-record.js';
+export { buildGoldenRecord } from './golden-record.js';
