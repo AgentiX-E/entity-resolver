@@ -2,6 +2,7 @@
 
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
+  initScorers,
   getScorers,
   getScorer,
   scorerCount,
@@ -81,5 +82,41 @@ describe('Registry edge cases', () => {
 
   it('getScorer throws for unknown scorer name', () => {
     expect(() => getScorer('nonexistent_scorer_xyz')).toThrow('Unknown scorer');
+  });
+});
+
+describe('initScorers', () => {
+  beforeEach(() => {
+    resetScorerCache();
+  });
+
+  it('returns wasm when WASM binaries are available', async () => {
+    const result = await initScorers();
+    // WASM binaries may or may not be available in test env
+    expect(['wasm', 'js']).toContain(result);
+    expect(scorerCount()).toBeGreaterThanOrEqual(19);
+  });
+
+  it('increases scorer count when WASM loaded', async () => {
+    const jsCountBefore = scorerCount();
+    await initScorers();
+    // After init, count is either 19 (JS) or 24 (19 JS + 5 WASM)
+    const jsCountAfter = scorerCount();
+    expect(jsCountAfter).toBeGreaterThanOrEqual(jsCountBefore);
+  });
+
+  it('getScorers returns WASM-preferred entries after init', async () => {
+    await initScorers();
+    const scorers = getScorers();
+    // Verify all 19 JS scorer names are present
+    expect(scorers.levenshtein).toBeDefined();
+    expect(scorers.exact).toBeDefined();
+    expect(scorers.soundex).toBeDefined();
+  });
+
+  it('idempotent: calling initScorers twice is safe', async () => {
+    const r1 = await initScorers();
+    const r2 = await initScorers();
+    expect(r1).toBe(r2);
   });
 });

@@ -46,7 +46,9 @@ export {
 } from './matching/scorers/js/scorers.js';
 
 // Scorer Registry
+export type { ScorerInitResult } from './matching/scorers/registry.js';
 export {
+  initScorers,
   getScorers,
   getScorer,
   scorerCount,
