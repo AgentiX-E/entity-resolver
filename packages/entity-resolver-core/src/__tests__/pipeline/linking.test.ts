@@ -218,4 +218,19 @@ describe('linkRecords', () => {
     } as RecordLinkConfig);
     expect(result.crossPairs).toHaveLength(0);
   });
+
+  it('L7: uses blocking config for cross-set pair generation', async () => {
+    const left = [{ given_name: 'John', surname: 'Smith' }, { given_name: 'Jane', surname: 'Doe' }];
+    const right = [{ given_name: 'John', surname: 'Smith' }, { given_name: 'Bob', surname: 'Wilson' }];
+    const comps = makeComparisons([...left, ...right]);
+    const result = await linkRecords(left, right, {
+      comparisons: comps,
+      matchThreshold: 0.5,
+      blocking: {
+        passes: [{ fields: ['given_name'], transforms: ['lowercase'] }],
+      },
+    } as RecordLinkConfig);
+    expect(result.crossPairs).toBeDefined();
+    expect(result.statistics.totalRecords).toBe(4);
+  });
 });
