@@ -605,3 +605,29 @@ describe('EM convergence edge cases', () => {
     }
   });
 });
+
+describe('EM numerical stability helpers', () => {
+  it('safeLog returns large negative for zero and negative', async () => {
+    const { safeLog } = await import('../../fellegi-sunter/em.js');
+    expect(safeLog(0)).toBe(-1e10);
+    expect(safeLog(-1)).toBe(-1e10);
+    expect(safeLog(1)).toBeCloseTo(0);
+  });
+
+  it('logSumExp handles negative infinity', async () => {
+    const { logSumExp } = await import('../../fellegi-sunter/em.js');
+    expect(logSumExp(-Infinity, 5)).toBe(5);
+    expect(logSumExp(3, -Infinity)).toBe(3);
+  });
+
+  it('clampProb handles extreme values', async () => {
+    const { clampProb } = await import('../../fellegi-sunter/em.js');
+    expect(clampProb(0)).toBe(1e-10);
+    expect(clampProb(-0.5)).toBe(1e-10);
+    expect(clampProb(NaN)).toBe(1e-10);
+    expect(clampProb(Infinity)).toBe(1e-10);
+    expect(clampProb(1)).toBe(1 - 1e-10);
+    expect(clampProb(2)).toBe(1 - 1e-10);
+    expect(clampProb(0.5)).toBe(0.5);
+  });
+});

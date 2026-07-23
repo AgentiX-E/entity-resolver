@@ -266,3 +266,25 @@ describe('deserializeModel validation', () => {
     expect(result.valid).toBe(false);
   });
 });
+
+describe('Deserialization error edge cases', () => {
+  it('handles invalid JSON string', () => {
+    const result = deserializeModel('not valid json{{{');
+    expect(result.valid).toBe(false);
+    expect(result.errors.length).toBeGreaterThan(0);
+  });
+
+  it('handles empty object JSON', () => {
+    const result = deserializeModel('{}');
+    expect(result.valid).toBe(false);
+  });
+
+  it('handles null serialization', () => {
+    const result = deserializeModel('null');
+    expect(result.valid).toBe(false);
+  });
+
+  it('deserializeFSParamsFromJSON handles empty', () => {
+    expect(() => { deserializeFSParamsFromJSON(JSON.stringify({ m: [], u: [] })); }).toThrow();
+  });
+});

@@ -78,8 +78,8 @@ function parseCsv(text: string): RawRecord[] {
   return records;
 }
 
-/** Parse a single CSV line handling quoted fields and commas within quotes. */
-function parseCsvLine(line: string): string[] {
+/** @internal Parse a single CSV line handling quoted fields and commas within quotes. */
+export function parseCsvLine(line: string): string[] {
   const result: string[] = [];
   let current = '';
   let inQuotes = false;

@@ -373,22 +373,22 @@ function computeLogLikelihood(pairKeySets: readonly string[][], state: EMState):
 
 // ─── Numerical stability helpers ────────────────────────────────
 
-/** Safe log: returns a large negative number instead of -Infinity. */
-function safeLog(x: number): number {
+/** @internal Safe log: returns a large negative number instead of -Infinity. */
+export function safeLog(x: number): number {
   if (x <= 0) return -1e10;
   return Math.log(x);
 }
 
-/** Log-sum-exp for numerical stability: log(exp(a) + exp(b)). */
-function logSumExp(a: number, b: number): number {
+/** @internal Log-sum-exp for numerical stability: log(exp(a) + exp(b)). */
+export function logSumExp(a: number, b: number): number {
   if (!Number.isFinite(a) && a < 0) return b;
   if (!Number.isFinite(b) && b < 0) return a;
   const max = Math.max(a, b);
   return max + Math.log(Math.exp(a - max) + Math.exp(b - max));
 }
 
-/** Clamp a probability to (0, 1) with safeguards against edge values. */
-function clampProb(p: number): number {
+/** @internal Clamp a probability to (0, 1) with safeguards against edge values. */
+export function clampProb(p: number): number {
   if (!Number.isFinite(p) || p <= 0) return 1e-10;
   if (p >= 1) return 1 - 1e-10;
   return p;
