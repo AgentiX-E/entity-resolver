@@ -2,8 +2,12 @@
 
 import { describe, it, expect } from 'vitest';
 import {
-  BloomFilter, encodePPRL, matchPPRL,
-  encodePPRLAsync, matchPPRLAsync, sha256Async,
+  BloomFilter,
+  encodePPRL,
+  matchPPRL,
+  encodePPRLAsync,
+  matchPPRLAsync,
+  sha256Async,
 } from '../../index.js';
 
 const SECRET = 'test-secret-key-for-pprl';
@@ -43,8 +47,10 @@ describe('BloomFilter', () => {
   it('computes high similarity for similar tokens', () => {
     const bf1 = new BloomFilter(1024, 15);
     const bf2 = new BloomFilter(1024, 15);
-    bf1.add('john', SECRET); bf1.add('smith', SECRET);
-    bf2.add('john', SECRET); bf2.add('smith', SECRET);
+    bf1.add('john', SECRET);
+    bf1.add('smith', SECRET);
+    bf2.add('john', SECRET);
+    bf2.add('smith', SECRET);
     expect(bf1.similarity(bf2)).toBe(1);
   });
 
@@ -58,7 +64,8 @@ describe('BloomFilter', () => {
 
   it('hex serialization roundtrips', () => {
     const bf = new BloomFilter(1024, 15);
-    bf.add('alice', SECRET); bf.add('bob', SECRET);
+    bf.add('alice', SECRET);
+    bf.add('bob', SECRET);
     const hex = bf.toHex();
     const restored = BloomFilter.fromHex(hex, 1024, 15);
     expect(restored.similarity(bf)).toBe(1);
@@ -158,8 +165,9 @@ describe('encodePPRLAsync', () => {
   it('produces same result as sync version', async () => {
     const syncFilter = encodePPRL('hello-world', { secretKey: SECRET });
     const asyncFilter = await encodePPRLAsync('hello-world', { secretKey: SECRET });
-    expect(Buffer.from(asyncFilter.bits).toString('hex'))
-      .toBe(Buffer.from(syncFilter.bits).toString('hex'));
+    expect(Buffer.from(asyncFilter.bits).toString('hex')).toBe(
+      Buffer.from(syncFilter.bits).toString('hex'),
+    );
   });
 
   it('handles empty string', async () => {
@@ -170,20 +178,12 @@ describe('encodePPRLAsync', () => {
 
 describe('matchPPRLAsync', () => {
   it('matches identical records asynchronously', async () => {
-    const scores = await matchPPRLAsync(
-      { name: 'John' },
-      { name: 'John' },
-      { secretKey: SECRET },
-    );
+    const scores = await matchPPRLAsync({ name: 'John' }, { name: 'John' }, { secretKey: SECRET });
     expect(scores.name).toBeGreaterThan(0);
   });
 
   it('different records have low match score', async () => {
-    const scores = await matchPPRLAsync(
-      { name: 'Alice' },
-      { name: 'Bob' },
-      { secretKey: SECRET },
-    );
+    const scores = await matchPPRLAsync({ name: 'Alice' }, { name: 'Bob' }, { secretKey: SECRET });
     expect(scores.name).toBeLessThan(1);
   });
 });
@@ -192,15 +192,13 @@ describe('sha256Async', () => {
   it('produces consistent hash', async () => {
     const hash1 = await sha256Async('test');
     const hash2 = await sha256Async('test');
-    expect(Buffer.from(hash1).toString('hex'))
-      .toBe(Buffer.from(hash2).toString('hex'));
+    expect(Buffer.from(hash1).toString('hex')).toBe(Buffer.from(hash2).toString('hex'));
   });
 
   it('different inputs produce different hashes', async () => {
     const hash1 = await sha256Async('a');
     const hash2 = await sha256Async('b');
-    expect(Buffer.from(hash1).toString('hex'))
-      .not.toBe(Buffer.from(hash2).toString('hex'));
+    expect(Buffer.from(hash1).toString('hex')).not.toBe(Buffer.from(hash2).toString('hex'));
   });
 });
 
@@ -211,8 +209,7 @@ describe('BloomFilter serialization', () => {
     const restored = BloomFilter.fromHex(hex, bf.size, bf.numHashes);
     expect(restored.size).toBe(bf.size);
     expect(restored.numHashes).toBe(bf.numHashes);
-    expect(Buffer.from(restored.bits).toString('hex'))
-      .toBe(Buffer.from(bf.bits).toString('hex'));
+    expect(Buffer.from(restored.bits).toString('hex')).toBe(Buffer.from(bf.bits).toString('hex'));
   });
 
   it('toBase64 and fromBase64 roundtrip', () => {
@@ -221,8 +218,7 @@ describe('BloomFilter serialization', () => {
     const restored = BloomFilter.fromBase64(b64, bf.size, bf.numHashes);
     expect(restored.size).toBe(bf.size);
     expect(restored.numHashes).toBe(bf.numHashes);
-    expect(Buffer.from(restored.bits).toString('hex'))
-      .toBe(Buffer.from(bf.bits).toString('hex'));
+    expect(Buffer.from(restored.bits).toString('hex')).toBe(Buffer.from(bf.bits).toString('hex'));
   });
 });
 

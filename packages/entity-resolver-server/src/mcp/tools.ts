@@ -2,8 +2,12 @@
 // Exposes ER capabilities as invocable tools for AI agents with real execution logic.
 
 import {
-  runPipeline, autoConfigure, loadAllBenchmarks, runBenchmark,
-  gazetteerMatch, linkRecords,
+  runPipeline,
+  autoConfigure,
+  loadAllBenchmarks,
+  runBenchmark,
+  gazetteerMatch,
+  linkRecords,
   evaluateClustering,
 } from '@agentix-e/entity-resolver-core';
 import type { PipelineConfig, GazetteerConfig } from '@agentix-e/entity-resolver-core';
@@ -88,7 +92,10 @@ export function getMcpTools(): McpTool[] {
       parameters: {
         type: 'object',
         properties: {
-          dataset: { type: 'string', description: 'Dataset name (FEBRL 5000, DBLP-ACM, Abt-Buy, etc.)' },
+          dataset: {
+            type: 'string',
+            description: 'Dataset name (FEBRL 5000, DBLP-ACM, Abt-Buy, etc.)',
+          },
         },
       },
     },
@@ -99,8 +106,14 @@ export function getMcpTools(): McpTool[] {
       parameters: {
         type: 'object',
         properties: {
-          predictedClusters: { type: 'object', description: 'Predicted clusters as { clusterId: [memberIds] }' },
-          groundTruth: { type: 'object', description: 'Ground truth clusters as { clusterId: [memberIds] }' },
+          predictedClusters: {
+            type: 'object',
+            description: 'Predicted clusters as { clusterId: [memberIds] }',
+          },
+          groundTruth: {
+            type: 'object',
+            description: 'Ground truth clusters as { clusterId: [memberIds] }',
+          },
         },
         required: ['predictedClusters', 'groundTruth'],
       },
@@ -189,9 +202,7 @@ export async function executeMcpTool(
     case 'er_benchmark': {
       const datasetName = params.dataset as string | undefined;
       const datasets = loadAllBenchmarks();
-      const ds = datasetName
-        ? datasets.find((d) => d.name === datasetName)
-        : datasets[0];
+      const ds = datasetName ? datasets.find((d) => d.name === datasetName) : datasets[0];
       if (!ds) return { error: `Dataset "${datasetName}" not found` };
       const result = await runBenchmark(ds);
       return result;

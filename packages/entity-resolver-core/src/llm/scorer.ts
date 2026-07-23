@@ -110,12 +110,15 @@ async function callLLM(
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
       model,
       messages: [
-        { role: 'system', content: 'You are an entity resolver assistant. Respond only with valid JSON.' },
+        {
+          role: 'system',
+          content: 'You are an entity resolver assistant. Respond only with valid JSON.',
+        },
         { role: 'user', content: prompt },
       ],
       max_tokens: maxTokens,
@@ -128,7 +131,7 @@ async function callLLM(
     throw new Error(`LLM API error ${response.status}: ${errText}`);
   }
 
-  const data = await response.json() as {
+  const data = (await response.json()) as {
     choices: Array<{ message: { content: string } }>;
   };
 
@@ -136,7 +139,10 @@ async function callLLM(
 
   try {
     // Parse JSON from response (may contain markdown code fences)
-    const jsonStr = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    const jsonStr = content
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
     const parsed = JSON.parse(jsonStr) as { score: number; reasoning: string };
     return {
       score: Math.max(0, Math.min(1, parsed.score)),

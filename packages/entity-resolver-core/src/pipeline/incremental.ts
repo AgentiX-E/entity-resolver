@@ -136,9 +136,7 @@ export async function incrementalModify(
   const modSet = new Set(modifiedIds);
 
   // Keep pairs where neither record is modified
-  const keptPairs = existingPairs.filter(
-    (p) => !modSet.has(p.leftId) && !modSet.has(p.rightId),
-  );
+  const keptPairs = existingPairs.filter((p) => !modSet.has(p.leftId) && !modSet.has(p.rightId));
 
   // Re-compute: compare each modified record against every record
   const recomputedPairs: ScoredPair[] = [];

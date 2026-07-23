@@ -118,8 +118,7 @@ describe('EM mathematical correctness', () => {
     const pairs = generateDataset(700, 300, ['name']);
     const result = runEM(pairs);
 
-    const meanPosterior =
-      result.posteriors.reduce((a, b) => a + b, 0) / result.posteriors.length;
+    const meanPosterior = result.posteriors.reduce((a, b) => a + b, 0) / result.posteriors.length;
     // λ should be very close to mean(posteriors) — EM uses posteriors from
     // the previous iteration for M-step, and the level-ordering constraint
     // may slightly perturb the exact equality after convergence.
@@ -442,11 +441,13 @@ describe('EM mixed levels & multi-field', () => {
   it('E3: three fields with different signal strength', () => {
     const pairs: ComparisonVector[][] = [];
     for (let i = 0; i < 500; i++) {
-      pairs.push(makePair(
-        exactMatch('name'),
-        i % 5 === 0 ? notMatch('dob') : exactMatch('dob'),
-        i % 2 === 0 ? notMatch('city') : exactMatch('city'),
-      ));
+      pairs.push(
+        makePair(
+          exactMatch('name'),
+          i % 5 === 0 ? notMatch('dob') : exactMatch('dob'),
+          i % 2 === 0 ? notMatch('city') : exactMatch('city'),
+        ),
+      );
     }
     for (let i = 0; i < 500; i++) {
       pairs.push(makePair(notMatch('name'), notMatch('dob'), notMatch('city')));
@@ -471,7 +472,7 @@ describe('EM known-distribution recovery', () => {
     const pairs = generateDataset(950, 50, ['name']);
     const result = runEM(pairs, { maxIterations: 50, epsilon: 1e-10 });
     // With Laplace smoothing, λ estimate is slightly pulled toward 0.5
-    expect(result.parameters.lambda).toBeGreaterThan(0.80);
+    expect(result.parameters.lambda).toBeGreaterThan(0.8);
     expect(result.parameters.lambda).toBeLessThan(0.99);
   });
 
@@ -573,9 +574,7 @@ describe('EM convergence edge cases', () => {
     // Small dataset that may not converge → should stop at maxIterations
     const pairs: ComparisonVector[][] = [
       ...Array.from({ length: 20 }, () => makePair(exactMatch('name'), notMatch('email'))),
-      ...Array.from({ length: 20 }, () => makePair(
-        notMatch('name'), exactMatch('email'),
-      )),
+      ...Array.from({ length: 20 }, () => makePair(notMatch('name'), exactMatch('email'))),
     ];
     const result = runEM(pairs, { maxIterations: 5, epsilon: 1e-15 });
     expect(result.converged).toBeDefined();

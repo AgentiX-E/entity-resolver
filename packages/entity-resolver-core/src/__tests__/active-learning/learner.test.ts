@@ -279,10 +279,14 @@ describe('active learning convergence', () => {
     for (let i = 0; i < 15; i++) {
       const batch = nextLabelingBatch(session, 2);
       if (batch.length === 0) break; // batch exhausted
-      applyLabels(session, batch.map((p, idx) => ({
-        pairId: p.pairId,
-        label: 1, // label all as match
-      })));
+      applyLabels(
+        session,
+        batch.map((pairIdx) => ({
+          leftId: pairs[pairIdx]!.leftId,
+          rightId: pairs[pairIdx]!.rightId,
+          label: 1, // label all as match
+        })),
+      );
     }
 
     // Session has processed labels and has a classifier

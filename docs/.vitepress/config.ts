@@ -118,9 +118,7 @@ export default defineConfig({
       ],
     },
 
-    socialLinks: [
-      { icon: 'github', link: 'https://github.com/AgentiX-E/entity-resolver' },
-    ],
+    socialLinks: [{ icon: 'github', link: 'https://github.com/AgentiX-E/entity-resolver' }],
 
     search: {
       provider: 'local',

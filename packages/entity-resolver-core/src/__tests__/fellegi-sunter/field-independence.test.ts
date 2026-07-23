@@ -83,4 +83,25 @@ describe('analyzeFieldCorrelations', () => {
     // Should detect some association
     expect(report.warnings.length).toBeGreaterThan(0);
   });
+
+  it('handles empty record array', () => {
+    const report = analyzeFieldCorrelations([], ['a', 'b']);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it('handles single field', () => {
+    const records = [{ x: '1' }, { x: '1' }];
+    const report = analyzeFieldCorrelations(records, ['x']);
+    expect(report.warnings).toEqual([]);
+  });
+
+  it('handles null/undefined values', () => {
+    const records = [
+      { a: null, b: undefined },
+      { a: '1', b: '2' },
+      { a: '1', b: '2' },
+    ];
+    const report = analyzeFieldCorrelations(records, ['a', 'b']);
+    expect(report.warnings).toBeDefined();
+  });
 });

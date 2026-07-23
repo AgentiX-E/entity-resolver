@@ -123,7 +123,11 @@ describe('buildPoolConfig', () => {
 
   it('default poolSize is 10', () => {
     const config: PgStoreConfig = {
-      host: 'db.example.com', port: 5432, database: 'db', user: 'u', password: 'p',
+      host: 'db.example.com',
+      port: 5432,
+      database: 'db',
+      user: 'u',
+      password: 'p',
     };
     const result = buildPoolConfig(config);
     expect(result.max).toBe(10);
@@ -166,15 +170,27 @@ describe('PgEntityStore CRUD operations', () => {
     query(sql: string, _params?: unknown[]) {
       queries.push(sql);
       // Simulate entity operations
-      if (sql.includes('INSERT') || sql.includes('UPDATE') || sql.includes('DELETE') || sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK') || sql.includes('CREATE TABLE')) {
+      if (
+        sql.includes('INSERT') ||
+        sql.includes('UPDATE') ||
+        sql.includes('DELETE') ||
+        sql.includes('BEGIN') ||
+        sql.includes('COMMIT') ||
+        sql.includes('ROLLBACK') ||
+        sql.includes('CREATE TABLE')
+      ) {
         return Promise.resolve({ rows: [], rowCount: 1 });
       }
       if (sql.includes('SELECT')) {
-        if (_params?.[0] === "existing") {
-          return Promise.resolve({ rows: [{ cluster_id: 'existing', member_ids: [1, 2, 3], cohesion: 0.8 }] });
+        if (_params?.[0] === 'existing') {
+          return Promise.resolve({
+            rows: [{ cluster_id: 'existing', member_ids: [1, 2, 3], cohesion: 0.8 }],
+          });
         }
         if (sql.includes('&&')) {
-          return Promise.resolve({ rows: [{ cluster_id: 'neighbor', member_ids: [1, 2], cohesion: 0.5 }] });
+          return Promise.resolve({
+            rows: [{ cluster_id: 'neighbor', member_ids: [1, 2], cohesion: 0.5 }],
+          });
         }
         return Promise.resolve({ rows: [] });
       }
@@ -184,12 +200,17 @@ describe('PgEntityStore CRUD operations', () => {
       return Promise.resolve({
         query: (sql: string, _p?: unknown[]) => {
           queries.push(sql);
-          return Promise.resolve({ rows: sql.includes('SELECT') ? [{ member_ids: [1, 2, 3] }] : [], rowCount: 1 });
+          return Promise.resolve({
+            rows: sql.includes('SELECT') ? [{ member_ids: [1, 2, 3] }] : [],
+            rowCount: 1,
+          });
         },
         release: () => {},
       });
     }
-    end() { return Promise.resolve(); }
+    end() {
+      return Promise.resolve();
+    }
   }
 
   beforeEach(() => {
@@ -232,10 +253,11 @@ describe('PgEntityStore CRUD operations', () => {
         if (sql === 'ROLLBACK') return Promise.resolve({ rows: [], rowCount: 1 });
         return Promise.reject(new Error('DB error'));
       },
-      connect: () => Promise.resolve({
-        query: (sql: string) => Promise.reject(new Error('DB error')),
-        release: () => {},
-      }),
+      connect: () =>
+        Promise.resolve({
+          query: (_sql: string) => Promise.reject(new Error('DB error')),
+          release: () => {},
+        }),
       end: () => Promise.resolve(),
     };
     const errorStore = new PgEntityStore(failingPool as any);
@@ -260,7 +282,7 @@ describe('PgEntityStore CRUD operations', () => {
   });
 
   it('applySplit uses transaction', async () => {
-    await store.applySplit('entity', [["1"], ["2", "3"]]);
+    await store.applySplit('entity', [['1'], ['2', '3']]);
     expect(queries.some((q) => q.includes('BEGIN'))).toBe(true);
     expect(queries.some((q) => q.includes('COMMIT'))).toBe(true);
   });

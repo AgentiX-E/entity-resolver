@@ -2,22 +2,34 @@
 // Zero dependencies. Serves as the default store and testing reference.
 
 import type { EntityId } from '../types/core.js';
+import type { IEntityStore, EntityRecord } from '../interfaces/IEntityStore.js';
 
-export class MemoryEntityStore {
-  private entities = new Map<EntityId, { id: EntityId; memberIds: number[]; cohesion: number }>();
+/** Internal entity representation with mutable memberIds for merge. */
+interface InternalEntity {
+  readonly id: EntityId;
+  memberIds: number[];
+  cohesion: number;
+}
 
-  async getEntity(id: EntityId): Promise<{ clusterId: string; memberIds: number[]; cohesion: number } | null> {
+export class MemoryEntityStore implements IEntityStore {
+  private entities = new Map<EntityId, InternalEntity>();
+
+  async getEntity(id: EntityId): Promise<EntityRecord | null> {
     const e = this.entities.get(id);
     return e ? { clusterId: e.id, memberIds: e.memberIds, cohesion: e.cohesion } : null;
   }
 
-  async queryNeighbors(id: EntityId, _hops?: number): Promise<{ clusterId: string; memberIds: number[]; cohesion: number }[]> {
+  async queryNeighbors(id: EntityId, _hops?: number): Promise<EntityRecord[]> {
     const e = this.entities.get(id);
     return e ? [{ clusterId: e.id, memberIds: e.memberIds, cohesion: e.cohesion }] : [];
   }
 
-  async upsertEntity(entity: { clusterId: string; memberIds: number[]; cohesion: number }): Promise<void> {
-    this.entities.set(entity.clusterId, { id: entity.clusterId, memberIds: entity.memberIds, cohesion: entity.cohesion });
+  async upsertEntity(entity: EntityRecord): Promise<void> {
+    this.entities.set(entity.clusterId, {
+      id: entity.clusterId,
+      memberIds: [...entity.memberIds],
+      cohesion: entity.cohesion,
+    });
   }
 
   async deleteEntity(id: EntityId): Promise<void> {
@@ -37,7 +49,11 @@ export class MemoryEntityStore {
     this.entities.delete(entityId);
     for (let i = 0; i < memberGroups.length; i++) {
       const gid: EntityId = `${entityId}_split_${i}`;
-      this.entities.set(gid, { id: gid, memberIds: memberGroups[i]!.map(Number), cohesion: 0 });
+      this.entities.set(gid, {
+        id: gid,
+        memberIds: memberGroups[i]!.map(Number),
+        cohesion: 0,
+      });
     }
   }
 }

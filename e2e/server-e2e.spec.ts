@@ -66,7 +66,10 @@ test.describe('Server E2E — API Endpoints', () => {
     const res = await request.post('/api/v1/gazetteer', {
       data: {
         queryRecords: [{ given_name: 'Alice', surname: 'Doe' }],
-        indexRecords: [{ given_name: 'Alice', surname: 'Doe' }, { given_name: 'Bob', surname: 'Wilson' }],
+        indexRecords: [
+          { given_name: 'Alice', surname: 'Doe' },
+          { given_name: 'Bob', surname: 'Wilson' },
+        ],
       },
     });
     expect([200, 500]).toContain(res.status());

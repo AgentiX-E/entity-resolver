@@ -1,6 +1,10 @@
 // Layer 2: Headless Components — renderless state machines.
 // Manage state and interactions without any DOM manipulation.
 // Users provide their own rendering (React, Vue, Svelte, vanilla JS, Canvas, etc.)
+//
+// Pattern: mutable private state, readonly public interface.
+// State objects are stable references — mutations are immediately visible.
+// TypeScript enforces readonly access externally.
 
 import type {
   WaterfallChartData,
@@ -35,16 +39,16 @@ export function useWaterfall(): { state: WaterfallState; actions: WaterfallActio
 
   const actions: WaterfallActions = {
     hover(barIndex: number) {
-      (state as any).hoveredBar = barIndex;
+      mutate(state).hoveredBar = barIndex;
     },
     unhover() {
-      (state as any).hoveredBar = null;
+      mutate(state).hoveredBar = null;
     },
     selectPair(pairIndex: number) {
-      (state as any).selectedPair = pairIndex;
+      mutate(state).selectedPair = pairIndex;
     },
     loadData(data: WaterfallChartData) {
-      (state as any).data = data;
+      mutate(state).data = data;
     },
   };
 
@@ -77,17 +81,17 @@ export function useHistogram(): { state: HistogramState; actions: HistogramActio
 
   const actions: HistogramActions = {
     hover(binIndex: number) {
-      (state as any).hoveredBin = binIndex;
+      mutate(state).hoveredBin = binIndex;
     },
     unhover() {
-      (state as any).hoveredBin = null;
+      mutate(state).hoveredBin = null;
     },
     setThreshold(t: number) {
-      (state as any).threshold = t;
+      mutate(state).threshold = t;
     },
     loadData(data: HistogramData) {
-      (state as any).data = data;
-      (state as any).threshold = data.threshold ?? 0;
+      mutate(state).data = data;
+      mutate(state).threshold = data.threshold ?? 0;
     },
   };
 
@@ -112,6 +116,17 @@ export interface ClusterExplorerActions {
   collapseAll(): void;
 }
 
+function collectAllIds(root: ClusterExplorerData | null): Set<string> {
+  const ids = new Set<string>(['root']);
+  if (!root) return ids;
+  const walk = (node: typeof root.tree) => {
+    ids.add(node.id);
+    for (const child of node.children) walk(child);
+  };
+  walk(root.tree);
+  return ids;
+}
+
 export function useClusterExplorer(): {
   state: ClusterExplorerState;
   actions: ClusterExplorerActions;
@@ -130,35 +145,23 @@ export function useClusterExplorer(): {
       } else {
         expanded.add(nodeId);
       }
-      (state as any).expandedNodes = expanded;
+      mutate(state).expandedNodes = expanded;
     },
     selectNode(nodeId: string) {
-      (state as any).selectedNode = nodeId;
+      mutate(state).selectedNode = nodeId;
     },
     loadData(data: ClusterExplorerData) {
-      (state as any).data = data;
+      mutate(state).data = data;
     },
     expandAll() {
-      const allIds = collectAllIds(state.data);
-      (state as any).expandedNodes = allIds;
+      mutate(state).expandedNodes = collectAllIds(state.data);
     },
     collapseAll() {
-      (state as any).expandedNodes = new Set(['root']);
+      mutate(state).expandedNodes = new Set(['root']);
     },
   };
 
   return { state, actions };
-}
-
-function collectAllIds(data: ClusterExplorerData | null): Set<string> {
-  const ids = new Set<string>(['root']);
-  if (!data) return ids;
-  const walk = (node: typeof data.tree) => {
-    ids.add(node.id);
-    for (const child of node.children) walk(child);
-  };
-  walk(data.tree);
-  return ids;
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -186,15 +189,31 @@ export function useMuChart(): { state: MuChartState; actions: MuChartActions } {
 
   const actions: MuChartActions = {
     selectField(fieldIndex: number) {
-      (state as any).selectedField = fieldIndex;
+      mutate(state).selectedField = fieldIndex;
     },
     setViewMode(mode: 'grouped' | 'stacked') {
-      (state as any).viewMode = mode;
+      mutate(state).viewMode = mode;
     },
     loadData(data: MuChartData) {
-      (state as any).data = data;
+      mutate(state).data = data;
     },
   };
 
   return { state, actions };
+}
+
+// ══════════════════════════════════════════════════════════════
+// Internal utility: cast readonly to mutable within the module
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Remove `readonly` from all properties — mutability escape hatch for
+ * headless state machine actions. This is the ONLY place where readonly
+ * stripping occurs; it's encapsulated within this module and never exported.
+ */
+type Mutable<T> = { -readonly [P in keyof T]: T[P] };
+
+/** Strip readonly from an object. Only for internal use within state machines. */
+function mutate<T extends object>(obj: T): Mutable<T> {
+  return obj as Mutable<T>;
 }

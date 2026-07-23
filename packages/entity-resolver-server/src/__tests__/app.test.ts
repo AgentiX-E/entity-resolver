@@ -50,7 +50,7 @@ describe('authentication middleware', () => {
     const app = createApp({ auth: { apiKeys: ['sk-test'] } });
     const res = await app.request('/api/v1/benchmarks');
     expect(res.status).toBe(401);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.error).toContain('Authorization');
   });
 
@@ -66,7 +66,7 @@ describe('authentication middleware', () => {
     const app = createApp({ auth: { apiKeys: ['sk-test'] } });
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.status).toBe('ok');
   });
 
@@ -130,7 +130,7 @@ describe('JWT authentication', () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(res.status).toBe(403);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.error).toBe('Invalid credentials');
   });
 
@@ -157,7 +157,7 @@ describe('JWT authentication', () => {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(res.status).toBe(403);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.error).toBe('Token expired');
   });
 
@@ -329,7 +329,7 @@ describe('rate limit middleware', () => {
     await app.request('/api/v1/benchmarks');
     const res = await app.request('/api/v1/benchmarks');
     if (res.status === 429) {
-      const body = await res.json() as Record<string, unknown>;
+      const body = (await res.json()) as Record<string, unknown>;
       expect(body.retryAfter).toBeDefined();
     }
   });
@@ -420,7 +420,7 @@ describe('health endpoint', () => {
   it('returns correct status and metadata', async () => {
     const app = createApp();
     const res = await app.request('/health');
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.status).toBe('ok');
     expect(body.timestamp).toBeGreaterThan(0);
     expect(body.uptime).toBeGreaterThanOrEqual(0);
@@ -431,11 +431,11 @@ describe('health endpoint', () => {
   it('health endpoint returns growing uptime', async () => {
     const app = createApp();
     const res1 = await app.request('/health');
-    const body1 = await res1.json() as Record<string, unknown>;
+    const body1 = (await res1.json()) as Record<string, unknown>;
     await new Promise((r) => setTimeout(r, 10));
     const res2 = await app.request('/health');
-    const body2 = await res2.json() as Record<string, unknown>;
-    expect((body2.uptime as number)).toBeGreaterThanOrEqual((body1.uptime as number));
+    const body2 = (await res2.json()) as Record<string, unknown>;
+    expect(body2.uptime as number).toBeGreaterThanOrEqual(body1.uptime as number);
   });
 
   it('health endpoint works with auth configured', async () => {
@@ -445,7 +445,7 @@ describe('health endpoint', () => {
     });
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.status).toBe('ok');
   });
 
@@ -470,7 +470,7 @@ describe('API endpoints', () => {
     const app = createApp();
     const res = await app.request('/api/v1/benchmarks');
     expect(res.status).toBe(200);
-    const body = await res.json() as Array<Record<string, unknown>>;
+    const body = (await res.json()) as Array<Record<string, unknown>>;
     expect(Array.isArray(body)).toBe(true);
     expect(body.length).toBeGreaterThan(0);
     expect(body[0]!.name).toBeTruthy();
@@ -524,7 +524,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.clusters).toBeDefined();
     expect(body.statistics).toBeDefined();
   });
@@ -542,7 +542,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.config).toBeDefined();
     expect(body.fields).toBeDefined();
   });
@@ -563,15 +563,11 @@ describe('API endpoints', () => {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        records: [
-          { name: 'Alice' },
-          { name: 'Alice' },
-          { name: 'Bob' },
-        ],
+        records: [{ name: 'Alice' }, { name: 'Alice' }, { name: 'Bob' }],
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.totalPairs).toBeDefined();
   });
 
@@ -583,7 +579,7 @@ describe('API endpoints', () => {
       body: JSON.stringify({ dataset: 'Cora' }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.dataset).toBe('Cora');
     expect(body.executionTimeMs).toBeGreaterThan(0);
   });
@@ -609,7 +605,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.matches).toBeDefined();
   });
 
@@ -634,7 +630,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.crossPairs).toBeDefined();
   });
 
@@ -642,7 +638,7 @@ describe('API endpoints', () => {
     const app = createApp();
     const res = await app.request('/api/v1/mcp/tools');
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.tools).toBeDefined();
     expect(Array.isArray(body.tools)).toBe(true);
   });
@@ -663,7 +659,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.recordCount).toBe(2);
     expect(body.detectedFields).toBeDefined();
   });
@@ -677,7 +673,7 @@ describe('API endpoints', () => {
     });
     // mcp/tools.ts returns { error: '...' } with 200 for unknown tools
     // TODO: throw proper error from executeMcpTool for unknown tool names
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.error).toBeDefined();
     expect(body.error).toContain('Unknown tool');
   });
@@ -699,7 +695,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.clusters).toBeDefined();
     expect(body.statistics).toBeDefined();
   });
@@ -712,7 +708,7 @@ describe('API endpoints', () => {
       body: JSON.stringify({ tool: 'er_benchmark', params: { dataset: 'Cora' } }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.dataset).toBe('Cora');
   });
 
@@ -732,7 +728,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.config).toBeDefined();
     expect(body.fields).toBeDefined();
   });
@@ -751,7 +747,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.matches).toBeDefined();
   });
 
@@ -769,7 +765,7 @@ describe('API endpoints', () => {
       }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.crossPairs).toBeDefined();
   });
 
@@ -781,7 +777,7 @@ describe('API endpoints', () => {
       body: JSON.stringify({ tool: 'er_benchmark', params: {} }),
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, unknown>;
+    const body = (await res.json()) as Record<string, unknown>;
     expect(body.dataset).toBeDefined();
   });
 
@@ -809,7 +805,9 @@ describe('API endpoints', () => {
     const app = createApp({ auth: { jwtSecret: 'secret-min-32-chars-long-key!!' } });
     // Very long random token
     const res = await app.request('/api/v1/benchmarks', {
-      headers: { Authorization: `Bearer ${'x'.repeat(5000)}.${'y'.repeat(100)}.${'z'.repeat(100)}` },
+      headers: {
+        Authorization: `Bearer ${'x'.repeat(5000)}.${'y'.repeat(100)}.${'z'.repeat(100)}`,
+      },
     });
     expect(res.status).toBe(403);
   });

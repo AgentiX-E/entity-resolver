@@ -27,9 +27,9 @@ function resolveFile(url: string): { path: string; mime: string } | null {
 
   // Check multiple locations
   const candidates = [
-    join(PROJECT_ROOT, clean),                          // absolute from project root
-    join(__dirname, 'wasm-cache', clean),               // from e2e/wasm-cache/
-    join(__dirname, clean),                             // from e2e/
+    join(PROJECT_ROOT, clean), // absolute from project root
+    join(__dirname, 'wasm-cache', clean), // from e2e/wasm-cache/
+    join(__dirname, clean), // from e2e/
   ];
 
   for (const candidate of candidates) {

@@ -55,8 +55,11 @@ export abstract class ErBaseElement extends HTMLElement {
 
   /** Apply theme CSS custom properties to the shadow root. */
   protected applyTheme(): void {
-    for (const [prop, value] of Object.entries(DEFAULT_THEME)) {
-      (this.root.host as any)?.style?.setProperty(prop, value);
+    const host = this.root.host;
+    if (host && host instanceof HTMLElement) {
+      for (const [prop, value] of Object.entries(DEFAULT_THEME)) {
+        host.style.setProperty(prop, value);
+      }
     }
   }
 
@@ -235,9 +238,7 @@ export class ErClusterExplorerElement extends ErBaseElement {
 
     let treeHtml = '';
     if (this._data.tree && this._data.tree.children) {
-      treeHtml = this._data.tree.children
-        .map((c) => this.renderTree(c, 0))
-        .join('');
+      treeHtml = this._data.tree.children.map((c) => this.renderTree(c, 0)).join('');
     }
 
     this.root.innerHTML = `

@@ -17,14 +17,20 @@ import { globSync } from 'node:fs';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const CACHE_DIR = join(__dirname, 'wasm-cache');
 const WASM_FILE = join(CACHE_DIR, 'duckdb-eh.wasm');
-const CDN_URL =
-  'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb-eh.wasm';
+const CDN_URL = 'https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm/dist/duckdb-eh.wasm';
 
 function findPnpmWasm(): string | null {
   const pattern = join(
-    __dirname, '..', 'node_modules', '.pnpm',
-    '@duckdb+duckdb-wasm*', 'node_modules', '@duckdb',
-    'duckdb-wasm', 'dist', 'duckdb-eh.wasm',
+    __dirname,
+    '..',
+    'node_modules',
+    '.pnpm',
+    '@duckdb+duckdb-wasm*',
+    'node_modules',
+    '@duckdb',
+    'duckdb-wasm',
+    'dist',
+    'duckdb-eh.wasm',
   );
   const matches = globSync(pattern);
   return matches.length > 0 ? matches[0]! : null;
@@ -65,7 +71,9 @@ async function ensureWasm(): Promise<string> {
     });
   });
 
-  console.log(`[wasm-download] Downloaded (${(buffer.length / 1024 / 1024).toFixed(1)} MB) to ${WASM_FILE}`);
+  console.log(
+    `[wasm-download] Downloaded (${(buffer.length / 1024 / 1024).toFixed(1)} MB) to ${WASM_FILE}`,
+  );
   return WASM_FILE;
 }
 

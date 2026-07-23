@@ -6,10 +6,18 @@ import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { z } from 'zod';
 import {
-  runPipeline, autoConfigure, loadAllBenchmarks, runBenchmark,
-  gazetteerMatch, linkRecords,
+  runPipeline,
+  autoConfigure,
+  loadAllBenchmarks,
+  runBenchmark,
+  gazetteerMatch,
+  linkRecords,
 } from '@agentix-e/entity-resolver-core';
-import type { PipelineConfig, GazetteerConfig, RecordLinkConfig } from '@agentix-e/entity-resolver-core';
+import type {
+  PipelineConfig,
+  GazetteerConfig,
+  RecordLinkConfig,
+} from '@agentix-e/entity-resolver-core';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { AuthConfig } from '../middleware/auth.js';
@@ -24,49 +32,66 @@ export interface ServerConfig {
 
 // ─── Zod schemas ──────────────────────────────────────────────────
 
-const DedupeSchema = z.object({
-  records: z.array(z.record(z.string(), z.unknown())).min(1, 'At least one record required'),
-}).strict();
+const DedupeSchema = z
+  .object({
+    records: z.array(z.record(z.string(), z.unknown())).min(1, 'At least one record required'),
+  })
+  .strict();
 
-const AutoconfigureSchema = z.object({
-  records: z.array(z.record(z.string(), z.unknown())).min(1),
-}).strict();
+const AutoconfigureSchema = z
+  .object({
+    records: z.array(z.record(z.string(), z.unknown())).min(1),
+  })
+  .strict();
 
-const DiagnosticsSchema = z.object({
-  records: z.array(z.record(z.string(), z.unknown())).min(1),
-  pairIndex: z.number().int().min(0).optional(),
-}).strict();
+const DiagnosticsSchema = z
+  .object({
+    records: z.array(z.record(z.string(), z.unknown())).min(1),
+    pairIndex: z.number().int().min(0).optional(),
+  })
+  .strict();
 
-const BenchmarkRunSchema = z.object({
-  dataset: z.string().optional(),
-}).strict();
+const BenchmarkRunSchema = z
+  .object({
+    dataset: z.string().optional(),
+  })
+  .strict();
 
-const GazetteerSchema = z.object({
-  queryRecords: z.array(z.record(z.string(), z.unknown())).min(1),
-  indexRecords: z.array(z.record(z.string(), z.unknown())).min(1),
-  threshold: z.number().min(0).max(1).optional(),
-}).strict();
+const GazetteerSchema = z
+  .object({
+    queryRecords: z.array(z.record(z.string(), z.unknown())).min(1),
+    indexRecords: z.array(z.record(z.string(), z.unknown())).min(1),
+    threshold: z.number().min(0).max(1).optional(),
+  })
+  .strict();
 
-const LinkSchema = z.object({
-  left: z.array(z.record(z.string(), z.unknown())).min(1),
-  right: z.array(z.record(z.string(), z.unknown())).min(1),
-  threshold: z.number().min(0).max(1).optional(),
-}).strict();
+const LinkSchema = z
+  .object({
+    left: z.array(z.record(z.string(), z.unknown())).min(1),
+    right: z.array(z.record(z.string(), z.unknown())).min(1),
+    threshold: z.number().min(0).max(1).optional(),
+  })
+  .strict();
 
-const McpExecuteSchema = z.object({
-  tool: z.string().min(1),
-  params: z.record(z.string(), z.unknown()).optional(),
-}).strict();
+const McpExecuteSchema = z
+  .object({
+    tool: z.string().min(1),
+    params: z.record(z.string(), z.unknown()).optional(),
+  })
+  .strict();
 
 // ─── Helper ───────────────────────────────────────────────────────
 
 function parseAndRespond(c: Context, schema: z.ZodSchema, body: unknown) {
   const result = schema.safeParse(body);
   if (!result.success) {
-    return c.json({
-      error: 'Validation failed',
-      details: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`),
-    }, 400);
+    return c.json(
+      {
+        error: 'Validation failed',
+        details: result.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`),
+      },
+      400,
+    );
   }
   return null; // valid
 }
@@ -84,13 +109,15 @@ export function createApp(config: ServerConfig = {}): Hono {
   }
 
   // Enhanced health check
-  app.get('/health', (c: Context) => c.json({
-    status: 'ok',
-    timestamp: Date.now(),
-    uptime: process.uptime(),
-    memory: process.memoryUsage().heapUsed,
-    version: '0.1.0',
-  }));
+  app.get('/health', (c: Context) =>
+    c.json({
+      status: 'ok',
+      timestamp: Date.now(),
+      uptime: process.uptime(),
+      memory: process.memoryUsage().heapUsed,
+      version: '0.1.0',
+    }),
+  );
 
   // Deduplicate records
   app.post('/api/v1/dedupe', async (c: Context) => {

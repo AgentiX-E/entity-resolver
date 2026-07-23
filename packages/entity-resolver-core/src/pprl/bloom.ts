@@ -205,7 +205,7 @@ function popcount(b: number): number {
   let n = b;
   n = n - ((n >> 1) & 0x55);
   n = (n & 0x33) + ((n >> 2) & 0x33);
-  return ((n + (n >> 4)) & 0x0f);
+  return (n + (n >> 4)) & 0x0f;
 }
 
 /** Read a big-endian uint32 from a byte array at offset (with wrap). */

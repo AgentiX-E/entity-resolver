@@ -27,9 +27,11 @@ describe('scoreWithLLM', () => {
       { leftId: 2, rightId: 3, score: 0.01, probability: 0.01 },
     ];
 
-    const results = await scoreWithLLM(pairs, [
-      { name: 'A' }, { name: 'A' }, { name: 'B' }, { name: 'C' },
-    ], { candidateLo: 0.4, candidateHi: 0.6 });
+    const results = await scoreWithLLM(
+      pairs,
+      [{ name: 'A' }, { name: 'A' }, { name: 'B' }, { name: 'C' }],
+      { candidateLo: 0.4, candidateHi: 0.6 },
+    );
 
     // Neither pair is in [0.4, 0.6] → no LLM calls
     expect(results).toHaveLength(0);
@@ -40,9 +42,7 @@ describe('scoreWithLLM', () => {
   it('handles pairs in boundary range', async () => {
     process.env['DEEPSEEK_API_KEY'] = 'test-key-do-not-use';
 
-    const pairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.5, probability: 0.5 },
-    ];
+    const pairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.5, probability: 0.5 }];
 
     await expect(
       scoreWithLLM(pairs, [{ name: 'John' }, { name: 'Jon' }], {
@@ -82,13 +82,23 @@ describe('LLM scorer with mocked fetch', () => {
     process.env['DEEPSEEK_API_KEY'] = 'test-key';
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async () => {
-      return new Response(JSON.stringify({
-        choices: [{ message: { content: JSON.stringify({ matches: [{ idA: 0, idB: 1, score: 0.52 }] }) } }],
-      }), { status: 200 });
+      return new Response(
+        JSON.stringify({
+          choices: [
+            {
+              message: { content: JSON.stringify({ matches: [{ idA: 0, idB: 1, score: 0.52 }] }) },
+            },
+          ],
+        }),
+        { status: 200 },
+      );
     }) as typeof globalThis.fetch;
     try {
       const pairs = [{ leftId: 0, rightId: 1, score: 0.5 }];
-      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], { candidateLo: 0.4, candidateHi: 0.6 });
+      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], {
+        candidateLo: 0.4,
+        candidateHi: 0.6,
+      });
       expect(Array.isArray(results)).toBe(true);
     } finally {
       globalThis.fetch = originalFetch;
@@ -100,13 +110,19 @@ describe('LLM scorer with mocked fetch', () => {
     process.env['DEEPSEEK_API_KEY'] = 'test-key';
     const originalFetch = globalThis.fetch;
     globalThis.fetch = (async () => {
-      return new Response(JSON.stringify({
-        choices: [{ message: { content: 'not-valid-json' } }],
-      }), { status: 200 });
+      return new Response(
+        JSON.stringify({
+          choices: [{ message: { content: 'not-valid-json' } }],
+        }),
+        { status: 200 },
+      );
     }) as typeof globalThis.fetch;
     try {
       const pairs = [{ leftId: 0, rightId: 1, score: 0.5 }];
-      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], { candidateLo: 0.4, candidateHi: 0.6 });
+      const results = await scoreWithLLM(pairs, [{ name: 'A' }, { name: 'B' }], {
+        candidateLo: 0.4,
+        candidateHi: 0.6,
+      });
       expect(Array.isArray(results)).toBe(true);
     } finally {
       globalThis.fetch = originalFetch;

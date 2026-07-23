@@ -14,16 +14,20 @@ export async function runBenchmark(dataset: BenchmarkDataset): Promise<Benchmark
   const sample = dataset.records[0] ?? {};
   const fields = Object.keys(sample);
   const comps = fields.map((f) => nameComparisonSpec(f));
-  const passes = fields.length >= 2
-    ? [{ fields: fields.slice(0, 2), transforms: ['strip', 'lowercase'] as const }]
-    : [{ fields, transforms: ['strip', 'lowercase'] as const }];
+  const passes =
+    fields.length >= 2
+      ? [{ fields: fields.slice(0, 2), transforms: ['strip', 'lowercase'] as const }]
+      : [{ fields, transforms: ['strip', 'lowercase'] as const }];
 
   let predClusters: Map<EntityId, Cluster> = new Map();
   let matchCount = 0;
 
   try {
     const result = await runPipeline(dataset.records, {
-      blocking: { passes }, comparisons: comps, matchThreshold: 0.5, autoConfigure: false,
+      blocking: { passes },
+      comparisons: comps,
+      matchThreshold: 0.5,
+      autoConfigure: false,
     });
     predClusters = result.clusters as Map<EntityId, Cluster>;
     matchCount = result.statistics.matchedRecords;
@@ -40,29 +44,42 @@ export async function runBenchmark(dataset: BenchmarkDataset): Promise<Benchmark
   const em = evaluateClustering(predClusters, refClusters);
 
   return {
-    dataset: dataset.name, recordCount: dataset.recordCount,
-    trueMatchCount: dataset.trueMatchCount, foundMatchCount: matchCount,
-    purity: em.clusterPrecision, completeness: em.clusterRecall,
+    dataset: dataset.name,
+    recordCount: dataset.recordCount,
+    trueMatchCount: dataset.trueMatchCount,
+    foundMatchCount: matchCount,
+    purity: em.clusterPrecision,
+    completeness: em.clusterRecall,
     executionTimeMs: Date.now() - startTime,
   };
 }
 
-export async function runAllBenchmarks(): Promise<{ results: BenchmarkResult[]; totalTimeMs: number }> {
+export async function runAllBenchmarks(): Promise<{
+  results: BenchmarkResult[];
+  totalTimeMs: number;
+}> {
   const datasets = loadAllBenchmarks();
   const results: BenchmarkResult[] = [];
   const totalStart = Date.now();
-  for (const dataset of datasets) { results.push(await runBenchmark(dataset)); }
+  for (const dataset of datasets) {
+    results.push(await runBenchmark(dataset));
+  }
   return { results, totalTimeMs: Date.now() - totalStart };
 }
 
 export function formatBenchmarkReport(results: BenchmarkResult[]): string {
   const lines: string[] = [
-    '='.repeat(70), '  Entity Resolver Benchmark Report', '='.repeat(70), '',
+    '='.repeat(70),
+    '  Entity Resolver Benchmark Report',
+    '='.repeat(70),
+    '',
     '  Dataset             | Records | Matches | Purity  | Completeness | Time',
     '  ' + '-'.repeat(67),
   ];
   for (const r of results) {
-    lines.push(`  ${r.dataset.padEnd(20)} | ${String(r.recordCount).padStart(7)} | ${String(r.foundMatchCount).padStart(7)} | ${r.purity.toFixed(3).padStart(7)} | ${r.completeness.toFixed(3).padStart(12)} | ${String(r.executionTimeMs + 'ms').padStart(7)}`);
+    lines.push(
+      `  ${r.dataset.padEnd(20)} | ${String(r.recordCount).padStart(7)} | ${String(r.foundMatchCount).padStart(7)} | ${r.purity.toFixed(3).padStart(7)} | ${r.completeness.toFixed(3).padStart(12)} | ${String(r.executionTimeMs + 'ms').padStart(7)}`,
+    );
   }
   lines.push('  ' + '-'.repeat(67));
   const totalTime = results.reduce((s, r) => s + r.executionTimeMs, 0);

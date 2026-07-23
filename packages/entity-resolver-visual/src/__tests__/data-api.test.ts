@@ -219,7 +219,12 @@ describe('buildUnlinkablesData', () => {
   it('handles zero singletons (all linked)', () => {
     const result = makeMockResult({
       singletons: [],
-      statistics: { ...makeMockResult().statistics, totalRecords: 4, matchedRecords: 4, matchRate: 1 },
+      statistics: {
+        ...makeMockResult().statistics,
+        totalRecords: 4,
+        matchedRecords: 4,
+        matchRate: 1,
+      },
     });
     const data = buildUnlinkablesData(result);
     expect(data.unlinkedRecords).toBe(0);
@@ -231,7 +236,12 @@ describe('buildUnlinkablesData', () => {
     const result = makeMockResult({
       scoredPairs: [],
       singletons: [0, 1, 2, 3, 4],
-      statistics: { ...makeMockResult().statistics, totalRecords: 5, matchedRecords: 0, matchRate: 0 },
+      statistics: {
+        ...makeMockResult().statistics,
+        totalRecords: 5,
+        matchedRecords: 0,
+        matchRate: 0,
+      },
     });
     const data = buildUnlinkablesData(result);
     expect(data.unlinkedRecords).toBe(5);
@@ -319,10 +329,13 @@ describe('buildMuChartData edge cases', () => {
     const result = makeMockResult({
       diagnostics: {
         muParameters: new Map([
-          ['name', {
-            mProbabilities: new Map([['name:exact_match', 0.95]]),
-            uProbabilities: new Map(),
-          }],
+          [
+            'name',
+            {
+              mProbabilities: new Map([['name:exact_match', 0.95]]),
+              uProbabilities: new Map(),
+            },
+          ],
         ]),
         matchWeightDistribution: [],
         unlinkableCount: 0,
@@ -342,10 +355,13 @@ describe('buildMuChartData edge cases', () => {
     const result = makeMockResult({
       diagnostics: {
         muParameters: new Map([
-          ['empty_field', {
-            mProbabilities: new Map(),
-            uProbabilities: new Map(),
-          }],
+          [
+            'empty_field',
+            {
+              mProbabilities: new Map(),
+              uProbabilities: new Map(),
+            },
+          ],
         ]),
         matchWeightDistribution: [],
         unlinkableCount: 0,
@@ -366,10 +382,13 @@ describe('buildMuChartData edge cases', () => {
     const result = makeMockResult({
       diagnostics: {
         muParameters: new Map([
-          ['name', {
-            mProbabilities: new Map([['name:exact_match', 0.95]]),
-            uProbabilities: new Map([['name:exact_match', 0]]),
-          }],
+          [
+            'name',
+            {
+              mProbabilities: new Map([['name:exact_match', 0.95]]),
+              uProbabilities: new Map([['name:exact_match', 0]]),
+            },
+          ],
         ]),
         matchWeightDistribution: [],
         unlinkableCount: 0,
@@ -398,10 +417,13 @@ describe('buildWaterfallData edge cases', () => {
     const result = makeMockResult({
       diagnostics: {
         muParameters: new Map([
-          ['name', {
-            mProbabilities: new Map([['name:exact_match', 0]]),
-            uProbabilities: new Map([['name:exact_match', 0.05]]),
-          }],
+          [
+            'name',
+            {
+              mProbabilities: new Map([['name:exact_match', 0]]),
+              uProbabilities: new Map([['name:exact_match', 0.05]]),
+            },
+          ],
         ]),
         matchWeightDistribution: [],
         unlinkableCount: 0,

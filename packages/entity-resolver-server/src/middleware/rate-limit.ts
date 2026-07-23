@@ -1,7 +1,7 @@
 // Rate limiting middleware — token bucket algorithm.
 // Memory-based implementation with configurable limits and TTL cleanup.
 
-import type { Context, Next } from 'hono';
+import type { Context, MiddlewareHandler } from 'hono';
 
 /** Rate limit configuration. */
 export interface RateLimitConfig {
@@ -21,7 +21,7 @@ interface Bucket {
 /** Rate limiter handle returned by createRateLimitMiddleware. */
 export interface RateLimiter {
   /** Hono middleware function. */
-  readonly middleware: (c: Context, next: Next) => Promise<void>;
+  readonly middleware: MiddlewareHandler;
   /** Stop the automatic cleanup timer and clear all buckets. */
   readonly dispose: () => void;
 }
@@ -43,13 +43,16 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
   const buckets = new Map<string, Bucket>();
   let cleanupTimer: ReturnType<typeof setInterval> | null = null;
 
-  const middleware = async (c: Context, next: Next) => {
+  const middleware: MiddlewareHandler = async (c, next) => {
     // Skip rate limiting for health endpoint
-    if (c.req.path === '/health') return next();
+    if (c.req.path === '/health') {
+      await next();
+      return;
+    }
 
     const key = config.keyGenerator
       ? config.keyGenerator(c)
-      : c.req.header('X-Forwarded-For') ?? c.req.header('X-Real-IP') ?? 'anonymous';
+      : (c.req.header('X-Forwarded-For') ?? c.req.header('X-Real-IP') ?? 'anonymous');
 
     let bucket = buckets.get(key);
 
@@ -67,7 +70,8 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
     // Check rate limit
     if (bucket.tokens >= 1) {
       bucket.tokens -= 1;
-      return next();
+      await next();
+      return;
     }
 
     return c.json(
@@ -80,15 +84,18 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
   };
 
   // Start periodic TTL cleanup: evict buckets inactive for 2x the window
-  cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    const ttl = windowMs * 2;
-    for (const [key, bucket] of buckets) {
-      if (now - bucket.lastRefill > ttl) {
-        buckets.delete(key);
+  cleanupTimer = setInterval(
+    () => {
+      const now = Date.now();
+      const ttl = windowMs * 2;
+      for (const [key, bucket] of buckets) {
+        if (now - bucket.lastRefill > ttl) {
+          buckets.delete(key);
+        }
       }
-    }
-  }, Math.min(windowMs, 60000)); // Clean at most every 60s
+    },
+    Math.min(windowMs, 60000),
+  ); // Clean at most every 60s
 
   const dispose = () => {
     if (cleanupTimer) {

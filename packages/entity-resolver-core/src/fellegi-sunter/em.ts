@@ -180,11 +180,7 @@ function extractKeys(pairVectors: readonly (readonly ComparisonVector[])[]): {
  * Uses log-space computation for numerical stability.
  * Results are written into the pre-allocated `posteriors` array.
  */
-function eStep(
-  pairKeySets: readonly string[][],
-  state: EMState,
-  posteriors: number[],
-): void {
+function eStep(pairKeySets: readonly string[][], state: EMState, posteriors: number[]): void {
   const logPrior = safeLog(state.lambda);
   const log1MinusPrior = safeLog(1 - state.lambda);
 
@@ -201,10 +197,7 @@ function eStep(
     }
 
     const logNumerator = logPrior + logMatchProb;
-    const logDenominator = logSumExp(
-      logPrior + logMatchProb,
-      log1MinusPrior + logNonMatchProb,
-    );
+    const logDenominator = logSumExp(logPrior + logMatchProb, log1MinusPrior + logNonMatchProb);
 
     posteriors[i] = Math.exp(logNumerator - logDenominator);
   }
@@ -313,10 +306,7 @@ function levelRank(level: string): number {
  * higher comparison levels should have higher probability under the match
  * distribution and lower probability under the non-match distribution.
  */
-function enforceLevelOrdering(
-  fieldKeys: readonly string[],
-  state: EMState,
-): void {
+function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): void {
   // Sort keys by level rank (ascending = strongest first)
   const sorted = [...fieldKeys].sort((a, b) => {
     const [, levelA] = a.split(':');
@@ -359,10 +349,7 @@ function enforceLevelOrdering(
  *
  * L(θ) = Σ_i log[ λ · ∏_f m_f(γ_i^f) + (1-λ) · ∏_f u_f(γ_i^f) ]
  */
-function computeLogLikelihood(
-  pairKeySets: readonly string[][],
-  state: EMState,
-): number {
+function computeLogLikelihood(pairKeySets: readonly string[][], state: EMState): number {
   const logPrior = safeLog(state.lambda);
   const log1MinusPrior = safeLog(1 - state.lambda);
   let ll = 0;

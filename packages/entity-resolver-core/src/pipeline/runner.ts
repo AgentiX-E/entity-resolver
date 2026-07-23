@@ -7,6 +7,7 @@ import type {
   PipelineStatistics,
   DiagnosticData,
   FieldMetadata,
+  FieldMuParams,
 } from '../types/core.js';
 import type { FSParameters } from '../fellegi-sunter/parameters.js';
 import type { BlockingConfig, CandidatePair } from '../blocking/types.js';
@@ -197,21 +198,26 @@ function buildDiagnostics(
   params: FSParameters,
   _pairVectors: ComparisonVector[][],
 ): DiagnosticData {
-  const muParams = new Map<string, any>();
+  // Build muParameters map keyed by field name
+  const muParams = new Map<
+    string,
+    { mProbabilities: Map<string, number>; uProbabilities: Map<string, number> }
+  >();
   for (const key of params.mProbabilities.keys()) {
     const [field] = key.split(':');
-    if (!muParams.has(field!))
+    if (!muParams.has(field!)) {
       muParams.set(field!, { mProbabilities: new Map(), uProbabilities: new Map() });
+    }
     muParams.get(field!)!.mProbabilities.set(key, params.mProbabilities.get(key)!);
     muParams.get(field!)!.uProbabilities.set(key, params.uProbabilities.get(key)!);
   }
+
   // Build match weight histogram from per-pair vector counts
-  const weightBins: Array<{ binMin: number; binMax: number; count: number }> = [];
+  const weightBins: Array<{ minWeight: number; maxWeight: number; count: number }> = [];
   const totalPairs = _pairVectors.length;
   if (totalPairs > 0) {
-    // Compute approximate match weight bins from parameter distribution
     for (let bin = 0; bin < 20; bin++) {
-      weightBins.push({ binMin: bin * 5 - 50, binMax: (bin + 1) * 5 - 50, count: 0 });
+      weightBins.push({ minWeight: bin * 5 - 50, maxWeight: (bin + 1) * 5 - 50, count: 0 });
     }
     for (const pair of _pairVectors) {
       let weight = 0;
@@ -225,9 +231,19 @@ function buildDiagnostics(
       if (weightBins[binIdx]) weightBins[binIdx]!.count++;
     }
   }
+
+  // Convert mutable Maps to ReadonlyMaps for the immutable DiagnosticData return type
+  const frozenMuParams = new Map<string, FieldMuParams>();
+  for (const [field, params] of muParams) {
+    frozenMuParams.set(field, {
+      mProbabilities: new Map(params.mProbabilities),
+      uProbabilities: new Map(params.uProbabilities),
+    });
+  }
+
   return {
-    muParameters: muParams as any,
-    matchWeightDistribution: weightBins as any,
+    muParameters: frozenMuParams,
+    matchWeightDistribution: weightBins,
     unlinkableCount: 0,
   };
 }

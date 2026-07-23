@@ -59,7 +59,11 @@ describe('buildGoldenRecord', () => {
       ];
       const result = buildGoldenRecord(records, {
         defaultStrategy: 'source_priority',
-        sourcePriority: new Map([['crm', 1], ['website', 2], ['email', 999]]),
+        sourcePriority: new Map([
+          ['crm', 1],
+          ['website', 2],
+          ['email', 999],
+        ]),
       });
       expect(result.goldenRecord.name).toBe('John');
     });
@@ -103,6 +107,13 @@ describe('buildGoldenRecord', () => {
     it('handles all empty values gracefully', () => {
       const result = buildGoldenRecord([{ x: '' }, { x: '' }]);
       expect(result.goldenRecord.x).toBeUndefined();
+    });
+
+    it('unknown survivor strategy falls back to first value', () => {
+      const result = buildGoldenRecord([{ name: 'A' }, { name: 'B' }], {
+        rules: [{ field: 'name', strategy: 'unknown_strategy' as any }],
+      });
+      expect(result.goldenRecord.name).toBeDefined();
     });
   });
 });

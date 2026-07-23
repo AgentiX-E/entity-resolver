@@ -157,8 +157,9 @@ export async function linkRecords(
     const blockingResult = standardBlocking(allRecords, config.blocking);
     // Filter to cross-set pairs only
     candidates = blockingResult.pairs.filter(
-      (p) => (p.leftId < leftCount && p.rightId >= leftCount) ||
-             (p.leftId >= leftCount && p.rightId < leftCount),
+      (p) =>
+        (p.leftId < leftCount && p.rightId >= leftCount) ||
+        (p.leftId >= leftCount && p.rightId < leftCount),
     );
   } else {
     // All cross-set pairs (O(m × n))

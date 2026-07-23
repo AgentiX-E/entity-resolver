@@ -92,14 +92,7 @@ describe('incrementalAdd', () => {
     const { records, pairs, result } = createBaseState();
 
     // Add a new "Alice" — should merge with existing Alice cluster
-    const out = await incrementalAdd(
-      [{ name: 'Alice' }],
-      records,
-      result,
-      pairs,
-      matchFn,
-      0.5,
-    );
+    const out = await incrementalAdd([{ name: 'Alice' }], records, result, pairs, matchFn, 0.5);
     expect(out.metadata.totalRecords).toBe(5);
   });
 
@@ -107,14 +100,7 @@ describe('incrementalAdd', () => {
     const matchFn = makeMatchFn();
     const { records, pairs, result } = createBaseState();
 
-    const out = await incrementalAdd(
-      [{ name: 'Charlie' }],
-      records,
-      result,
-      pairs,
-      matchFn,
-      0.5,
-    );
+    const out = await incrementalAdd([{ name: 'Charlie' }], records, result, pairs, matchFn, 0.5);
     expect(out.metadata.totalRecords).toBe(5);
     // Charlie should be a singleton or in its own cluster
   });
@@ -140,7 +126,8 @@ describe('incrementalAdd', () => {
     const matchFn = async (a: RawRecord, b: RawRecord) => {
       callCount++;
       return {
-        leftId: 0, rightId: 0,
+        leftId: 0,
+        rightId: 0,
         score: String(a.name) === String(b.name) ? 1 : 0,
         probability: String(a.name) === String(b.name) ? 1 : 0,
       };
@@ -227,9 +214,7 @@ describe('incrementalDelete', () => {
 
   it('D5: deleting a record that has no pairs', () => {
     // Setup: 3 records, pair only between 0-1, record 2 is a singleton
-    const pairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.95, probability: 0.95 },
-    ];
+    const pairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.95, probability: 0.95 }];
     const result = connectedComponents(pairs, 3, 0.5);
 
     // Delete the singleton (id=2)
@@ -282,10 +267,10 @@ describe('incrementalModify', () => {
   it('M3: modifying record to match a different cluster', async () => {
     // Alice[0] was in Alice cluster, now changed to Bob — should merge with Bob
     const records: RawRecord[] = [
-      { name: 'Bob' },    // was Alice, now Bob
-      { name: 'Alice' },  // still Alice
-      { name: 'Bob' },    // Bob
-      { name: 'Bob' },    // Bob
+      { name: 'Bob' }, // was Alice, now Bob
+      { name: 'Alice' }, // still Alice
+      { name: 'Bob' }, // Bob
+      { name: 'Bob' }, // Bob
     ];
     const pairs: ScoredPair[] = [
       { leftId: 0, rightId: 1, score: 0.1, probability: 0.1 },
@@ -303,18 +288,15 @@ describe('incrementalModify', () => {
     const matchFn = async (a: RawRecord, b: RawRecord) => {
       callCount++;
       return {
-        leftId: 0, rightId: 0,
+        leftId: 0,
+        rightId: 0,
         score: String(a.name) === String(b.name) ? 0.95 : 0.1,
         probability: 0.5,
       };
     };
 
-    const records: RawRecord[] = [
-      { name: 'A' }, { name: 'B' }, { name: 'C' }, { name: 'D' },
-    ];
-    const pairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.1, probability: 0.1 },
-    ];
+    const records: RawRecord[] = [{ name: 'A' }, { name: 'B' }, { name: 'C' }, { name: 'D' }];
+    const pairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.1, probability: 0.1 }];
 
     // Modify records 0 and 2
     await incrementalModify([0, 2], records, pairs, matchFn, 0.5);
@@ -342,9 +324,7 @@ describe('incrementalModify', () => {
   });
 
   it('M5: kept pairs from unmodified records are preserved', async () => {
-    const records: RawRecord[] = [
-      { name: 'A' }, { name: 'A' }, { name: 'B' }, { name: 'B' },
-    ];
+    const records: RawRecord[] = [{ name: 'A' }, { name: 'A' }, { name: 'B' }, { name: 'B' }];
     const pairs: ScoredPair[] = [
       { leftId: 0, rightId: 1, score: 0.95, probability: 0.95 },
       { leftId: 2, rightId: 3, score: 0.95, probability: 0.95 },
@@ -358,12 +338,8 @@ describe('incrementalModify', () => {
   });
 
   it('M6: modifying all records is equivalent to full re-compute', async () => {
-    const records: RawRecord[] = [
-      { name: 'A' }, { name: 'A' }, { name: 'B' },
-    ];
-    const oldPairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.1, probability: 0.1 },
-    ];
+    const records: RawRecord[] = [{ name: 'A' }, { name: 'A' }, { name: 'B' }];
+    const oldPairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.1, probability: 0.1 }];
 
     const matchFn = makeMatchFn();
     const incResult = await incrementalModify([0, 1, 2], records, oldPairs, matchFn, 0.5);

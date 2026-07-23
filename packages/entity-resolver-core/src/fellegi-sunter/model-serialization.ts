@@ -139,12 +139,17 @@ export function deserializeModel(json: string): DeserializedModel {
         continue;
       }
       if (typeof comp.field !== 'string') errors.push(`comparisons[${i}]: missing "field"`);
-      if (typeof comp.scorerName !== 'string') errors.push(`comparisons[${i}]: missing "scorerName"`);
+      if (typeof comp.scorerName !== 'string')
+        errors.push(`comparisons[${i}]: missing "scorerName"`);
       if (!Array.isArray(comp.levels)) errors.push(`comparisons[${i}]: missing "levels" array`);
       else {
         for (let j = 0; j < comp.levels.length; j++) {
           const lvl = comp.levels[j];
-          if (!isRecord(lvl) || typeof lvl.label !== 'string' || typeof lvl.threshold !== 'number') {
+          if (
+            !isRecord(lvl) ||
+            typeof lvl.label !== 'string' ||
+            typeof lvl.threshold !== 'number'
+          ) {
             errors.push(`comparisons[${i}].levels[${j}]: invalid level`);
           }
         }
@@ -191,8 +196,8 @@ export function deserializeFSParamsFromJSON(json: string): FSParameters {
 
   const params: FSParameters = {
     lambda: Number(raw.lambda),
-    mProbabilities: new Map(Object.entries(raw.mProbabilities as Record<string, number> ?? {})),
-    uProbabilities: new Map(Object.entries(raw.uProbabilities as Record<string, number> ?? {})),
+    mProbabilities: new Map(Object.entries((raw.mProbabilities as Record<string, number>) ?? {})),
+    uProbabilities: new Map(Object.entries((raw.uProbabilities as Record<string, number>) ?? {})),
   };
 
   validateParameters(params);

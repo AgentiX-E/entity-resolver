@@ -1,8 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import {
-  DuckDBWasmStore,
-  DuckDBWasmInitResult,
-} from '../../index.js';
+import { DuckDBWasmStore, DuckDBWasmInitResult } from '../../index.js';
 
 // ═══════════════════════════════════════════════════════════════
 // DuckDBWasmStore — Enterprise Distribution
@@ -158,7 +155,10 @@ describe('DuckDBWasmStore — edge cases', () => {
     const store = new DuckDBWasmStore({ offline: true });
     await store.init();
     await store.upsertEntity({ clusterId: 'split-me', memberIds: [1, 2, 3, 4], cohesion: 0.7 });
-    await store.applySplit('split-me', [['1', '2'], ['3', '4']]);
+    await store.applySplit('split-me', [
+      ['1', '2'],
+      ['3', '4'],
+    ]);
     const original = await store.getEntity('split-me');
     expect(original).toBeNull();
     const g0 = await store.getEntity('split-me_split_0');

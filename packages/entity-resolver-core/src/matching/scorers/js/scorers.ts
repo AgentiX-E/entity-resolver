@@ -444,10 +444,7 @@ function parseCoordinates(value: unknown): Coordinates | null {
  * Haversine formula — great-circle distance between two points on Earth.
  * Returns distance in kilometers.
  */
-function haversineDistance(
-  lat1: number, lng1: number,
-  lat2: number, lng2: number,
-): number {
+function haversineDistance(lat1: number, lng1: number, lat2: number, lng2: number): number {
   const R = 6371; // Earth radius in km
   const dLat = toRad(lat2 - lat1);
   const dLng = toRad(lng2 - lng1);

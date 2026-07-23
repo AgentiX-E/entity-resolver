@@ -461,8 +461,9 @@ describe('blocking utilities', () => {
   });
 
   it('soundex produces consistent codes', () => {
-    expect(applyBlockingTransforms('Robert', ['soundex']))
-      .toBe(applyBlockingTransforms('Rupert', ['soundex']));
+    expect(applyBlockingTransforms('Robert', ['soundex'])).toBe(
+      applyBlockingTransforms('Rupert', ['soundex']),
+    );
   });
 
   it('metaphone produces output', () => {

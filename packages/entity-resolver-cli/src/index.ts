@@ -1,8 +1,6 @@
 // @agentix-e/entity-resolver-cli — CLI entry point.
 // Command-line tool for entity resolver deduplication, matching, and diagnostics.
 
-import { createInterface } from 'node:readline';
-
 // TUI Diagnostics
 export {
   renderWaterfallTUI,
@@ -24,7 +22,6 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
   }
 
   const command = args[0]!;
-  const commandArgs = args.slice(1);
 
   switch (command) {
     case 'health':
@@ -63,7 +60,10 @@ TUI Renderers (imported programmatically):
 }
 
 // Wire up as CLI when executed directly
-if (process.argv[1]?.endsWith('/entity-resolver-cli') || process.argv[1]?.endsWith('\\entity-resolver-cli')) {
+if (
+  process.argv[1]?.endsWith('/entity-resolver-cli') ||
+  process.argv[1]?.endsWith('\\entity-resolver-cli')
+) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);

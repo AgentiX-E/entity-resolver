@@ -59,7 +59,10 @@ describe('DuckDBStore', () => {
   it('splits entity into groups', async () => {
     const store = await DuckDBStore.create();
     await store.upsertEntity({ clusterId: 'parent', memberIds: [1, 2, 3, 4, 5], cohesion: 0.6 });
-    await store.applySplit('parent', [['1', '2'], ['3', '4', '5']]);
+    await store.applySplit('parent', [
+      ['1', '2'],
+      ['3', '4', '5'],
+    ]);
     expect(await store.getEntity('parent')).toBeNull();
     const g0 = await store.getEntity('parent_split_0');
     expect(g0).not.toBeNull();
@@ -70,7 +73,11 @@ describe('DuckDBStore', () => {
     const store = await DuckDBStore.create();
     // Insert many
     for (let i = 0; i < 20; i++) {
-      await store.upsertEntity({ clusterId: `e${i}`, memberIds: [i, i + 100], cohesion: 0.5 + i * 0.02 });
+      await store.upsertEntity({
+        clusterId: `e${i}`,
+        memberIds: [i, i + 100],
+        cohesion: 0.5 + i * 0.02,
+      });
     }
     // Verify all
     for (let i = 0; i < 20; i++) {

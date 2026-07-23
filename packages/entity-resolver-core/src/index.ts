@@ -19,6 +19,8 @@ export type {
 
 // Interfaces
 export type { IScorer, ScorerFactory } from './interfaces/IScorer.js';
+export type { IEntityStore, ICloseableStore, EntityRecord } from './interfaces/IEntityStore.js';
+export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
 
 // Scorers
 export {
@@ -206,6 +208,7 @@ export { gazetteerMatch, linkRecords } from './pipeline/linking.js';
 
 // Memory reference implementations
 export { MemoryEntityStore } from './memory/entity-store.js';
+export { MemoryConfigStore } from './memory/config-store.js';
 
 // PPRL
 export type { PPRLConfig } from './pprl/bloom.js';

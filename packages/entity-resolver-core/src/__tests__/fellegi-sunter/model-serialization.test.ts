@@ -203,7 +203,12 @@ describe('deserializeModel validation', () => {
 
   it('V3: rejects missing parameters', () => {
     const result = deserializeModel(
-      JSON.stringify({ version: '1.0', comparisons: [], blocking: { passes: [] }, matchThreshold: 0.5 }),
+      JSON.stringify({
+        version: '1.0',
+        comparisons: [],
+        blocking: { passes: [] },
+        matchThreshold: 0.5,
+      }),
     );
     expect(result.valid).toBe(false);
     expect(result.errors.some((e) => e.includes('parameters'))).toBe(true);

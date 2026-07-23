@@ -1,7 +1,8 @@
-// Tests for MemoryEntityStore — in-memory reference implementation.
+// Tests for MemoryEntityStore and MemoryConfigStore — in-memory reference implementations.
 
 import { describe, it, expect } from 'vitest';
 import { MemoryEntityStore } from '../../memory/entity-store.js';
+import { MemoryConfigStore } from '../../memory/config-store.js';
 
 describe('MemoryEntityStore', () => {
   describe('getEntity', () => {
@@ -102,10 +103,7 @@ describe('MemoryEntityStore', () => {
     it('splits entity into groups', async () => {
       const store = new MemoryEntityStore();
       await store.upsertEntity({ clusterId: 'c1', memberIds: [1, 2, 3, 4], cohesion: 0.5 });
-      await store.applySplit('c1', [
-        ['1', '2'] as any,
-        ['3', '4'] as any,
-      ]);
+      await store.applySplit('c1', [['1', '2'] as any, ['3', '4'] as any]);
 
       // Original entity deleted
       const original = await store.getEntity('c1');
@@ -124,5 +122,66 @@ describe('MemoryEntityStore', () => {
       const store = new MemoryEntityStore();
       await expect(store.applySplit('nonexistent', [])).resolves.toBeUndefined();
     });
+  });
+});
+
+// ══════════════════════════════════════════════════════
+// MemoryConfigStore
+// ══════════════════════════════════════════════════════
+
+describe('MemoryConfigStore', () => {
+  it('load returns null for non-existent config', async () => {
+    const store = new MemoryConfigStore();
+    expect(await store.load('missing')).toBeNull();
+  });
+
+  it('save and load roundtrip', async () => {
+    const store = new MemoryConfigStore();
+    const config = {
+      blocking: { passes: [{ fields: ['name'], transforms: ['strip' as const] }] },
+      comparisons: [],
+      matchThreshold: 0.5,
+    };
+    await store.save('my-pipeline', config);
+    const loaded = await store.load('my-pipeline');
+    expect(loaded).not.toBeNull();
+    expect(loaded!.name).toBe('my-pipeline');
+    expect(loaded!.config.matchThreshold).toBe(0.5);
+    expect(loaded!.createdAt).toBeTruthy();
+    expect(loaded!.updatedAt).toBeTruthy();
+  });
+
+  it('list returns all config names', async () => {
+    const store = new MemoryConfigStore();
+    await store.save('config-a', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
+    await store.save('config-b', { blocking: {}, comparisons: [], matchThreshold: 0.7 } as any);
+    const list = await store.list();
+    expect(list).toHaveLength(2);
+    expect(list).toContain('config-a');
+    expect(list).toContain('config-b');
+  });
+
+  it('delete removes config', async () => {
+    const store = new MemoryConfigStore();
+    await store.save('temp', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
+    await store.delete('temp');
+    expect(await store.load('temp')).toBeNull();
+  });
+
+  it('delete non-existent is idempotent', async () => {
+    const store = new MemoryConfigStore();
+    await expect(store.delete('nonexistent')).resolves.toBeUndefined();
+  });
+
+  it('save updates existing config maintains createdAt', async () => {
+    const store = new MemoryConfigStore();
+    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
+    const first = await store.load('pipeline');
+    // Wait 1ms to ensure different updatedAt
+    await new Promise((r) => setTimeout(r, 1));
+    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.8 } as any);
+    const second = await store.load('pipeline');
+    expect(second!.createdAt).toBe(first!.createdAt);
+    expect(second!.config.matchThreshold).toBe(0.8);
   });
 });

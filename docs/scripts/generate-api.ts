@@ -26,7 +26,8 @@ const PACKAGES: PackageEntry[] = [
   {
     name: 'node',
     dir: 'packages/entity-resolver-node',
-    description: 'Node.js adapters — DuckDB embedded store, PostgreSQL store with mTLS, storage resolver.',
+    description:
+      'Node.js adapters — DuckDB embedded store, PostgreSQL store with mTLS, storage resolver.',
   },
   {
     name: 'browser',
@@ -36,17 +37,20 @@ const PACKAGES: PackageEntry[] = [
   {
     name: 'server',
     dir: 'packages/entity-resolver-server',
-    description: 'Deployable HTTP/gRPC/MCP API service (stateless by default) with auth and rate limiting.',
+    description:
+      'Deployable HTTP/gRPC/MCP API service (stateless by default) with auth and rate limiting.',
   },
   {
     name: 'cli',
     dir: 'packages/entity-resolver-cli',
-    description: 'Command-line tool for deduplication, matching, and diagnostics with TUI renderers.',
+    description:
+      'Command-line tool for deduplication, matching, and diagnostics with TUI renderers.',
   },
   {
     name: 'visual',
     dir: 'packages/entity-resolver-visual',
-    description: 'Framework-agnostic diagnostic components (3-layer: Data API + Headless + Web Components).',
+    description:
+      'Framework-agnostic diagnostic components (3-layer: Data API + Headless + Web Components).',
   },
 ];
 

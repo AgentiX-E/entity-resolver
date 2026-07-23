@@ -1,11 +1,7 @@
 // Tests for Record Linking and Gazetteer matching APIs.
 
 import { describe, it, expect } from 'vitest';
-import {
-  gazetteerMatch,
-  linkRecords,
-  autoConfigure,
-} from '../../index.js';
+import { gazetteerMatch, linkRecords, autoConfigure } from '../../index.js';
 import type { GazetteerConfig, RecordLinkConfig } from '../../index.js';
 
 // ═══════════════════════════════════════════════════════════════
@@ -79,8 +75,14 @@ describe('gazetteerMatch', () => {
   });
 
   it('G4: scores are in [0, 1] range', async () => {
-    const queries = [{ name: 'A', city: 'X' }, { name: 'B', city: 'Y' }];
-    const index = [{ name: 'B', city: 'Y' }, { name: 'C', city: 'Z' }];
+    const queries = [
+      { name: 'A', city: 'X' },
+      { name: 'B', city: 'Y' },
+    ];
+    const index = [
+      { name: 'B', city: 'Y' },
+      { name: 'C', city: 'Z' },
+    ];
     const comps = makeComparisons([...queries, ...index]);
 
     const result = await gazetteerMatch(queries, index, {
@@ -126,8 +128,9 @@ describe('linkRecords', () => {
     expect(result.crossPairs.length).toBeGreaterThanOrEqual(1);
     // Only cross-dataset pairs should exist
     for (const p of result.crossPairs) {
-      const isCross = (p.leftId < left.length && p.rightId >= left.length) ||
-                       (p.leftId >= left.length && p.rightId < left.length);
+      const isCross =
+        (p.leftId < left.length && p.rightId >= left.length) ||
+        (p.leftId >= left.length && p.rightId < left.length);
       expect(isCross).toBe(true);
     }
   });
@@ -153,8 +156,7 @@ describe('linkRecords', () => {
     expect(result.crossPairs.length).toBeGreaterThanOrEqual(2);
     // All pairs must be cross-dataset
     for (const p of result.crossPairs) {
-      const isCross = (p.leftId < 2 && p.rightId >= 2) ||
-                       (p.leftId >= 2 && p.rightId < 2);
+      const isCross = (p.leftId < 2 && p.rightId >= 2) || (p.leftId >= 2 && p.rightId < 2);
       expect(isCross).toBe(true);
     }
   });
@@ -220,8 +222,14 @@ describe('linkRecords', () => {
   });
 
   it('L7: uses blocking config for cross-set pair generation', async () => {
-    const left = [{ given_name: 'John', surname: 'Smith' }, { given_name: 'Jane', surname: 'Doe' }];
-    const right = [{ given_name: 'John', surname: 'Smith' }, { given_name: 'Bob', surname: 'Wilson' }];
+    const left = [
+      { given_name: 'John', surname: 'Smith' },
+      { given_name: 'Jane', surname: 'Doe' },
+    ];
+    const right = [
+      { given_name: 'John', surname: 'Smith' },
+      { given_name: 'Bob', surname: 'Wilson' },
+    ];
     const comps = makeComparisons([...left, ...right]);
     const result = await linkRecords(left, right, {
       comparisons: comps,

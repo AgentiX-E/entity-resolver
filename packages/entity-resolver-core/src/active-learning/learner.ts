@@ -16,11 +16,11 @@ export interface LabeledPair {
 
 /** Active learning session state. */
 export interface ActiveLearningSession {
-  readonly labeledPairs: LabeledPair[];
-  readonly unlabeledPairs: ScoredPair[];
-  readonly iteration: number;
-  readonly classifier: LogisticClassifier | null;
-  readonly converged: boolean;
+  labeledPairs: LabeledPair[];
+  unlabeledPairs: ScoredPair[];
+  iteration: number;
+  classifier: LogisticClassifier | null;
+  converged: boolean;
 }
 
 /** Logistic regression classifier for match prediction. */
@@ -210,17 +210,14 @@ export function nextLabelingBatch(session: ActiveLearningSession, batchSize: num
  */
 export function applyLabels(session: ActiveLearningSession, labels: readonly LabeledPair[]): void {
   session.labeledPairs.push(...labels);
-  (session as any).iteration++;
+  session.iteration++;
 
   // Retrain classifier
-  (session as any).classifier = trainLogisticClassifier(
-    session.labeledPairs,
-    session.unlabeledPairs,
-  );
+  session.classifier = trainLogisticClassifier(session.labeledPairs, session.unlabeledPairs);
 
   // Check convergence: if accuracy stops improving
   if (session.labeledPairs.length >= 10 && (session.classifier?.accuracy ?? 0) >= 0.95) {
-    (session as any).converged = true;
+    session.converged = true;
   }
 }
 

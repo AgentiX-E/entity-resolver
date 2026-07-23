@@ -1,6 +1,6 @@
 // Token Blocking + Sorted Neighborhood + Multi-pass + Meta-blocking strategies.
 
-import type { CandidatePair, BlockingConfig, BlockingResult } from './types.js';
+import type { CandidatePair, BlockingConfig, BlockingResult, BlockingTransform } from './types.js';
 import { applyBlockingTransforms, computeReductionRatio } from './types.js';
 
 // ─── Token Blocking (pyJedAI-style) ────────────────────────────
@@ -156,13 +156,13 @@ export function multiPassBlocking(
 /** Build a blocking key from a record using a pass config. */
 function buildPassKey(
   record: Record<string, unknown>,
-  pass: { fields: readonly string[]; transforms: readonly string[] },
+  pass: { fields: readonly string[]; transforms: readonly BlockingTransform[] },
 ): string {
   const parts: string[] = [];
   for (const field of pass.fields) {
     const raw = String(record[field] ?? '').trim();
     if (raw === '') return '';
-    const transformed = applyBlockingTransforms(raw, pass.transforms as any[]);
+    const transformed = applyBlockingTransforms(raw, pass.transforms);
     if (transformed === '') return '';
     parts.push(transformed);
   }

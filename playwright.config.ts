@@ -31,7 +31,5 @@ export default defineConfig({
       reuseExistingServer: false,
     },
   ],
-  projects: [
-    { name: 'chromium', use: { browserName: 'chromium' } },
-  ],
+  projects: [{ name: 'chromium', use: { browserName: 'chromium' } }],
 });

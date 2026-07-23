@@ -2,15 +2,15 @@
 // Supports field-level survivorship strategies for building Customer 360,
 // MDM, and entity consolidation pipelines.
 
-import type { RawRecord } from '../types/core.js';
+import type { RawRecord } from './types/core.js';
 
 /** Field-level survivorship strategy. */
 export type SurvivorStrategy =
-  | 'longest'      // Prefer the longest non-empty value
+  | 'longest' // Prefer the longest non-empty value
   | 'most_popular' // Prefer the most frequent non-empty value
   | 'most_complete' // Prefer the record with the most non-empty fields
   | 'source_priority' // Prefer records from higher-priority sources
-  | 'first'        // First non-empty value (stable ordering)
+  | 'first' // First non-empty value (stable ordering)
   | 'concatenate'; // Concatenate all unique non-empty values
 
 /** Field configuration for golden record generation. */
@@ -82,7 +82,9 @@ function mostPopular(values: Array<{ value: unknown; recordIndex: number }>): un
   return best;
 }
 
-function mostComplete(values: Array<{ value: unknown; recordIndex: number; totalFields: number }>): unknown {
+function mostComplete(
+  values: Array<{ value: unknown; recordIndex: number; totalFields: number }>,
+): unknown {
   // Find the record with the most non-empty fields
   let best = values[0]?.value;
   let bestFields = 0;
@@ -140,7 +142,11 @@ export function buildGoldenRecord(
     const strategy = rule?.strategy ?? defaultStrategy;
 
     const values = records
-      .map((record, idx) => ({ value: record[field], recordIndex: idx, totalFields: countNonEmpty(record) }))
+      .map((record, idx) => ({
+        value: record[field],
+        recordIndex: idx,
+        totalFields: countNonEmpty(record),
+      }))
       .filter((v) => nonEmptyValue(v.value));
 
     if (values.length === 0) continue;

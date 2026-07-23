@@ -5,11 +5,10 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text'],
-      thresholds: { statements: 80, branches: 80, functions: 80, lines: 80 },
+      thresholds: { statements: 95, branches: 95, functions: 95, lines: 95 },
     },
     server: {
       deps: {
-        // Inline workspace packages so vitest can resolve their deps
         inline: [/@agentix-e\/entity-resolver-core/],
       },
     },
