@@ -197,19 +197,16 @@ describe('PgEntityStore CRUD operations', () => {
     store = new PgEntityStore(new MockPool() as any);
   });
 
-  it.skip('getEntity returns null for missing entity', async () => {
-    // TODO: fix MockPool to pass ID param correctly from getEntity SQL
+  it('getEntity returns null for missing entity', async () => {
     const result = await store.getEntity('missing');
     expect(result).toBeNull();
   });
 
-  it.skip('getEntity returns entity when found', async () => {
-    // TODO: fix MockPool to pass ID param correctly from getEntity SQL
+  it('getEntity returns entity when found', async () => {
     const result = await store.getEntity('existing');
-    if (result) {
-      expect(result.clusterId).toBe('existing');
-      expect(result.memberIds).toEqual([1, 2, 3]);
-    }
+    expect(result).not.toBeNull();
+    expect(result!.clusterId).toBe('existing');
+    expect(result!.memberIds).toEqual([1, 2, 3]);
   });
 
   it('queryNeighbors returns neighbor entities', async () => {

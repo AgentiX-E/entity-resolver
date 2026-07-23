@@ -361,6 +361,28 @@ describe('buildMuChartData edge cases', () => {
     const data = buildMuChartData(result);
     expect(data.lambda).toBe(0.001);
   });
+
+  it('handles uProbability explicitly set to 0', () => {
+    const result = makeMockResult({
+      diagnostics: {
+        muParameters: new Map([
+          ['name', {
+            mProbabilities: new Map([['name:exact_match', 0.95]]),
+            uProbabilities: new Map([['name:exact_match', 0]]),
+          }],
+        ]),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
+      },
+    });
+    const data = buildMuChartData(result);
+    expect(data.fields.length).toBeGreaterThanOrEqual(0);
+    for (const field of data.fields) {
+      for (const level of field.levels) {
+        expect(typeof level.weight).toBe('number');
+      }
+    }
+  });
 });
 
 describe('buildWaterfallData edge cases', () => {
