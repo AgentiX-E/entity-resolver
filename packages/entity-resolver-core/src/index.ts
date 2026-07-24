@@ -168,6 +168,18 @@ export {
   comparisonNeighborhoodPruning,
   metaBlocking,
 } from './blocking/strategies.js';
+// Blocking (pyJedAI extensions)
+export type { SuffixArraysConfig, ExtendedSuffixArraysConfig, ExtendedQGramsConfig } from './blocking/strategies-pyjedai.js';
+export {
+  suffixArraysBlocking,
+  extendedSuffixArraysBlocking,
+  extendedQGramsBlocking,
+} from './blocking/strategies-pyjedai.js';
+
+export type { WeightingScheme, PruningMethod, MetaBlockingConfig } from './blocking/meta-blocking.js';
+export { metaBlockingFull } from './blocking/meta-blocking.js';
+
+// Blocking Analysis
 export type { BlockingAnalysisResult } from './blocking/analyzer.js';
 export {
   analyzeBlockingRule,
