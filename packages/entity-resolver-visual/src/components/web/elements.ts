@@ -223,6 +223,8 @@ export class ErWaterfallElement extends ErBaseElement {
     }
 
     const card = createDiv(CARD_CSS);
+    card.setAttribute('role', 'img');
+    card.setAttribute('aria-label', `Waterfall chart: match weight ${escapeHtml(this._data.totalWeight.toFixed(2))}`);
     const themeStyle = this.buildThemeStyle();
 
     // Title row

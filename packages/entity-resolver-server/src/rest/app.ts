@@ -51,6 +51,35 @@ export interface ServerConfig {
 /** Default maximum request body size: 10MB */
 const DEFAULT_MAX_BODY_SIZE = 10 * 1024 * 1024;
 
+/** Graceful shutdown state. */
+let _shuttingDown = false;
+let _pendingRequests = 0;
+const SHUTDOWN_TIMEOUT_MS = 15000;
+
+/** Mark the server as shutting down. New requests will be rejected. */
+export function initiateShutdown(): void {
+  _shuttingDown = true;
+}
+
+/** Track a request in-flight for graceful shutdown counting. */
+function trackRequest(fn: () => Promise<Response>): Promise<Response> {
+  _pendingRequests++;
+  return fn().finally(() => {
+    _pendingRequests--;
+  });
+}
+
+/**
+ * Wait for pending requests to drain, then resolve.
+ * Used by process.on('SIGTERM') handlers.
+ */
+export async function drainConnections(): Promise<void> {
+  const deadline = Date.now() + SHUTDOWN_TIMEOUT_MS;
+  while (_pendingRequests > 0 && Date.now() < deadline) {
+    await new Promise((r) => setTimeout(r, 100));
+  }
+}
+
 // ─── Zod schemas ──────────────────────────────────────────────────
 
 const DedupeSchema = z

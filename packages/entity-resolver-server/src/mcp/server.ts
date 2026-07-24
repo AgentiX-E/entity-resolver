@@ -127,7 +127,12 @@ async function dispatchMethod(req: JsonRpcRequest): Promise<JsonRpcResponse | Js
 
     case 'notifications/initialised':
     case 'notifications/initialized': {
-      // Notifications have no response — return empty object
+      // JSON-RPC 2.0: notifications (no "id" field) MUST NOT receive a response.
+      if (!('id' in req) || req.id === undefined || req.id === null) {
+        initialized = true;
+        return null; // No response for notifications
+      }
+      initialized = true;
       return buildResponse(req.id, {});
     }
 
@@ -141,7 +146,44 @@ async function dispatchMethod(req: JsonRpcRequest): Promise<JsonRpcResponse | Js
 // ═══════════════════════════════════════════════════════════
 
 /** Map of active SSE connections by session ID. */
-const sseClients = new Map<string, (data: string) => void>();
+const sseClients = new Map<string, { send: (data: string) => void; lastPing: number }>();
+
+/**
+ * Start a periodic SSE heartbeat.
+ * Clients inactive for >2x heartbeat interval are cleaned up.
+ */
+function startSSEHeartbeat(clearExisting = true): () => void {
+  const HEARTBEAT_MS = 30000;
+  
+  if (clearExisting) {
+    // Kill any previous heartbeat interval
+    _heartbeatId = setInterval(() => {
+      const now = Date.now();
+      for (const [sid, client] of sseClients) {
+        if (now - client.lastPing > HEARTBEAT_MS * 3) {
+          sseClients.delete(sid);
+        } else {
+          try {
+            client.send('event: ping\ndata: {}\n\n');
+          } catch {
+            sseClients.delete(sid);
+          }
+        }
+      }
+    }, HEARTBEAT_MS);
+    
+    _heartbeatId.unref?.(); // Don't keep the process alive
+  }
+  
+  return () => {
+    if (_heartbeatId) {
+      clearInterval(_heartbeatId);
+      _heartbeatId = null;
+    }
+  };
+}
+
+let _heartbeatId: ReturnType<typeof setInterval> | null = null;
 
 /**
  * Send a Server-Sent Event to a client.
@@ -150,7 +192,8 @@ const sseClients = new Map<string, (data: string) => void>();
 function sendSSE(sessionId: string, data: string): void {
   const client = sseClients.get(sessionId);
   if (client) {
-    client(data);
+    client.lastPing = Date.now();
+    client.send(data);
   }
 }
 
@@ -160,9 +203,12 @@ function sseEndpoint(_c: Context): Response {
 
   const stream = new ReadableStream({
     start(controller) {
+      startSSEHeartbeat(false);
+      
       // Register client for server-initiated events
-      sseClients.set(sessionId, (data) => {
-        controller.enqueue(`event: message\ndata: ${data}\n\n`);
+      sseClients.set(sessionId, {
+        send: (data) => controller.enqueue(`event: message\ndata: ${data}\n\n`),
+        lastPing: Date.now(),
       });
 
       // Send initial connection event
