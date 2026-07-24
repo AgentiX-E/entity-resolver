@@ -191,6 +191,30 @@ export {
 export type { ClusteringResult, ClusteringMetadata } from './clustering/algorithms.js';
 export { connectedComponents, dbscanClustering, uniqueMapping } from './clustering/algorithms.js';
 
+// Clustering (pyJedAI extensions)
+export type {
+  CenterClusteringOptions,
+  BestMatchClusteringOptions,
+  MergeCenterClusteringOptions,
+  CorrelationClusteringOptions,
+  CutClusteringOptions,
+  MarkovClusteringOptions,
+  KiralyMSMOptions,
+  RicochetSROptions,
+  RowColumnClusteringOptions,
+} from './clustering/algorithms-pyjedai.js';
+export {
+  centerClustering,
+  bestMatchClustering,
+  mergeCenterClustering,
+  correlationClustering,
+  cutClustering,
+  markovClustering,
+  kiralyMSMClustering,
+  ricochetSRClustering,
+  rowColumnClustering,
+} from './clustering/algorithms-pyjedai.js';
+
 // Evaluation
 export type { EvaluationMetrics } from './evaluation/metrics.js';
 export { evaluateClustering } from './evaluation/metrics.js';
