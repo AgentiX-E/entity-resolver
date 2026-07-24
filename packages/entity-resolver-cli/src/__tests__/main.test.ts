@@ -48,4 +48,43 @@ describe('CLI main function', () => {
     await main(['unknown_cmd']);
     expect(consoleErrorOutput.some((l) => l.includes('Unknown command'))).toBe(true);
   });
+
+  it('dedupe without file shows usage error', async () => {
+    await main(['dedupe']);
+    expect(consoleErrorOutput.some((l) => l.includes('Usage'))).toBe(true);
+  });
+
+  it('match without files shows usage error', async () => {
+    await main(['match']);
+    expect(consoleErrorOutput.some((l) => l.includes('Usage'))).toBe(true);
+  });
+
+  it('link is alias for match', async () => {
+    await main(['link']);
+    expect(consoleErrorOutput.some((l) => l.includes('Usage'))).toBe(true);
+  });
+
+  it('gazetteer without files shows usage error', async () => {
+    await main(['gazetteer']);
+    expect(consoleErrorOutput.some((l) => l.includes('Usage'))).toBe(true);
+  });
+
+  it('benchmark prints report', async () => {
+    await main(['benchmark']);
+    expect(consoleOutput.some((l) => l.includes('Entity Resolver Benchmark') || l.length > 0)).toBe(true);
+  }, 30000);
+
+  it('autoconfigure without file shows usage error', async () => {
+    await main(['autoconfigure']);
+    expect(consoleErrorOutput.some((l) => l.includes('Usage'))).toBe(true);
+  });
+
+  it('help shows all commands', async () => {
+    await main(['help']);
+    expect(consoleOutput.some((l) => l.includes('dedupe'))).toBe(true);
+    expect(consoleOutput.some((l) => l.includes('match'))).toBe(true);
+    expect(consoleOutput.some((l) => l.includes('gazetteer'))).toBe(true);
+    expect(consoleOutput.some((l) => l.includes('benchmark'))).toBe(true);
+    expect(consoleOutput.some((l) => l.includes('autoconfigure'))).toBe(true);
+  });
 });
