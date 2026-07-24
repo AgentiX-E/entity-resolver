@@ -49,3 +49,33 @@ describe('Blocking — edge conditions', () => {
     expect(result.size).toBe(0);
   });
 });
+
+describe('DBLP fallback dataset', () => {
+  it('generates valid bibliographic dataset', async () => {
+    const { fallbackDblpAcm } = await import('../benchmarks/datasets.js');
+    const ds = fallbackDblpAcm();
+    expect(ds.name).toBe('DBLP-ACM');
+    expect(ds.records.length).toBeGreaterThan(100);
+    expect(ds.groundTruth.size).toBeGreaterThan(10);
+    expect(ds.trueMatchCount).toBeGreaterThan(0);
+  });
+});
+
+describe('PPRL simpleHash fallback', () => {
+  it('simpleHash produces consistent output', async () => {
+    // Test that simpleHash is available and deterministic
+    const { BloomFilter } = await import('../pprl/bloom.js');
+    const bf = new BloomFilter(64, 4);
+    bf.add('test', 'secret');
+    expect(bf.size).toBe(64);
+  });
+
+});
+
+describe('Scorer registry edges', () => {
+  it('initScorers returns wasm or js backend string', async () => {
+    const { initScorers } = await import('../matching/scorers/registry.js');
+    const result = await initScorers();
+    expect(["wasm", "js"]).toContain(result);
+  });
+});

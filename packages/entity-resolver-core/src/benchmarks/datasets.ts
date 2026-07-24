@@ -175,8 +175,8 @@ function loadRealDblpAcm(): BenchmarkDataset {
   }
 }
 
-/** Fallback: generated bibliographic dataset when real CSV is unavailable. */
-function fallbackDblpAcm(): BenchmarkDataset {
+/** @internal Fallback: generated bibliographic dataset when real CSV is unavailable. */
+export function fallbackDblpAcm(): BenchmarkDataset {
   const gen = generateCoraDataset({
     numEntities: 500,
     recordsPerEntity: 2,
