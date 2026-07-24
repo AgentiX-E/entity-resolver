@@ -3,6 +3,8 @@
 
 import type { IEntityStore } from '@agentix-e/entity-resolver-core';
 import { MemoryEntityStore } from '@agentix-e/entity-resolver-core';
+import type { ILogger } from '@agentix-e/entity-resolver-core';
+import { NoopLogger } from '@agentix-e/entity-resolver-core';
 
 /** Storage backends supported by the resolver. */
 export type StorageBackend = 'duckdb' | 'postgres' | 'memory';
@@ -42,7 +44,7 @@ export interface StorageResolverOptions {
  * - 'postgres' → PgEntityStore (full PostgreSQL with mTLS, falls back to memory on failure)
  * - 'memory' (default) → MemoryEntityStore (pure JS Map)
  */
-export async function resolveStorage(options?: StorageResolverOptions): Promise<ResolvedStorage> {
+export async function resolveStorage(options?: StorageResolverOptions, logger: ILogger = NoopLogger): Promise<ResolvedStorage> {
   const backend = options?.backend ?? 'memory';
 
   if (backend === 'duckdb') {
@@ -51,7 +53,9 @@ export async function resolveStorage(options?: StorageResolverOptions): Promise<
       const config = options?.duckdbPath ? { path: options.duckdbPath } : {};
       const store = await DuckDBStore.create(config);
       return { backend: 'duckdb', store };
-    } catch {
+    } catch (err) {
+      logger.warn('DuckDB initialization failed, falling back to memory store', { operation: 'resolveStorage', cause: String(err) });
+      // SAFE: intentional degradation — storage backend failures gracefully fall back to in-memory store
       return { backend: 'memory', store: new MemoryEntityStore() };
     }
   }
@@ -68,7 +72,9 @@ export async function resolveStorage(options?: StorageResolverOptions): Promise<
         ...(pgConfig?.password ? { password: pgConfig.password } : {}),
       });
       return { backend: 'postgres', store };
-    } catch {
+    } catch (err) {
+      logger.warn('PostgreSQL initialization failed, falling back to memory store', { operation: 'resolveStorage', cause: String(err) });
+      // SAFE: intentional degradation — storage backend failures gracefully fall back to in-memory store
       return { backend: 'memory', store: new MemoryEntityStore() };
     }
   }

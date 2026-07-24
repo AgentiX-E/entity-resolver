@@ -1,8 +1,25 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 // Tests for PgEntityStore — mTLS config building, SQL operations, schema migration.
 
-import { PgEntityStore, buildPoolConfig, ER_SCHEMA_SQL, resolveStorage } from '../../index.js';
 import type { PgStoreConfig } from '../../index.js';
+
+// Mock fs.readFileSync to return predictable PEM content for TLS tests.
+// Paths containing "nonexistent" throw, PEM content strings (no path separators)
+// are passed through without file reading, file paths return mock content.
+vi.mock('node:fs', () => ({
+  readFileSync: (path: string): string => {
+    if (path.includes('/nonexistent/')) {
+      throw new Error('ENOENT: no such file');
+    }
+    // PEM content strings (no path separators) are not file paths
+    if (!path.includes('/') && !path.includes('\\')) {
+      throw new Error('ENOENT: not a file path');
+    }
+    return `MOCKED PEM CONTENT FOR: ${path}`;
+  },
+}));
+
+import { PgEntityStore, buildPoolConfig, ER_SCHEMA_SQL, resolveStorage } from '../../index.js';
 
 // ══════════════════════════════════════════════════════════════
 // mTLS Configuration Tests (pure function — no DB needed)
@@ -103,7 +120,7 @@ describe('buildPoolConfig', () => {
     expect(ssl.servername).toBe('localhost');
   });
 
-  it('TLS file read error falls back to raw string', () => {
+  it('TLS file read error throws IOError (no silent fallback)', () => {
     const config: PgStoreConfig = {
       host: 'db.example.com',
       port: 5432,
@@ -116,7 +133,9 @@ describe('buildPoolConfig', () => {
         key: '/nonexistent/path/key.pem',
       },
     };
-    // Should not throw — fs.readFileSync errors are caught, raw string passed through
+    // Should throw IOError — no silent fallback to raw string
+    expect(() => buildPoolConfig(config)).toThrow('Failed to read PEM CA certificate');
+  });
     const result = buildPoolConfig(config);
     expect(result.ssl).toBeDefined();
   });

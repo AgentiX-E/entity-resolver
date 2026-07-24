@@ -3,6 +3,7 @@
 // Falls back to pure JS when WASM is unavailable.
 
 import type { IScorer } from '../../../interfaces/IScorer.js';
+import type { ILogger } from '../../../interfaces/ILogger.js';
 import type { FieldMetadata } from '../../../types/core.js';
 
 let _wasmScorers: Readonly<Record<string, IScorer>> | null = null;
@@ -11,7 +12,7 @@ let _wasmScorers: Readonly<Record<string, IScorer>> | null = null;
  * Attempt to load WASM-accelerated scorers.
  * Returns null if WASM is unavailable.
  */
-export async function tryLoadWasmScorers(): Promise<Readonly<Record<string, IScorer>> | null> {
+export async function tryLoadWasmScorers(logger?: ILogger): Promise<Readonly<Record<string, IScorer>> | null> {
   if (_wasmScorers) return _wasmScorers;
 
   try {
@@ -36,7 +37,10 @@ export async function tryLoadWasmScorers(): Promise<Readonly<Record<string, ISco
 
     _wasmScorers = scorers;
     return _wasmScorers;
-  } catch {
+  } catch (err: unknown) {
+    logger?.warn(
+      `WASM scorer loading failed — falling back to pure JS scorers: ${err instanceof Error ? err.message : String(err)}`
+    );
     return null;
   }
 }

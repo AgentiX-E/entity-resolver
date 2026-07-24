@@ -70,20 +70,25 @@ describe('Generator edge cases', () => {
 });
 
 describe('Benchmark runner edge cases', () => {
-  it('handles empty dataset', async () => {
+  it('handles empty dataset with zero scores', async () => {
     const result = await runBenchmark({
       name: 'empty', description: '', recordCount: 0, trueMatchCount: 0,
       records: [], groundTruth: new Map(),
     });
     expect(result.dataset).toBe('empty');
+    expect(result.purity).toBe(0);
+    expect(result.completeness).toBe(0);
+    expect(result.executionTimeMs).toBeGreaterThanOrEqual(0);
   });
 
-  it('handles single-record dataset', async () => {
+  it('handles single-record dataset with zero scores', async () => {
     const result = await runBenchmark({
       name: 'single', description: '', recordCount: 1, trueMatchCount: 0,
       records: [{ name: 'Only' }], groundTruth: new Map(),
     });
     expect(result.recordCount).toBe(1);
+    expect(result.purity).toBe(0);
+    expect(result.completeness).toBe(0);
   });
 
   it('runs all benchmarks end-to-end', async () => {

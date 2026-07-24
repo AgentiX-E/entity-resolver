@@ -3,6 +3,7 @@
 // API key is injected via configuration — NEVER in code or environment variables.
 
 import type { ScoredPair } from '../types/core.js';
+import type { ILogger } from '../interfaces/ILogger.js';
 
 /** LLM provider configuration. */
 export interface LLMProviderConfig {
@@ -47,6 +48,7 @@ export async function scoreWithLLM(
   pairs: readonly ScoredPair[],
   records: ReadonlyArray<Record<string, unknown>>,
   config: LLMScorerConfig,
+  logger?: ILogger,
 ): Promise<LLMScorerResult[]> {
   if (!config.apiKey) {
     throw new Error('LLMScorerConfig.apiKey is required for LLM scoring');
@@ -66,7 +68,7 @@ export async function scoreWithLLM(
     const recordB = records[pair.rightId] ?? {};
 
     const prompt = buildComparisonPrompt(recordA, recordB);
-    const llmResult = await callLLM(apiBase, config.apiKey, model, prompt, config.maxTokens ?? 200);
+    const llmResult = await callLLM(apiBase, config.apiKey, model, prompt, config.maxTokens ?? 200, logger);
 
     results.push({
       leftId: pair.leftId,
@@ -111,6 +113,7 @@ async function callLLM(
   model: string,
   prompt: string,
   maxTokens: number,
+  logger?: ILogger,
 ): Promise<{ score: number; reasoning: string }> {
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
@@ -155,6 +158,7 @@ async function callLLM(
       reasoning: parsed.reasoning ?? 'no reasoning provided',
     };
   } catch {
+    logger?.warn('LLM JSON response parse failed — returning neutral score as graceful degradation');
     return { score: 0.5, reasoning: 'failed to parse LLM response' };
   }
 }

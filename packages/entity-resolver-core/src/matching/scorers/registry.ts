@@ -2,6 +2,7 @@
 // Auto-detects WASM availability and provides the fastest available scorer set.
 
 import type { IScorer } from '../../interfaces/IScorer.js';
+import type { ILogger } from '../../interfaces/ILogger.js';
 import { ALL_SCORERS, IMPLEMENTED_SCORER_COUNT } from './js/scorers.js';
 import { tryLoadWasmScorers } from './wasm/loader.js';
 
@@ -26,11 +27,11 @@ export type ScorerInitResult = 'wasm' | 'js';
  *
  * @returns 'wasm' if WASM scorers loaded, 'js' if pure JS fallback is used.
  */
-export async function initScorers(): Promise<ScorerInitResult> {
+export async function initScorers(logger?: ILogger): Promise<ScorerInitResult> {
   if (_wasmInitialized) return _wasmActive ? 'wasm' : 'js';
 
   try {
-    const wasmScorers = await tryLoadWasmScorers();
+    const wasmScorers = await tryLoadWasmScorers(logger);
     if (wasmScorers && Object.keys(wasmScorers).length > 0) {
       // Merge WASM scorers with JS fallback: WASM takes priority,
       // keeping pure JS scorers for names not in the WASM set
@@ -39,8 +40,11 @@ export async function initScorers(): Promise<ScorerInitResult> {
       _wasmActive = true;
       return 'wasm';
     }
-  } catch {
-    // WASM unavailable — fall through to pure JS
+  } catch (err: unknown) {
+    // WASM unavailable — fall through to pure JS (graceful degradation)
+    logger?.warn(
+      `WASM scorer initialization failed — using pure JS fallback: ${err instanceof Error ? err.message : String(err)}`
+    );
   }
 
   _scorers = ALL_SCORERS;

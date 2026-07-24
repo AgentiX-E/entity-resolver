@@ -32,7 +32,8 @@ function getCryptoSubtle(): SubtleCrypto | null {
       return _cryptoSubtle;
     }
   } catch {
-    // globalThis.crypto may not exist
+    // SAFE: globalThis.crypto may not exist in some runtimes;
+    // returning null for crypto is expected fallback for browser detection.
   }
   _cryptoSubtle = null;
   return null;
@@ -78,8 +79,9 @@ function syncSha256Fallback(input: string): Uint8Array {
     const hash = nodeCreateHash('sha256').update(input).digest();
     return new Uint8Array(hash);
   } catch {
-    // Ultimate fallback: simple FNV-1a-like hash (not cryptographically secure,
-    // but sufficient for Bloom filter bit distribution)
+    // SAFE: Node.js crypto may be unavailable in browser-like environments;
+    // falling back to simple FNV-1a-like hash (not cryptographically secure,
+    // but sufficient for Bloom filter bit distribution).
     return simpleHash(input);
   }
 }

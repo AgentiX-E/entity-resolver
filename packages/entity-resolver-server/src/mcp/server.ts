@@ -210,6 +210,8 @@ export function createMcpApp(): Hono {
     try {
       body = await c.req.json();
     } catch {
+      // SAFE: intentional graceful degradation — return a proper JSON-RPC
+      // parse error (400) instead of crashing or leaking internal details
       return c.json(buildErrorResponse(null, JSONRPC_ERRORS.PARSE_ERROR), 400);
     }
 

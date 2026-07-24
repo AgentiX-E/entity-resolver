@@ -21,6 +21,30 @@ export type {
 export type { IScorer, ScorerFactory } from './interfaces/IScorer.js';
 export type { IEntityStore, ICloseableStore, EntityRecord } from './interfaces/IEntityStore.js';
 export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
+export type { ILogger, LogLevel, LogContext } from './interfaces/ILogger.js';
+export { NoopLogger } from './interfaces/ILogger.js';
+
+// Error Hierarchy
+export {
+  EntityResolverError,
+  ValidationError,
+  ConfigurationError,
+  IOError,
+  ParseError,
+  ResolutionError,
+  BlockingError,
+  ScoringError,
+  ClusteringError,
+  EvaluationError,
+  ConvergenceError,
+  LLMError,
+  AuthError,
+  RateLimitError,
+  InternalError,
+  reconstructError,
+  wrapError,
+} from './errors/hierarchy.js';
+export type { ErrorCode, ErrorContext } from './errors/hierarchy.js';
 
 // Scorers
 export {

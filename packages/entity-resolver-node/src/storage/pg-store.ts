@@ -4,6 +4,9 @@
 
 import type { EntityId } from '@agentix-e/entity-resolver-core';
 import type { IEntityStore, ICloseableStore, EntityRecord } from '@agentix-e/entity-resolver-core';
+import { IOError } from '@agentix-e/entity-resolver-core';
+import type { ILogger } from '@agentix-e/entity-resolver-core';
+import { NoopLogger } from '@agentix-e/entity-resolver-core';
 import type { Pool, PoolConfig } from 'pg';
 
 /** mTLS configuration — all paths in PEM format. */
@@ -70,7 +73,7 @@ interface PgSSLConfig {
  * Build a pg PoolConfig from our config with mTLS support.
  * This is a pure function — testable without a real database.
  */
-export function buildPoolConfig(config: PgStoreConfig): PoolConfig {
+export function buildPoolConfig(config: PgStoreConfig, logger: ILogger = NoopLogger): PoolConfig {
   const poolConfig: PoolConfig = {
     host: config.host ?? 'localhost',
     port: config.port ?? 5432,
@@ -88,22 +91,25 @@ export function buildPoolConfig(config: PgStoreConfig): PoolConfig {
     if (config.tls.ca) {
       try {
         ssl.ca = readPemFile(config.tls.ca);
-      } catch {
-        ssl.ca = config.tls.ca;
+      } catch (err) {
+        logger.warn('Failed to read PEM CA file', { operation: 'buildPoolConfig', file: config.tls.ca, cause: String(err) });
+        throw new IOError(`Failed to read PEM CA certificate: ${config.tls.ca}`);
       }
     }
     if (config.tls.cert) {
       try {
         ssl.cert = readPemFile(config.tls.cert);
-      } catch {
-        ssl.cert = config.tls.cert;
+      } catch (err) {
+        logger.warn('Failed to read PEM cert file', { operation: 'buildPoolConfig', file: config.tls.cert, cause: String(err) });
+        throw new IOError(`Failed to read PEM client certificate: ${config.tls.cert}`);
       }
     }
     if (config.tls.key) {
       try {
         ssl.key = readPemFile(config.tls.key);
-      } catch {
-        ssl.key = config.tls.key;
+      } catch (err) {
+        logger.warn('Failed to read PEM key file', { operation: 'buildPoolConfig', file: config.tls.key, cause: String(err) });
+        throw new IOError(`Failed to read PEM private key: ${config.tls.key}`);
       }
     }
     if (config.tls.servername) {
@@ -115,10 +121,40 @@ export function buildPoolConfig(config: PgStoreConfig): PoolConfig {
   return poolConfig;
 }
 
-/** Read a PEM file. If the path contains PEM content directly, return it. */
-function readPemFile(path: string): string {
-  const fs = require('fs');
-  return fs.readFileSync(path, 'utf-8');
+/** PEM content prefix patterns — content that is PEM data, not a file path. */
+const PEM_CONTENT_PREFIXES = ['-----BEGIN ', '----BEGIN '];
+
+/** Read PEM content: if the value looks like PEM content or is not a file path,
+ *  return it directly. Otherwise, try to read it as a file. */
+function readPemFile(pathOrContent: string): string {
+  // Direct PEM content markers
+  for (const prefix of PEM_CONTENT_PREFIXES) {
+    if (pathOrContent.trimStart().startsWith(prefix)) {
+      return pathOrContent;
+    }
+  }
+  // If no path separators, treat as direct content (not a file path)
+  if (!pathOrContent.includes('/') && !pathOrContent.includes('\\')) {
+    return pathOrContent;
+  }
+  try {
+    const { readFileSync } = await_import_fs();
+    return readFileSync(pathOrContent, 'utf-8');
+  } catch (err) {
+    // SAFE: if file read fails, the original path/content is not valid.
+    // Re-throw for the caller to wrap in IOError with context.
+    throw err;
+  }
+}
+
+/** Lazily import fs module (ESM-safe dynamic import). */
+let _fsModule: { readFileSync: (path: string, encoding: string) => string } | null = null;
+function await_import_fs(): { readFileSync: (path: string, encoding: string) => string } {
+  if (!_fsModule) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    _fsModule = require('fs');
+  }
+  return _fsModule;
 }
 
 /** Convert a pg row to an EntityRecord. */

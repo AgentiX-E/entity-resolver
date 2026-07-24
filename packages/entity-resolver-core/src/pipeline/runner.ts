@@ -1,4 +1,4 @@
-// Entity Resolver Pipeline â€” end-to-end orchestration.
+// Entity Resolver Pipeline â€? end-to-end orchestration.
 // Wires together preprocessing, blocking, matching (FS EM), clustering, and evaluation.
 
 import type {
@@ -14,6 +14,7 @@ import type { BlockingConfig, CandidatePair } from '../blocking/types.js';
 import type { ComparisonSpec, ComparisonVector } from '../matching/comparison.js';
 import type { ScoredPair } from '../types/core.js';
 import type { ClusteringResult } from '../clustering/algorithms.js';
+import { ValidationError } from '../errors/hierarchy.js';
 import { preprocessRecords } from '../preprocessing/cleaner.js';
 import { standardBlocking } from '../blocking/standard.js';
 import { estimateParameters } from '../fellegi-sunter/em.js';
@@ -48,11 +49,11 @@ export interface PipelineOptions {
  * Run the full entity resolver pipeline on a set of records.
  *
  * Pipeline stages:
- * 1. Preprocessing â€” Unicode repair, normalization
- * 2. Blocking â€” Generate candidate pairs
- * 3. Matching â€” Generate comparison vectors + FS match weights
- * 4. Clustering â€” Group pairs into entity clusters
- * 5. Evaluation â€” Compute 12 metrics (if ground truth provided)
+ * 1. Preprocessing â€? Unicode repair, normalization
+ * 2. Blocking â€? Generate candidate pairs
+ * 3. Matching â€? Generate comparison vectors + FS match weights
+ * 4. Clustering â€? Group pairs into entity clusters
+ * 5. Evaluation â€? Compute 12 metrics (if ground truth provided)
  */
 export async function runPipeline(
   records: RawRecord[],
@@ -60,6 +61,25 @@ export async function runPipeline(
   options?: PipelineOptions,
   _groundTruth?: Map<string, number[]>,
 ): Promise<PipelineResult> {
+  // ©¤©¤ Input validation ©¤©¤
+  if (!Array.isArray(records) || records.length === 0) {
+    throw new ValidationError('records must be a non-empty array', {
+      operation: 'runPipeline',
+      details: { received: typeof records },
+    });
+  }
+  if (!config.comparisons || config.comparisons.length === 0) {
+    throw new ValidationError('config.comparisons must be a non-empty array', {
+      operation: 'runPipeline',
+      details: { received: config.comparisons },
+    });
+  }
+  if (typeof config.matchThreshold !== 'number' || config.matchThreshold < 0 || config.matchThreshold > 1) {
+    throw new ValidationError(`config.matchThreshold must be a number in [0, 1], got ${String(config.matchThreshold)}`, {
+      operation: 'runPipeline',
+    });
+  }
+
   const startTime = Date.now();
 
   // Stage 1: Preprocessing
@@ -70,7 +90,7 @@ export async function runPipeline(
   const blockingResult = standardBlocking(cleaned, config.blocking);
   const candidates = blockingResult.pairs;
 
-  // Stage 3: Matching â€” generate comparison vectors grouped by pair
+  // Stage 3: Matching â€? generate comparison vectors grouped by pair
   const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
   // Stage 3b: Estimate FS parameters via EM (per-pair posteriors)

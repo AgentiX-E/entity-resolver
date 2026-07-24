@@ -176,6 +176,8 @@ export const soundexScorer: IScorer = {
     try {
       return soundex(sa) === soundex(sb) ? 1 : 0;
     } catch {
+      // SAFE: strsimkit soundex() may throw on non-ASCII or malformed input;
+      // returning 0 (no phonetic match) is correct graceful degradation.
       return 0;
     }
   },
@@ -199,6 +201,8 @@ export const doubleMetaphoneScorer: IScorer = {
       if (pa === sb2 || sa2 === pb || sa2 === sb2) return 0.8;
       return 0;
     } catch {
+      // SAFE: strsimkit doubleMetaphone() may throw on non-ASCII or malformed input;
+      // returning 0 (no phonetic match) is correct graceful degradation.
       return 0;
     }
   },

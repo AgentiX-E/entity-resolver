@@ -14,6 +14,8 @@
 import type { EntityId } from '@agentix-e/entity-resolver-core';
 import type { IEntityStore, ICloseableStore, EntityRecord } from '@agentix-e/entity-resolver-core';
 import { MemoryEntityStore } from '@agentix-e/entity-resolver-core';
+import type { ILogger } from '@agentix-e/entity-resolver-core';
+import { NoopLogger } from '@agentix-e/entity-resolver-core';
 
 /**
  * Configuration for DuckDB WASM initialization.
@@ -89,6 +91,7 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
   private db: DuckDBWasmDatabase | null = null;
   private conn: DuckDBWasmConnection | null = null;
   private fallback: MemoryEntityStore;
+  private logger: ILogger;
   private ready = false;
   private initResult: DuckDBWasmInitResult = {
     tier: 'memory_fallback',
@@ -98,9 +101,10 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
 
   private opts: DuckDBWasmOptions;
 
-  constructor(options?: DuckDBWasmOptions) {
+  constructor(options?: DuckDBWasmOptions, logger: ILogger = NoopLogger) {
     this.fallback = new MemoryEntityStore();
     this.opts = options ?? {};
+    this.logger = logger;
   }
 
   /** Get initialization result for health monitoring. */
@@ -143,6 +147,8 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
 
       return this.fallbackInit('All WASM URLs failed');
     } catch (err) {
+      this.logger.warn('DuckDB WASM module import failed, falling back to memory store', { operation: 'DuckDBWasmStore.init', cause: String(err) });
+      // SAFE: intentional degradation — WASM import unavailable, fall back to in-memory store
       return this.fallbackInit(`DuckDB WASM import failed: ${String(err)}`);
     }
   }
@@ -193,7 +199,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
 
       this.ready = true;
       return true;
-    } catch {
+    } catch (err) {
+      this.logger.debug('WASM initialization attempt failed for URL tier', { operation: 'DuckDBWasmStore.tryInitWithUrl', url, cause: String(err) });
+      // SAFE: intentional tier fallback — this URL failed, the caller tries the next tier
       return false;
     }
   }
@@ -209,7 +217,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
       }>;
       const bundles = getJsDelivrBundles();
       return await selectBundle(bundles);
-    } catch {
+    } catch (err) {
+      this.logger.debug('Failed to retrieve bundled WASM bundle', { operation: 'DuckDBWasmStore.getBundledBundle', cause: String(err) });
+      // SAFE: intentional fallback — bundled WASM unavailable, try next tier
       return null;
     }
   }
@@ -232,8 +242,10 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
         URL.revokeObjectURL(workerUrl);
         clearTimeout(timer);
         resolve(worker);
-      } catch {
+      } catch (err) {
         clearTimeout(timer);
+        this.logger.debug('Failed to create WASM worker', { operation: 'DuckDBWasmStore.createWorkerWithTimeout', cause: String(err) });
+        // SAFE: intentional degradation — worker creation failed, resolve null to try next tier
         resolve(null);
       }
     });
@@ -271,7 +283,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
         memberIds: JSON.parse(row.members_json ?? '[]') as number[],
         cohesion: row.cohesion ?? 0,
       };
-    } catch {
+    } catch (err) {
+      this.logger.warn('DuckDB WASM query failed in getEntity, falling back to memory store', { operation: 'DuckDBWasmStore.getEntity', entityId: id, cause: String(err) });
+      // SAFE: intentional degradation — WASM query failure gracefully falls back to in-memory store
       return this.fallback.getEntity(id);
     }
   }
@@ -292,7 +306,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
       ];
       if (hops <= 0) return result;
       return result;
-    } catch {
+    } catch (err) {
+      this.logger.warn('DuckDB WASM query failed in queryNeighbors, returning empty result', { operation: 'DuckDBWasmStore.queryNeighbors', entityId: id, cause: String(err) });
+      // SAFE: intentional degradation — WASM query failure returns empty, caller can retry or handle gracefully
       return [];
     }
   }
@@ -308,7 +324,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
         JSON.stringify(e.memberIds),
         e.cohesion,
       ]);
-    } catch {
+    } catch (err) {
+      this.logger.warn('DuckDB WASM upsert failed, falling back to memory store', { operation: 'DuckDBWasmStore.upsertEntity', clusterId: e.clusterId, cause: String(err) });
+      // SAFE: intentional degradation — WASM write failure gracefully falls back to in-memory store
       await this.fallback.upsertEntity(e);
     }
   }
@@ -320,7 +338,9 @@ export class DuckDBWasmStore implements IEntityStore, ICloseableStore {
     }
     try {
       await this.conn.query('DELETE FROM er_entities WHERE cluster_id = ?', [id]);
-    } catch {
+    } catch (err) {
+      this.logger.warn('DuckDB WASM delete failed, falling back to memory store', { operation: 'DuckDBWasmStore.deleteEntity', entityId: id, cause: String(err) });
+      // SAFE: intentional degradation — WASM delete failure gracefully falls back to in-memory store
       await this.fallback.deleteEntity(id);
     }
   }

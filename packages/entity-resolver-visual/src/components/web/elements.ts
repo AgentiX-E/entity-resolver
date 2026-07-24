@@ -157,6 +157,8 @@ export abstract class ErBaseElement extends HTMLElement {
     try {
       return JSON.parse(attr) as T;
     } catch {
+      // SAFE: intentional graceful degradation — return null on malformed
+      // JSON attribute data so the component renders its empty state
       return null;
     }
   }

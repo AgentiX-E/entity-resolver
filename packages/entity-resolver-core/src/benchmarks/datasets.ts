@@ -9,6 +9,7 @@ import {
   generateAmazonGoogleDataset,
   generateCoraDataset,
 } from './generator.js';
+import type { ILogger } from '../interfaces/ILogger.js';
 
 /** A benchmark dataset with records and ground truth clusters. */
 export interface BenchmarkDataset {
@@ -105,7 +106,7 @@ export function parseCsvLine(line: string): string[] {
 }
 
 /** Load the real DBLP-ACM dataset from shipped CSV files. */
-function loadRealDblpAcm(): BenchmarkDataset {
+function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
   // Dynamic import for fs — only available in Node.js
   try {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -170,7 +171,10 @@ function loadRealDblpAcm(): BenchmarkDataset {
       records,
       groundTruth,
     };
-  } catch {
+  } catch (err: unknown) {
+    logger?.warn(
+      `Real DBLP-ACM dataset files not available — using generated fallback: ${err instanceof Error ? err.message : String(err)}`
+    );
     return fallbackDblpAcm();
   }
 }
@@ -193,8 +197,8 @@ export function fallbackDblpAcm(): BenchmarkDataset {
   };
 }
 
-export function loadDblpAcm(): BenchmarkDataset {
-  return loadRealDblpAcm();
+export function loadDblpAcm(logger?: ILogger): BenchmarkDataset {
+  return loadRealDblpAcm(logger);
 }
 
 // ══════════════════════════════════════════════════════════════

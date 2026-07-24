@@ -4,11 +4,12 @@ import { runPipeline } from '../pipeline/runner.js';
 import { loadAllBenchmarks } from './datasets.js';
 import type { BenchmarkDataset, BenchmarkResult } from './datasets.js';
 import { evaluateClustering } from '../evaluation/metrics.js';
+import type { ILogger } from '../interfaces/ILogger.js';
 import { nameComparisonSpec } from '../matching/comparison.js';
 import type { Cluster } from '../types/core.js';
 import type { EntityId } from '../types/core.js';
 
-export async function runBenchmark(dataset: BenchmarkDataset): Promise<BenchmarkResult> {
+export async function runBenchmark(dataset: BenchmarkDataset, logger?: ILogger): Promise<BenchmarkResult> {
   const startTime = Date.now();
 
   const sample = dataset.records[0] ?? {};
@@ -31,8 +32,15 @@ export async function runBenchmark(dataset: BenchmarkDataset): Promise<Benchmark
     });
     predClusters = result.clusters as Map<EntityId, Cluster>;
     matchCount = result.statistics.matchedRecords;
-  } catch {
-    // Fallback: blocking produced no pairs, treat as no matches
+  } catch (err: unknown) {
+    // Pipeline failure is not fatal — return zero-score result.
+    // Individual dataset failures are expected (e.g., small datasets may not
+    // produce valid blocking results). The benchmark suite continues.
+    const msg = err instanceof Error ? err.message : String(err);
+    logger?.warn(`Benchmark pipeline failed for ${dataset.name}: ${msg}`, {
+      operation: 'runBenchmark',
+      cause: msg,
+    });
   }
 
   // Build reference clusters from ground truth
@@ -54,7 +62,7 @@ export async function runBenchmark(dataset: BenchmarkDataset): Promise<Benchmark
   };
 }
 
-export async function runAllBenchmarks(): Promise<{
+export async function runAllBenchmarks(logger?: ILogger): Promise<{
   results: BenchmarkResult[];
   totalTimeMs: number;
 }> {
@@ -62,7 +70,23 @@ export async function runAllBenchmarks(): Promise<{
   const results: BenchmarkResult[] = [];
   const totalStart = Date.now();
   for (const dataset of datasets) {
-    results.push(await runBenchmark(dataset));
+    try {
+      results.push(await runBenchmark(dataset, logger));
+    } catch (err: unknown) {
+      // Log the error but continue with remaining datasets.
+      // Individual dataset failures should not abort the full suite.
+      const msg = err instanceof Error ? err.message : String(err);
+      logger?.warn(`Skipping benchmark '${dataset.name}': ${msg}`, { operation: 'runAllBenchmarks' });
+      results.push({
+        dataset: dataset.name,
+        recordCount: dataset.recordCount,
+        trueMatchCount: dataset.trueMatchCount,
+        foundMatchCount: 0,
+        purity: 0,
+        completeness: 0,
+        executionTimeMs: 0,
+      });
+    }
   }
   return { results, totalTimeMs: Date.now() - totalStart };
 }

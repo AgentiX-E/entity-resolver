@@ -155,6 +155,8 @@ async function safeJson<T = unknown>(c: Context): Promise<T | Response> {
   try {
     return await c.req.json<T>();
   } catch {
+    // SAFE: intentional graceful degradation — return 400 on malformed JSON
+    // instead of letting default handler leak a 500 with stack trace
     return c.json({ error: 'Invalid JSON in request body' }, 400);
   }
 }
