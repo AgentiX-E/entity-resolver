@@ -1,0 +1,58 @@
+# @agentix-e/entity-resolver
+
+> Entity Resolution engine for TypeScript. Stateless pure-computation core with WASM acceleration.
+
+## Quick Start
+
+```typescript
+import { dedupe } from '@agentix-e/entity-resolver-core';
+const result = await dedupe(records);
+// result.clusters, result.scores, result.diagnostics
+```
+
+## Architecture
+
+- **Core**: Stateless engine `f(records) → {clusters, scores, diagnostics}`. Zero I/O, runs anywhere JS runs.
+- **Node**: FileDataSource, SqliteEntityStore, FileConfigStore
+- **Browser**: FetchDataSource, IndexedDBEntityStore, LocalStorageConfigStore
+- **Server**: Hono REST + MCP JSON-RPC 2.0 + SSE transport
+- **CLI**: dedupe, match, link, gazetteer, benchmark, autoconfigure
+- **Visual**: 3-layer (Data API + Headless + Web Components)
+
+## Key Features
+
+- **Fellegi-Sunter probabilistic model** with EM estimation, match weights, TF adjustments
+- **5 blocking strategies**: Standard, Token, Sorted Neighborhood, Multi-pass, Meta-blocking
+- **19 scorers** with WASM acceleration (~5x faster)
+- **12 clustering algorithms**: Connected Components, DBSCAN, Unique Mapping, Center, BestMatch, MergeCenter, Correlation, Cut, Markov, KiralyMSM, RicochetSR, RowColumn
+- **3 blocking builders**: SuffixArrays, ExtendedSuffixArrays, ExtendedQGrams
+- **7 weighting schemes**: CBS, JACCARD, COSINE, DICE, ECBS, EJS, X²
+- **8 pruning methods**: WEP, CEP, CNP, RCNP, WNP, BLAST, RWNP, CP
+- **Streaming**: IDataSource interface with AsyncIterable
+- **Privacy**: PPRL Bloom filter encoding
+- **LLM scorer**: Optional DeepSeek/OpenAI boundary-pair resolution
+- **Active learning**: Uncertainty sampling + logistic classifier
+- **Golden record**: Field-level survivorship (most_popular, longest, source_priority)
+
+## Interfaces
+
+```typescript
+interface IDataSource { read(): AsyncIterable<Record<string, unknown>> }
+interface IEntityStore { getEntity, queryNeighbors, upsertEntity, applyMerge, applySplit }
+interface IConfigStore { load, save, list }
+interface IScorer { readonly name; score(a, b, field): number }
+interface ILogger { debug, info, warn, error }
+```
+
+## Error Hierarchy
+
+14 typed error classes: ValidationError, ConfigurationError, IOError, ParseError, ResolutionError, BlockingError, ScoringError, ClusteringError, EvaluationError, ConvergenceError, LLMError, AuthError, RateLimitError, InternalError
+
+## Repository
+
+- **URL**: https://github.com/AgentiX-E/entity-resolver
+- **License**: MIT
+- **Package manager**: pnpm 9.15.0
+- **Node**: >= 22.0.0
+- **CI**: Ubuntu + Windows + macOS, Node 20 + 22, 95% coverage thresholds
+- **Author**: Lambertyan — AgentiX-E
