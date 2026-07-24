@@ -105,9 +105,9 @@ function computeCramersV(
 
   for (const [row, rowMap] of table) {
     let rowTotal = 0;
-    for (const [, count] of rowMap) {
+    for (const [col, count] of rowMap) {
       rowTotal += count;
-      colTotals.set(row, (colTotals.get(row) ?? 0) + count);
+      colTotals.set(col, (colTotals.get(col) ?? 0) + count);
     }
     rowTotals.set(row, rowTotal);
     n += rowTotal;

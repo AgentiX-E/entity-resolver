@@ -17,6 +17,8 @@ export interface EMOptions {
   readonly epsilon?: number;
   /** Random seed for reproducibility (reserved for future multi-start). */
   readonly seed?: number;
+  /** Number of random restarts for multi-start EM. Default: 1 (no restart). */
+  readonly numRestarts?: number;
 }
 
 /** Result of EM parameter estimation. */
@@ -79,60 +81,95 @@ export function estimateParameters(
     pair.map((v) => `${v.field}:${v.level}`),
   );
 
-  // Initialize parameters with literature defaults
-  const state: EMState = initializeState(keys);
+  // Helper: run EM iterations for a given state, return diagnostics
+  const runEMLoop = (
+    state: EMState,
+  ): {
+    converged: boolean;
+    iterations: number;
+    logLikelihood: number;
+    logLikelihoodHistory: number[];
+    posteriors: number[];
+  } => {
+    const localLLHistory: number[] = [];
+    const localPosteriors: number[] = new Array(N).fill(0);
+    let localConverged = false;
+    let localIter = 0;
 
-  const logLikelihoodHistory: number[] = [];
-  const posteriors: number[] = new Array(N).fill(0);
-  let converged = false;
-  let iteration = 0;
+    for (localIter = 0; localIter < maxIterations; localIter++) {
+      eStep(pairKeySets, state, localPosteriors);
+      mStep(pairKeySets, fieldToKeys, localPosteriors, state, keys);
 
-  for (iteration = 0; iteration < maxIterations; iteration++) {
-    // ── E-step: compute per-pair posterior P(match | observations) ──
-    eStep(pairKeySets, state, posteriors);
+      const ll = computeLogLikelihood(pairKeySets, state);
+      localLLHistory.push(ll);
 
-    // ── M-step: re-estimate m, u, lambda using posterior weights ──
-    mStep(pairKeySets, fieldToKeys, posteriors, state, keys);
-
-    // ── Convergence check: log-likelihood delta ──
-    const ll = computeLogLikelihood(pairKeySets, state);
-    logLikelihoodHistory.push(ll);
-
-    if (iteration > 0) {
-      const prevLL = logLikelihoodHistory[iteration - 1]!;
-      if (Math.abs(ll - prevLL) < epsilon) {
-        converged = true;
-        // Run one final E-step with converged parameters for accurate posteriors
-        eStep(pairKeySets, state, posteriors);
-        break;
+      if (localIter > 0) {
+        const prevLL = localLLHistory[localIter - 1]!;
+        if (Math.abs(ll - prevLL) < epsilon) {
+          localConverged = true;
+          eStep(pairKeySets, state, localPosteriors);
+          break;
+        }
       }
+    }
+
+    if (!localConverged) {
+      eStep(pairKeySets, state, localPosteriors);
+    }
+
+    return {
+      converged: localConverged,
+      iterations: localIter + 1,
+      logLikelihood: localLLHistory[localLLHistory.length - 1]!,
+      logLikelihoodHistory: localLLHistory,
+      posteriors: localPosteriors,
+    };
+  };
+
+  // Initial run
+  let bestState: EMState = initializeState(keys);
+  let bestResult = runEMLoop(bestState);
+  let bestIteration = bestResult.iterations;
+
+  // Multi-start: run EM from additional random initializations
+  // and select the result with the highest log-likelihood
+  const numRestarts = options.numRestarts ?? 1;
+  for (let r = 1; r < numRestarts; r++) {
+    const restartedState = initializeState(keys, {
+      initialM: 0.7 + Math.random() * 0.2,
+      initialU: 0.05 + Math.random() * 0.15,
+      initialLambda: 0.001 + Math.random() * 0.01,
+    });
+
+    const restartedResult = runEMLoop(restartedState);
+
+    if (restartedResult.logLikelihood > bestResult.logLikelihood) {
+      bestState = restartedState;
+      bestResult = restartedResult;
+      bestIteration = restartedResult.iterations;
     }
   }
 
-  // If hit maxIterations without converging, ensure posteriors are from final params
-  if (!converged) {
-    eStep(pairKeySets, state, posteriors);
-  }
-
   return {
-    parameters: freezeParameters(state),
-    iterations: iteration + 1,
-    converged,
-    logLikelihood: logLikelihoodHistory[logLikelihoodHistory.length - 1]!,
-    logLikelihoodHistory,
-    posteriors,
+    parameters: freezeParameters(bestState),
+    iterations: bestIteration,
+    converged: bestResult.converged,
+    logLikelihood: bestResult.logLikelihood,
+    logLikelihoodHistory: bestResult.logLikelihoodHistory,
+    posteriors: bestResult.posteriors,
   };
 }
 
 // ─── Initialization ─────────────────────────────────────────────
 
-function initializeState(keys: readonly string[]): EMState {
-  // Use uninformative prior (λ = 0.5) so data drives convergence rather than initial bias.
-  // m = 0.9 and u = 0.1 are reasonable starting points for field-level parameters.
+function initializeState(
+  keys: readonly string[],
+  overrides?: { initialM?: number; initialU?: number; initialLambda?: number },
+): EMState {
   const defaults = createDefaultParameters(keys, {
-    initialLambda: 0.5,
-    initialM: 0.9,
-    initialU: 0.1,
+    initialLambda: overrides?.initialLambda ?? 0.5,
+    initialM: overrides?.initialM ?? 0.9,
+    initialU: overrides?.initialU ?? 0.1,
   });
   return {
     lambda: defaults.lambda,
@@ -307,37 +344,78 @@ function levelRank(level: string): number {
  * distribution and lower probability under the non-match distribution.
  */
 function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): void {
-  // Sort keys by level rank (ascending = strongest first)
-  const sorted = [...fieldKeys].sort((a, b) => {
+  // ── PAVA for m-probabilities ──
+  // Sort weakest-first (rank descending) so that the monotonicity constraint
+  // m_weak <= m_strong maps naturally to PAVA's non-decreasing enforcement.
+  const mLevels = [...fieldKeys].sort((a, b) => {
+    const [, levelA] = a.split(':');
+    const [, levelB] = b.split(':');
+    return levelRank(levelB!) - levelRank(levelA!);
+  });
+
+  const mBlocks: Array<{ indices: number[]; avgValue: number; totalWeight: number }> = [];
+  for (let i = 0; i < mLevels.length; i++) {
+    const key = mLevels[i]!;
+    const mVal = state.mProbabilities.get(key) ?? 0.5;
+    mBlocks.push({ indices: [i], avgValue: mVal, totalWeight: 1 });
+
+    // Merge backward while violation exists (PAVA)
+    while (mBlocks.length >= 2) {
+      const last = mBlocks[mBlocks.length - 1]!;
+      const prev = mBlocks[mBlocks.length - 2]!;
+      if (prev.avgValue <= last.avgValue) break; // Monotonic ✓
+
+      const merged = {
+        indices: [...prev.indices, ...last.indices],
+        avgValue:
+          (prev.avgValue * prev.totalWeight + last.avgValue * last.totalWeight) /
+          (prev.totalWeight + last.totalWeight),
+        totalWeight: prev.totalWeight + last.totalWeight,
+      };
+      mBlocks.splice(mBlocks.length - 2, 2, merged);
+    }
+  }
+
+  for (const block of mBlocks) {
+    for (const idx of block.indices) {
+      state.mProbabilities.set(mLevels[idx]!, block.avgValue);
+    }
+  }
+
+  // ── PAVA for u-probabilities ──
+  // Sort strongest-first (rank ascending) so that the monotonicity constraint
+  // u_strong <= u_weak maps to PAVA's non-decreasing enforcement.
+  const uLevels = [...fieldKeys].sort((a, b) => {
     const [, levelA] = a.split(':');
     const [, levelB] = b.split(':');
     return levelRank(levelA!) - levelRank(levelB!);
   });
 
-  // Forward pass: ensure m is non-increasing (stronger levels ≥ weaker)
-  for (let i = 1; i < sorted.length; i++) {
-    const prevKey = sorted[i - 1]!;
-    const currKey = sorted[i]!;
-    const prevM = state.mProbabilities.get(prevKey);
-    const currM = state.mProbabilities.get(currKey);
-    if (prevM !== undefined && currM !== undefined && currM > prevM) {
-      // Average them to satisfy monotonicity
-      const avg = (prevM + currM) / 2;
-      state.mProbabilities.set(prevKey, avg);
-      state.mProbabilities.set(currKey, avg);
+  const uBlocks: Array<{ indices: number[]; avgValue: number; totalWeight: number }> = [];
+  for (let i = 0; i < uLevels.length; i++) {
+    const key = uLevels[i]!;
+    const uVal = state.uProbabilities.get(key) ?? 0.1;
+    uBlocks.push({ indices: [i], avgValue: uVal, totalWeight: 1 });
+
+    while (uBlocks.length >= 2) {
+      const last = uBlocks[uBlocks.length - 1]!;
+      const prev = uBlocks[uBlocks.length - 2]!;
+      if (prev.avgValue <= last.avgValue) break; // Monotonic ✓
+
+      const merged = {
+        indices: [...prev.indices, ...last.indices],
+        avgValue:
+          (prev.avgValue * prev.totalWeight + last.avgValue * last.totalWeight) /
+          (prev.totalWeight + last.totalWeight),
+        totalWeight: prev.totalWeight + last.totalWeight,
+      };
+      uBlocks.splice(uBlocks.length - 2, 2, merged);
     }
   }
 
-  // Forward pass: ensure u is non-decreasing (stronger levels ≤ weaker)
-  for (let i = 1; i < sorted.length; i++) {
-    const prevKey = sorted[i - 1]!;
-    const currKey = sorted[i]!;
-    const prevU = state.uProbabilities.get(prevKey);
-    const currU = state.uProbabilities.get(currKey);
-    if (prevU !== undefined && currU !== undefined && currU < prevU) {
-      const avg = (prevU + currU) / 2;
-      state.uProbabilities.set(prevKey, avg);
-      state.uProbabilities.set(currKey, avg);
+  for (const block of uBlocks) {
+    for (const idx of block.indices) {
+      state.uProbabilities.set(uLevels[idx]!, block.avgValue);
     }
   }
 }

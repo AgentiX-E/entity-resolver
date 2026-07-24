@@ -107,7 +107,7 @@ export async function runPipeline(
     tfLookup = new TFAdjustmentLookup(freqs);
   }
 
-  const scoredPairs = computeScoredPairs(cleaned, candidates, config.comparisons, params, tfLookup);
+  const scoredPairs = computeScoredPairs(cleaned, candidates, config.comparisons, params, tfLookup, pairVectors);
 
   // Stage 4: Clustering
   const clustering = connectedComponents(scoredPairs, records.length, config.matchThreshold);
@@ -158,6 +158,7 @@ function computeScoredPairs(
   comparisons: readonly ComparisonSpec[],
   params: FSParameters,
   tfLookup?: TFAdjustmentLookup,
+  pairVectors?: readonly ComparisonVector[][],
 ): ScoredPair[] {
   const pairs: ScoredPair[] = [];
   const fieldMeta = new Map<string, FieldMetadata>();
@@ -170,10 +171,13 @@ function computeScoredPairs(
     });
   }
 
-  for (const pair of candidates) {
+  for (let i = 0; i < candidates.length; i++) {
+    const pair = candidates[i]!;
     const a = records[pair.leftId]!;
     const b = records[pair.rightId]!;
-    const vecs = generateComparisonVectors(a, b, comparisons, fieldMeta);
+    const vecs = pairVectors
+      ? pairVectors[i]!
+      : generateComparisonVectors(a, b, comparisons, fieldMeta);
     const mw = computeAggregateMatchWeight(vecs, params);
 
     let adjustedProb = mw.probability;

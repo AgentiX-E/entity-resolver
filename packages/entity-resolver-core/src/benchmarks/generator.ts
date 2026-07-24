@@ -470,8 +470,11 @@ function generatePersonVariant(
 
   // Apply typo to one field
   if (rng.next() < 0.5) {
-    const field = rng.pick(['given_name', 'surname', 'address_city']);
-    rec[field] = applyTypo(entity.firstName, rng); // simplified
+    const field = rng.pick(['given_name', 'surname', 'address_city']) as 'given_name' | 'surname' | 'address_city';
+    const entityValue: string = field === 'given_name' ? entity.firstName
+      : field === 'surname' ? entity.lastName
+      : entity.city;
+    rec[field] = applyTypo(entityValue, rng);
   }
 
   // Phonetic variation

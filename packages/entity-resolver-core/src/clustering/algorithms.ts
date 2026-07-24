@@ -19,17 +19,26 @@ export interface ClusteringMetadata {
 
 // Union-Find helper
 function ufFind(parent: number[], x: number): number {
-  while (parent[x] !== x) {
-    parent[x] = parent[parent[x]!]!;
-    x = parent[x]!;
+  // Full path compression: recursive find with root caching
+  if (parent[x] !== x && parent[x] !== undefined) {
+    parent[x] = ufFind(parent, parent[x]!);
   }
-  return x;
+  return parent[x] ?? x;
 }
 
-function ufUnion(parent: number[], a: number, b: number): void {
+function ufUnion(parent: number[], size: number[], a: number, b: number): void {
   const ra = ufFind(parent, a);
   const rb = ufFind(parent, b);
-  if (ra !== rb) parent[ra] = rb;
+  if (ra === rb) return;
+
+  // Union by size: attach smaller tree under larger tree
+  if ((size[ra] ?? 1) < (size[rb] ?? 1)) {
+    parent[ra] = rb;
+    size[rb] = (size[rb] ?? 1) + (size[ra] ?? 1);
+  } else {
+    parent[rb] = ra;
+    size[ra] = (size[ra] ?? 1) + (size[rb] ?? 1);
+  }
 }
 
 // ═══════════════════════════════════════════════════════
@@ -42,9 +51,10 @@ export function connectedComponents(
   threshold: number,
 ): ClusteringResult {
   const parent = Array.from({ length: totalRecords }, (_, i) => i);
+  const size = new Array<number>(totalRecords).fill(1);
   for (const pair of pairs) {
     if (pair.score >= threshold || (pair.probability ?? 0) >= threshold) {
-      ufUnion(parent, pair.leftId, pair.rightId);
+      ufUnion(parent, size, pair.leftId, pair.rightId);
     }
   }
   return buildResult(parent, totalRecords, 'cc');
@@ -69,6 +79,7 @@ export function dbscanClustering(
   }
 
   const labels = new Array<number>(totalRecords).fill(-1);
+  const visitedSet = new Set<number>();
   let clusterId = 0;
 
   for (let i = 0; i < totalRecords; i++) {
@@ -80,6 +91,8 @@ export function dbscanClustering(
     }
     labels[i] = clusterId;
     const seeds = [...nbrs];
+    visitedSet.clear();
+    for (const n of nbrs) visitedSet.add(n);
     for (let s = 0; s < seeds.length; s++) {
       const point = seeds[s]!;
       if (labels[point] === -2) labels[point] = clusterId;
@@ -88,7 +101,10 @@ export function dbscanClustering(
       const pointNbrs = neighbors[point]!;
       if (pointNbrs.length >= minPts) {
         for (const n of pointNbrs) {
-          if (!seeds.includes(n)) seeds.push(n);
+          if (!visitedSet.has(n)) {
+            visitedSet.add(n);
+            seeds.push(n);
+          }
         }
       }
     }
@@ -110,13 +126,14 @@ export function uniqueMapping(
   const sorted = [...pairs].sort((a, b) => b.score - a.score);
   const used = new Set<number>();
   const parent = Array.from({ length: totalRecords }, (_, i) => i);
+  const size = new Array<number>(totalRecords).fill(1);
 
   for (const pair of sorted) {
     if (pair.score < threshold) break;
     if (used.has(pair.leftId) || used.has(pair.rightId)) continue;
     used.add(pair.leftId);
     used.add(pair.rightId);
-    ufUnion(parent, pair.leftId, pair.rightId);
+    ufUnion(parent, size, pair.leftId, pair.rightId);
   }
 
   return buildResult(parent, totalRecords, 'unique');
