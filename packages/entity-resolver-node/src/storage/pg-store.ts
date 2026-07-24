@@ -138,7 +138,7 @@ function readPemFile(pathOrContent: string): string {
     return pathOrContent;
   }
   try {
-    const { readFileSync } = await_import_fs();
+    const { readFileSync } = getFsModule();
     return readFileSync(pathOrContent, 'utf-8');
   } catch (err) {
     // SAFE: if file read fails, the original path/content is not valid.
@@ -147,12 +147,16 @@ function readPemFile(pathOrContent: string): string {
   }
 }
 
-/** Lazily import fs module (ESM-safe dynamic import). */
+/** Lazily import fs module (ESM-safe via createRequire from 'module'). */
 let _fsModule: { readFileSync: (path: string, encoding: string) => string } | null = null;
-function await_import_fs(): { readFileSync: (path: string, encoding: string) => string } {
+
+function getFsModule(): { readFileSync: (path: string, encoding: string) => string } {
   if (!_fsModule) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    _fsModule = require('fs');
+    // In ESM, require is not globally available. Use createRequire from 'module'
+    // which is the standard ESM-compatible way to load CommonJS modules.
+    const { createRequire } = require('node:module') as { createRequire: (url: string) => NodeRequire };
+    const nodeRequire = createRequire(import.meta.url);
+    _fsModule = nodeRequire('node:fs');
   }
   return _fsModule;
 }
