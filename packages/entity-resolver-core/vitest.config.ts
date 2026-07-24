@@ -5,8 +5,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      // branches 89 (current 89.77%) — remaining 5.23pp in deep algorithmic code (I4 target: 95%)
-      thresholds: { statements: 95, branches: 89, functions: 95, lines: 95 },
+      // Target: all dimensions ≥ 95%. Branches at 90 (current 88.88, gap in learner/analyzer/datasets).
+      thresholds: { statements: 95, branches: 90, functions: 95, lines: 95 },
       include: ['src/**/*.ts'],
       exclude: [
         'src/**/*.d.ts',

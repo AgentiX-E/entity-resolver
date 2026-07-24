@@ -1,0 +1,123 @@
+name: Benchmark Regression
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  benchmark:
+    name: Benchmarks
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run benchmarks (current branch)
+        run: |
+          node -e "
+            const { runAllBenchmarks, formatBenchmarkReport } = require('./packages/entity-resolver-core/dist/benchmarks/runner.js');
+            (async () => {
+              const r = await runAllBenchmarks();
+              console.log(formatBenchmarkReport(r.results));
+              require('fs').writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
+            })().catch(e => { console.error(e); process.exit(1); });
+          "
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmark-results.json
+          retention-days: 30
+
+  compare:
+    name: Regression Detection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: benchmark
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - name: Run benchmarks (main branch)
+        run: |
+          node -e "
+            const { runAllBenchmarks, formatBenchmarkReport } = require('./packages/entity-resolver-core/dist/benchmarks/runner.js');
+            (async () => {
+              const r = await runAllBenchmarks();
+              require('fs').writeFileSync('benchmark-results-main.json', JSON.stringify(r, null, 2));
+            })().catch(e => { console.error(e); process.exit(1); });
+          "
+
+      - name: Download PR benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results
+          path: .
+
+      - name: Compare benchmarks
+        run: |
+          node -e "
+            const pr = JSON.parse(require('fs').readFileSync('benchmark-results.json', 'utf-8'));
+            const main = JSON.parse(require('fs').readFileSync('benchmark-results-main.json', 'utf-8'));
+
+            let regressions = 0;
+            for (let i = 0; i < pr.results.length; i++) {
+              const prR = pr.results[i];
+              const mainR = main.results[i];
+              if (!prR || !mainR) continue;
+
+              const purityDelta = prR.purity - mainR.purity;
+              const completenessDelta = prR.completeness - mainR.completeness;
+              const timeDelta = prR.executionTimeMs - mainR.executionTimeMs;
+
+              const timeReg = mainR.executionTimeMs > 0 ? (timeDelta / mainR.executionTimeMs) * 100 : 0;
+
+              process.stdout.write(prR.dataset.padEnd(20) + ' | ');
+              process.stdout.write('Purity: ' + (purityDelta >= 0 ? '+' : '') + purityDelta.toFixed(4) + ' | ');
+              process.stdout.write('Recall: ' + (completenessDelta >= 0 ? '+' : '') + completenessDelta.toFixed(4) + ' | ');
+              process.stdout.write('Time: ' + (timeDelta >= 0 ? '+' : '') + timeDelta.toFixed(0) + 'ms (' + timeReg.toFixed(1) + '%)\n');
+
+              if (timeReg > 20 || purityDelta < -0.02) {
+                regressions++;
+              }
+            }
+
+            if (regressions > 0) {
+              console.error('\n⚠️  ' + regressions + ' benchmark regression(s) detected!');
+              console.error('Purity drop > 0.02 or time increase > 20%');
+              process.exit(1);
+            } else {
+              console.log('\n✅ No benchmark regressions detected');
+            }
+          "

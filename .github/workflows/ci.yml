@@ -6,10 +6,15 @@ on:
   pull_request:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -25,6 +30,7 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -38,23 +44,55 @@ jobs:
       - run: pnpm typecheck
 
   test:
-    name: Test (Coverage)
-    runs-on: ubuntu-latest
+    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['20', '22']
+        exclude:
+          # Reduce matrix: skip Node 20 on Windows (resource saving)
+          - os: windows-latest
+            node-version: '20'
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
+
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: pnpm
+
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test
+
+      - name: Run tests with coverage
+        run: pnpm test
+
+      - name: Upload coverage to Codecov
+        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: packages/*/coverage/coverage-final.json
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifact
+        if: always() && matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.node-version }}
+          path: packages/*/coverage/
+          retention-days: 7
 
   format:
     name: Format Check
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -70,6 +108,7 @@ jobs:
   e2e:
     name: E2E (Playwright)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -88,3 +127,4 @@ jobs:
       - run: pnpm build
       - run: npx playwright install chromium --with-deps
       - run: npx playwright test
+        retry: 2

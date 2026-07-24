@@ -1,0 +1,55 @@
+name: PR Review Automation
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  auto-review:
+    name: Automated PR Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Run type check on changed files
+        run: pnpm typecheck
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Check test results
+        if: failure()
+        run: |
+          echo "### ⚠️ PR Review: Tests Failed" >> $GITHUB_STEP_SUMMARY
+          echo "Please ensure all tests pass before merging." >> $GITHUB_STEP_SUMMARY
+
+  dependency-check:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: critical
+          deny-licenses: GPL-3.0-only, AGPL-3.0-only
