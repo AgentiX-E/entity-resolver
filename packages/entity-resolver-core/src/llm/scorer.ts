@@ -15,6 +15,16 @@ export interface LLMProviderConfig {
   readonly apiKey: string;
   /** Max tokens for LLM response. */
   readonly maxTokens?: number;
+  /** Maximum pairs to batch in a single API call. Default: 5. */
+  readonly batchSize?: number;
+  /** Maximum retry attempts on transient failures. Default: 3. */
+  readonly maxRetries?: number;
+  /** Base delay for exponential backoff (ms). Default: 1000. */
+  readonly retryBaseMs?: number;
+  /** Circuit breaker: max consecutive failures before pausing. Default: 5. */
+  readonly circuitBreakerThreshold?: number;
+  /** Circuit breaker cooldown (ms). Default: 60000. */
+  readonly circuitBreakerCooldownMs?: number;
 }
 
 /** LLM scorer configuration. */
