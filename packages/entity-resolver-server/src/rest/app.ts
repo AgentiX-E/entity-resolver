@@ -18,6 +18,7 @@ import type {
   GazetteerConfig,
   RecordLinkConfig,
 } from '@agentix-e/entity-resolver-core';
+import { getHealth } from '../logging/health.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { AuthConfig } from '../middleware/auth.js';
@@ -108,16 +109,8 @@ export function createApp(config: ServerConfig = {}): Hono {
     app.use('*', createRateLimitMiddleware(config.rateLimit).middleware);
   }
 
-  // Enhanced health check
-  app.get('/health', (c: Context) =>
-    c.json({
-      status: 'ok',
-      timestamp: Date.now(),
-      uptime: process.uptime(),
-      memory: process.memoryUsage().heapUsed,
-      version: '0.1.0',
-    }),
-  );
+  // Enhanced health check with component status
+  app.get('/health', (c: Context) => c.json(getHealth()));
 
   // Deduplicate records
   app.post('/api/v1/dedupe', async (c: Context) => {

@@ -422,10 +422,10 @@ describe('health endpoint', () => {
     const res = await app.request('/health');
     const body = (await res.json()) as Record<string, unknown>;
     expect(body.status).toBe('ok');
-    expect(body.timestamp).toBeGreaterThan(0);
+    expect(body.timestamp).toBeTruthy();
     expect(body.uptime).toBeGreaterThanOrEqual(0);
-    expect(body.memory).toBeGreaterThan(0);
-    expect(body.version).toBe('0.1.0');
+    expect(body.components).toBeDefined();
+    expect(body.memory).toBeDefined();
   });
 
   it('health endpoint returns growing uptime', async () => {

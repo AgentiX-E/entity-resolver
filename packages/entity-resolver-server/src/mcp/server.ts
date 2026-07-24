@@ -17,6 +17,7 @@ import {
   type McpToolsCallResult,
 } from './jsonrpc.js';
 import { getMcpTools, executeMcpTool, type McpTool } from './tools.js';
+import { getHealth } from '../logging/health.js';
 
 // ═══════════════════════════════════════════════════════════
 // MCP Server State
@@ -195,8 +196,8 @@ function sseEndpoint(_c: Context): Response {
 export function createMcpApp(): Hono {
   const app = new Hono();
 
-  // Health check
-  app.get('/health', (c) => c.json({ status: 'ok', uptime: process.uptime() }));
+  // Health check with component status
+  app.get('/health', (c) => c.json(getHealth()));
 
   // SSE endpoint for MCP streaming transport
   app.get('/mcp/sse', sseEndpoint);
