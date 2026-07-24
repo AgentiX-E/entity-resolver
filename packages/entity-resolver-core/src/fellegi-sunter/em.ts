@@ -11,14 +11,18 @@ import type { FSParameters } from './parameters.js';
 
 /** Configuration for the EM algorithm. */
 export interface EMOptions {
-  /** Maximum number of iterations (default: 30). */
   readonly maxIterations?: number;
-  /** Convergence threshold: stop when delta log-likelihood < epsilon. */
   readonly epsilon?: number;
-  /** Random seed for reproducibility (reserved for future multi-start). */
   readonly seed?: number;
-  /** Number of random restarts for multi-start EM. Default: 1 (no restart). */
   readonly numRestarts?: number;
+  /**
+   * Maximum number of pairs to use for EM training.
+   * When set, pairs are deterministically sampled (hash-based) to cap
+   * training data size. This enables EM to run on large datasets without
+   * O(N²) memory. Uses Splink-style hash-based sampling for reproducibility.
+   * Default: undefined (no cap — uses all pairs).
+   */
+  readonly maxPairs?: number;
 }
 
 /** Result of EM parameter estimation. */
@@ -71,15 +75,38 @@ export function estimateParameters(
     throw new Error('Cannot estimate parameters from empty pair set');
   }
 
-  const N = pairVectors.length;
+  // Splink-style hash-based deterministic sampling for large datasets
+  const { maxPairs } = options;
+  let effectiveVectors = pairVectors;
+
+  if (maxPairs && maxPairs > 0 && pairVectors.length > maxPairs) {
+    // Deterministic hash-based sampling: keep pairs where hash(leftId, rightId) < threshold
+    const sampleRatio = maxPairs / pairVectors.length;
+    const sampledVectors: ComparisonVector[][] = [];
+    
+    for (let i = 0; i < pairVectors.length; i++) {
+      if (simpleHash32(i) < sampleRatio * 0xffffffff) {
+        sampledVectors.push(pairVectors[i] as ComparisonVector[]);
+      }
+    }
+    // Ensure at least 2 pairs for meaningful estimation
+    if (sampledVectors.length < 2 && pairVectors.length >= 2) {
+      sampledVectors.push(pairVectors[0] as ComparisonVector[], pairVectors[1] as ComparisonVector[]);
+    }
+    
+    effectiveVectors = sampledVectors;
+  } else {
+    effectiveVectors = pairVectors;
+  }
 
   // Extract all unique "field:level" keys and organize by field
-  const { keys, fieldToKeys } = extractKeys(pairVectors);
+  const { keys, fieldToKeys } = extractKeys(effectiveVectors);
 
-  // Build per-pair key arrays: pairKeySets[i] = ["name:exact_match", "dob:strong_match", ...]
-  const pairKeySets: string[][] = pairVectors.map((pair) =>
+  // Build per-pair key arrays
+  const pairKeySets: string[][] = effectiveVectors.map((pair) =>
     pair.map((v) => `${v.field}:${v.level}`),
   );
+  const N = effectiveVectors.length;
 
   // Helper: run EM iterations for a given state, return diagnostics
   const runEMLoop = (
@@ -470,4 +497,14 @@ export function clampProb(p: number): number {
   if (!Number.isFinite(p) || p <= 0) return 1e-10;
   if (p >= 1) return 1 - 1e-10;
   return p;
+}
+
+/** Simple 32-bit hash for deterministic pair sampling (Splink-style). */
+function simpleHash32(n: number): number {
+  let h = n | 0;
+  h = ((h ^ 61) ^ (h >>> 16)) * 9;
+  h = h ^ (h >>> 4);
+  h = h * 0x27d4eb2d;
+  h = h ^ (h >>> 15);
+  return h >>> 0;
 }

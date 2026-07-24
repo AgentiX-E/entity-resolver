@@ -298,3 +298,22 @@ export { buildGoldenRecord } from './golden-record.js';
 // Utilities
 export type { MemoryGuardConfig, MemorySnapshot } from './utils/memory-guard.js';
 export { checkMemory, isMemoryHigh, estimateBlockingMemory } from './utils/memory-guard.js';
+
+// Graph Metrics
+export type {
+  NodeMetrics,
+  ClusterMetrics,
+  ClusterGraphMetrics,
+} from './clustering/graph-metrics.js';
+export { computeGraphMetrics, detectBridges } from './clustering/graph-metrics.js';
+
+// Composable Blocking
+export {
+  blockOnAll,
+  andBlocking,
+  orBlocking,
+  intersectPairs,
+  unionPairs,
+  subtractPairs,
+} from './blocking/composable.js';
+export type { BlockingPredicate } from './blocking/composable.js';
