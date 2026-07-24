@@ -43,6 +43,12 @@ export interface PipelineOptions {
   readonly maxEmIterations?: number;
   /** EM convergence epsilon. */
   readonly emEpsilon?: number;
+  /**
+   * If true, preprocess records in-place without cloning.
+   * Faster and uses less memory, but mutates the input array.
+   * Default: true (in-place). Set false to preserve input.
+   */
+  readonly mutateInput?: boolean;
 }
 
 /**
@@ -82,8 +88,9 @@ export async function runPipeline(
 
   const startTime = Date.now();
 
-  // Stage 1: Preprocessing
-  const cleaned = structuredClone(records);
+  // Stage 1: Preprocessing (in-place by default to avoid structuredClone overhead)
+  const mutateInput = options?.mutateInput ?? true;
+  const cleaned: RawRecord[] = mutateInput ? records : structuredClone(records);
   preprocessRecords(cleaned);
 
   // Stage 2: Blocking
@@ -125,6 +132,28 @@ export async function runPipeline(
   };
 
   return result;
+}
+
+/**
+ * Run the pipeline from a streaming data source.
+ *
+ * Materializes all records into memory first (for blocking/clustering which
+ * require full dataset access), but prepares the architecture for future
+ * true-streaming stages.
+ *
+ * Prefer this over runPipeline() when consuming from an IDataSource ��
+ * it handles the async iteration and provides better memory diagnostics.
+ */
+export async function runPipelineFromSource(
+  source: { read(): AsyncIterable<RawRecord> },
+  config: PipelineConfig,
+  options?: PipelineOptions,
+): Promise<PipelineResult> {
+  const records: RawRecord[] = [];
+  for await (const record of source.read()) {
+    records.push(record);
+  }
+  return runPipeline(records, config, options);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -236,13 +265,14 @@ function buildDiagnostics(
     muParams.get(field!)!.uProbabilities.set(key, params.uProbabilities.get(key)!);
   }
 
-  // Build match weight histogram from per-pair vector counts
+  // Build match weight histogram with adaptive bin range
   const weightBins: Array<{ minWeight: number; maxWeight: number; count: number }> = [];
   const totalPairs = _pairVectors.length;
   if (totalPairs > 0) {
-    for (let bin = 0; bin < 20; bin++) {
-      weightBins.push({ minWeight: bin * 5 - 50, maxWeight: (bin + 1) * 5 - 50, count: 0 });
-    }
+    // Compute actual min/max weights for adaptive bins
+    let minW = Infinity;
+    let maxW = -Infinity;
+    const weights: number[] = [];
     for (const pair of _pairVectors) {
       let weight = 0;
       for (const v of pair) {
@@ -251,7 +281,26 @@ function buildDiagnostics(
         const u = params.uProbabilities.get(key);
         if (m && u && u > 0) weight += Math.log2(m / u);
       }
-      const binIdx = Math.min(Math.max(Math.floor((weight + 50) / 5), 0), 19);
+      weights.push(weight);
+      if (weight < minW) minW = weight;
+      if (weight > maxW) maxW = weight;
+    }
+
+    // Pad range by 10% on each side
+    const pad = Math.max((maxW - minW) * 0.1, 1);
+    const effectiveMin = Math.floor(minW - pad);
+    const effectiveMax = Math.ceil(maxW + pad);
+    const binWidth = Math.max((effectiveMax - effectiveMin) / 20, 0.5);
+
+    for (let bin = 0; bin < 20; bin++) {
+      weightBins.push({
+        minWeight: Math.round((effectiveMin + bin * binWidth) * 10) / 10,
+        maxWeight: Math.round((effectiveMin + (bin + 1) * binWidth) * 10) / 10,
+        count: 0,
+      });
+    }
+    for (const w of weights) {
+      const binIdx = Math.min(Math.max(Math.floor((w - effectiveMin) / binWidth), 0), 19);
       if (weightBins[binIdx]) weightBins[binIdx]!.count++;
     }
   }

@@ -23,6 +23,7 @@ export type { IEntityStore, ICloseableStore, EntityRecord } from './interfaces/I
 export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
 export type { ILogger, LogLevel, LogContext } from './interfaces/ILogger.js';
 export { NoopLogger } from './interfaces/ILogger.js';
+export type { IDataSource, ReadOptions } from './interfaces/IDataSource.js';
 
 // Error Hierarchy
 export {
@@ -184,7 +185,7 @@ export { evaluateClustering } from './evaluation/metrics.js';
 
 // Pipeline
 export type { PipelineConfig, PipelineOptions } from './pipeline/runner.js';
-export { runPipeline } from './pipeline/runner.js';
+export { runPipeline, runPipelineFromSource } from './pipeline/runner.js';
 
 // Benchmarks
 export type { BenchmarkDataset, BenchmarkResult } from './benchmarks/datasets.js';
@@ -257,3 +258,7 @@ export type {
   GoldenRecordResult,
 } from './golden-record.js';
 export { buildGoldenRecord } from './golden-record.js';
+
+// Utilities
+export type { MemoryGuardConfig, MemorySnapshot } from './utils/memory-guard.js';
+export { checkMemory, isMemoryHigh, estimateBlockingMemory } from './utils/memory-guard.js';
