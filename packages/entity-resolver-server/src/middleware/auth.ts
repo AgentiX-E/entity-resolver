@@ -1,9 +1,11 @@
 // Authentication middleware — API key + JWT dual-mode support.
 // Enterprise-grade: both simple (API key) and standard (JWT) auth.
 // Uses jose for real HMAC-SHA256 JWT verification via Web Crypto API.
+// API key comparison uses crypto.timingSafeEqual() to prevent timing attacks.
 
 import type { Context, Next } from 'hono';
 import { jwtVerify, errors as joseErrors } from 'jose';
+import { timingSafeEqual } from 'node:crypto';
 
 const { JWTExpired, JWTInvalid, JOSEError } = joseErrors;
 
@@ -65,9 +67,18 @@ export function createAuthMiddleware(config: AuthConfig) {
       return c.json({ error: 'Missing Authorization header' }, 401);
     }
 
-    // API Key validation (exact match, priority over JWT)
-    if (config.apiKeys && config.apiKeys.includes(token)) {
-      return next();
+    // API Key validation (constant-time comparison to prevent timing attacks)
+    if (config.apiKeys) {
+      const tokenBuf = Buffer.from(token);
+      for (const validKey of config.apiKeys) {
+        const validBuf = Buffer.from(validKey);
+        if (
+          tokenBuf.length === validBuf.length &&
+          timingSafeEqual(tokenBuf, validBuf)
+        ) {
+          return next();
+        }
+      }
     }
 
     // JWT validation

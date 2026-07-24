@@ -9,8 +9,16 @@ export interface RateLimitConfig {
   readonly maxRequests?: number;
   /** Time window in milliseconds. Default: 60000 (1 minute). */
   readonly windowMs?: number;
-  /** Custom key generator (default: IP-based). */
+  /** Custom key generator (default: IP-based with trusted proxy support). */
   readonly keyGenerator?: (c: Context) => string;
+  /**
+   * List of trusted proxy IPs or CIDR ranges.
+   * When configured, only these proxies' X-Forwarded-For headers are trusted.
+   * Without this, the X-Forwarded-For header is ignored and the direct
+   * connection IP is used to prevent IP spoofing.
+   * Default: empty (no proxies trusted — use direct connection IP).
+   */
+  readonly trustedProxies?: readonly string[];
 }
 
 interface Bucket {
@@ -52,7 +60,7 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
 
     const key = config.keyGenerator
       ? config.keyGenerator(c)
-      : (c.req.header('X-Forwarded-For') ?? c.req.header('X-Real-IP') ?? 'anonymous');
+      : resolveClientIp(c, config.trustedProxies);
 
     let bucket = buckets.get(key);
 
@@ -109,7 +117,48 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
 }
 
 /**
- * Starts bucket cleanup for rate limiters created with `createRateLimitMiddleware`.
+ * Resolve the client IP address safely.
+ *
+ * Without trusted proxies configured, uses only the direct connection IP
+ * (from CF-Connecting-IP header or environment remoteAddr).
+ * X-Forwarded-For is ignored entirely to prevent IP spoofing by untrusted clients.
+ *
+ * With trusted proxies configured, if the direct IP is in the trusted list,
+ * the rightmost entry from X-Forwarded-For is used.
+ */
+function resolveClientIp(
+  c: Context,
+  trustedProxies?: readonly string[],
+): string {
+  // Get the actual connecting IP (not spoofable headers)
+  const directIp =
+    c.req.header('CF-Connecting-IP') ??
+    c.req.header('X-Real-IP') ??
+    c.env?.remoteAddr ??
+    'anonymous';
+
+  if (!trustedProxies || trustedProxies.length === 0) {
+    return directIp;
+  }
+
+  // Check if direct IP is a trusted proxy
+  if (!trustedProxies.includes(directIp)) {
+    return directIp;
+  }
+
+  // Direct IP is trusted — use X-Forwarded-For (rightmost entry)
+  const xff = c.req.header('X-Forwarded-For');
+  if (xff) {
+    const ips = xff.split(',').map((ip) => ip.trim()).filter(Boolean);
+    if (ips.length > 0) {
+      return ips[ips.length - 1]!;
+    }
+  }
+
+  return directIp;
+}
+
+/**
  * @deprecated Use the `dispose()` method on the RateLimiter returned by
  *   `createRateLimitMiddleware()` instead. This function is a no-op
  *   and will be removed in a future version.

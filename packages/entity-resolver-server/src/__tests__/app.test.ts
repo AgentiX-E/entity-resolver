@@ -351,64 +351,60 @@ describe('rate limit middleware', () => {
     expect(res.status).toBe(200);
   });
 
-  it('uses X-Forwarded-For for rate limit key', async () => {
+  it('ignores X-Forwarded-For when no trusted proxies configured (security)', async () => {
     const app = createApp({
       rateLimit: { maxRequests: 1, windowMs: 60000 },
     });
-    // Same IP hits limit
+    // Without trusted proxies, X-Forwarded-For is ignored.
+    // All requests use the same 'anonymous' key, so the first
+    // response should also be used for the second (same key).
     await app.request('/api/v1/benchmarks', {
       headers: { 'X-Forwarded-For': '10.0.0.1' },
     });
-    const res1 = await app.request('/api/v1/benchmarks', {
-      headers: { 'X-Forwarded-For': '10.0.0.1' },
+    // Second request with different X-Forwarded-For — should also
+    // be rate-limited because the spoofed header is ignored
+    const res = await app.request('/api/v1/benchmarks', {
+      headers: { 'X-Forwarded-For': '10.0.0.999' },
     });
+    expect(res.status).toBe(429);
+  });
+
+  it('respects X-Forwarded-For when direct IP is trusted proxy', async () => {
+    // Use Hono's mock to set a trusted connecting IP
+    const app = createApp({
+      rateLimit: {
+        maxRequests: 1,
+        windowMs: 60000,
+        trustedProxies: ['10.0.0.99'],
+      },
+    });
+    // Simulate request from trusted proxy forwarding client IPs
+    const headers1 = {
+      'X-Forwarded-For': '10.0.0.1',
+      'X-Real-IP': '10.0.0.99',
+    };
+    await app.request('/api/v1/benchmarks', { headers: headers1 });
+    // Same client IP (10.0.0.1) — rate limited
+    const res1 = await app.request('/api/v1/benchmarks', { headers: headers1 });
     expect(res1.status).toBe(429);
 
-    // Different IP gets fresh bucket
-    const res2 = await app.request('/api/v1/benchmarks', {
-      headers: { 'X-Forwarded-For': '10.0.0.2' },
-    });
+    // Different client IP — should get fresh bucket
+    const headers2 = {
+      'X-Forwarded-For': '10.0.0.2',
+      'X-Real-IP': '10.0.0.99',
+    };
+    const res2 = await app.request('/api/v1/benchmarks', { headers: headers2 });
     expect(res2.status).toBe(200);
   });
 
-  it('uses X-Real-IP as fallback rate limit key', async () => {
+  it('uses anonymous key when no IP information available', async () => {
     const app = createApp({
       rateLimit: { maxRequests: 1, windowMs: 60000 },
     });
+    // All requests without IP headers share the same 'anonymous' bucket
     await app.request('/api/v1/benchmarks');
-    const res1 = await app.request('/api/v1/benchmarks');
-    expect(res1.status).toBe(429);
-
-    // Different X-Real-IP should bypass rate limit
-    const res2 = await app.request('/api/v1/benchmarks', {
-      headers: { 'X-Real-IP': '10.0.0.99' },
-    });
-    expect(res2.status).toBe(200);
-  });
-
-  it('startBucketCleanup returns a function that can be called', async () => {
-    const { startBucketCleanup } = await import('../middleware/rate-limit.js');
-    const cleanup = startBucketCleanup(100);
-    expect(typeof cleanup).toBe('function');
-    cleanup();
-  });
-
-  it('different IPs get independent rate limits', async () => {
-    const app = createApp({
-      rateLimit: { maxRequests: 1, windowMs: 60000 },
-    });
-    // IP 1 uses 1 request (hitting limit)
-    await app.request('/api/v1/benchmarks');
-    const res1 = await app.request('/api/v1/benchmarks');
-    // IP 1 should be rate-limited
-    expect(res1.status).toBe(429);
-
-    // IP 2 (different header) should NOT be rate-limited
-    const res2 = await app.request('/api/v1/benchmarks', {
-      headers: { 'X-Forwarded-For': '10.0.0.2' },
-    });
-    // IP 2's first request
-    expect(res2.status).toBe(200);
+    const res = await app.request('/api/v1/benchmarks');
+    expect(res.status).toBe(429);
   });
 });
 

@@ -1,21 +1,27 @@
 // LLM-assisted boundary-pair scorer for entity-resolver.
 // Uses an LLM (DeepSeek, OpenAI-compatible) to resolve ambiguous pairs.
-// API key via DEEPSEEK_API_KEY environment variable — NEVER in code.
+// API key is injected via configuration — NEVER in code or environment variables.
 
 import type { ScoredPair } from '../types/core.js';
 
-/** LLM scorer configuration. */
-export interface LLMScorerConfig {
-  /** Minimum score threshold to consider for LLM review. */
-  readonly candidateLo: number;
-  /** Maximum score threshold. Pairs in [lo, hi] are sent to LLM. */
-  readonly candidateHi: number;
+/** LLM provider configuration. */
+export interface LLMProviderConfig {
   /** API base URL. Default: DeepSeek API. */
   readonly apiBaseUrl?: string;
   /** Model name. Default: deepseek-chat. */
   readonly model?: string;
+  /** API key for the provider. MUST be provided by the caller (never from env). */
+  readonly apiKey: string;
   /** Max tokens for LLM response. */
   readonly maxTokens?: number;
+}
+
+/** LLM scorer configuration. */
+export interface LLMScorerConfig extends LLMProviderConfig {
+  /** Minimum score threshold to consider for LLM review. */
+  readonly candidateLo: number;
+  /** Maximum score threshold. Pairs in [lo, hi] are sent to LLM. */
+  readonly candidateHi: number;
 }
 
 /** Result from LLM scoring a record pair. */
@@ -33,17 +39,17 @@ export interface LLMScorerResult {
  * Pairs with scores in [candidateLo, candidateHi] are sent to the LLM
  * for semantic judgment. Pairs outside this range are returned as-is.
  *
- * API key: Set DEEPSEEK_API_KEY environment variable.
- * NEVER hardcode API keys in source code.
+ * The API key MUST be provided via config.apiKey — never read from
+ * environment variables or hardcoded. This ensures the caller controls
+ * credential lifecycle and injection (e.g., from a secret manager).
  */
 export async function scoreWithLLM(
   pairs: readonly ScoredPair[],
   records: ReadonlyArray<Record<string, unknown>>,
   config: LLMScorerConfig,
 ): Promise<LLMScorerResult[]> {
-  const apiKey = process.env['DEEPSEEK_API_KEY'];
-  if (!apiKey) {
-    throw new Error('DEEPSEEK_API_KEY environment variable is required for LLM scoring');
+  if (!config.apiKey) {
+    throw new Error('LLMScorerConfig.apiKey is required for LLM scoring');
   }
 
   const results: LLMScorerResult[] = [];
@@ -60,7 +66,7 @@ export async function scoreWithLLM(
     const recordB = records[pair.rightId] ?? {};
 
     const prompt = buildComparisonPrompt(recordA, recordB);
-    const llmResult = await callLLM(apiBase, apiKey, model, prompt, config.maxTokens ?? 200);
+    const llmResult = await callLLM(apiBase, config.apiKey, model, prompt, config.maxTokens ?? 200);
 
     results.push({
       leftId: pair.leftId,

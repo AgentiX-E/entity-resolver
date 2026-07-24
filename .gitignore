@@ -11,3 +11,4 @@ target/
 .DS_Store
 test-results/
 e2e/wasm-cache/
+.env
