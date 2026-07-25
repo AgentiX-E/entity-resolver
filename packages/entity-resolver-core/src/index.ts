@@ -251,6 +251,16 @@ export {
 export type { EvaluationMetrics } from './evaluation/metrics.js';
 export { evaluateClustering } from './evaluation/metrics.js';
 
+// Cross-Validation
+export type {
+  SplitConfig,
+  TrainTestSplit,
+  CrossValidateConfig,
+  FoldResult,
+  CrossValidateReport,
+} from './evaluation/cross-validate.js';
+export { trainTestSplit, crossValidate } from './evaluation/cross-validate.js';
+
 // Pipeline
 export type { PipelineConfig, PipelineOptions } from './pipeline/runner.js';
 export { runPipeline, runPipelineFromSource } from './pipeline/runner.js';
