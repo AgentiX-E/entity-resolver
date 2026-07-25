@@ -30,13 +30,12 @@ jobs:
 
       - name: Run benchmarks (current branch)
         run: |
-          node -e "
-            const { runAllBenchmarks, formatBenchmarkReport } = require('./packages/entity-resolver-core/dist/benchmarks/runner.js');
-            (async () => {
-              const r = await runAllBenchmarks();
-              console.log(formatBenchmarkReport(r.results));
-              require('fs').writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
-            })().catch(e => { console.error(e); process.exit(1); });
+          node --input-type=module -e "
+            import { runAllBenchmarks, formatBenchmarkReport } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
+            import { writeFileSync } from 'node:fs';
+            const r = await runAllBenchmarks();
+            console.log(formatBenchmarkReport(r.results));
+            writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
           "
 
       - name: Upload benchmark results
@@ -71,12 +70,11 @@ jobs:
 
       - name: Run benchmarks (main branch)
         run: |
-          node -e "
-            const { runAllBenchmarks, formatBenchmarkReport } = require('./packages/entity-resolver-core/dist/benchmarks/runner.js');
-            (async () => {
-              const r = await runAllBenchmarks();
-              require('fs').writeFileSync('benchmark-results-main.json', JSON.stringify(r, null, 2));
-            })().catch(e => { console.error(e); process.exit(1); });
+          node --input-type=module -e "
+            import { runAllBenchmarks } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
+            import { writeFileSync } from 'node:fs';
+            const r = await runAllBenchmarks();
+            writeFileSync('benchmark-results-main.json', JSON.stringify(r, null, 2));
           "
 
       - name: Download PR benchmark results
@@ -87,9 +85,10 @@ jobs:
 
       - name: Compare benchmarks
         run: |
-          node -e "
-            const pr = JSON.parse(require('fs').readFileSync('benchmark-results.json', 'utf-8'));
-            const main = JSON.parse(require('fs').readFileSync('benchmark-results-main.json', 'utf-8'));
+          node --input-type=module -e "
+            import { readFileSync } from 'node:fs';
+            const pr = JSON.parse(readFileSync('benchmark-results.json', 'utf-8'));
+            const main = JSON.parse(readFileSync('benchmark-results-main.json', 'utf-8'));
 
             let regressions = 0;
             for (let i = 0; i < pr.results.length; i++) {
@@ -114,10 +113,10 @@ jobs:
             }
 
             if (regressions > 0) {
-              console.error('\n⚠️  ' + regressions + ' benchmark regression(s) detected!');
+              console.error('\n\u26a0\ufe0f  ' + regressions + ' benchmark regression(s) detected!');
               console.error('Purity drop > 0.02 or time increase > 20%');
               process.exit(1);
             } else {
-              console.log('\n✅ No benchmark regressions detected');
+              console.log('\n\u2705 No benchmark regressions detected');
             }
           "
