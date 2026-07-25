@@ -55,8 +55,10 @@ export {
   ErHistogramElement,
   ErClusterExplorerElement,
   ErMuChartElement,
+  ErEvaluationRadarElement,
   registerAllElements,
 } from './components/web/elements.js';
+export { renderWaterfallSvg, renderHistogramSvg, renderEvaluationRadarSvg } from './components/web/svg-charts.js';
 
 // Layer 4: Interactive Dashboard
 export { DashboardShell, ComparisonViewer, DashboardEventBus, exportDashboardHTML } from './dashboard/index.js';

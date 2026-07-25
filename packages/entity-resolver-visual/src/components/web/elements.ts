@@ -12,9 +12,11 @@ import type {
   MuChartData,
   ClusterExplorerData,
   ClusterTreeNode,
+  EvaluationRadarData,
 } from '../../data/api.js';
+import { renderWaterfallSvg, renderHistogramSvg, renderEvaluationRadarSvg } from './svg-charts.js';
 
-// ══════════════════════════════════════════════════════════════
+// ═════════════════════════════════====================================
 // HTML Sanitization
 // ══════════════════════════════════════════════════════════════
 
@@ -92,16 +94,6 @@ function createDiv(styles: string, ...children: (string | Node)[]): HTMLDivEleme
     }
   }
   return div;
-}
-
-/**
- * Create a <span> with inline styles and text content (automatically escaped).
- */
-function createSpan(styles: string, text: string | number): HTMLSpanElement {
-  const span = document.createElement('span');
-  span.setAttribute('style', styles);
-  span.textContent = String(text);
-  return span;
 }
 
 /**
@@ -203,67 +195,13 @@ export class ErWaterfallElement extends ErBaseElement {
 
   private render(): void {
     if (!this._data) {
-      resetShadowRoot(
-        this.root,
-        buildFullCss(),
-        createDiv('padding: 16px;', 'No waterfall data loaded.'),
-      );
+      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No waterfall data loaded.'));
       return;
     }
-
-    const card = createDiv(CARD_CSS);
-    card.setAttribute('role', 'img');
-    card.setAttribute(
-      'aria-label',
-      `Waterfall chart: match weight ${escapeHtml(this._data.totalWeight.toFixed(2))}`,
-    );
     const themeStyle = this.buildThemeStyle();
-
-    // Title row
-    const title = createDiv(
-      `font-size: var(--er-font-size-lg); margin-bottom: 12px;`,
-      `Match Weight: ${escapeHtml(this._data.totalWeight.toFixed(2))} (${escapeHtml((this._data.matchProbability * 100).toFixed(1))}%)`,
-    );
-    card.appendChild(title);
-
-    // Bars
-    for (const bar of this._data.bars) {
-      const row = createDiv(
-        `display: flex; align-items: center; margin-bottom: var(--er-bar-gap); height: var(--er-bar-height);`,
-      );
-      row.appendChild(
-        createSpan(
-          'width: 120px; font-size: var(--er-font-size-sm); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;',
-          escapeHtml(bar.label),
-        ),
-      );
-
-      const barColor = bar.weight >= 0 ? 'var(--er-color-match)' : 'var(--er-color-nonmatch)';
-      const barWidth = Math.max(1, Math.abs(bar.weight * 10));
-      const barDiv = createDiv(
-        `flex: 1; background: ${barColor}; height: var(--er-bar-height); border-radius: var(--er-border-radius); min-width: ${barWidth}px;`,
-      );
-      // Set width proportionally
-      barDiv.style.width = `${barWidth}px`;
-      row.appendChild(barDiv);
-
-      row.appendChild(
-        createSpan(
-          'width: 60px; text-align: right; font-size: var(--er-font-size-sm);',
-          escapeHtml(bar.weight.toFixed(1)),
-        ),
-      );
-      card.appendChild(row);
-    }
-
-    // Footer
-    const footer = createDiv(
-      'margin-top: 8px; font-size: var(--er-font-size-sm); color: var(--er-color-prior);',
-      `Pair: #${escapeHtml(this._data.recordPair.idA)} ↔ #${escapeHtml(this._data.recordPair.idB)}`,
-    );
-    card.appendChild(footer);
-
-    resetShadowRoot(this.root, buildFullCss(), themeStyle, card);
+    const containerWidth = this.clientWidth || 600;
+    const svg = renderWaterfallSvg(this._data, containerWidth);
+    resetShadowRoot(this.root, buildFullCss(), themeStyle, svg);
   }
 }
 
@@ -292,57 +230,12 @@ export class ErHistogramElement extends ErBaseElement {
 
   private render(): void {
     if (!this._data) {
-      resetShadowRoot(
-        this.root,
-        buildFullCss(),
-        createDiv('padding: 16px;', 'No histogram data loaded.'),
-      );
+      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No histogram data loaded.'));
       return;
     }
-
     const themeStyle = this.buildThemeStyle();
-    const card = createDiv(CARD_CSS);
-    const maxCount = Math.max(...this._data.bins.map((b) => b.count), 1);
-
-    const header = createDiv(
-      'font-size: var(--er-font-size-lg); margin-bottom: 12px;',
-      'Match Weight Distribution',
-    );
-    card.appendChild(header);
-
-    for (const bin of this._data.bins) {
-      const row = createDiv(
-        'display: flex; align-items: center; margin-bottom: var(--er-bar-gap);',
-      );
-      row.appendChild(
-        createSpan(
-          'width: 80px; font-size: var(--er-font-size-sm);',
-          `[${escapeHtml(bin.minWeight)},${escapeHtml(bin.maxWeight)})`,
-        ),
-      );
-
-      const barDiv = createDiv(
-        `flex: 1; background: var(--er-color-primary); height: var(--er-bar-height); border-radius: var(--er-border-radius); min-width: 1px;`,
-      );
-      barDiv.style.width = `${(bin.count / maxCount) * 100}%`;
-      row.appendChild(barDiv);
-
-      row.appendChild(
-        createSpan(
-          'width: 40px; text-align: right; font-size: var(--er-font-size-sm);',
-          escapeHtml(bin.count),
-        ),
-      );
-      card.appendChild(row);
-    }
-
-    const summary = createDiv(
-      'margin-top: 8px; font-size: var(--er-font-size-sm);',
-      `Total: ${escapeHtml(this._data.summary.totalPairs)} | Above threshold: ${escapeHtml(this._data.summary.aboveThreshold)} | Below: ${escapeHtml(this._data.summary.belowThreshold)}`,
-    );
-    card.appendChild(summary);
-
-    resetShadowRoot(this.root, buildFullCss(), themeStyle, card);
+    const svg = renderHistogramSvg(this._data, this.clientWidth || 600);
+    resetShadowRoot(this.root, buildFullCss(), themeStyle, svg);
   }
 }
 
@@ -531,6 +424,33 @@ export class ErMuChartElement extends ErBaseElement {
   }
 }
 
+// ══════════════════════════════════════════════════════════════
+// <er-evaluation-radar> — Evaluation Radar Chart Component
+// ══════════════════════════════════════════════════════════════
+
+export class ErEvaluationRadarElement extends ErBaseElement {
+  static readonly observedAttributes = ['data', 'theme'];
+
+  private _data: EvaluationRadarData | null = null;
+
+  connectedCallback(): void { this.render(); }
+
+  attributeChangedCallback(name: string, _o: string | null, n: string | null): void {
+    if (name === 'data') { this._data = this.parseDataAttr<EvaluationRadarData>(n); this.render(); }
+    if (name === 'theme') this.render();
+  }
+
+  private render(): void {
+    if (!this._data) {
+      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No evaluation data.'));
+      return;
+    }
+    const themeStyle = this.buildThemeStyle();
+    const svg = renderEvaluationRadarSvg(this._data, this.clientWidth || 400);
+    resetShadowRoot(this.root, buildFullCss(), themeStyle, svg);
+  }
+}
+
 /** Register all custom elements. Safe to call multiple times — idempotent. */
 export function registerAllElements(): void {
   const elements: [string, CustomElementConstructor][] = [
@@ -538,6 +458,7 @@ export function registerAllElements(): void {
     ['er-histogram', ErHistogramElement],
     ['er-cluster-explorer', ErClusterExplorerElement],
     ['er-mu-chart', ErMuChartElement],
+    ['er-evaluation-radar', ErEvaluationRadarElement],
   ];
 
   for (const [name, ctor] of elements) {
