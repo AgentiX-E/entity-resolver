@@ -12,3 +12,7 @@ export { DuckDBStore } from './storage/duckdb-store.js';
 // Storage resolution
 export type { ResolvedStorage } from './storage-resolver.js';
 export { resolveStorage } from './storage-resolver.js';
+
+// SQL Backend
+export type { DuckDbSqlBackendConfig } from './storage/duckdb-sql-backend.js';
+export { DuckDbSqlBackend } from './storage/duckdb-sql-backend.js';

@@ -24,6 +24,7 @@ export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
 export type { ILogger, LogLevel, LogContext } from './interfaces/ILogger.js';
 export { NoopLogger } from './interfaces/ILogger.js';
 export type { IDataSource, ReadOptions } from './interfaces/IDataSource.js';
+export type { ISqlBackend, SqlRow, TempTableConfig, SqlBlockingConfig } from './interfaces/ISqlBackend.js';
 
 // Error Hierarchy
 export {
@@ -194,6 +195,9 @@ export {
   recommendBlockingRules,
   verifyBlockingRecall,
 } from './blocking/analyzer.js';
+
+// SQL Blocking
+export { sqlBlocking } from './blocking/sql-blocking.js';
 
 // Clustering
 export type { ClusteringResult, ClusteringMetadata } from './clustering/algorithms.js';
