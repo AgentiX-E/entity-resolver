@@ -24,9 +24,56 @@ export class MemoryEntityStore implements IEntityStore {
     return e ? { clusterId: e.id, memberIds: e.memberIds, cohesion: e.cohesion } : null;
   }
 
-  async queryNeighbors(id: EntityId, _hops?: number): Promise<EntityRecord[]> {
-    const e = this.entities.get(id);
-    return e ? [{ clusterId: e.id, memberIds: e.memberIds, cohesion: e.cohesion }] : [];
+  async queryNeighbors(id: EntityId, hops: number = 1): Promise<EntityRecord[]> {
+    const start = this.entities.get(id);
+    if (!start) return [];
+
+    if (hops <= 1) {
+      // Single-hop: return entities sharing at least one member
+      const memberSet = new Set(start.memberIds);
+      const result: EntityRecord[] = [];
+      for (const [, entity] of this.entities) {
+        if (entity.id === id) continue;
+        if (entity.memberIds.some((m) => memberSet.has(m))) {
+          result.push({
+            clusterId: entity.id,
+            memberIds: [...entity.memberIds],
+            cohesion: entity.cohesion,
+          });
+        }
+      }
+      return result;
+    }
+
+    // Multi-hop: BFS traversal
+    const visited = new Set<EntityId>([id]);
+    const queue: EntityId[] = [id];
+    const result: EntityRecord[] = [];
+
+    for (let hop = 0; hop < hops; hop++) {
+      const nextQueue: EntityId[] = [];
+      for (const currentId of queue) {
+        const current = this.entities.get(currentId);
+        if (!current) continue;
+        const memberSet = new Set(current.memberIds);
+        for (const [neighborId, neighbor] of this.entities) {
+          if (visited.has(neighborId)) continue;
+          if (neighbor.memberIds.some((m) => memberSet.has(m))) {
+            visited.add(neighborId);
+            nextQueue.push(neighborId);
+            result.push({
+              clusterId: neighbor.id,
+              memberIds: [...neighbor.memberIds],
+              cohesion: neighbor.cohesion,
+            });
+          }
+        }
+      }
+      queue.length = 0;
+      queue.push(...nextQueue);
+    }
+
+    return result;
   }
 
   async upsertEntity(entity: EntityRecord): Promise<void> {

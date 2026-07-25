@@ -6,12 +6,19 @@ import type { RawRecord } from './types/core.js';
 
 /** Field-level survivorship strategy. */
 export type SurvivorStrategy =
-  | 'longest' // Prefer the longest non-empty value
-  | 'most_popular' // Prefer the most frequent non-empty value
-  | 'most_complete' // Prefer the record with the most non-empty fields
-  | 'source_priority' // Prefer records from higher-priority sources
-  | 'first' // First non-empty value (stable ordering)
-  | 'concatenate'; // Concatenate all unique non-empty values
+  | 'longest'
+  | 'most_popular'
+  | 'most_complete'
+  | 'source_priority'
+  | 'first'
+  | 'concatenate'
+  | 'avg'        // Numeric average
+  | 'min'        // Numeric minimum
+  | 'max'        // Numeric maximum
+  | 'sum'        // Numeric sum
+  | 'median'     // Numeric median
+  | 'most_recent' // Most recent date (ISO 8601)
+  | 'oldest';     // Oldest date (ISO 8601)
 
 /** Field configuration for golden record generation. */
 export interface FieldSurvivorRule {
@@ -48,6 +55,37 @@ export interface GoldenRecordResult {
 
 function nonEmptyValue(v: unknown): boolean {
   return v !== null && v !== undefined && v !== '';
+}
+
+/** Apply a numeric aggregation to values. Falls back to first value if not all numeric. */
+function numericAggregate(
+  values: { value: unknown; recordIndex: number }[],
+  fn: (nums: number[]) => number,
+): unknown {
+  const nums: number[] = [];
+  for (const v of values) {
+    const n = Number(v.value);
+    if (Number.isFinite(n)) nums.push(n);
+  }
+  if (nums.length === 0) return values[0]!.value;
+  return fn(nums);
+}
+
+/** Select most recent or oldest date value. */
+function dateExtreme(
+  values: { value: unknown; recordIndex: number }[],
+  isBetter: (a: number, b: number) => boolean,
+): unknown {
+  let best = values[0]!;
+  let bestTime = Date.parse(String(best.value));
+  for (const v of values) {
+    const t = Date.parse(String(v.value));
+    if (Number.isFinite(t) && (!Number.isFinite(bestTime) || isBetter(t, bestTime))) {
+      best = v;
+      bestTime = t;
+    }
+  }
+  return best.value;
 }
 
 function longest(values: { value: unknown; recordIndex: number }[]): unknown {
@@ -188,6 +226,31 @@ export function buildGoldenRecord(
         selectedValue = best.value;
         break;
       }
+      case 'avg':
+        selectedValue = numericAggregate(values, (nums) => nums.reduce((s, n) => s + n, 0) / nums.length);
+        break;
+      case 'min':
+        selectedValue = numericAggregate(values, (nums) => Math.min(...nums));
+        break;
+      case 'max':
+        selectedValue = numericAggregate(values, (nums) => Math.max(...nums));
+        break;
+      case 'sum':
+        selectedValue = numericAggregate(values, (nums) => nums.reduce((s, n) => s + n, 0));
+        break;
+      case 'median':
+        selectedValue = numericAggregate(values, (nums) => {
+          const sorted = [...nums].sort((a, b) => a - b);
+          const mid = Math.floor(sorted.length / 2);
+          return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+        });
+        break;
+      case 'most_recent':
+        selectedValue = dateExtreme(values, (a, b) => a > b);
+        break;
+      case 'oldest':
+        selectedValue = dateExtreme(values, (a, b) => a < b);
+        break;
       default:
         selectedValue = values[0]!.value;
     }
