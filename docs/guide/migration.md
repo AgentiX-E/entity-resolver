@@ -1,141 +1,136 @@
-# Migrating from Splink / GoldenMatch
+# Migration Guide — Splink → @agentix-e/entity-resolver
 
-## Splink → @agentix-e/entity-resolver
+This guide helps Splink users migrate their entity resolution pipelines to entity-resolver.
 
-Splink (Python, PySpark) is the most popular open-source ER library. Our TypeScript/Node.js engine provides architectural parity with a different runtime.
+## Quick Comparison
 
-### Conceptual Mapping
+| Concept | Splink (Python) | entity-resolver (TypeScript) |
+|---------|-----------------|------------------------------|
+| Linker | `DuckDBLinker(df, settings)` | `runPipeline(records, config)` |
+| Blocking | `blocking_rules_to_generate_predictions` | `blocking.passes[]` |
+| Comparisons | `comparison_library` | `comparisons[]` |
+| EM training | `estimate_parameters_using_expectation_maximisation()` | `estimateParameters(vectors)` (built-in) |
+| Predict | `linker.predict()` | `runPipeline()` returns `scoredPairs` |
+| Clusters | `linker.cluster_pairwise_predictions_at_threshold()` | `connectedComponents(pairs, threshold)` |
+| Diagnostics | Waterfall chart, comparison viewer | `<er-dashboard>` or `buildWaterfallData()` |
 
-| Splink Concept | entity-resolver Equivalent |
-|---------------|------------------------------|
-| `Linker` | `runPipeline()` |
-| `SettingsCreator` | `PipelineConfig` (comparisons, blocking rules) |
-| `comparison_levels` | `ComparisonLevel` with `ComparisonSpec` |
-| `blocking_rules` | `BlockingPass[]` in `BlockingConfig` |
-| `EM training session` | `estimateParameters()` |
-| `m_probabilities` / `u_probabilities` | `FSParameters.mParams` / `FSParameters.uParams` |
-| `match_weight` | `computeMatchWeight()` |
-| `match_probability` | `weightToProbability()` |
-| `term_frequency_adjustments` | `adjustWeightByTF()` |
-| `waterfall chart` | `DiagnosticData.matchWeightBins` |
-| `cluster()` | `connectedComponents()` |
-| `truth_space_table` | `evaluateClustering()` |
-| `comparison_viewer` | `generateComparisonVectors()` |
-| `deterministic_rules` | `scorer: 'exact'` with high threshold |
+## Step-by-step Migration
 
-### API Migration: Basic Deduplication
+### 1. Blocking rules
 
-**Splink (Python):**
+**Splink:**
 ```python
-from splink.duckdb.linker import DuckDBLinker
-import splink.duckdb.comparison_library as cl
-
-settings = {
-    "link_type": "dedupe_only",
-    "comparisons": [
-        cl.name_comparison("name"),
-        cl.jaro_winkler_at_thresholds("city", 0.9),
-    ],
-    "blocking_rules_to_generate_predictions": [
-        "l.name = r.name",
-    ],
-}
-linker = DuckDBLinker(df, settings)
-linker.estimate_u_using_random_sampling(max_pairs=1e6)
-linker.estimate_m_from_pairwise_labels(table)
-results = linker.predict()
-clusters = linker.cluster_pairwise_predictions_at_threshold(results, 0.9)
+"blocking_rules_to_generate_predictions": [
+    "l.email = r.email",
+    "l.surname = r.surname and l.city = r.city",
+]
 ```
 
-**entity-resolver (TypeScript):**
+**entity-resolver:**
 ```typescript
-import { runPipeline, estimateParameters } from '@agentix-e/entity-resolver-core';
-
-const result = await runPipeline(records, {
+const config = {
   blocking: {
-    passes: [{ fields: ['name'], transforms: ['strip', 'lowercase'] }],
+    passes: [
+      { fields: ['email'], transforms: ['strip', 'lowercase'] },
+      { fields: ['surname', 'city'], transforms: ['strip', 'lowercase'] },
+    ],
   },
-  comparisons: [
-    { field: 'name', scorer: 'jaro_winkler', weight: 0.5 },
-    { field: 'city', scorer: 'jaro_winkler', weight: 0.5 },
-  ],
-  matchThreshold: 0.9,
-  autoConfigure: true,  // auto-estimates m/u via EM
+};
+```
+
+### 2. SQL blocking (DuckDB)
+
+entity-resolver also supports **SQL-based blocking** for large datasets:
+
+```typescript
+const { DuckDbSqlBackend } = require('@agentix-e/entity-resolver-node');
+const backend = new DuckDbSqlBackend();
+
+const blockingResult = await sqlBlocking(records, backend, {
+  rules: ['l.email = r.email', 'l.surname = r.surname AND l.city = r.city'],
 });
 ```
 
-### Key Differences
+### 3. Comparison specs
+
+**Splink:**
+```python
+cl.exact_match("email"),
+cl.jaro_winkler_at_thresholds("first_name", [0.9, 0.7]),
+```
+
+**entity-resolver:**
+```typescript
+const comparisons = [
+  { field: 'email', scorerName: 'exact', levels: [{ label: 'exact_match', threshold: 0.99 }] },
+  { field: 'first_name', scorerName: 'jaro_winkler', levels: [
+      { label: 'exact_match', threshold: 0.99 },
+      { label: 'strong_match', threshold: 0.85 },
+    ]},
+];
+```
+
+### 4. Term frequency adjustment
+
+**Splink:** Built into the model via `term_frequency_adjustments`.
+
+**entity-resolver:**
+```typescript
+const config = {
+  tfFields: ['surname', 'city'],
+};
+```
+
+### 5. Threshold prediction
+
+**Splink:**
+```python
+pairwise = linker.predict(threshold_match_probability=0.9)
+clusters = linker.cluster_pairwise_predictions_at_threshold(pairwise, 0.95)
+```
+
+**entity-resolver:**
+```typescript
+const result = await runPipeline(records, {
+  ...config,
+  matchThreshold: 0.5,
+});
+// result.clusters, result.scoredPairs, result.statistics
+```
+
+### 6. Diagnostics
+
+**Splink:**
+```python
+linker.visualisations.waterfall_chart(...)
+linker.comparison_viewer_dashboard(...)
+```
+
+**entity-resolver:**
+```typescript
+// Server endpoint
+// GET /dashboard → full interactive panel
+
+// Or programmatic
+import { exportDashboardHTML } from '@agentix-e/entity-resolver-visual';
+fs.writeFileSync('report.html', exportDashboardHTML(result, records));
+```
+
+### 7. Unique Advantages
 
 | Feature | Splink | entity-resolver |
-|---------|--------|-------------------|
-| **Language** | Python (PySpark optional) | TypeScript/Node.js |
-| **Backend** | DuckDB / Spark / Athena | DuckDB / PostgreSQL / Memory / WASM |
-| **State** | Stateful `Linker` object | Stateless `runPipeline()` |
-| **EM Training** | Explicit `estimate_*` calls | Auto (via `autoConfigure: true`) or explicit |
-| **Blocking** | SQL expressions as strings | Structured `BlockingPass[]` config |
-| **I/O** | Reads/writes directly | DI interfaces (no I/O in core) |
-| **Browser** | ❌ Not available | ✅ DuckDB WASM |
-| **PPRL** | ❌ Not built-in | ✅ Bloom filter PPRL |
-| **LLM Scoring** | ❌ Not built-in | ✅ Optional LLM scorer |
-| **MCP Tools** | ❌ Not available | ✅ Built-in MCP server |
-| **mTLS** | Depends on driver | ✅ First-class support |
+|---------|:---:|:---:|
+| TypeScript/JavaScript | ❌ | ✅ |
+| Browser (WASM) | ❌ | ✅ |
+| MCP AI agent protocol | ❌ | ✅ |
+| PPRL (privacy) | ❌ | ✅ |
+| Golden records | ❌ | ✅ |
+| Active learning | ❌ | ✅ |
+| LLM scoring | ❌ | ✅ |
+| SQL backends | DuckDB/Spark/PG | DuckDB/PG |
+| HTML dashboard | ✅ | ✅ |
+| Multi-backend SQL | ✅ | ✅ |
 
-## GoldenMatch → @agentix-e/entity-resolver
+## License
 
-GoldenMatch is a commercial ER product. Our engine matches or exceeds its core capabilities.
-
-### Conceptual Mapping
-
-| GoldenMatch Concept | entity-resolver Equivalent |
-|--------------------|------------------------------|
-| Match Engine | `runPipeline()` |
-| Scoring Suite (20+ algorithms) | 19 scorers (all modern algorithms covered) |
-| Blocking Engine | 5 blocking strategies |
-| Entity Store | `IEntityStore` (4 backends) |
-| Cluster Management | `connectedComponents()` / `dbscanClustering()` |
-| Merge/Split API | `IEntityStore.applyMerge()` / `applySplit()` |
-| REST API | `createApp()` (Hono) |
-| Batch Processing | `runPipeline()` (stateless, parallelizable) |
-| Real-time API | `POST /api/dedupe` |
-| Incremental Updates | `incrementalAdd()` / `incrementalDelete()` / `incrementalModify()` |
-| PPRL | `encodePPRL()` / `matchPPRL()` |
-
-### Architecture Differences
-
-| Dimension | GoldenMatch | entity-resolver |
-|-----------|-------------|-------------------|
-| **License** | Commercial | MIT |
-| **Core Design** | Stateful service | Stateless pure functions |
-| **Embeddability** | REST API only | npm package + REST API |
-| **Dependencies** | Java runtime | Node.js 22+ (zero JVM) |
-| **Cold Start** | Service startup | `import { runPipeline }` |
-| **Customization** | Configuration-driven | Code-driven (DI + custom scorers) |
-| **Offline** | Requires service | ✅ Fully offline (core + DuckDB) |
-| **Edge/Serverless** | ❌ Heavyweight | ✅ Zero-I/O core, runs anywhere |
-
-## Migration Checklist
-
-### Phase 1: Evaluation
-- [ ] Run both systems on your dataset and compare F1 scores
-- [ ] Verify clustering output matches within acceptable tolerance
-- [ ] Compare runtime performance on representative data sizes
-
-### Phase 2: Feature Parity
-- [ ] Map existing blocking rules to `BlockingPass[]` configs
-- [ ] Map existing comparison/scoring configs to `ComparisonSpec[]`
-- [ ] Set up equivalent storage backend (Memory → DuckDB → PostgreSQL)
-- [ ] Configure equivalent match thresholds
-
-### Phase 3: Production Cutover
-- [ ] Set up PostgreSQL with mTLS (if applicable)
-- [ ] Deploy Docker container with REST API
-- [ ] Configure auth and rate limiting
-- [ ] Set up health monitoring
-- [ ] Run parallel pipelines for validation period
-- [ ] Cut over traffic
-
-## Getting Help
-
-- [API Reference](/api/core/) — Full typed API documentation
-- [GitHub Issues](https://github.com/AgentiX-E/entity-resolver/issues)
-- [Core Concepts](/guide/core-concepts) — Algorithm deep-dives
+Both projects are MIT licensed.
