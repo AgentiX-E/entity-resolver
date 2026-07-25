@@ -1,7 +1,6 @@
 // Integration tests for cross-validation + train-test split.
 import { describe, it, expect } from 'vitest';
 import { trainTestSplit, crossValidate } from '../../evaluation/cross-validate.js';
-import { runPipeline } from '../../pipeline/runner.js';
 import type { PipelineResult } from '../../types/core.js';
 
 const records = Array.from({ length: 40 }, (_, i) => ({
@@ -53,7 +52,15 @@ describe('crossValidate', () => {
       clusters: new Map(),
       scoredPairs: [],
       singletons: recs.map((_, i) => i),
-      statistics: { totalRecords: recs.length, totalClusters: 0, matchedRecords: 0, matchRate: 0, averageClusterSize: 0, maxClusterSize: 0, executionTimeMs: 0 },
+      statistics: {
+        totalRecords: recs.length,
+        totalClusters: 0,
+        matchedRecords: 0,
+        matchRate: 0,
+        averageClusterSize: 0,
+        maxClusterSize: 0,
+        executionTimeMs: 0,
+      },
       diagnostics: { muParameters: new Map(), matchWeightDistribution: [], unlinkableCount: 0 },
     };
   };

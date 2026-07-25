@@ -179,7 +179,7 @@ function securityHeadersMiddleware(): (c: Context, next: Next) => Promise<void> 
 
 // ─── Validation helper ───────────────────────────────────────────
 
-function parseAndRespond(c: Context, schema: z.ZodSchema, body: unknown) {
+function parseAndRespond(c: Context, schema: z.ZodType, body: unknown) {
   const result = schema.safeParse(body);
   if (!result.success) {
     return c.json(
@@ -316,7 +316,15 @@ export function createApp(config: ServerConfig = {}): Hono {
         pipelineResult: {
           clusters: {},
           scoredPairs: [],
-          statistics: { totalRecords: records.length, totalClusters: 0, matchedRecords: 0, matchRate: 0, averageClusterSize: 0, maxClusterSize: 0, executionTimeMs: 0 },
+          statistics: {
+            totalRecords: records.length,
+            totalClusters: 0,
+            matchedRecords: 0,
+            matchRate: 0,
+            averageClusterSize: 0,
+            maxClusterSize: 0,
+            executionTimeMs: 0,
+          },
           diagnostics: { muParameters: {} },
         },
         records,

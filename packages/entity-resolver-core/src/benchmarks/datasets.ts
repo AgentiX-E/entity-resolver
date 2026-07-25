@@ -20,6 +20,17 @@ import { createRequire } from 'node:module';
 /** Type of entity resolution problem. */
 export type BenchmarkType = 'deduplication' | 'record_linkage';
 
+/** Minimal type for fs methods used by dataset loaders. */
+interface MinimalFS {
+  existsSync(p: string): boolean;
+  readFileSync(p: string, encoding: string): string;
+}
+
+/** Minimal type for path methods used by dataset loaders. */
+interface MinimalPath {
+  join(...segments: string[]): string;
+}
+
 /** A benchmark dataset with records and ground truth clusters. */
 export interface BenchmarkDataset {
   readonly name: string;
@@ -127,10 +138,8 @@ function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
     // Use createRequire for ESM-compatible access to Node.js built-in modules.
     // Falls back to generated data when fs/path are unavailable (browser).
     const nodeRequire = createRequire(import.meta.url);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const fs: any = nodeRequire('fs');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const path: any = nodeRequire('path');
+    const fs = nodeRequire('fs') as MinimalFS;
+    const path = nodeRequire('path') as MinimalPath;
 
     // Use import.meta.url for ESM-compatible path resolution (replaces CJS __dirname).
     const moduleDir = new URL('.', import.meta.url).pathname;

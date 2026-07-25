@@ -12,29 +12,42 @@ const BATCH = 1000; // Small batches to avoid C API buffer overflow
 const PROGRESS_INTERVAL = 1_000_000; // Report every 1M
 
 function createRng(seed: number) {
-  let s = [seed | 0, (seed * 1812433253) | 0, (seed * 862813427) | 0, (seed * 1459599639) | 0];
+  const s = [seed | 0, (seed * 1812433253) | 0, (seed * 862813427) | 0, (seed * 1459599639) | 0];
   return {
     next() {
       const t = (s[1]! << 9) >>> 0;
       const r = (((((s[0]! * 5) >>> 0) << 7) | (((s[0]! * 5) >>> 0) >>> 25)) * 9) >>> 0;
-      s[2]! ^= s[0]!; s[3]! ^= s[1]!; s[1]! ^= s[2]!; s[0]! ^= s[3]!; s[2]! ^= t;
-      s[3]! = ((s[3]! << 11) | (s[3]! >>> 21)) >>> 0;
+      s[2]! ^= s[0]!;
+      s[3]! ^= s[1]!;
+      s[1]! ^= s[2]!;
+      s[0]! ^= s[3]!;
+      s[2]! ^= t;
+      const v3 = s[3]!;
+      s[3] = ((v3 << 11) | (v3 >>> 21)) >>> 0;
       return r >>> 0;
     },
   };
 }
 
 /** Insert batch using raw exec — simplest/fastest path for DuckDB. */
-function insertBatch(db: Database, table: string, batch: Record<string, unknown>[], startRowId: number): Promise<void> {
+function insertBatch(
+  db: Database,
+  table: string,
+  batch: Record<string, unknown>[],
+  startRowId: number,
+): Promise<void> {
   return new Promise<void>((resolve, reject) => {
-    const values = batch.map((rec, bIdx) => {
-      const rowId = startRowId + bIdx;
-      const id = String(rec.id ?? '').replace(/'/g, "''");
-      const grp = String(rec.grp ?? '').replace(/'/g, "''");
-      return `(${rowId}, '${id}', '${grp}')`;
-    }).join(', ');
+    const values = batch
+      .map((rec, bIdx) => {
+        const rowId = startRowId + bIdx;
+        const id = String(rec.id ?? '').replace(/'/g, "''");
+        const grp = String(rec.grp ?? '').replace(/'/g, "''");
+        return `(${rowId}, '${id}', '${grp}')`;
+      })
+      .join(', ');
     db.exec(`INSERT INTO ${table} VALUES ${values}`, (err: Error | null) => {
-      if (err) reject(err); else resolve();
+      if (err) reject(err);
+      else resolve();
     });
   });
 }
@@ -43,7 +56,8 @@ function insertBatch(db: Database, table: string, batch: Record<string, unknown>
 function query(db: Database, sql: string): Promise<Record<string, unknown>[]> {
   return new Promise((resolve, reject) => {
     db.all(sql, (err: Error | null, rows: Record<string, unknown>[]) => {
-      if (err) reject(err); else resolve(rows);
+      if (err) reject(err);
+      else resolve(rows);
     });
   });
 }
@@ -52,7 +66,8 @@ function query(db: Database, sql: string): Promise<Record<string, unknown>[]> {
 function exec(db: Database, sql: string): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     db.exec(sql, (err: Error | null) => {
-      if (err) reject(err); else resolve();
+      if (err) reject(err);
+      else resolve();
     });
   });
 }
@@ -60,7 +75,11 @@ function exec(db: Database, sql: string): Promise<void> {
 describe('100M Load Test (optimized)', () => {
   it('streams 100M records via raw DuckDB API with BATCH=1000', async () => {
     const dbPath = join(tmpdir(), `er100m-${Date.now()}.duckdb`);
-    try { rmSync(dbPath); } catch { /* noop */ }
+    try {
+      rmSync(dbPath);
+    } catch {
+      /* noop */
+    }
 
     const db = new Database(dbPath);
     const totalStart = Date.now();
@@ -94,12 +113,12 @@ describe('100M Load Test (optimized)', () => {
 
       if (i > 0 && i % PROGRESS_INTERVAL === 0) {
         const elapsed = Date.now() - lastLog;
-        const rate = (PROGRESS_INTERVAL / elapsed * 1000 / 1e6).toFixed(1);
-        const pct = (i / RECORDS * 100).toFixed(1);
+        const rate = (((PROGRESS_INTERVAL / elapsed) * 1000) / 1e6).toFixed(1);
+        const pct = ((i / RECORDS) * 100).toFixed(1);
         console.log(`  ${i.toLocaleString()} / ${RECORDS.toLocaleString()} (${pct}%) — ${rate}M/s`);
         lastLog = Date.now();
         // Yield to event loop
-        await new Promise(r => setTimeout(r, 0));
+        await new Promise((r) => setTimeout(r, 0));
       }
     }
 
@@ -111,7 +130,7 @@ describe('100M Load Test (optimized)', () => {
 
     const streamTime = Date.now() - totalStart;
     console.log(`  Streaming complete: ${globalRowId.toLocaleString()} records in ${streamTime}ms`);
-    console.log(`  Throughput: ${(RECORDS / streamTime * 1000 / 1e6).toFixed(1)}M records/sec`);
+    console.log(`  Throughput: ${(((RECORDS / streamTime) * 1000) / 1e6).toFixed(1)}M records/sec`);
 
     // Verify count
     const countRows = await query(db, 'SELECT COUNT(*) as cnt FROM __er_records');
@@ -121,21 +140,33 @@ describe('100M Load Test (optimized)', () => {
     // Phase 2: SQL blocking (only if records were loaded)
     const phaseStart = Date.now();
     console.log(`  Running SQL blocking (LIMIT 1M)...`);
-    const blockingRows = await query(db, `
+    const blockingRows = await query(
+      db,
+      `
       SELECT l.__row_id__ as left_id, r.__row_id__ as right_id
       FROM __er_records l
       INNER JOIN __er_records r ON (l.grp = r.grp)
       WHERE l.__row_id__ < r.__row_id__
       LIMIT 1000000
-    `);
+    `,
+    );
     const blockingTime = Date.now() - phaseStart;
-    console.log(`  SQL blocking: ${blockingRows.length.toLocaleString()} candidates in ${blockingTime}ms`);
+    console.log(
+      `  SQL blocking: ${blockingRows.length.toLocaleString()} candidates in ${blockingTime}ms`,
+    );
 
     const totalTime = Date.now() - totalStart;
     console.log(`  Total wall time: ${(totalTime / 1000).toFixed(1)}s`);
 
     // Close and cleanup
-    await new Promise<void>(resolve => { db.close(); setImmediate(resolve); });
-    try { rmSync(dbPath); } catch { /* noop */ }
+    await new Promise<void>((resolve) => {
+      db.close();
+      setImmediate(resolve);
+    });
+    try {
+      rmSync(dbPath);
+    } catch {
+      /* noop */
+    }
   }, 7200000);
 });

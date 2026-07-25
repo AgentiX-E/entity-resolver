@@ -264,7 +264,7 @@ if (_isCliInvocation) {
     );
     process.exit(1);
   });
-  main().catch((err) => {
+  main().catch((err: unknown) => {
     console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
   });

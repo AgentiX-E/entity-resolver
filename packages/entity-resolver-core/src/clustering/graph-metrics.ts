@@ -143,7 +143,7 @@ export function computeGraphMetrics(
     const isConnected = checkConnectivity(members, adjacency);
 
     clusterMetrics.push({
-      clusterId: String(clusterId),
+      clusterId,
       size,
       density,
       centrality,

@@ -77,7 +77,7 @@ export function estimateParameters(
 
   // Splink-style hash-based deterministic sampling for large datasets
   const { maxPairs } = options;
-  let effectiveVectors = pairVectors;
+  let effectiveVectors: readonly (readonly ComparisonVector[])[];
 
   if (maxPairs && maxPairs > 0 && pairVectors.length > maxPairs) {
     // Deterministic hash-based sampling: keep pairs where hash(leftId, rightId) < threshold
@@ -122,9 +122,9 @@ export function estimateParameters(
     posteriors: number[];
   } => {
     const localLLHistory: number[] = [];
-    const localPosteriors: number[] = new Array(N).fill(0);
+    const localPosteriors = new Array<number>(N).fill(0);
     let localConverged = false;
-    let localIter = 0;
+    let localIter: number;
 
     for (localIter = 0; localIter < maxIterations; localIter++) {
       eStep(pairKeySets, state, localPosteriors);

@@ -137,7 +137,7 @@ export class DashboardShell extends HTMLElement {
   private bus!: DashboardEventBus;
   private result: PipelineResult | null = null;
   private records: RawRecord[] = [];
-  private unsubs: Array<() => void> = [];
+  private unsubs: (() => void)[] = [];
 
   constructor() {
     super();
@@ -195,7 +195,10 @@ export class DashboardShell extends HTMLElement {
     this.setComponentData('er-waterfall', 'data', waterfallData);
 
     // Histogram
-    const histogramData = buildHistogramData(result, result.statistics.matchRate > 0 ? 0.5 : undefined);
+    const histogramData = buildHistogramData(
+      result,
+      result.statistics.matchRate > 0 ? 0.5 : undefined,
+    );
     this.setComponentData('er-histogram', 'data', histogramData);
 
     // m/u Chart
@@ -208,9 +211,9 @@ export class DashboardShell extends HTMLElement {
   }
 
   private setComponentData(selector: string, prop: string, value: unknown): void {
-    const el = this.shadow.querySelector(selector) as HTMLElement & Record<string, unknown>;
+    const el = this.shadow.querySelector(selector);
     if (el && prop in el) {
-      (el as Record<string, unknown>)[prop] = value;
+      (el as unknown as Record<string, unknown>)[prop] = value;
     }
   }
 
@@ -227,14 +230,14 @@ export class DashboardShell extends HTMLElement {
     // Pair select → show comparison viewer
     this.unsubs.push(
       this.bus.on('pair:select', (event) => {
-        this.showComparisonViewer(event.detail?.pairIndex as number ?? 0);
+        this.showComparisonViewer((event.detail?.pairIndex as number) ?? 0);
       }),
     );
 
     // Threshold change → recalculate histogram + clusters
     this.unsubs.push(
       this.bus.on('threshold:change', (event) => {
-        const threshold = event.detail?.value as number ?? 0.5;
+        const threshold = (event.detail?.value as number) ?? 0.5;
         if (this.result) {
           const histData = buildHistogramData(this.result, threshold);
           this.setComponentData('er-histogram', 'data', histData);
@@ -245,7 +248,9 @@ export class DashboardShell extends HTMLElement {
 
   private showComparisonViewer(pairIndex: number): void {
     const panel = this.shadow.getElementById('comparison-panel');
-    const viewer = this.shadow.getElementById('comparisonViewer') as HTMLElement & { load?: (pairIndex: number, result: PipelineResult, records: RawRecord[]) => void };
+    const viewer = this.shadow.getElementById('comparisonViewer') as HTMLElement & {
+      load?: (pairIndex: number, result: PipelineResult, records: RawRecord[]) => void;
+    };
     if (panel) panel.style.display = 'block';
     if (viewer?.load && this.result) {
       viewer.load(pairIndex, this.result, this.records);
@@ -255,7 +260,8 @@ export class DashboardShell extends HTMLElement {
   private showEmpty(): void {
     const grid = this.shadow.getElementById('grid');
     if (grid) {
-      grid.innerHTML = '<div class="er-empty-state">No data to display. Run a pipeline first.</div>';
+      grid.innerHTML =
+        '<div class="er-empty-state">No data to display. Run a pipeline first.</div>';
     }
   }
 }

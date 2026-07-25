@@ -210,6 +210,7 @@ export function reconstructError(json: Record<string, unknown>): EntityResolverE
 
   const Ctor = ERROR_CLASS_MAP.get(code);
   if (Ctor) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const err = Object.create(Ctor.prototype) as EntityResolverError;
     Object.assign(err, {
       message,

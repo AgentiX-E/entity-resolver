@@ -101,13 +101,8 @@ describe('DuckDbSqlBackend', () => {
 
   it('createTempTable handles special characters in values', async () => {
     const db = new DuckDbSqlBackend();
-    await db.createTempTable(
-      [{ name: "O'Brien", city: "N'Awlins" }],
-      { name: 'test_special' },
-    );
-    const rows = await db.query(
-      "SELECT * FROM test_special WHERE name LIKE 'O''Brien'",
-    );
+    await db.createTempTable([{ name: "O'Brien", city: "N'Awlins" }], { name: 'test_special' });
+    const rows = await db.query("SELECT * FROM test_special WHERE name LIKE 'O''Brien'");
     expect(rows).toHaveLength(1);
     await db.close();
   });
@@ -140,9 +135,7 @@ describe('sqlBlocking', () => {
     expect(result.totalRecords).toBe(4);
     expect(result.pairs.length).toBeGreaterThan(0);
     const alicePair = result.pairs.find(
-      (p) =>
-        (p.leftId === 0 && p.rightId === 1) ||
-        (p.leftId === 1 && p.rightId === 0),
+      (p) => (p.leftId === 0 && p.rightId === 1) || (p.leftId === 1 && p.rightId === 0),
     );
     expect(alicePair).toBeDefined();
   });

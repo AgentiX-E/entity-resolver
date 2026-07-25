@@ -221,6 +221,7 @@ describe('PgEntityStore CRUD operations', () => {
             rowCount: 1,
           });
         },
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
         release: () => {},
       });
     }
@@ -272,6 +273,7 @@ describe('PgEntityStore CRUD operations', () => {
       connect: () =>
         Promise.resolve({
           query: (_sql: string) => Promise.reject(new Error('DB error')),
+          // eslint-disable-next-line @typescript-eslint/no-empty-function
           release: () => {},
         }),
       end: () => Promise.resolve(),

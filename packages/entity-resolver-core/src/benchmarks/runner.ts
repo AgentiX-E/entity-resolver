@@ -188,7 +188,7 @@ export function formatBenchmarkReport(results: BenchmarkResult[]): string {
   ];
   for (const r of results) {
     lines.push(
-      `  ${r.dataset.padEnd(20)} | ${String(r.recordCount).padStart(7)} | ${String(r.foundMatchCount).padStart(7)} | ${r.purity.toFixed(3).padStart(7)} | ${r.completeness.toFixed(3).padStart(12)} | ${String(r.executionTimeMs + 'ms').padStart(7)}`,
+      `  ${r.dataset.padEnd(20)} | ${String(r.recordCount).padStart(7)} | ${String(r.foundMatchCount).padStart(7)} | ${r.purity.toFixed(3).padStart(7)} | ${r.completeness.toFixed(3).padStart(12)} | ${`${String(r.executionTimeMs)}ms`.padStart(7)}`,
     );
   }
   lines.push('  ' + '-'.repeat(67));

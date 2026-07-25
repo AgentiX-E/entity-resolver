@@ -123,7 +123,12 @@ export class PgSqlBackend implements ISqlBackend {
           await this.createTempTable(batch, config);
         } else {
           // Subsequent batches: INSERT into existing table
-          await this.appendBatch(config.name, batch, [...(config.columns ?? Object.keys(batch[0] ?? {}))], batch.length);
+          await this.appendBatch(
+            config.name,
+            batch,
+            [...(config.columns ?? Object.keys(batch[0] ?? {}))],
+            batch.length,
+          );
         }
         batch.length = 0;
       }
@@ -132,7 +137,12 @@ export class PgSqlBackend implements ISqlBackend {
       if (!this.tempTables.has(config.name)) {
         await this.createTempTable(batch, config);
       } else {
-        await this.appendBatch(config.name, batch, [...(config.columns ?? Object.keys(batch[0] ?? {}))], batch.length);
+        await this.appendBatch(
+          config.name,
+          batch,
+          [...(config.columns ?? Object.keys(batch[0] ?? {}))],
+          batch.length,
+        );
       }
     }
   }

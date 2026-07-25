@@ -96,7 +96,11 @@ function scorerToSql(scorerName: string, field: string): string {
  *     ELSE 'not_match'
  *   END as "name__level"
  */
-function buildLevelCase(field: string, scoreExpr: string, levels: readonly ComparisonLevel[]): string {
+function buildLevelCase(
+  field: string,
+  scoreExpr: string,
+  levels: readonly ComparisonLevel[],
+): string {
   if (levels.length === 0) {
     return `'not_match' as "${field}__level"`;
   }
@@ -192,13 +196,7 @@ export function parseComparisonRows(
 // ══════════════════════════════════════════════════════════════
 
 /** Names of all UDF-requiring scorers that should be registered. */
-export const SQL_UDF_SCORERS = [
-  'levenshtein',
-  'jaro',
-  'jaro_winkler',
-  'dice',
-  'soundex',
-] as const;
+export const SQL_UDF_SCORERS = ['levenshtein', 'jaro', 'jaro_winkler', 'dice', 'soundex'] as const;
 
 /** Check if a scorer name requires a UDF. */
 export function requiresUdf(scorerName: string): boolean {
@@ -207,7 +205,15 @@ export function requiresUdf(scorerName: string): boolean {
 
 /** Check if a scorer name has native SQL support (no UDF needed). */
 export function isSqlNative(scorerName: string): boolean {
-  return ['exact', 'booleanMatch', 'numericDiff', 'dateDiff', 'tokenSort', 'jaccard', 'overlap'].includes(scorerName);
+  return [
+    'exact',
+    'booleanMatch',
+    'numericDiff',
+    'dateDiff',
+    'tokenSort',
+    'jaccard',
+    'overlap',
+  ].includes(scorerName);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -230,13 +236,13 @@ export type ScorerFn = (a: unknown, b: unknown) => number;
  */
 export function patchUdfVectors(
   rows: ComparisonVector[][],
-  candidates: Array<{ leftId: number; rightId: number }>,
+  candidates: { leftId: number; rightId: number }[],
   comparisons: readonly ComparisonSpec[],
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   scorers: Map<string, ScorerFn>,
 ): void {
   // Find which comparison indices need patching
-  const patchIndices: Array<{ idx: number; scorerName: string; field: string }> = [];
+  const patchIndices: { idx: number; scorerName: string; field: string }[] = [];
   for (let i = 0; i < comparisons.length; i++) {
     const spec = comparisons[i]!;
     if (requiresUdf(spec.scorerName)) {

@@ -60,7 +60,7 @@ async function buildComparisonTable(
         return vectors
           .map(
             (v) =>
-              `(${pairId}, '${String(v.field).replace(/'/g, "''")}', '${v.level}', ${v.score}, '${v.scorer}')`,
+              `(${pairId}, '${v.field.replace(/'/g, "''")}', '${v.level}', ${v.score}, '${v.scorer}')`,
           )
           .join(', ');
       })

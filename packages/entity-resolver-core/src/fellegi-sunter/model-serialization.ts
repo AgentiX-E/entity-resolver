@@ -133,7 +133,7 @@ export function deserializeModel(json: string): DeserializedModel {
     errors.push('Missing or invalid "comparisons" array');
   } else {
     for (let i = 0; i < raw.comparisons.length; i++) {
-      const comp = raw.comparisons[i];
+      const comp: unknown = raw.comparisons[i];
       if (!isRecord(comp)) {
         errors.push(`comparisons[${i}]: must be an object`);
         continue;
@@ -144,7 +144,7 @@ export function deserializeModel(json: string): DeserializedModel {
       if (!Array.isArray(comp.levels)) errors.push(`comparisons[${i}]: missing "levels" array`);
       else {
         for (let j = 0; j < comp.levels.length; j++) {
-          const lvl = comp.levels[j];
+          const lvl: unknown = comp.levels[j];
           if (
             !isRecord(lvl) ||
             typeof lvl.label !== 'string' ||
@@ -182,7 +182,7 @@ export function deserializeFSParamsFromJSON(json: string): FSParameters {
   try {
     raw = JSON.parse(json);
   } catch (e) {
-    throw new Error(`Invalid JSON: ${String(e)}`);
+    throw new Error(`Invalid JSON: ${String(e)}`, { cause: e });
   }
 
   if (!isRecord(raw)) {

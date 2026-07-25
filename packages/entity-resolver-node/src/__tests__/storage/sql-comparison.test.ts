@@ -179,9 +179,7 @@ describe('DuckDB SQL comparison E2E', () => {
   it('SQL numericDiff produces correct distance', async () => {
     const db = new DuckDbSqlBackend();
     await db.createTempTable(records, { name: '__er_records' });
-    await db.exec(
-      'CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)',
-    );
+    await db.exec('CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)');
     await db.exec('INSERT INTO __er_candidates VALUES (0, 1), (1, 2)');
 
     const specs: ComparisonSpec[] = [
@@ -207,9 +205,7 @@ describe('DuckDB SQL comparison E2E', () => {
   it('SQL dateDiff produces correct similarity', async () => {
     const db = new DuckDbSqlBackend();
     await db.createTempTable(records, { name: '__er_records' });
-    await db.exec(
-      'CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)',
-    );
+    await db.exec('CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)');
     await db.exec('INSERT INTO __er_candidates VALUES (0, 1), (0, 2)');
 
     const specs: ComparisonSpec[] = [
@@ -235,9 +231,7 @@ describe('DuckDB SQL comparison E2E', () => {
   it('parseComparisonRows assigns correct levels', async () => {
     const db = new DuckDbSqlBackend();
     await db.createTempTable(records, { name: '__er_records' });
-    await db.exec(
-      'CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)',
-    );
+    await db.exec('CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)');
     await db.exec('INSERT INTO __er_candidates VALUES (0, 1)');
 
     const specs: ComparisonSpec[] = [
@@ -271,9 +265,7 @@ describe('DuckDB SQL comparison E2E', () => {
 describe('patchUdfVectors', () => {
   it('patches jaro_winkler scores in SQL results', () => {
     const vectors: ComparisonVector[][] = [
-      [
-        { field: 'name', level: 'not_match', score: -1.0, scorer: 'jaro_winkler' },
-      ],
+      [{ field: 'name', level: 'not_match', score: -1.0, scorer: 'jaro_winkler' }],
     ];
     const candidates = [{ leftId: 0, rightId: 1 }];
     const specs: ComparisonSpec[] = [
@@ -286,15 +278,15 @@ describe('patchUdfVectors', () => {
         ],
       },
     ];
-    const records = [
-      { name: 'John Smith' },
-      { name: 'John Smith' },
-    ];
+    const records = [{ name: 'John Smith' }, { name: 'John Smith' }];
 
     const scorers = new Map([
-      ['jaro_winkler', (a: unknown, b: unknown) => {
-        return String(a) === String(b) ? 1.0 : 0.0;
-      }],
+      [
+        'jaro_winkler',
+        (a: unknown, b: unknown) => {
+          return String(a) === String(b) ? 1.0 : 0.0;
+        },
+      ],
     ]);
 
     patchUdfVectors(vectors, candidates, specs, records, scorers);
@@ -306,9 +298,7 @@ describe('patchUdfVectors', () => {
 
   it('does not modify native scorer vectors', () => {
     const vectors: ComparisonVector[][] = [
-      [
-        { field: 'name', level: 'exact_match', score: 1.0, scorer: 'exact' },
-      ],
+      [{ field: 'name', level: 'exact_match', score: 1.0, scorer: 'exact' }],
     ];
     const candidates = [{ leftId: 0, rightId: 1 }];
     const specs: ComparisonSpec[] = [
@@ -355,9 +345,7 @@ describe('patchUdfVectors', () => {
       { name: 'A', city: 'NYC' },
     ];
 
-    const scorers = new Map([
-      ['levenshtein', () => 1.0],
-    ]);
+    const scorers = new Map([['levenshtein', () => 1.0]]);
 
     patchUdfVectors(vectors, candidates, specs, records, scorers);
 

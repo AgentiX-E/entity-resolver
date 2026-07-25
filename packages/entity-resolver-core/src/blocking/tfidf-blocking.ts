@@ -30,9 +30,7 @@ function tokenize(value: string): string[] {
 }
 
 /** Compute IDF scores for a corpus of token lists. */
-function computeIDF(
-  tokenizedRecords: string[][],
-): Map<string, number> {
+function computeIDF(tokenizedRecords: string[][]): Map<string, number> {
   const N = tokenizedRecords.length;
   const df = new Map<string, number>();
 
@@ -78,7 +76,7 @@ export function bm25Score(
     const idfVal = idf.get(t) ?? 0;
     const numerator = tf * (k1 + 1);
     const denominator = tf + k1 * (1 - b + b * (docLen / Math.max(1, avgDocLen)));
-    score += idfVal * numerator / denominator;
+    score += (idfVal * numerator) / denominator;
   }
 
   return score;
@@ -138,9 +136,7 @@ export function tfidfBlocking(
   // Step 3: Select top-K tokens per record by IDF
   const topTokens: string[][] = [];
   for (const tokens of tokenized) {
-    const sorted = [...new Set(tokens)].sort(
-      (a, b) => (idf.get(b) ?? 0) - (idf.get(a) ?? 0),
-    );
+    const sorted = [...new Set(tokens)].sort((a, b) => (idf.get(b) ?? 0) - (idf.get(a) ?? 0));
     topTokens.push(sorted.slice(0, topK));
   }
 

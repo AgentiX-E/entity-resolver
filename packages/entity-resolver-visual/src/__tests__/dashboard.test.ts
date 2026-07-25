@@ -40,13 +40,15 @@ describe('DashboardEventBus', () => {
 
     root.dispatchEvent(
       new CustomEvent('er-dashboard:cluster:select', {
-        bubbles: true, composed: true,
+        bubbles: true,
+        composed: true,
         detail: { type: 'cluster:select' },
       }),
     );
     root.dispatchEvent(
       new CustomEvent('er-dashboard:threshold:change', {
-        bubbles: true, composed: true,
+        bubbles: true,
+        composed: true,
         detail: { type: 'threshold:change' },
       }),
     );
@@ -120,9 +122,7 @@ describe('exportDashboardHTML', () => {
   it('handles clusters with members', () => {
     const resultWithClusters: PipelineResult = {
       ...mockResult,
-      clusters: new Map([
-        ['c1', { clusterId: 'c1', memberIds: [0, 1, 2], cohesion: 0.9 }],
-      ]),
+      clusters: new Map([['c1', { clusterId: 'c1', memberIds: [0, 1, 2], cohesion: 0.9 }]]),
     };
     const html = exportDashboardHTML(resultWithClusters);
     expect(html).toContain('"id":"c1"');

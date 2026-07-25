@@ -4,7 +4,6 @@
 // All methods are async by IEntityStore contract but internally synchronous
 // (Map operations are O(1)). The require-await rule is disabled here because
 // these methods intentionally use sync Map operations to fulfill an async interface.
-/* eslint-disable @typescript-eslint/require-await */
 
 import type { EntityId } from '../types/core.js';
 import type { IEntityStore, EntityRecord } from '../interfaces/IEntityStore.js';

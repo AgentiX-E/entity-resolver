@@ -9,6 +9,7 @@ export type { ServerConfig } from './rest/app.js';
 export type { AuthConfig, JwtValidationResult } from './middleware/auth.js';
 export { createAuthMiddleware } from './middleware/auth.js';
 export type { RateLimitConfig } from './middleware/rate-limit.js';
+// eslint-disable-next-line @typescript-eslint/no-deprecated
 export { createRateLimitMiddleware, startBucketCleanup } from './middleware/rate-limit.js';
 
 // MCP Tools

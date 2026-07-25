@@ -4,7 +4,6 @@
 // All methods are async by IConfigStore contract but internally synchronous
 // (Map operations are O(1)). The require-await rule is disabled here because
 // these methods intentionally use sync Map operations to fulfill an async interface.
-/* eslint-disable @typescript-eslint/require-await */
 
 import type { IConfigStore, StoredConfig } from '../interfaces/IConfigStore.js';
 import type { PipelineConfig } from '../pipeline/runner.js';

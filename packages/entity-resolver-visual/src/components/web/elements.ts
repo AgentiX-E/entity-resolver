@@ -137,6 +137,7 @@ export abstract class ErBaseElement extends HTMLElement {
   }
 
   /** Parse a JSON attribute value safely. */
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-parameters
   protected parseDataAttr<T>(attr: string | null): T | null {
     if (!attr || attr === 'undefined') return null;
     try {
@@ -195,7 +196,11 @@ export class ErWaterfallElement extends ErBaseElement {
 
   private render(): void {
     if (!this._data) {
-      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No waterfall data loaded.'));
+      resetShadowRoot(
+        this.root,
+        buildFullCss(),
+        createDiv('padding: 16px;', 'No waterfall data loaded.'),
+      );
       return;
     }
     const themeStyle = this.buildThemeStyle();
@@ -230,7 +235,11 @@ export class ErHistogramElement extends ErBaseElement {
 
   private render(): void {
     if (!this._data) {
-      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No histogram data loaded.'));
+      resetShadowRoot(
+        this.root,
+        buildFullCss(),
+        createDiv('padding: 16px;', 'No histogram data loaded.'),
+      );
       return;
     }
     const themeStyle = this.buildThemeStyle();
@@ -307,7 +316,7 @@ export class ErClusterExplorerElement extends ErBaseElement {
     );
     card.appendChild(stats);
 
-    if (this._data.tree && this._data.tree.children) {
+    if (this._data.tree?.children) {
       for (const child of this._data.tree.children) {
         card.appendChild(this.buildTreeNodeElement(child, 0));
       }
@@ -433,16 +442,25 @@ export class ErEvaluationRadarElement extends ErBaseElement {
 
   private _data: EvaluationRadarData | null = null;
 
-  connectedCallback(): void { this.render(); }
+  connectedCallback(): void {
+    this.render();
+  }
 
   attributeChangedCallback(name: string, _o: string | null, n: string | null): void {
-    if (name === 'data') { this._data = this.parseDataAttr<EvaluationRadarData>(n); this.render(); }
+    if (name === 'data') {
+      this._data = this.parseDataAttr<EvaluationRadarData>(n);
+      this.render();
+    }
     if (name === 'theme') this.render();
   }
 
   private render(): void {
     if (!this._data) {
-      resetShadowRoot(this.root, buildFullCss(), createDiv('padding: 16px;', 'No evaluation data.'));
+      resetShadowRoot(
+        this.root,
+        buildFullCss(),
+        createDiv('padding: 16px;', 'No evaluation data.'),
+      );
       return;
     }
     const themeStyle = this.buildThemeStyle();

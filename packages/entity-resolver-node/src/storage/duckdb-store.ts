@@ -100,7 +100,7 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
     const target = allRows.find((r) => r.cluster_id === id);
     if (!target) return [];
 
-    const targetMembers: number[] = JSON.parse(target.members_json ?? '[]');
+    const targetMembers: number[] = JSON.parse(target.members_json ?? '[]') as number[];
     const result: EntityRecord[] = [this.rowToEntity(target)];
 
     if (hops <= 0) return result;
@@ -115,7 +115,7 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
       const nextFrontier = new Set<number>();
       for (const row of allRows) {
         if (visited.has(row.cluster_id)) continue;
-        const members: number[] = JSON.parse(row.members_json ?? '[]');
+        const members: number[] = JSON.parse(row.members_json ?? '[]') as number[];
         if (members.some((m) => frontier.has(m))) {
           visited.add(row.cluster_id);
           result.push(this.rowToEntity(row));

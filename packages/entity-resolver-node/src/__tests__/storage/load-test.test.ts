@@ -3,18 +3,61 @@
 // blocking limited to prevent candidate explosion.
 import { describe, it, expect } from 'vitest';
 import { DuckDbSqlBackend } from '../../storage/duckdb-sql-backend.js';
-import { buildComparisonQuery, parseComparisonRows, estimateParameters, computeAggregateMatchWeight, connectedComponents } from '@agentix-e/entity-resolver-core';
-import type { ComparisonSpec, ScoredPair, EntityId, Cluster } from '@agentix-e/entity-resolver-core';
+import {
+  buildComparisonQuery,
+  parseComparisonRows,
+  estimateParameters,
+  computeAggregateMatchWeight,
+  connectedComponents,
+} from '@agentix-e/entity-resolver-core';
+import type { ComparisonSpec, ScoredPair } from '@agentix-e/entity-resolver-core';
 
 /** On-the-fly record generator — O(1) memory. */
 async function* generateRecords(count: number): AsyncIterable<Record<string, unknown>> {
-  const firstNames = ['James','John','Robert','Michael','William','David','Mary','Patricia','Jennifer','Linda',
-    'Daniel','Matthew','Anthony','Mark','Donald','Steven','Paul','Andrew','Joshua','Kenneth'];
-  const lastNames = ['Smith','Johnson','Williams','Brown','Jones','Garcia','Miller','Davis','Rodriguez','Martinez'];
-  const cities = ['New York','Los Angeles','Chicago','Houston','Phoenix'];
+  const firstNames = [
+    'James',
+    'John',
+    'Robert',
+    'Michael',
+    'William',
+    'David',
+    'Mary',
+    'Patricia',
+    'Jennifer',
+    'Linda',
+    'Daniel',
+    'Matthew',
+    'Anthony',
+    'Mark',
+    'Donald',
+    'Steven',
+    'Paul',
+    'Andrew',
+    'Joshua',
+    'Kenneth',
+  ];
+  const lastNames = [
+    'Smith',
+    'Johnson',
+    'Williams',
+    'Brown',
+    'Jones',
+    'Garcia',
+    'Miller',
+    'Davis',
+    'Rodriguez',
+    'Martinez',
+  ];
+  const cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix'];
 
   let h = 42;
-  const hash = () => { h = ((h ^ 61) ^ (h >>> 16)) * 9; h = h ^ (h >>> 4); h = h * 0x27d4eb2d; h = h ^ (h >>> 15); return h >>> 0; };
+  const hash = () => {
+    h = (h ^ 61 ^ (h >>> 16)) * 9;
+    h = h ^ (h >>> 4);
+    h = h * 0x27d4eb2d;
+    h = h ^ (h >>> 15);
+    return h >>> 0;
+  };
 
   for (let i = 0; i < count; i++) {
     yield {
@@ -28,10 +71,22 @@ async function* generateRecords(count: number): AsyncIterable<Record<string, unk
 }
 
 const comparisons: ComparisonSpec[] = [
-  { field: 'first_name', scorerName: 'exact', levels: [
-    { label: 'exact_match', threshold: 0.99 }, { label: 'not_match', threshold: 0.0 }] },
-  { field: 'last_name', scorerName: 'exact', levels: [
-    { label: 'exact_match', threshold: 0.99 }, { label: 'not_match', threshold: 0.0 }] },
+  {
+    field: 'first_name',
+    scorerName: 'exact',
+    levels: [
+      { label: 'exact_match', threshold: 0.99 },
+      { label: 'not_match', threshold: 0.0 },
+    ],
+  },
+  {
+    field: 'last_name',
+    scorerName: 'exact',
+    levels: [
+      { label: 'exact_match', threshold: 0.99 },
+      { label: 'not_match', threshold: 0.0 },
+    ],
+  },
 ];
 
 describe('100K+ Load Test', () => {
@@ -72,16 +127,23 @@ describe('100K+ Load Test', () => {
     // Step 3: Build candidates table (small batch)
     await backend.exec('CREATE TEMP TABLE __er_candidates (left_id INTEGER, right_id INTEGER)');
     const BATCH = 5000;
-    const candidates = blockingRows.map(r => ({ leftId: Number(r.left_id), rightId: Number(r.right_id) }));
+    const candidates = blockingRows.map((r) => ({
+      leftId: Number(r.left_id),
+      rightId: Number(r.right_id),
+    }));
     for (let i = 0; i < candidates.length; i += BATCH) {
       const chunk = candidates.slice(i, i + BATCH);
-      const vals = chunk.map(c => `(${c.leftId}, ${c.rightId})`).join(', ');
+      const vals = chunk.map((c) => `(${c.leftId}, ${c.rightId})`).join(', ');
       await backend.exec(`INSERT INTO __er_candidates VALUES ${vals}`);
     }
 
     // Step 4: SQL comparison (only 20K pairs → fast)
     const compStart = Date.now();
-    const compQuery = buildComparisonQuery({ comparisons, recordsTable: '__er_records', candidatesTable: '__er_candidates' });
+    const compQuery = buildComparisonQuery({
+      comparisons,
+      recordsTable: '__er_records',
+      candidatesTable: '__er_candidates',
+    });
     const compRows = await backend.query(compQuery);
     const pairVectors = parseComparisonRows(compRows, comparisons);
     const compTime = Date.now() - compStart;
@@ -92,7 +154,12 @@ describe('100K+ Load Test', () => {
     const scoredPairs: ScoredPair[] = candidates.map((pair, idx) => {
       const vecs = pairVectors[idx] ?? [];
       const mw = computeAggregateMatchWeight(vecs, emResult.parameters);
-      return { leftId: pair.leftId, rightId: pair.rightId, score: mw.probability, probability: mw.probability };
+      return {
+        leftId: pair.leftId,
+        rightId: pair.rightId,
+        score: mw.probability,
+        probability: mw.probability,
+      };
     });
     const clustering = connectedComponents(scoredPairs, totalRecords, 0.5);
 

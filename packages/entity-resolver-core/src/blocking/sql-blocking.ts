@@ -51,24 +51,23 @@ export async function sqlBlocking(
     const dedupe = config.deduplicate ?? true;
     const dedupeClause = dedupe ? 'l.__row_id__ < r.__row_id__' : 'l.__row_id__ != r.__row_id__';
 
-    const ruleQueries = config.rules.map((rule) =>
-      `SELECT l.__row_id__ as left_id, r.__row_id__ as right_id
+    const ruleQueries = config.rules.map(
+      (rule) =>
+        `SELECT l.__row_id__ as left_id, r.__row_id__ as right_id
        FROM ${RECORDS_TABLE} l
        INNER JOIN ${RECORDS_TABLE} r ON (${rule})
        WHERE ${dedupeClause}`,
     );
 
-    const sql = config.rules.length === 1
-      ? ruleQueries[0]!
-      : ruleQueries.join(' UNION ');
+    const sql = config.rules.length === 1 ? ruleQueries[0]! : ruleQueries.join(' UNION ');
 
     const limitClause = config.maxPairs ? ` LIMIT ${config.maxPairs}` : '';
     const rows = await backend.query(sql + limitClause);
 
     // Step 3: Convert SQL rows to CandidatePair array
     const pairs: CandidatePair[] = rows.map((row) => ({
-      leftId: Number(row['left_id']),
-      rightId: Number(row['right_id']),
+      leftId: Number(row.left_id),
+      rightId: Number(row.right_id),
     }));
 
     const reductionRatio = computeReductionRatio(pairs.length, totalRecords);

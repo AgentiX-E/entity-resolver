@@ -193,7 +193,7 @@ export function crossValidate(
     }
 
     // Build predicted clusters (train set only — direct from pipeline)
-    const predClusters = result.clusters as ReadonlyMap<EntityId, Cluster>;
+    const predClusters = result.clusters;
 
     const em = evaluateClustering(predClusters, refClusters);
 
@@ -210,8 +210,7 @@ export function crossValidate(
     });
   }
 
-  const avg = (values: number[]) =>
-    values.reduce((s, v) => s + v, 0) / values.length;
+  const avg = (values: number[]) => values.reduce((s, v) => s + v, 0) / values.length;
   const std = (values: number[], mean: number) =>
     Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length);
 
@@ -240,7 +239,7 @@ function seedRandom(seed: number) {
 }
 
 /** Fisher-Yates shuffle. */
-function shuffle<T>(arr: T[], rng: () => number): void {
+function shuffle(arr: unknown[], rng: () => number): void {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1));
     [arr[i], arr[j]] = [arr[j]!, arr[i]!];

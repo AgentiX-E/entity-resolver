@@ -57,21 +57,13 @@ describe('Golden Record numeric strategies', () => {
   });
 
   it('most_recent picks latest date', () => {
-    const records = [
-      { date: '2024-01-15' },
-      { date: '2024-06-20' },
-      { date: '2023-12-01' },
-    ];
+    const records = [{ date: '2024-01-15' }, { date: '2024-06-20' }, { date: '2023-12-01' }];
     const result = buildGoldenRecord(records, { defaultStrategy: 'most_recent' });
     expect(result.goldenRecord.date).toBe('2024-06-20');
   });
 
   it('oldest picks earliest date', () => {
-    const records = [
-      { date: '2024-01-15' },
-      { date: '2024-06-20' },
-      { date: '2023-12-01' },
-    ];
+    const records = [{ date: '2024-01-15' }, { date: '2024-06-20' }, { date: '2023-12-01' }];
     const result = buildGoldenRecord(records, { defaultStrategy: 'oldest' });
     expect(result.goldenRecord.date).toBe('2023-12-01');
   });

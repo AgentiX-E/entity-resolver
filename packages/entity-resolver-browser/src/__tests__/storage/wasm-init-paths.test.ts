@@ -118,6 +118,7 @@ describe('DuckDBWasmStore init paths', () => {
   }, 5000);
 
   it('init with debug logging enabled', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     const spy = vi.spyOn(console, 'debug').mockImplementation(() => {});
     const store = new DuckDBWasmStore({ debug: true });
     await store.init();
@@ -141,7 +142,7 @@ describe('DuckDBWasmStore init paths', () => {
     // Test delete
     await store.deleteEntity('c1');
     const deleted = await store.getEntity('c1');
-    expect(deleted || null).toBe(null);
+    expect(deleted ?? null).toBe(null);
     // Test close
     await store.close();
   }, 5000);

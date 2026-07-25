@@ -24,7 +24,12 @@ export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
 export type { ILogger, LogLevel, LogContext } from './interfaces/ILogger.js';
 export { NoopLogger } from './interfaces/ILogger.js';
 export type { IDataSource, ReadOptions } from './interfaces/IDataSource.js';
-export type { ISqlBackend, SqlRow, TempTableConfig, SqlBlockingConfig } from './interfaces/ISqlBackend.js';
+export type {
+  ISqlBackend,
+  SqlRow,
+  TempTableConfig,
+  SqlBlockingConfig,
+} from './interfaces/ISqlBackend.js';
 
 // Error Hierarchy
 export {

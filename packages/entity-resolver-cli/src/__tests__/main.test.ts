@@ -7,7 +7,7 @@ import { main } from '../index.js';
 
 // ─── Helpers ──────────────────────────────────────────────────
 
-const TEST_DIR = join(tmpdir(), 'er-cli-test-' + Date.now());
+const TEST_DIR = join(tmpdir(), `er-cli-test-${Date.now()}`);
 
 function writeTempCsv(name: string, content: string): string {
   if (!existsSync(TEST_DIR)) mkdirSync(TEST_DIR, { recursive: true });

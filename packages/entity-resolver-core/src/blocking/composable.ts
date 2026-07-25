@@ -57,7 +57,7 @@ export function andBlocking(passes: readonly BlockingPass[]): BlockingPass[] {
   // the actual intersection logic
   return passes.map((p) => ({
     ...p,
-    meta: { ...((p as any).meta ?? {}), conjunctive: true },
+    meta: { conjunctive: true },
   }));
 }
 
@@ -68,7 +68,7 @@ export function andBlocking(passes: readonly BlockingPass[]): BlockingPass[] {
 export function orBlocking(passes: readonly BlockingPass[]): BlockingPass[] {
   return passes.map((p) => ({
     ...p,
-    meta: { ...((p as any).meta ?? {}), conjunctive: false },
+    meta: { conjunctive: false },
   }));
 }
 

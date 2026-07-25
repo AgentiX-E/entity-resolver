@@ -45,8 +45,8 @@ function parseTraceparent(header: string): TraceContext | null {
   const spanId = parts[2];
   const flags = parts[3];
 
-  if (!traceId || traceId.length !== 32 || !/^[0-9a-f]{32}$/.test(traceId)) return null;
-  if (!spanId || spanId.length !== 16 || !/^[0-9a-f]{16}$/.test(spanId)) return null;
+  if (traceId?.length !== 32 || !/^[0-9a-f]{32}$/.test(traceId)) return null;
+  if (spanId?.length !== 16 || !/^[0-9a-f]{16}$/.test(spanId)) return null;
 
   const sampled = (flags ?? '00') === '01';
 

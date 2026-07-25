@@ -11,21 +11,31 @@ const REPLACEMENT_CHAR = '\uFFFD';
 
 /** Common Unicode confusables map (ftfy-inspired). */
 const UNICODE_FIXES: Readonly<Record<string, string>> = Object.freeze({
-  '\u2018': "'", '\u2019': "'",
-  '\u201C': '"', '\u201D': '"',
-  '\u2013': '-', '\u2014': '--',
-  '\u00A0': ' ', '\u2026': '...',
-  '\u00AD': '',  '\u200B': '',
-  '\uFEFF': '',  '\u2122': '(TM)',
+  '\u2018': "'",
+  '\u2019': "'",
+  '\u201C': '"',
+  '\u201D': '"',
+  '\u2013': '-',
+  '\u2014': '--',
+  '\u00A0': ' ',
+  '\u2026': '...',
+  '\u00AD': '',
+  '\u200B': '',
+  '\uFEFF': '',
+  '\u2122': '(TM)',
   '\u00AE': '(R)',
 });
 
 /** Moji-bake (garbled text) repair patterns. */
 const MOJIBAKE_PATTERNS: readonly { pattern: RegExp; replacement: string }[] = [
-  { pattern: /Ã©/g, replacement: 'é' }, { pattern: /Ã¨/g, replacement: 'è' },
-  { pattern: /Ã«/g, replacement: 'ë' }, { pattern: /Ã¼/g, replacement: 'ü' },
-  { pattern: /Ã¶/g, replacement: 'ö' }, { pattern: /Ã¤/g, replacement: 'ä' },
-  { pattern: /Ã /g, replacement: 'à' },  { pattern: /Ã§/g, replacement: 'ç' },
+  { pattern: /Ã©/g, replacement: 'é' },
+  { pattern: /Ã¨/g, replacement: 'è' },
+  { pattern: /Ã«/g, replacement: 'ë' },
+  { pattern: /Ã¼/g, replacement: 'ü' },
+  { pattern: /Ã¶/g, replacement: 'ö' },
+  { pattern: /Ã¤/g, replacement: 'ä' },
+  { pattern: /Ã /g, replacement: 'à' },
+  { pattern: /Ã§/g, replacement: 'ç' },
   { pattern: /Ã±/g, replacement: 'ñ' },
   { pattern: /â\u0080\u0099/g, replacement: "'" },
   { pattern: /â\u0080\u009C/g, replacement: '"' },
@@ -56,13 +66,13 @@ export function repairUnicode(input: string): string {
 // ═══════════════════════════════════════════════════════════════
 
 /** Fullwidth ASCII range: U+FF01–U+FF5E → U+0021–U+007E */
-const FULLWIDTH_OFFSET = 0xFF01 - 0x0021;
+const FULLWIDTH_OFFSET = 0xff01 - 0x0021;
 
 /** Fullwidth space → halfwidth space. */
 const FULLWIDTH_SPACE = '\u3000';
 
 /** Katakana → Hiragana shift (U+30A1–U+30F6 → U+3041–U+3096). */
-const KATAKANA_SHIFT = 0x30A1 - 0x3041;
+const KATAKANA_SHIFT = 0x30a1 - 0x3041;
 
 /**
  * Normalize CJK text for entity resolution.
@@ -92,14 +102,14 @@ export function normalizeCJK(value: string): string {
   let mapped = '';
   for (let i = 0; i < result.length; i++) {
     const cp = result.codePointAt(i)!;
-    if (cp >= 0xFF01 && cp <= 0xFF5E) {
+    if (cp >= 0xff01 && cp <= 0xff5e) {
       mapped += String.fromCodePoint(cp - FULLWIDTH_OFFSET);
-    } else if (cp >= 0xFFE0 && cp <= 0xFFE6) {
+    } else if (cp >= 0xffe0 && cp <= 0xffe6) {
       // Fullwidth currency/symbol range → halfwidth
-      mapped += String.fromCodePoint(cp - 0xFFE0 + 0x00A2);
+      mapped += String.fromCodePoint(cp - 0xffe0 + 0x00a2);
     } else if (result[i] === FULLWIDTH_SPACE) {
       mapped += ' ';
-    } else if (cp > 0xFFFF) {
+    } else if (cp > 0xffff) {
       mapped += result[i]! + (result[i + 1] ?? '');
       i++;
     } else {
@@ -112,9 +122,9 @@ export function normalizeCJK(value: string): string {
   mapped = '';
   for (let i = 0; i < result.length; i++) {
     const cp = result.codePointAt(i)!;
-    if (cp >= 0x30A1 && cp <= 0x30F6) {
+    if (cp >= 0x30a1 && cp <= 0x30f6) {
       mapped += String.fromCodePoint(cp - KATAKANA_SHIFT);
-    } else if (cp > 0xFFFF) {
+    } else if (cp > 0xffff) {
       mapped += result[i]! + (result[i + 1] ?? '');
       i++;
     } else {
@@ -148,7 +158,9 @@ export function normalize(value: unknown): string {
  * Normalize an email address.
  */
 export function normalizeEmail(value: unknown): string {
-  const str = String(value ?? '').trim().toLowerCase();
+  const str = String(value ?? '')
+    .trim()
+    .toLowerCase();
   if (!str.includes('@')) return str;
   const [local, domain] = str.split('@') as [string, string];
   const cleanLocal = local.replace(/\./g, '');

@@ -13,11 +13,22 @@
  * in-memory runPipeline as before.
  */
 
-import type { RawRecord, PipelineResult, PipelineStatistics, DiagnosticData, ScoredPair } from '../types/core.js';
+import type {
+  RawRecord,
+  PipelineResult,
+  PipelineStatistics,
+  DiagnosticData,
+  ScoredPair,
+} from '../types/core.js';
 import type { PipelineConfig, PipelineOptions } from './runner.js';
 import type { ISqlBackend } from '../interfaces/ISqlBackend.js';
 import { NoopLogger } from '../interfaces/ILogger.js';
-import { buildComparisonQuery, parseComparisonRows, requiresUdf, patchUdfVectors } from '../matching/sql-comparison.js';
+import {
+  buildComparisonQuery,
+  parseComparisonRows,
+  requiresUdf,
+  patchUdfVectors,
+} from '../matching/sql-comparison.js';
 import { estimateParameters } from '../fellegi-sunter/em.js';
 import { computeAggregateMatchWeight } from '../fellegi-sunter/match-weight.js';
 import { buildTermFrequencies, TFAdjustmentLookup } from '../fellegi-sunter/tf-adjust.js';
@@ -71,7 +82,15 @@ export async function runPipelineFromSqlSource(
       clusters: new Map(),
       scoredPairs: [],
       singletons: [],
-      statistics: { totalRecords: 0, totalClusters: 0, matchedRecords: 0, matchRate: 0, averageClusterSize: 0, maxClusterSize: 0, executionTimeMs: Date.now() - startTime },
+      statistics: {
+        totalRecords: 0,
+        totalClusters: 0,
+        matchedRecords: 0,
+        matchRate: 0,
+        averageClusterSize: 0,
+        maxClusterSize: 0,
+        executionTimeMs: Date.now() - startTime,
+      },
       diagnostics: { muParameters: new Map(), matchWeightDistribution: [], unlinkableCount: 0 },
     };
   }
@@ -87,21 +106,20 @@ export async function runPipelineFromSqlSource(
   const blockingStart = Date.now();
   const dedupeClause = 'l.__row_id__ < r.__row_id__';
 
-  const ruleQueries = config.sqlRules.map((rule) =>
-    `SELECT l.__row_id__ as left_id, r.__row_id__ as right_id
+  const ruleQueries = config.sqlRules.map(
+    (rule) =>
+      `SELECT l.__row_id__ as left_id, r.__row_id__ as right_id
      FROM ${RECORDS_TABLE} l
      INNER JOIN ${RECORDS_TABLE} r ON (${rule})
      WHERE ${dedupeClause}`,
   );
 
-  const blockingSql = ruleQueries.length === 1
-    ? ruleQueries[0]!
-    : ruleQueries.join(' UNION ');
+  const blockingSql = ruleQueries.length === 1 ? ruleQueries[0]! : ruleQueries.join(' UNION ');
 
   const blockingRows = await config.backend.query(blockingSql);
   const candidates: CandidatePair[] = blockingRows.map((row) => ({
-    leftId: Number(row['left_id']),
-    rightId: Number(row['right_id']),
+    leftId: Number(row.left_id),
+    rightId: Number(row.right_id),
   }));
 
   logger.debug('SQL blocking complete', {
@@ -117,18 +135,28 @@ export async function runPipelineFromSqlSource(
       clusters: new Map(),
       scoredPairs: [],
       singletons: Array.from({ length: totalRecords }, (_, i) => i),
-      statistics: { totalRecords, totalClusters: 0, matchedRecords: 0, matchRate: 0, averageClusterSize: 0, maxClusterSize: 0, executionTimeMs: Date.now() - startTime },
+      statistics: {
+        totalRecords,
+        totalClusters: 0,
+        matchedRecords: 0,
+        matchRate: 0,
+        averageClusterSize: 0,
+        maxClusterSize: 0,
+        executionTimeMs: Date.now() - startTime,
+      },
       diagnostics: { muParameters: new Map(), matchWeightDistribution: [], unlinkableCount: 0 },
     };
   }
 
   // ── Stage 3: Materialize candidates table for SQL comparison ──
   await config.backend.exec(`DROP TABLE IF EXISTS ${CANDIDATES_TABLE}`);
-  await config.backend.exec(`CREATE TEMP TABLE ${CANDIDATES_TABLE} (left_id INTEGER, right_id INTEGER)`);
+  await config.backend.exec(
+    `CREATE TEMP TABLE ${CANDIDATES_TABLE} (left_id INTEGER, right_id INTEGER)`,
+  );
   const BATCH = 1000;
   for (let i = 0; i < candidates.length; i += BATCH) {
     const chunk = candidates.slice(i, i + BATCH);
-    const values = chunk.map(p => `(${p.leftId}, ${p.rightId})`).join(', ');
+    const values = chunk.map((p) => `(${p.leftId}, ${p.rightId})`).join(', ');
     await config.backend.exec(`INSERT INTO ${CANDIDATES_TABLE} VALUES ${values}`);
   }
 
@@ -148,7 +176,14 @@ export async function runPipelineFromSqlSource(
     if (requiresUdf(spec.scorerName)) {
       const scorer = getScorer(spec.scorerName);
       if (scorer) {
-        scorers.set(spec.scorerName, (a: unknown, b: unknown) => scorer.score(a, b, { name: spec.field, semanticType: 'string', cardinality: totalRecords, isNumeric: false }));
+        scorers.set(spec.scorerName, (a: unknown, b: unknown) =>
+          scorer.score(a, b, {
+            name: spec.field,
+            semanticType: 'string',
+            cardinality: totalRecords,
+            isNumeric: false,
+          }),
+        );
       }
     }
   }
@@ -158,9 +193,11 @@ export async function runPipelineFromSqlSource(
   // For patching UDF vectors, we need records by index.
   // Since we already have them in SQL, we'll load them lazily.
   // For < 10K candidates with UDF fields, loading is acceptable.
-  const needsPatch = config.pipeline.comparisons.some(s => requiresUdf(s.scorerName));
+  const needsPatch = config.pipeline.comparisons.some((s) => requiresUdf(s.scorerName));
   if (needsPatch && candidates.length > 0) {
-    const allRows = await config.backend.query(`SELECT *, __row_id__ FROM ${RECORDS_TABLE} ORDER BY __row_id__`);
+    const allRows = await config.backend.query(
+      `SELECT *, __row_id__ FROM ${RECORDS_TABLE} ORDER BY __row_id__`,
+    );
     for (const row of allRows) {
       const rec: RawRecord = {};
       for (const [k, v] of Object.entries(row)) {
@@ -187,7 +224,8 @@ export async function runPipelineFromSqlSource(
   // ── Stage 6: Compute match weights ──
   let tfLookup: TFAdjustmentLookup | undefined;
   if (config.pipeline.tfFields && config.pipeline.tfFields.length > 0) {
-    const tfRecords = records.length > 0 ? records : await loadRecords(config.backend, RECORDS_TABLE);
+    const tfRecords =
+      records.length > 0 ? records : await loadRecords(config.backend, RECORDS_TABLE);
     const freqs = buildTermFrequencies(tfRecords, config.pipeline.tfFields);
     tfLookup = new TFAdjustmentLookup(freqs);
   }

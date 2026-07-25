@@ -40,7 +40,7 @@ export class DuckDbSqlBackend implements ISqlBackend {
     // Load extensions if requested
     if (config.extensions) {
       for (const ext of config.extensions) {
-        this.exec(`INSTALL ${ext}; LOAD ${ext};`);
+        void this.exec(`INSTALL ${ext}; LOAD ${ext};`);
       }
     }
   }
@@ -52,16 +52,16 @@ export class DuckDbSqlBackend implements ISqlBackend {
   async query(sql: string, params?: unknown[]): Promise<SqlRow[]> {
     return new Promise((resolve, reject) => {
       // Replace $N parameters with escaped values for DuckDB API
-      const finalSql = params
-        ? this.interpolateParams(sql, params)
-        : sql;
+      const finalSql = params ? this.interpolateParams(sql, params) : sql;
 
       this.db.all(finalSql, (err: Error | null, rows: SqlRow[]) => {
         if (err) {
-          reject(new IOError(`DuckDB query failed: ${err.message}`, {
-            operation: 'DuckDbSqlBackend.query',
-            details: { sql: sql.slice(0, 200) },
-          }));
+          reject(
+            new IOError(`DuckDB query failed: ${err.message}`, {
+              operation: 'DuckDbSqlBackend.query',
+              details: { sql: sql.slice(0, 200) },
+            }),
+          );
           return;
         }
         resolve(rows);
@@ -145,8 +145,11 @@ export class DuckDbSqlBackend implements ISqlBackend {
       if (!firstRecord) {
         firstRecord = rec;
         columns = (config.columns ?? Object.keys(rec)) as string[];
-        const resolvedColumns = columns as string[];
-        const colDefs = ['__row_id__ INTEGER', ...resolvedColumns.map((c: string) => `${c} VARCHAR`)].join(', ');
+        const resolvedColumns = columns;
+        const colDefs = [
+          '__row_id__ INTEGER',
+          ...resolvedColumns.map((c: string) => `${c} VARCHAR`),
+        ].join(', ');
         await this.exec(`DROP TABLE IF EXISTS ${name}`);
         await this.exec(`CREATE TEMP TABLE ${name} (${colDefs})`);
       }

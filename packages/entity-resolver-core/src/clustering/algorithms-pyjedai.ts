@@ -745,7 +745,7 @@ export function cutClustering(
   const V = N + 1;
 
   // Build capacity matrix as array of Maps (sparse)
-  const cap: Map<number, number>[] = Array.from({ length: V }, () => new Map());
+  const cap: Map<number, number>[] = Array.from({ length: V }, () => new Map<number, number>());
 
   for (const [u, nbrs] of adj) {
     const ui = nodeIndex.get(u)!;
@@ -766,7 +766,7 @@ export function cutClustering(
 
   // --- Push-Relabel max flow with gap heuristic ---
   function maxFlow(s: number, t: number): number {
-    const flow: Map<number, number>[] = Array.from({ length: V }, () => new Map());
+    const flow: Map<number, number>[] = Array.from({ length: V }, () => new Map<number, number>());
     const excess = new Float64Array(V);
     const height = new Int32Array(V);
     const count = new Int32Array(2 * V);
@@ -853,7 +853,8 @@ export function cutClustering(
         count[oldH]!--;
         count[height[u]]!++;
         // Gap heuristic
-        if (count[oldH]! === 0 && oldH < V) {
+        const oldCount = count[oldH]!;
+        if (oldCount === 0 && oldH < V) {
           for (let i = 0; i < V; i++) {
             if (i !== s && i !== t && height[i]! > oldH && height[i]! < V) {
               count[height[i]!]!--;
@@ -1034,7 +1035,7 @@ export function markovClustering(
   }
 
   // Build initial dense matrix
-  const matrix: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+  const matrix: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
 
   for (const p of pairs) {
     const sim = pairSim(p);
@@ -1062,7 +1063,7 @@ export function markovClustering(
 
   // Matrix multiplication: result = m1 * m2
   function multiply(m1: number[][], m2: number[][]): number[][] {
-    const result: number[][] = Array.from({ length: n }, () => new Array(n).fill(0));
+    const result: number[][] = Array.from({ length: n }, () => new Array<number>(n).fill(0));
     for (let i = 0; i < n; i++) {
       for (let j = 0; j < n; j++) {
         let sum = 0;
@@ -1617,7 +1618,9 @@ export function rowColumnClustering(
   const numD2 = maxD2 + 1;
 
   // Build similarity matrix (numD1 × numD2) — default to -1 (no edge)
-  const simMatrix: number[][] = Array.from({ length: numD1 }, () => new Array(numD2).fill(-1));
+  const simMatrix: number[][] = Array.from({ length: numD1 }, () =>
+    new Array<number>(numD2).fill(-1),
+  );
 
   for (const p of pairs) {
     const sim = pairSim(p);

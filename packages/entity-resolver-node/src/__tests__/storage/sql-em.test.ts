@@ -59,7 +59,9 @@ describe('sqlEstimateParameters', () => {
 
   it('handles single pair', async () => {
     const backend = new DuckDbSqlBackend();
-    const result = await sqlEstimateParameters(backend, [[{ field: 'x', level: 'exact_match', score: 1.0, scorer: 'e' }]]);
+    const result = await sqlEstimateParameters(backend, [
+      [{ field: 'x', level: 'exact_match', score: 1.0, scorer: 'e' }],
+    ]);
     expect(result.parameters).toBeDefined();
     await backend.close();
   });

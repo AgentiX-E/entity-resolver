@@ -214,9 +214,7 @@ describe('runPipelineFromSqlSource E2E', () => {
   ];
 
   it('completes pipeline from streaming source', async () => {
-    const { runPipelineFromSqlSource } = await import(
-      '@agentix-e/entity-resolver-core'
-    );
+    const { runPipelineFromSqlSource } = await import('@agentix-e/entity-resolver-core');
 
     const records = [
       { name: 'Alice', city: 'NYC' },
@@ -242,9 +240,7 @@ describe('runPipelineFromSqlSource E2E', () => {
   }, 30000);
 
   it('handles empty streaming source', async () => {
-    const { runPipelineFromSqlSource } = await import(
-      '@agentix-e/entity-resolver-core'
-    );
+    const { runPipelineFromSqlSource } = await import('@agentix-e/entity-resolver-core');
 
     const source = arrayToIterable([], 10);
 
@@ -263,9 +259,7 @@ describe('runPipelineFromSqlSource E2E', () => {
   }, 30000);
 
   it('handles zero candidates gracefully', async () => {
-    const { runPipelineFromSqlSource } = await import(
-      '@agentix-e/entity-resolver-core'
-    );
+    const { runPipelineFromSqlSource } = await import('@agentix-e/entity-resolver-core');
 
     // Records with unique names → no matches
     const records = [

@@ -12,13 +12,13 @@ export type SurvivorStrategy =
   | 'source_priority'
   | 'first'
   | 'concatenate'
-  | 'avg'        // Numeric average
-  | 'min'        // Numeric minimum
-  | 'max'        // Numeric maximum
-  | 'sum'        // Numeric sum
-  | 'median'     // Numeric median
+  | 'avg' // Numeric average
+  | 'min' // Numeric minimum
+  | 'max' // Numeric maximum
+  | 'sum' // Numeric sum
+  | 'median' // Numeric median
   | 'most_recent' // Most recent date (ISO 8601)
-  | 'oldest';     // Oldest date (ISO 8601)
+  | 'oldest'; // Oldest date (ISO 8601)
 
 /** Field configuration for golden record generation. */
 export interface FieldSurvivorRule {
@@ -211,13 +211,13 @@ export function buildGoldenRecord(
         selectedValue = [...new Set(values.map((v) => String(v.value)))].join(separator);
         break;
       case 'source_priority': {
-        const priorities = config.sourcePriority ?? new Map();
+        const priorities = config.sourcePriority ?? new Map<string, number>();
         let best = values[0]!;
         let bestPriority = 999;
         for (const v of values) {
           const record = records[v.recordIndex]!;
           const source = String(record._source ?? 'unknown');
-          const priority = priorities.get(source) ?? 999;
+          const priority: number = priorities.get(source) ?? 999;
           if (priority < bestPriority) {
             best = v;
             bestPriority = priority;
@@ -227,7 +227,10 @@ export function buildGoldenRecord(
         break;
       }
       case 'avg':
-        selectedValue = numericAggregate(values, (nums) => nums.reduce((s, n) => s + n, 0) / nums.length);
+        selectedValue = numericAggregate(
+          values,
+          (nums) => nums.reduce((s, n) => s + n, 0) / nums.length,
+        );
         break;
       case 'min':
         selectedValue = numericAggregate(values, (nums) => Math.min(...nums));

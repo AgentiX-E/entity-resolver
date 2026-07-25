@@ -40,8 +40,12 @@ export interface ILogger {
  * is provided. All methods silently discard messages.
  */
 export const NoopLogger: ILogger = Object.freeze({
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   debug: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   info: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   warn: () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   error: () => {},
 });

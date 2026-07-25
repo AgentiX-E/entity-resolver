@@ -128,10 +128,11 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
  */
 function resolveClientIp(c: Context, trustedProxies?: readonly string[]): string {
   // Get the actual connecting IP (not spoofable headers)
-  const directIp =
+  const env = c.env as Record<string, unknown> | undefined;
+  const directIp: string =
     c.req.header('CF-Connecting-IP') ??
     c.req.header('X-Real-IP') ??
-    c.env?.remoteAddr ??
+    (env?.remoteAddr as string) ??
     'anonymous';
 
   if (!trustedProxies || trustedProxies.length === 0) {
@@ -164,5 +165,6 @@ function resolveClientIp(c: Context, trustedProxies?: readonly string[]): string
  *   and will be removed in a future version.
  */
 export function startBucketCleanup(_intervalMs?: number): () => void {
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   return () => {};
 }

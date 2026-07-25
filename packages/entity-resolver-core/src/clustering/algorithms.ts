@@ -41,9 +41,9 @@ function ufUnion(parent: number[], size: number[], a: number, b: number): void {
   }
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 // Strategy 1: Connected Components
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 
 export function connectedComponents(
   pairs: readonly ScoredPair[],
@@ -60,9 +60,9 @@ export function connectedComponents(
   return buildResult(parent, totalRecords, 'cc');
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 // Strategy 2: DBSCAN
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 
 export function dbscanClustering(
   pairs: readonly ScoredPair[],
@@ -93,8 +93,7 @@ export function dbscanClustering(
     const seeds = [...nbrs];
     visitedSet.clear();
     for (const n of nbrs) visitedSet.add(n);
-    for (let s = 0; s < seeds.length; s++) {
-      const point = seeds[s]!;
+    for (const point of seeds) {
       if (labels[point] === -2) labels[point] = clusterId;
       if (labels[point] !== -1) continue;
       labels[point] = clusterId;
@@ -114,9 +113,9 @@ export function dbscanClustering(
   return buildFromLabels(labels, totalRecords, 'dbscan');
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 // Strategy 3: Unique Mapping
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 
 export function uniqueMapping(
   pairs: readonly ScoredPair[],
@@ -139,9 +138,9 @@ export function uniqueMapping(
   return buildResult(parent, totalRecords, 'unique');
 }
 
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 // Helpers
-// ═══════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════�?
 
 function buildResult(parent: number[], n: number, method: string): ClusteringResult {
   const groups = new Map<number, number[]>();

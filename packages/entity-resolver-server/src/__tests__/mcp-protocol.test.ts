@@ -234,6 +234,7 @@ describe('MCP Protocol: tools/call', () => {
     });
     const body = (await res.json()) as Record<string, any>;
     // Unknown tool produces error (either HTTP error code or JSON-RPC error in body)
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     const hasError = res.status >= 400 || body.error || body.result?.isError;
     expect(hasError).toBe(true);
   });

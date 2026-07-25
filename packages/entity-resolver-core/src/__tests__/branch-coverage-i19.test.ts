@@ -12,7 +12,11 @@ const meta = { numSingletons: 0, totalRecords: 0 };
 import { incrementalAdd, incrementalDelete, incrementalModify } from '../pipeline/incremental.js';
 
 const mf = async (): Promise<ScoredPair> => ({ leftId: 0, rightId: 1, score: 1, probability: 1 });
-const empty: ClusteringResult = { clusters: new Map(), singletons: [], metadata: { numClusters: 0, ...meta, averageClusterSize: 0, maxClusterSize: 0 } };
+const empty: ClusteringResult = {
+  clusters: new Map(),
+  singletons: [],
+  metadata: { numClusters: 0, ...meta, averageClusterSize: 0, maxClusterSize: 0 },
+};
 
 describe('incremental edge cases', () => {
   it('incrementalAdd empty newRecords returns existing', async () => {
@@ -53,7 +57,10 @@ describe('auto-config edge cases', () => {
   });
 
   it('autoConfigure with numeric fields only', () => {
-    const result = autoConfigure([{ id: '1', price: '100' }, { id: '2', price: '200' }]);
+    const result = autoConfigure([
+      { id: '1', price: '100' },
+      { id: '2', price: '200' },
+    ]);
     expect(result.config).toBeDefined();
   });
 
@@ -63,7 +70,10 @@ describe('auto-config edge cases', () => {
   });
 
   it('autoConfigure tfFields for surname types', () => {
-    const records = [{ name: 'John', surname: 'Smith' }, { name: 'Jane', surname: 'Smith' }];
+    const records = [
+      { name: 'John', surname: 'Smith' },
+      { name: 'Jane', surname: 'Smith' },
+    ];
     const result = autoConfigure(records);
     expect(result.config.tfFields).toBeDefined();
   });
@@ -77,7 +87,10 @@ import { analyzeFieldCorrelations } from '../fellegi-sunter/field-independence.j
 
 describe('field independence', () => {
   it('returns report with warnings array', () => {
-    const records = [{ name: 'A', email: 'a@t.com' }, { name: 'A', email: 'a2@t.com' }];
+    const records = [
+      { name: 'A', email: 'a@t.com' },
+      { name: 'A', email: 'a2@t.com' },
+    ];
     const r = analyzeFieldCorrelations(records, ['name', 'email']);
     expect(Array.isArray(r.warnings)).toBe(true);
   });
@@ -111,7 +124,7 @@ describe('blockPurging', () => {
 import { intersectPairs, unionPairs, subtractPairs } from '../blocking/composable.js';
 import type { BlockingResult } from '../blocking/types.js';
 
-function br(pairs: Array<{ leftId: number; rightId: number }>, total = 4): BlockingResult {
+function br(pairs: { leftId: number; rightId: number }[], total = 4): BlockingResult {
   return { pairs, blockCount: 1, totalRecords: total, reductionRatio: 0 };
 }
 
@@ -126,19 +139,31 @@ describe('composable blocking', () => {
   });
 
   it('intersectPairs finds common pairs', () => {
-    const r1 = br([{ leftId: 0, rightId: 1 }, { leftId: 0, rightId: 2 }]);
-    const r2 = br([{ leftId: 0, rightId: 1 }, { leftId: 1, rightId: 2 }]);
+    const r1 = br([
+      { leftId: 0, rightId: 1 },
+      { leftId: 0, rightId: 2 },
+    ]);
+    const r2 = br([
+      { leftId: 0, rightId: 1 },
+      { leftId: 1, rightId: 2 },
+    ]);
     expect(intersectPairs([r1, r2]).pairs.length).toBe(1);
   });
 
   it('unionPairs deduplicates', () => {
     const r1 = br([{ leftId: 0, rightId: 1 }]);
-    const r2 = br([{ leftId: 0, rightId: 1 }, { leftId: 1, rightId: 2 }]);
+    const r2 = br([
+      { leftId: 0, rightId: 1 },
+      { leftId: 1, rightId: 2 },
+    ]);
     expect(unionPairs([r1, r2]).pairs.length).toBe(2);
   });
 
   it('subtractPairs excludes', () => {
-    const inc = br([{ leftId: 0, rightId: 1 }, { leftId: 0, rightId: 2 }]);
+    const inc = br([
+      { leftId: 0, rightId: 1 },
+      { leftId: 0, rightId: 2 },
+    ]);
     const exc = [br([{ leftId: 0, rightId: 1 }])];
     expect(subtractPairs(inc, exc).pairs.length).toBe(1);
   });

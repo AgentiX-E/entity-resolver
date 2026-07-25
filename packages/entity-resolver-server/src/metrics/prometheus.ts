@@ -17,9 +17,7 @@ import type { Context, Next } from 'hono';
 // Metric types
 // ══════════════════════════════════════════════════════════════
 
-interface MetricLabel {
-  readonly [key: string]: string;
-}
+type MetricLabel = Record<string, string>;
 
 /** A Prometheus counter — monotonically increasing value. */
 class Counter {
@@ -134,7 +132,7 @@ class Histogram {
 
 /** Collects and exports all registered metrics. */
 class MetricsRegistry {
-  private metrics: Array<Counter | Histogram> = [];
+  private metrics: (Counter | Histogram)[] = [];
 
   register(metric: Counter | Histogram): void {
     this.metrics.push(metric);
@@ -230,6 +228,7 @@ export function metricsMiddleware(): (c: Context, next: Next) => Promise<void> {
     const start = performance.now();
     await next();
     const duration = (performance.now() - start) / 1000;
+    // eslint-disable-next-line @typescript-eslint/no-deprecated
     const route = c.req.routePath || c.req.path || 'unknown';
     const status = String(c.res.status || 200);
     requestCounter.inc({ method: c.req.method, route, status });

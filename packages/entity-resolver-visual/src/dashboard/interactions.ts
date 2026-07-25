@@ -11,11 +11,7 @@
  */
 
 export type DashboardEventType =
-  | 'cluster:select'
-  | 'pair:select'
-  | 'threshold:change'
-  | 'record:hover'
-  | 'view:switch';
+  'cluster:select' | 'pair:select' | 'threshold:change' | 'record:hover' | 'view:switch';
 
 export interface DashboardEvent {
   type: DashboardEventType;

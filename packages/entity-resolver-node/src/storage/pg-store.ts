@@ -150,14 +150,8 @@ function readPemFile(pathOrContent: string): string {
   if (!pathOrContent.includes('/') && !pathOrContent.includes('\\')) {
     return pathOrContent;
   }
-  try {
-    const { readFileSync } = getFsModule();
-    return readFileSync(pathOrContent, 'utf-8');
-  } catch (err) {
-    // SAFE: if file read fails, the original path/content is not valid.
-    // Re-throw for the caller to wrap in IOError with context.
-    throw err;
-  }
+  const { readFileSync } = getFsModule();
+  return readFileSync(pathOrContent, 'utf-8');
 }
 
 /** Lazily import fs module (ESM-safe via createRequire from 'node:module'). */
@@ -168,11 +162,11 @@ function getFsModule(): { readFileSync: (path: string, encoding: string) => stri
     // In ESM, dynamic require is not available. Use createRequire from 'node:module'
     // which is the standard ESM-compatible way to load CommonJS modules.
     const nodeRequire = createRequire(import.meta.url);
-    _fsModule = nodeRequire('node:fs');
+    _fsModule = nodeRequire('node:fs') as {
+      readFileSync: (path: string, encoding: string) => string;
+    };
   }
-  // Non-null: always set by the branch above on first call.
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  return _fsModule!;
+  return _fsModule;
 }
 
 /** Convert a pg row to an EntityRecord. */
