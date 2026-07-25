@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### I11: Benchmark Fixes — 2026-07-25
+
+#### Fixed
+- **P0-3**: 5/8 benchmark datasets (DBLP-ACM, Amazon-Google, WDC Offers, iTunes-Amazon, Cora) now pass F1 ≥ 0.7
+- Benchmark runner now uses auto-configure for intelligent field detection and blocking rule generation
+- Small datasets (<500 records) automatically fall back to per-field blocking when initial blocking produces too few candidate pairs
+- DBLP-ACM benchmark now runs `linkRecords` for cross-dataset record linkage (not dedupe)
+
+#### Added
+- `BenchmarkDataset.type` field: `'deduplication' | 'record_linkage'`
+- `BenchmarkDataset.leftIndices` / `rightIndices` for record_linkage datasets
+- `autoConfigure` integration into benchmark runner for automatic field semantic detection
+
+#### Results
+| Dataset | Before F1 | After F1 | Δ |
+|---------|:---:|:---:|:---:|
+| FEBRL 5000 | 0.804 | **0.999** | +0.195 |
+| DBLP-ACM | 0.000 | **0.949** | +0.949 |
+| Abt-Buy | 0.835 | **0.941** | +0.106 |
+| Amazon-Google | 0.000 | **0.750** | +0.750 |
+| WDC Products | 0.848 | **0.865** | +0.017 |
+| WDC Offers | 0.000 | **0.811** | +0.811 |
+| iTunes-Amazon | 0.000 | **0.965** | +0.965 |
+| Cora | 0.000 | **0.965** | +0.965 |
+
 ### I10: Production Quality Baseline — 2026-07-25
 
 #### Fixed
