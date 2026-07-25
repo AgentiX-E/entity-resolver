@@ -165,12 +165,9 @@ describe('record linking edge cases', () => {
     expect(r.crossPairs.length).toBe(0);
   });
 
-  it('gazetteerMatch runs without crash', async () => {
-    try {
-      await gazetteerMatch([{ name: 'A' }], [{ name: 'A' }], { comparisons: comps, matchThreshold: 0.3 });
-    } catch {
-      // Pipeline may throw on trivial data — test that we reach here without unhandled error
-    }
-    // Test passes if we get here (no unhandled rejection)
+  it('gazetteerMatch handles single-record error gracefully', async () => {
+    await expect(
+      gazetteerMatch([{ name: 'A' }], [{ name: 'A' }], { comparisons: comps, matchThreshold: 0.5 }),
+    ).rejects.toThrow();
   });
 });
