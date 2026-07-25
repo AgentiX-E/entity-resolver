@@ -118,5 +118,3 @@ export function traceContextMiddleware(): (c: Context, next: Next) => Promise<vo
 export function getTraceContext(c: Context): TraceContext | null {
   return (c.get('traceContext') as TraceContext) ?? null;
 }
-
-export type { TraceContext };
