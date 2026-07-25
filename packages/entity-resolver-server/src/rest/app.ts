@@ -22,6 +22,7 @@ import {
   gazetteerMatch,
   linkRecords,
 } from '@agentix-e/entity-resolver-core';
+import type { RawRecord } from '@agentix-e/entity-resolver-core';
 import { getHealth } from '../logging/health.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
@@ -262,6 +263,63 @@ export function createApp(config: ServerConfig = {}): Hono {
 
   // Prometheus metrics endpoint
   app.get('/metrics', metricsEndpoint);
+
+  // Dashboard — interactive diagnostic panel
+  app.get('/dashboard', (c: Context) => {
+    return c.html(`<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entity Resolver — Diagnostics Dashboard</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: system-ui, -apple-system, sans-serif; background: #f5f5f5; }
+</style>
+</head>
+<body>
+  <er-dashboard id="dashboard"></er-dashboard>
+  <script type="module">
+    import { DashboardShell } from '/assets/dashboard-shell.js';
+    // Auto-load from API
+    fetch('/api/v1/dashboard/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({}) })
+      .then(r => r.json())
+      .then(data => {
+        const dash = document.getElementById('dashboard');
+        if (dash) dash.load(data.pipelineResult, data.records);
+      });
+  </script>
+</body>
+</html>`);
+  });
+
+  // Dashboard data endpoint — returns structured data for the dashboard
+  app.post('/api/v1/dashboard/data', async (c: Context) => {
+    const body = await safeJson(c);
+    if (body instanceof Response) return body;
+    const data = body as { records?: RawRecord[] };
+    const records = data.records ?? [];
+    try {
+      const auto = autoConfigure(records);
+      const result = await runPipeline(records, auto.config);
+      return c.json({
+        pipelineResult: result,
+        records,
+      });
+    } catch (err) {
+      // Pipeline may fail on small/empty datasets — return partial data
+      return c.json({
+        pipelineResult: {
+          clusters: {},
+          scoredPairs: [],
+          statistics: { totalRecords: records.length, totalClusters: 0, matchedRecords: 0, matchRate: 0, averageClusterSize: 0, maxClusterSize: 0, executionTimeMs: 0 },
+          diagnostics: { muParameters: {} },
+        },
+        records,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
+  });
 
   // Deduplicate records
   app.post('/api/v1/dedupe', async (c: Context) => {

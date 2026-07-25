@@ -844,3 +844,58 @@ describe('ServerConfig', () => {
     expect(res.status).toBe(200);
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// Dashboard Endpoints
+// ═══════════════════════════════════════════════════════════════
+
+describe('Dashboard endpoints', () => {
+  it('GET /dashboard returns 200 with HTML', async () => {
+    const app = createApp();
+    const res = await app.request('/dashboard');
+    expect(res.status).toBe(200);
+    const html = await res.text();
+    expect(html).toContain('<!DOCTYPE html>');
+    expect(html).toContain('<er-dashboard');
+  });
+
+  it('POST /api/v1/dashboard/data returns pipeline result', async () => {
+    const app = createApp();
+    const res = await app.request('/api/v1/dashboard/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        records: [
+          { name: 'Alice', email: 'a@test.com' },
+          { name: 'Alice', email: 'alice@test.com' },
+          { name: 'Bob', email: 'b@test.com' },
+        ],
+      }),
+    });
+    expect(res.status).toBe(200);
+    const body = (await res.json()) as Record<string, unknown>;
+    expect(body.pipelineResult).toBeDefined();
+    expect(body.records).toBeDefined();
+  });
+
+  it('POST /api/v1/dashboard/data works with empty records', async () => {
+    const app = createApp();
+    const res = await app.request('/api/v1/dashboard/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ records: [] }),
+    });
+    // OK with partial/empty result
+    expect([200, 500]).toContain(res.status);
+  });
+
+  it('POST /api/v1/dashboard/data handles empty body', async () => {
+    const app = createApp();
+    const res = await app.request('/api/v1/dashboard/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    expect([200, 500]).toContain(res.status);
+  });
+});

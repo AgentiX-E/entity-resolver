@@ -57,3 +57,7 @@ export {
   ErMuChartElement,
   registerAllElements,
 } from './components/web/elements.js';
+
+// Layer 4: Interactive Dashboard
+export { DashboardShell, ComparisonViewer, DashboardEventBus, exportDashboardHTML } from './dashboard/index.js';
+export type { DashboardEvent, DashboardEventType } from './dashboard/index.js';
