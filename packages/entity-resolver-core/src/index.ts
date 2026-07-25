@@ -95,6 +95,17 @@ export {
   dateComparisonSpec,
 } from './matching/comparison.js';
 
+// SQL Comparison
+export type { SqlComparisonConfig, ScorerFn } from './matching/sql-comparison.js';
+export {
+  buildComparisonQuery,
+  parseComparisonRows,
+  requiresUdf,
+  isSqlNative,
+  SQL_UDF_SCORERS,
+  patchUdfVectors,
+} from './matching/sql-comparison.js';
+
 // WASM Loader
 export { tryLoadWasmScorers } from './matching/scorers/wasm/loader.js';
 
