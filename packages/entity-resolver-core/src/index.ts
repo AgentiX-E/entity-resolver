@@ -113,6 +113,7 @@ export { tryLoadWasmScorers } from './matching/scorers/wasm/loader.js';
 export {
   repairUnicode,
   normalize,
+  normalizeCJK,
   normalizeEmail,
   normalizePhone,
   preprocessRecords,
