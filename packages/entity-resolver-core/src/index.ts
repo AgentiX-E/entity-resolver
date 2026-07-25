@@ -245,6 +245,8 @@ export { evaluateClustering } from './evaluation/metrics.js';
 // Pipeline
 export type { PipelineConfig, PipelineOptions } from './pipeline/runner.js';
 export { runPipeline, runPipelineFromSource } from './pipeline/runner.js';
+export type { SqlPipelineConfig } from './pipeline/sql-runner.js';
+export { runPipelineFromSqlSource } from './pipeline/sql-runner.js';
 
 // Benchmarks
 export type { BenchmarkDataset, BenchmarkResult } from './benchmarks/datasets.js';

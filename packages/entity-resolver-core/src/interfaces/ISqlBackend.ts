@@ -37,24 +37,36 @@ export interface SqlBlockingConfig {
 export interface ISqlBackend {
   /**
    * Execute a SQL query and return rows.
-   *
-   * @param sql — SQL query string (parameterized with $1, $2, ...)
-   * @param params — bound parameter values
-   * @returns Array of rows as Record<string, unknown>
    */
   query(sql: string, params?: unknown[]): Promise<SqlRow[]>;
 
   /**
-   * Create a temporary table from an array of records.
-   * The table is automatically dropped when the backend is closed.
-   *
-   * @param records — records to insert
-   * @param config — table name and optional column definitions
+   * Create a temporary table from an in-memory array of records.
    */
   createTempTable(
     records: readonly Record<string, unknown>[],
     config: TempTableConfig,
   ): Promise<void>;
+
+  /**
+   * Stream records from an AsyncIterable into a temporary table.
+   * Materializes rows in configurable batch sizes — O(batch) memory,
+   * not O(N). Suitable for 100K+ record datasets.
+   *
+   * @param source — async iterable yielding records
+   * @param config — table name and optional column definitions
+   * @param batchSize — number of records per INSERT batch (default: 1000)
+   */
+  streamToTable(
+    source: AsyncIterable<Record<string, unknown>>,
+    config: TempTableConfig,
+    batchSize?: number,
+  ): Promise<void>;
+
+  /**
+   * Return the number of rows in a table.
+   */
+  rowCount(tableName: string): Promise<number>;
 
   /**
    * Drop a temporary table.
@@ -68,7 +80,6 @@ export interface ISqlBackend {
 
   /**
    * Close the backend and release all resources.
-   * All temporary tables are dropped.
    */
   close(): Promise<void>;
 }

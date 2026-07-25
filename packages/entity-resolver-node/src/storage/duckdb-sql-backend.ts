@@ -122,6 +122,94 @@ export class DuckDbSqlBackend implements ISqlBackend {
   }
 
   /**
+   * Stream records from an AsyncIterable into a temp table.
+   * Batches INSERT statements to control memory — O(batch) not O(N).
+   */
+  async streamToTable(
+    source: AsyncIterable<Record<string, unknown>>,
+    config: TempTableConfig,
+    batchSize: number = 1000,
+  ): Promise<void> {
+    const name = config.name;
+    this.tempTables.add(name);
+
+    // Peek first record to infer columns
+    let columns: string[] | null = null;
+    let firstRecord: Record<string, unknown> | null = null;
+
+    // Collect first batch + infer schema
+    const batch: Record<string, unknown>[] = [];
+    let globalRowId = 0;
+
+    for await (const rec of source) {
+      if (!firstRecord) {
+        firstRecord = rec;
+        columns = (config.columns ?? Object.keys(rec)) as string[];
+        const resolvedColumns = columns as string[];
+        const colDefs = ['__row_id__ INTEGER', ...resolvedColumns.map((c: string) => `${c} VARCHAR`)].join(', ');
+        await this.exec(`DROP TABLE IF EXISTS ${name}`);
+        await this.exec(`CREATE TEMP TABLE ${name} (${colDefs})`);
+      }
+      batch.push(rec);
+
+      if (batch.length >= batchSize) {
+        await this.insertBatch(name, batch, columns!, globalRowId);
+        globalRowId += batch.length;
+        batch.length = 0;
+      }
+    }
+
+    // Flush remaining batch
+    if (batch.length > 0 && columns) {
+      await this.insertBatch(name, batch, columns, globalRowId);
+    } else if (!firstRecord) {
+      await this.exec(`DROP TABLE IF EXISTS ${name}`);
+      await this.exec(`CREATE TEMP TABLE ${name} (__row_id__ INTEGER)`);
+    }
+  }
+
+  /**
+   * Return the number of rows in a table.
+   */
+  async rowCount(tableName: string): Promise<number> {
+    try {
+      const rows = await this.query(`SELECT COUNT(*) as cnt FROM ${tableName}`);
+      return Number(rows[0]?.cnt ?? 0);
+    } catch {
+      return 0; // Table doesn't exist — count is 0
+    }
+  }
+
+  /**
+   * Insert a batch of records into a temp table.
+   * @param table — table name
+   * @param records — batch of records
+   * @param columns — column names
+   * @param startRowId — starting __row_id__ for this batch
+   */
+  private async insertBatch(
+    table: string,
+    records: Record<string, unknown>[],
+    columns: string[],
+    startRowId: number,
+  ): Promise<void> {
+    const values = records
+      .map((rec, batchIdx) => {
+        const rowId = startRowId + batchIdx;
+        const vals = columns.map((col) => {
+          const val = rec[col];
+          if (val === null || val === undefined) return 'NULL';
+          const str = String(val).replace(/'/g, "''").replace(/\\/g, '\\\\');
+          return `'${str}'`;
+        });
+        return `(${rowId}, ${vals.join(', ')})`;
+      })
+      .join(', ');
+
+    await this.exec(`INSERT INTO ${table} VALUES ${values}`);
+  }
+
+  /**
    * Execute a raw SQL statement.
    */
   async exec(sql: string): Promise<void> {
