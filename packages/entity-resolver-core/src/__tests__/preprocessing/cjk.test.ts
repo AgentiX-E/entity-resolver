@@ -1,6 +1,6 @@
 // CJK normalization tests — validates fullwidth, katakana, NFKC, and edge cases.
 import { describe, it, expect } from 'vitest';
-import { normalizeCJK, normalize } from '../preprocessing/cleaner.js';
+import { normalizeCJK, normalize } from '../../preprocessing/cleaner.js';
 
 describe('normalizeCJK', () => {
   it('converts fullwidth ASCII to halfwidth', () => {
