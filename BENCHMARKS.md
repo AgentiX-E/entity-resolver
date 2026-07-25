@@ -8,7 +8,8 @@ All tests run on a single Node.js 22 process with pnpm 9.15.0.
 | Dataset           | Records | True Matches | Type               | Source                                |
 | ----------------- | ------- | ------------ | ------------------ | ------------------------------------- |
 | **FEBRL 5000**    | 4,300   | 2,000        | Deduplication      | Deterministic FEBRL-style generator   |
-| **DBLP-ACM**      | 1,100   | 1,116        | Record Linkage     | Real bibliographic data (DBLP + ACM)  |
+| **DBLP-ACM (Real)** | 4,910 | 2,224 | Record Linkage | Real bibliographic data (DBLP 2616 + ACM 2294) |
+| **DBLP-ACM (Gen)**  | 1,100 | 1,116 | Record Linkage | Generated fallback |
 | **Abt-Buy**       | 150     | 60           | Product Matching   | Generated cross-retailer              |
 | **Amazon-Google** | 100     | 40           | Cross-retailer     | Generated with description variations |
 | **WDC Products**  | 115     | 60           | Product Dedup      | Generated smartphone corpus           |
@@ -26,7 +27,8 @@ All tests run on a single Node.js 22 process with pnpm 9.15.0.
   Dataset             | Records | Matches | Purity  | Completeness | Time
   -------------------------------------------------------------------
   FEBRL 5000           |    4300 |    3996 |   1.000 |        0.999 | 349558ms
-  DBLP-ACM             |    1100 |     961 |   0.949 |        0.950 |  5410ms
+  DBLP-ACM (Real)      |    4910 |    3043 |   0.933 |        0.916 | 348205ms
+  DBLP-ACM (Gen)       |    1100 |     961 |   0.949 |        0.950 |  5410ms
   Abt-Buy              |     150 |     150 |   0.889 |        1.000 |    34ms
   Amazon-Google        |     100 |     100 |   0.600 |        1.000 |    12ms
   WDC Products         |     115 |     113 |   0.762 |        1.000 |    21ms

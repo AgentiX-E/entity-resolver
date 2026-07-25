@@ -1,7 +1,7 @@
 // Automated benchmark runner for ER pipeline evaluation.
 // Supports both deduplication and record_linkage benchmarks.
-// Small datasets (< 500 records) automatically fall back to full pairwise
-// comparison when blocking produces insufficient candidate pairs.
+// Large datasets (>1000 records) automatically use SQL-backed pipeline
+// to avoid OOM on real-world benchmark data.
 
 import { runPipeline } from '../pipeline/runner.js';
 import { linkRecords } from '../pipeline/linking.js';
