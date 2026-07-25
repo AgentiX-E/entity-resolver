@@ -37,7 +37,7 @@ describe('Generator edge cases', () => {
     const a = generateFebrlDataset({ numEntities: 10, recordsPerEntity: 2, noiseRecords: 3 });
     const b = generateFebrlDataset({ numEntities: 10, recordsPerEntity: 2, noiseRecords: 3 });
     expect(a.records.length).toBe(b.records.length);
-    expect(a.records[0]!['given_name']).toBe(b.records[0]!['given_name']);
+    expect(a.records[0]!.given_name).toBe(b.records[0]!.given_name);
   });
 
   it('different generator produces different records', () => {
@@ -48,12 +48,16 @@ describe('Generator edge cases', () => {
 
   it('AbtBuy with 3 variants produces NEW: prefix', () => {
     const a = generateAbtBuyDataset({ numEntities: 3, recordsPerEntity: 3, noiseRecords: 0 });
-    const names = a.records.map((r) => String(r['name'] ?? ''));
+    const names = a.records.map((r) => String(r.name ?? ''));
     expect(names.some((n) => n.startsWith('NEW:'))).toBe(true);
   });
 
   it('AmazonGoogle produces exact record count', () => {
-    const ag = generateAmazonGoogleDataset({ numEntities: 3, recordsPerEntity: 2, noiseRecords: 0 });
+    const ag = generateAmazonGoogleDataset({
+      numEntities: 3,
+      recordsPerEntity: 2,
+      noiseRecords: 0,
+    });
     expect(ag.records.length).toBe(6);
   });
 
@@ -72,8 +76,12 @@ describe('Generator edge cases', () => {
 describe('Benchmark runner edge cases', () => {
   it('handles empty dataset with zero scores', async () => {
     const result = await runBenchmark({
-      name: 'empty', description: '', recordCount: 0, trueMatchCount: 0,
-      records: [], groundTruth: new Map(),
+      name: 'empty',
+      description: '',
+      recordCount: 0,
+      trueMatchCount: 0,
+      records: [],
+      groundTruth: new Map(),
     });
     expect(result.dataset).toBe('empty');
     expect(result.purity).toBe(0);
@@ -83,8 +91,12 @@ describe('Benchmark runner edge cases', () => {
 
   it('handles single-record dataset with zero scores', async () => {
     const result = await runBenchmark({
-      name: 'single', description: '', recordCount: 1, trueMatchCount: 0,
-      records: [{ name: 'Only' }], groundTruth: new Map(),
+      name: 'single',
+      description: '',
+      recordCount: 1,
+      trueMatchCount: 0,
+      records: [{ name: 'Only' }],
+      groundTruth: new Map(),
     });
     expect(result.recordCount).toBe(1);
     expect(result.purity).toBe(0);

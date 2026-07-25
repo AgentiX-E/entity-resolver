@@ -72,10 +72,7 @@ export function createAuthMiddleware(config: AuthConfig) {
       const tokenBuf = Buffer.from(token);
       for (const validKey of config.apiKeys) {
         const validBuf = Buffer.from(validKey);
-        if (
-          tokenBuf.length === validBuf.length &&
-          timingSafeEqual(tokenBuf, validBuf)
-        ) {
+        if (tokenBuf.length === validBuf.length && timingSafeEqual(tokenBuf, validBuf)) {
           return next();
         }
       }
@@ -104,7 +101,7 @@ async function validateJwt(
   config: Pick<AuthConfig, 'jwtSecret' | 'jwtAlgorithm' | 'jwtIssuer' | 'jwtAudience'>,
 ): Promise<JwtValidationResult> {
   try {
-    const secret = new TextEncoder().encode(config.jwtSecret!);
+    const secret = new TextEncoder().encode(config.jwtSecret);
     const algorithm = config.jwtAlgorithm ?? 'HS256';
 
     const verifyOptions: {
@@ -126,7 +123,7 @@ async function validateJwt(
 
     return {
       valid: true,
-      payload: payload as Record<string, unknown>,
+      payload: payload,
     };
   } catch (err) {
     if (err instanceof JWTExpired) {

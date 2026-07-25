@@ -35,14 +35,7 @@ import { blockPurging } from './strategies.js';
  * | EJS      | JS score × log10(distinct/comp[A]) × log10(distinct/comp[B]) |
  * | X2       | Chi-square statistic |
  */
-export type WeightingScheme =
-  | 'CBS'
-  | 'JACCARD'
-  | 'COSINE'
-  | 'DICE'
-  | 'ECBS'
-  | 'EJS'
-  | 'X2';
+export type WeightingScheme = 'CBS' | 'JACCARD' | 'COSINE' | 'DICE' | 'ECBS' | 'EJS' | 'X2';
 
 // ══════════════════════════════════════════════════════════════
 // Internal graph representation
@@ -67,7 +60,7 @@ interface EntityNeighborhood {
  * Co-occurrence counts accumulate across all blocks.
  */
 function buildEntityGraph(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   blocks: Map<string, number[]>,
 ): {
   neighborhoods: Map<number, EntityNeighborhood>;
@@ -168,7 +161,8 @@ function applyWeightingScheme(
         }
 
         case 'ECBS':
-          w = coOccurrence * 
+          w =
+            coOccurrence *
             Math.log10(totalBlocks / (entityBlocks || 1)) *
             Math.log10(totalBlocks / (neighborBlocks || 1));
           break;
@@ -178,7 +172,8 @@ function applyWeightingScheme(
           const ns = neighborhoods.get(edge.neighborId)?.count ?? 1;
           const js = coOccurrence / (es + ns - coOccurrence || 1);
           const distinctNeighbors = neighborhoods.size || 1;
-          w = js *
+          w =
+            js *
             Math.log10(distinctNeighbors / (entityBlocks || 1)) *
             Math.log10(distinctNeighbors / (neighborBlocks || 1));
           break;
@@ -186,12 +181,12 @@ function applyWeightingScheme(
 
         case 'X2': {
           const observed = coOccurrence;
-          const expected =
-            ((entityBlocks * neighborBlocks) / totalBlocks) || 0;
+          const expected = (entityBlocks * neighborBlocks) / totalBlocks || 0;
           const chi =
-            ((observed - expected) ** 2) / (expected || 1) +
-            (((entityBlocks - observed) - (totalBlocks - entityBlocks - neighborBlocks + observed)) ** 2) /
-              ((totalBlocks - entityBlocks - neighborBlocks + observed) || 1);
+            (observed - expected) ** 2 / (expected || 1) +
+            (entityBlocks - observed - (totalBlocks - entityBlocks - neighborBlocks + observed)) **
+              2 /
+              (totalBlocks - entityBlocks - neighborBlocks + observed || 1);
           w = chi;
           break;
         }
@@ -217,14 +212,14 @@ function applyWeightingScheme(
  * Available pruning methods.
  */
 export type PruningMethod =
-  | 'WEP'   // Weighted Edge Pruning — retain edges above average weight
-  | 'CEP'   // Cardinality Edge Pruning — retain top-K edges globally
-  | 'CNP'   // Cardinality Node Pruning — retain top-K edges per entity
-  | 'RCNP'  // Reciprocal CNP — edge must be in top-K for both entities
-  | 'WNP'   // Weighted Node Pruning — retain edges above entity's average
+  | 'WEP' // Weighted Edge Pruning — retain edges above average weight
+  | 'CEP' // Cardinality Edge Pruning — retain top-K edges globally
+  | 'CNP' // Cardinality Node Pruning — retain top-K edges per entity
+  | 'RCNP' // Reciprocal CNP — edge must be in top-K for both entities
+  | 'WNP' // Weighted Node Pruning — retain edges above entity's average
   | 'BLAST' // Edge weight > 1/4 * (maxWeight_A + maxWeight_B)
-  | 'RWNP'  // Reciprocal WNP — edge above average in BOTH neighborhoods
-  | 'CP';    // Comparison Propagation — keep all non-zero edges
+  | 'RWNP' // Reciprocal WNP — edge above average in BOTH neighborhoods
+  | 'CP'; // Comparison Propagation — keep all non-zero edges
 
 // ══════════════════════════════════════════════════════════════
 // Main meta-blocking pipeline
@@ -250,7 +245,7 @@ export interface MetaBlockingConfig {
  * This implements the pyJedAI meta-blocking workflow in TypeScript.
  */
 export function metaBlockingFull(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: MetaBlockingConfig = {},
 ): BlockingResult {
   const weightingScheme = config.weightingScheme ?? 'CBS';
@@ -276,12 +271,7 @@ export function metaBlockingFull(
 
   // Step 4: Apply weighting scheme
   const blockCounts = computeEntityBlockCounts(purged, totalEntities);
-  const weights = applyWeightingScheme(
-    neighborhoods,
-    weightingScheme,
-    blockCounts,
-    totalBlocks,
-  );
+  const weights = applyWeightingScheme(neighborhoods, weightingScheme, blockCounts, totalBlocks);
 
   // Step 5: Apply pruning
   const retainedEdges = pruneEdges(neighborhoods, weights, pruningMethod, topK);
@@ -291,9 +281,7 @@ export function metaBlockingFull(
   const pairs: CandidatePair[] = [];
   for (const [entityId, neighbors] of retainedEdges) {
     for (const neighborId of neighbors) {
-      const key = entityId < neighborId
-        ? `${entityId}:${neighborId}`
-        : `${neighborId}:${entityId}`;
+      const key = entityId < neighborId ? `${entityId}:${neighborId}` : `${neighborId}:${entityId}`;
       if (!pairSet.has(key)) {
         pairSet.add(key);
         pairs.push({
@@ -306,7 +294,12 @@ export function metaBlockingFull(
 
   const total = records.length;
   const totalPossible = (total * (total - 1)) / 2;
-  return { pairs, blockCount: purged.size, totalRecords: total, reductionRatio: computeReductionRatio(pairs.length, totalPossible) };
+  return {
+    pairs,
+    blockCount: purged.size,
+    totalRecords: total,
+    reductionRatio: computeReductionRatio(pairs.length, totalPossible),
+  };
 }
 
 /** Tokenize a single record for blocking. */
@@ -406,7 +399,7 @@ function cepPrune(
   retained: Map<number, Set<number>>,
 ): Map<number, Set<number>> {
   void neighborhoods; // unused — CEP uses global weight ordering, not per-entity structure
-  const allEdges: Array<{ entityId: number; neighborId: number; weight: number }> = [];
+  const allEdges: { entityId: number; neighborId: number; weight: number }[] = [];
   for (const [entityId, wmap] of weights) {
     for (const [neighborId, w] of wmap) {
       allEdges.push({ entityId, neighborId, weight: w });
@@ -478,7 +471,7 @@ function rcnpPrune(
     const kept = new Set<number>();
     for (const neighborId of top) {
       const neighborTop = topSets.get(neighborId);
-      if (neighborTop && neighborTop.has(entityId)) {
+      if (neighborTop?.has(entityId)) {
         kept.add(neighborId);
       }
     }

@@ -22,11 +22,6 @@ import {
   gazetteerMatch,
   linkRecords,
 } from '@agentix-e/entity-resolver-core';
-import type {
-  PipelineConfig,
-  GazetteerConfig,
-  RecordLinkConfig,
-} from '@agentix-e/entity-resolver-core';
 import { getHealth } from '../logging/health.js';
 import { createAuthMiddleware } from '../middleware/auth.js';
 import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
@@ -61,12 +56,31 @@ export function initiateShutdown(): void {
   _shuttingDown = true;
 }
 
-/** Track a request in-flight for graceful shutdown counting. */
-function trackRequest(fn: () => Promise<Response>): Promise<Response> {
-  _pendingRequests++;
-  return fn().finally(() => {
-    _pendingRequests--;
-  });
+/** Middleware: reject new requests during graceful shutdown. */
+function shutdownGuardMiddleware(): (c: Context, next: Next) => Promise<void> {
+  return async (c: Context, next: Next): Promise<void> => {
+    if (_shuttingDown) {
+      c.status(503);
+      c.res = new Response(JSON.stringify({ error: 'Server is shutting down' }), {
+        status: 503,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      return;
+    }
+    await next();
+  };
+}
+
+/** Middleware: track a request in-flight for graceful shutdown counting. */
+function requestTrackingMiddleware(): (c: Context, next: Next) => Promise<void> {
+  return async (_c: Context, next: Next) => {
+    _pendingRequests++;
+    try {
+      await next();
+    } finally {
+      _pendingRequests--;
+    }
+  };
 }
 
 /**
@@ -138,7 +152,9 @@ const McpExecuteSchema = z
  */
 function formatError(err: unknown, debug: boolean): { error: string; detail?: string } {
   if (debug && err instanceof Error) {
-    return { error: err.message, detail: err.stack };
+    const result: { error: string; detail?: string } = { error: err.message };
+    if (err.stack) result.detail = err.stack;
+    return result;
   }
   if (err instanceof Error) {
     return { error: err.message };
@@ -229,6 +245,12 @@ export function createApp(config: ServerConfig = {}): Hono {
     app.use('*', createRateLimitMiddleware(config.rateLimit).middleware);
   }
 
+  // Graceful shutdown guard
+  app.use('*', shutdownGuardMiddleware());
+
+  // Request tracking for graceful drain
+  app.use('*', requestTrackingMiddleware());
+
   // ── Routes ──
 
   // Health check (no auth required — bypassed in auth middleware)
@@ -245,7 +267,7 @@ export function createApp(config: ServerConfig = {}): Hono {
     const { records } = body as z.infer<typeof DedupeSchema>;
     try {
       const auto = autoConfigure(records);
-      const result = await runPipeline(records, auto.config as PipelineConfig);
+      const result = await runPipeline(records, auto.config);
       return c.json({
         clusters: Object.fromEntries(result.clusters),
         statistics: result.statistics,
@@ -309,7 +331,7 @@ export function createApp(config: ServerConfig = {}): Hono {
       const result = await gazetteerMatch(queryRecords, indexRecords, {
         comparisons: auto.config.comparisons,
         matchThreshold: threshold ?? 0.5,
-      } as GazetteerConfig);
+      });
       return c.json({
         matches: result.queryToIndexMatches.map((p) => ({
           queryIndex: p.leftId,
@@ -337,7 +359,7 @@ export function createApp(config: ServerConfig = {}): Hono {
       const result = await linkRecords(left, right, {
         comparisons: auto.config.comparisons,
         matchThreshold: threshold ?? 0.5,
-      } as RecordLinkConfig);
+      });
       return c.json({
         crossPairs: result.crossPairs,
         totalPairs: result.crossPairs.length,

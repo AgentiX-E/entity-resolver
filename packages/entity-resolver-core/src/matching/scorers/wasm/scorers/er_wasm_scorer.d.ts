@@ -1,4 +1,3 @@
-/* tslint:disable */
 /* eslint-disable */
 
 export function wasm_dice(a: string, b: string): number;

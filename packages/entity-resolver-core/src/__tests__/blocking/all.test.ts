@@ -542,7 +542,8 @@ describe('blocking empty/null field values', () => {
     const { analyzeBlockingRule } = await import('../../blocking/analyzer.js');
     const records = Array.from({ length: 50 }, () => ({ city: 'SameCity' }));
     const result = analyzeBlockingRule(records, {
-      fields: ['city'], transforms: ['strip', 'lowercase'],
+      fields: ['city'],
+      transforms: ['strip', 'lowercase'],
     });
     expect(result.estimatedPairCount).toBeGreaterThan(0);
   });

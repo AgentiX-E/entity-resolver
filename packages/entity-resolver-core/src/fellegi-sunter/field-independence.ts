@@ -34,7 +34,7 @@ export interface CorrelationReport {
  *   V < 0.1   → no warning (fields are sufficiently independent)
  */
 export function analyzeFieldCorrelations(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   fields: readonly string[],
 ): CorrelationReport {
   const warnings: CorrelationWarning[] = [];
@@ -70,7 +70,7 @@ export function analyzeFieldCorrelations(
  * Returns a value in [0, 1] where 0 = independent, 1 = perfect association.
  */
 function computeCramersV(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   fieldA: string,
   fieldB: string,
 ): number {

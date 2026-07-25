@@ -44,7 +44,10 @@ export interface StorageResolverOptions {
  * - 'postgres' → PgEntityStore (full PostgreSQL with mTLS, falls back to memory on failure)
  * - 'memory' (default) → MemoryEntityStore (pure JS Map)
  */
-export async function resolveStorage(options?: StorageResolverOptions, logger: ILogger = NoopLogger): Promise<ResolvedStorage> {
+export async function resolveStorage(
+  options?: StorageResolverOptions,
+  logger: ILogger = NoopLogger,
+): Promise<ResolvedStorage> {
   const backend = options?.backend ?? 'memory';
 
   if (backend === 'duckdb') {
@@ -54,7 +57,10 @@ export async function resolveStorage(options?: StorageResolverOptions, logger: I
       const store = await DuckDBStore.create(config);
       return { backend: 'duckdb', store };
     } catch (err) {
-      logger.warn('DuckDB initialization failed, falling back to memory store', { operation: 'resolveStorage', cause: String(err) });
+      logger.warn('DuckDB initialization failed, falling back to memory store', {
+        operation: 'resolveStorage',
+        cause: String(err),
+      });
       // SAFE: intentional degradation — storage backend failures gracefully fall back to in-memory store
       return { backend: 'memory', store: new MemoryEntityStore() };
     }
@@ -73,7 +79,10 @@ export async function resolveStorage(options?: StorageResolverOptions, logger: I
       });
       return { backend: 'postgres', store };
     } catch (err) {
-      logger.warn('PostgreSQL initialization failed, falling back to memory store', { operation: 'resolveStorage', cause: String(err) });
+      logger.warn('PostgreSQL initialization failed, falling back to memory store', {
+        operation: 'resolveStorage',
+        cause: String(err),
+      });
       // SAFE: intentional degradation — storage backend failures gracefully fall back to in-memory store
       return { backend: 'memory', store: new MemoryEntityStore() };
     }

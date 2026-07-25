@@ -60,10 +60,7 @@ function ufUnion(parent: number[], size: number[], a: number, b: number): void {
 // Connected Components via Union-Find on adjacency list
 // ---------------------------------------------------------------------------
 
-function connectedComponents(
-  edges: Array<[number, number]>,
-  totalRecords: number,
-): number[][] {
+function connectedComponents(edges: [number, number][], totalRecords: number): number[][] {
   const parent = Array.from({ length: totalRecords }, (_, i) => i);
   const psize = new Array<number>(totalRecords).fill(1);
   for (const [a, b] of edges) {
@@ -109,7 +106,8 @@ function buildResultFromClusters(
   const clusterList = [...result.values()];
   const sum = clusterList.reduce((s, c) => s + c.memberIds.length, 0);
   const avgSize = result.size > 0 ? sum / result.size : 0;
-  const maxSize = clusterList.length > 0 ? Math.max(...clusterList.map((c) => c.memberIds.length)) : 0;
+  const maxSize =
+    clusterList.length > 0 ? Math.max(...clusterList.map((c) => c.memberIds.length)) : 0;
 
   return {
     clusters: result,
@@ -212,7 +210,7 @@ export function centerClustering(
     edgesAttached.set(v2, (edgesAttached.get(v2) ?? 0) + 1);
   }
 
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
   const centers = new Set<number>();
   const members = new Set<number>();
 
@@ -293,7 +291,7 @@ export function bestMatchClustering(
 
   // Build candidates per source entity
   // source candidate entries: { targetId, similarity }
-  const candidatesPerSource = new Map<number, Array<{ targetId: number; similarity: number }>>();
+  const candidatesPerSource = new Map<number, { targetId: number; similarity: number }[]>();
 
   for (const p of pairs) {
     const sim = pairSim(p);
@@ -324,7 +322,7 @@ export function bestMatchClustering(
 
   const matchedTargets = new Set<number>();
   const matchedSources = new Set<number>();
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
 
   // Process sources in stable order
   const sortedSources = [...candidatesPerSource.keys()].sort((a, b) => a - b);
@@ -336,9 +334,7 @@ export function bestMatchClustering(
     for (const c of cands) {
       if (matchedTargets.has(c.targetId)) continue;
 
-      const [e1, e2] = order === 'inorder'
-        ? [sourceEnt, c.targetId]
-        : [c.targetId, sourceEnt];
+      const [e1, e2] = order === 'inorder' ? [sourceEnt, c.targetId] : [c.targetId, sourceEnt];
       newEdges.push([e1, e2]);
       matchedSources.add(sourceEnt);
       matchedTargets.add(c.targetId);
@@ -393,7 +389,7 @@ export function mergeCenterClustering(
   }
   edgeList.sort((a, b) => b[2] - a[2]);
 
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
   const centers = new Set<number>();
   const members = new Set<number>();
 
@@ -527,7 +523,7 @@ export function correlationClustering(
   }
 
   // Step 2: Initial clusters = connected components above initialThreshold
-  const initEdges: Array<[number, number]> = [];
+  const initEdges: [number, number][] = [];
   for (const p of pairs) {
     if (pairSim(p) > initThresh) {
       initEdges.push([p.leftId, p.rightId]);
@@ -632,7 +628,10 @@ export function correlationClustering(
       // Split: move half of a cluster to a new cluster
       let oldCluster = rng.nextInt(numClusters);
       let attempts = 20;
-      while ((!clusters[oldCluster]?.length || clusters[oldCluster]!.length < 4) && attempts-- > 0) {
+      while (
+        (!clusters[oldCluster]?.length || clusters[oldCluster]!.length < 4) &&
+        attempts-- > 0
+      ) {
         oldCluster = rng.nextInt(numClusters);
       }
       const clusterEnts = clusters[oldCluster];
@@ -746,7 +745,7 @@ export function cutClustering(
   const V = N + 1;
 
   // Build capacity matrix as array of Maps (sparse)
-  const cap: Array<Map<number, number>> = Array.from({ length: V }, () => new Map());
+  const cap: Map<number, number>[] = Array.from({ length: V }, () => new Map());
 
   for (const [u, nbrs] of adj) {
     const ui = nodeIndex.get(u)!;
@@ -767,7 +766,7 @@ export function cutClustering(
 
   // --- Push-Relabel max flow with gap heuristic ---
   function maxFlow(s: number, t: number): number {
-    const flow: Array<Map<number, number>> = Array.from({ length: V }, () => new Map());
+    const flow: Map<number, number>[] = Array.from({ length: V }, () => new Map());
     const excess = new Float64Array(V);
     const height = new Int32Array(V);
     const count = new Int32Array(2 * V);
@@ -799,19 +798,19 @@ export function cutClustering(
       let hd = 0;
       while (hd < q.length) {
         const u = q[hd++]!;
-            const hu = height[u]! + 1;
-            // Incoming edges: for each neighbor w where cap[w][u] - flow[w][u] > 0
-            for (let w = 0; w < V; w++) {
-              if (visited[w]!) continue;
-              const f = flow[w]?.get(u) ?? 0;
-              const c = cap[w]?.get(u) ?? 0;
-              if (c - f > 0) {
-                height[w] = hu;
-                count[hu] = (count[hu] ?? 0) + 1;
-                visited[w] = 1;
-                q.push(w);
-              }
-            }
+        const hu = height[u]! + 1;
+        // Incoming edges: for each neighbor w where cap[w][u] - flow[w][u] > 0
+        for (let w = 0; w < V; w++) {
+          if (visited[w]!) continue;
+          const f = flow[w]?.get(u) ?? 0;
+          const c = cap[w]?.get(u) ?? 0;
+          if (c - f > 0) {
+            height[w] = hu;
+            count[hu] = (count[hu] ?? 0) + 1;
+            visited[w] = 1;
+            q.push(w);
+          }
+        }
       }
 
       // Set remaining to V
@@ -828,8 +827,8 @@ export function cutClustering(
     globalRelabel();
 
     function push(u: number, v: number): boolean {
-      const c = (cap[u]!.get(v) ?? 0);
-      const f = (flow[u]!.get(v) ?? 0);
+      const c = cap[u]!.get(v) ?? 0;
+      const f = flow[u]!.get(v) ?? 0;
       const resid = c - f;
       if (resid <= 0 || excess[u]! <= 0 || height[u]! !== height[v]! + 1) return false;
       const delta = Math.min(excess[u]!, resid);
@@ -852,7 +851,7 @@ export function cutClustering(
         const oldH = height[u]!;
         height[u] = minH + 1;
         count[oldH]!--;
-        count[height[u]!]!++;
+        count[height[u]]!++;
         // Gap heuristic
         if (count[oldH]! === 0 && oldH < V) {
           for (let i = 0; i < V; i++) {
@@ -891,7 +890,7 @@ export function cutClustering(
 
     let relabelCount = 0;
     while (active.size > 0) {
-      const u = active.values().next().value as number;
+      const u = active.values().next().value!;
       active.delete(u);
       discharge(u);
       if (excess[u]! > 0 && height[u]! < V) active.add(u);
@@ -929,7 +928,7 @@ export function cutClustering(
 
   // Build the Gomory-Hu tree edges and find connected components after
   // removing the sink.
-  const treeEdges: Array<[number, number]> = [];
+  const treeEdges: [number, number][] = [];
   for (let v = 1; v < V; v++) {
     if (v === SINK) continue;
     const p = parent[v];
@@ -944,7 +943,7 @@ export function cutClustering(
   }
 
   // Add original edges between real nodes as additional connectivity
-  const allTreeEdges: Array<[number, number]> = [...treeEdges];
+  const allTreeEdges: [number, number][] = [...treeEdges];
   for (const [u, nbrs] of adj) {
     const ui = nodeIndex.get(u)!;
     for (const [v] of nbrs) {
@@ -957,7 +956,11 @@ export function cutClustering(
   const treeComps = connectedComponents(allTreeEdges, N);
   const mappedComps = treeComps.map((comp) => comp.map((i) => nodeList[i]!));
 
-  return buildResultFromClusters(mappedComps.length > 0 ? mappedComps : [nodeList], totalRecords, 'ctc');
+  return buildResultFromClusters(
+    mappedComps.length > 0 ? mappedComps : [nodeList],
+    totalRecords,
+    'ctc',
+  );
 }
 
 // ===========================================================================
@@ -1118,7 +1121,7 @@ export function markovClustering(
   }
 
   // Threshold final matrix and build edges
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
   for (let i = 0; i < n; i++) {
     for (let j = i + 1; j < n; j++) {
       const val = Math.max(current[i]![j]!, current[j]![i]!);
@@ -1171,8 +1174,8 @@ export function kiralyMSMClustering(
   }
 
   // Men = D1 (smaller IDs), Women = D2 (larger IDs)
-  const menCandidates = new Map<number, Array<{ woman: number; similarity: number; active: boolean }>>();
-  const womenCandidates = new Map<number, Array<{ man: number; similarity: number }>>();
+  const menCandidates = new Map<number, { woman: number; similarity: number; active: boolean }[]>();
+  const womenCandidates = new Map<number, { man: number; similarity: number }[]>();
   const allMen = new Set<number>();
 
   // Determine numEntitiesD1 automatically from pairs
@@ -1221,7 +1224,7 @@ export function kiralyMSMClustering(
   const isBachelor = new Array<boolean>(numD1).fill(false);
   const isUncertain = new Array<boolean>(numD1).fill(false);
   const fiances = new Map<number, number>(); // woman → man
-  const currentMatches = new Map<number, Array<{ man: number; woman: number; similarity: number }>>();
+  const currentMatches = new Map<number, { man: number; woman: number; similarity: number }[]>();
 
   const freeMen: number[] = [...allMen];
 
@@ -1297,7 +1300,9 @@ export function kiralyMSMClustering(
       if (cm) {
         cm.push({ man, woman: candidate.woman, similarity: candidate.similarity });
       } else {
-        currentMatches.set(man, [{ man, woman: candidate.woman, similarity: candidate.similarity }]);
+        currentMatches.set(man, [
+          { man, woman: candidate.woman, similarity: candidate.similarity },
+        ]);
       }
       fiances.set(candidate.woman, man);
     } else {
@@ -1313,7 +1318,9 @@ export function kiralyMSMClustering(
         if (cm) {
           cm.push({ man, woman: candidate.woman, similarity: candidate.similarity });
         } else {
-          currentMatches.set(man, [{ man, woman: candidate.woman, similarity: candidate.similarity }]);
+          currentMatches.set(man, [
+            { man, woman: candidate.woman, similarity: candidate.similarity },
+          ]);
         }
         fiances.set(candidate.woman, man);
 
@@ -1332,7 +1339,7 @@ export function kiralyMSMClustering(
   }
 
   // Build result graph
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
   for (const [, matches] of currentMatches) {
     for (const m of matches) {
       newEdges.push([m.man, m.woman]);
@@ -1444,7 +1451,7 @@ export function ricochetSRClustering(
   simWithCenter.set(top.id, 1.0);
 
   // Add top vertex's best neighbor as member
-  const topNeighbor = top.edges.keys().next().value as number;
+  const topNeighbor = top.edges.keys().next().value!;
   if (topNeighbor !== undefined) {
     members.add(topNeighbor);
     centerOf.set(topNeighbor, top.id);
@@ -1675,7 +1682,7 @@ export function rowColumnClustering(
   const solution: number[] = rowScanCost < colScanCost ? selectedColumn : colsFromSelectedRow;
 
   // Build graph from solution
-  const newEdges: Array<[number, number]> = [];
+  const newEdges: [number, number][] = [];
   const matched = new Set<number>();
 
   for (let row = 0; row < solution.length; row++) {

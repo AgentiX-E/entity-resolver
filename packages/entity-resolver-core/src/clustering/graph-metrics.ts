@@ -76,7 +76,7 @@ export function computeGraphMetrics(
   totalRecords: number,
 ): ClusterGraphMetrics {
   // Build adjacency for efficient edge lookup
-  const adjacency = new Map<number, Array<{ neighbor: number; weight: number }>>();
+  const adjacency = new Map<number, { neighbor: number; weight: number }[]>();
   for (const p of pairs) {
     const w = p.probability ?? p.score;
     addEdge(adjacency, p.leftId, p.rightId, w);
@@ -86,7 +86,7 @@ export function computeGraphMetrics(
   const nodes: NodeMetrics[] = [];
   for (let i = 0; i < totalRecords; i++) {
     const neighbors = adjacency.get(i) ?? [];
-    let degree = neighbors.length;
+    const degree = neighbors.length;
     let totalWeight = 0;
     let maxWeight = 0;
     for (const edge of neighbors) {
@@ -160,9 +160,7 @@ export function computeGraphMetrics(
     clusteredEntities,
     maxClusterSize,
     averageClusterSize:
-      nonSingletonClusters.length > 0
-        ? totalClusterSize / nonSingletonClusters.length
-        : 0,
+      nonSingletonClusters.length > 0 ? totalClusterSize / nonSingletonClusters.length : 0,
     singletonCount: totalRecords - clusteredEntities,
   };
 }
@@ -171,20 +169,15 @@ export function computeGraphMetrics(
 export function detectBridges(
   pairs: readonly ScoredPair[],
   cluster: { readonly memberIds: readonly number[] },
-): Array<{ readonly leftId: number; readonly rightId: number }> {
+): { readonly leftId: number; readonly rightId: number }[] {
   const members = new Set(cluster.memberIds);
-  const bridges: Array<{ leftId: number; rightId: number }> = [];
+  const bridges: { leftId: number; rightId: number }[] = [];
 
   for (const pair of pairs) {
     if (!members.has(pair.leftId) || !members.has(pair.rightId)) continue;
 
     // Check if removing this edge disconnects: count reachable nodes
-    const adjacency = buildClusterAdjacency(
-      pairs,
-      members,
-      pair.leftId,
-      pair.rightId,
-    );
+    const adjacency = buildClusterAdjacency(pairs, members, pair.leftId, pair.rightId);
     const reachable = bfsReachable(adjacency, pair.leftId);
     if (reachable.size < members.size) {
       bridges.push({ leftId: pair.leftId, rightId: pair.rightId });
@@ -199,7 +192,7 @@ export function detectBridges(
 // ══════════════════════════════════════════════════════════════
 
 function addEdge(
-  adj: Map<number, Array<{ neighbor: number; weight: number }>>,
+  adj: Map<number, { neighbor: number; weight: number }[]>,
   a: number,
   b: number,
   weight: number,
@@ -212,7 +205,7 @@ function addEdge(
 
 function checkConnectivity(
   members: readonly number[],
-  adjacency: Map<number, Array<{ neighbor: number; weight: number }>>,
+  adjacency: Map<number, { neighbor: number; weight: number }[]>,
 ): boolean {
   if (members.length <= 1) return true;
   const visited = new Set<number>();

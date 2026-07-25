@@ -11,5 +11,7 @@ const wasmBytes = readFileSync(join(__dirname, 'er_wasm_scorer_bg.wasm'));
 initSync({ module: wasmBytes });
 
 // Re-export wasm_score and a default init (no-op — already initialized)
-export default async function init() { /* already initialized synchronously */ }
+export default async function init() {
+  /* already initialized synchronously */
+}
 export { wasm_score };

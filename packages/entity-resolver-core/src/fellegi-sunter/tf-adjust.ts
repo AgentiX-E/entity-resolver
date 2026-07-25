@@ -21,7 +21,7 @@ export interface TermFrequency {
  * Build term frequency statistics for a set of records.
  */
 export function buildTermFrequencies(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   fields: readonly string[],
 ): Map<string, TermFrequency[]> {
   const result = new Map<string, TermFrequency[]>();

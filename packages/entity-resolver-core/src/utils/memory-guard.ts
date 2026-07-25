@@ -37,9 +37,7 @@ const DEFAULT_ERROR_THRESHOLD = 2 * 1024 * MB;
  * Uses `process.memoryUsage()` which is available in Node.js.
  * In browser/non-Node environments, returns a stub with heapUsed=0.
  */
-export function checkMemory(
-  config?: MemoryGuardConfig,
-): MemorySnapshot {
+export function checkMemory(config?: MemoryGuardConfig): MemorySnapshot {
   const warnThreshold = config?.warnThreshold ?? DEFAULT_WARN_THRESHOLD;
   const errorThreshold = config?.errorThreshold ?? DEFAULT_ERROR_THRESHOLD;
 
@@ -85,9 +83,9 @@ export function isMemoryHigh(config?: MemoryGuardConfig): boolean {
 export function estimateBlockingMemory(
   _recordCount: number,
   estimatedPairs: number,
-  comparisonsPerPair: number = 3,
+  comparisonsPerPair = 3,
 ): number {
   // Each pair generates ~150 bytes of data (scored pair + comparison vectors + overhead)
-  const bytesPerPair = 150 + (comparisonsPerPair * 50);
+  const bytesPerPair = 150 + comparisonsPerPair * 50;
   return estimatedPairs * bytesPerPair;
 }

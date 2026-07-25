@@ -1,4 +1,4 @@
-// Entity Resolver Pipeline â€? end-to-end orchestration.
+// Entity Resolver Pipeline ï¿½? end-to-end orchestration.
 // Wires together preprocessing, blocking, matching (FS EM), clustering, and evaluation.
 
 import type {
@@ -55,11 +55,11 @@ export interface PipelineOptions {
  * Run the full entity resolver pipeline on a set of records.
  *
  * Pipeline stages:
- * 1. Preprocessing â€? Unicode repair, normalization
- * 2. Blocking â€? Generate candidate pairs
- * 3. Matching â€? Generate comparison vectors + FS match weights
- * 4. Clustering â€? Group pairs into entity clusters
- * 5. Evaluation â€? Compute 12 metrics (if ground truth provided)
+ * 1. Preprocessing ï¿½? Unicode repair, normalization
+ * 2. Blocking ï¿½? Generate candidate pairs
+ * 3. Matching ï¿½? Generate comparison vectors + FS match weights
+ * 4. Clustering ï¿½? Group pairs into entity clusters
+ * 5. Evaluation ï¿½? Compute 12 metrics (if ground truth provided)
  */
 export async function runPipeline(
   records: RawRecord[],
@@ -67,7 +67,7 @@ export async function runPipeline(
   options?: PipelineOptions,
   _groundTruth?: Map<string, number[]>,
 ): Promise<PipelineResult> {
-  // ©¤©¤ Input validation ©¤©¤
+  // ï¿½ï¿½ï¿½ï¿½ Input validation ï¿½ï¿½ï¿½ï¿½
   if (!Array.isArray(records) || records.length === 0) {
     throw new ValidationError('records must be a non-empty array', {
       operation: 'runPipeline',
@@ -80,10 +80,17 @@ export async function runPipeline(
       details: { received: config.comparisons },
     });
   }
-  if (typeof config.matchThreshold !== 'number' || config.matchThreshold < 0 || config.matchThreshold > 1) {
-    throw new ValidationError(`config.matchThreshold must be a number in [0, 1], got ${String(config.matchThreshold)}`, {
-      operation: 'runPipeline',
-    });
+  if (
+    typeof config.matchThreshold !== 'number' ||
+    config.matchThreshold < 0 ||
+    config.matchThreshold > 1
+  ) {
+    throw new ValidationError(
+      `config.matchThreshold must be a number in [0, 1], got ${String(config.matchThreshold)}`,
+      {
+        operation: 'runPipeline',
+      },
+    );
   }
 
   const startTime = Date.now();
@@ -97,7 +104,7 @@ export async function runPipeline(
   const blockingResult = standardBlocking(cleaned, config.blocking);
   const candidates = blockingResult.pairs;
 
-  // Stage 3: Matching â€? generate comparison vectors grouped by pair
+  // Stage 3: Matching ï¿½? generate comparison vectors grouped by pair
   const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
   // Stage 3b: Estimate FS parameters via EM (per-pair posteriors)
@@ -114,7 +121,14 @@ export async function runPipeline(
     tfLookup = new TFAdjustmentLookup(freqs);
   }
 
-  const scoredPairs = computeScoredPairs(cleaned, candidates, config.comparisons, params, tfLookup, pairVectors);
+  const scoredPairs = computeScoredPairs(
+    cleaned,
+    candidates,
+    config.comparisons,
+    params,
+    tfLookup,
+    pairVectors,
+  );
 
   // Stage 4: Clustering
   const clustering = connectedComponents(scoredPairs, records.length, config.matchThreshold);
@@ -141,7 +155,7 @@ export async function runPipeline(
  * require full dataset access), but prepares the architecture for future
  * true-streaming stages.
  *
- * Prefer this over runPipeline() when consuming from an IDataSource ¡ª
+ * Prefer this over runPipeline() when consuming from an IDataSource ï¿½ï¿½
  * it handles the async iteration and provides better memory diagnostics.
  */
 export async function runPipelineFromSource(
@@ -266,7 +280,7 @@ function buildDiagnostics(
   }
 
   // Build match weight histogram with adaptive bin range
-  const weightBins: Array<{ minWeight: number; maxWeight: number; count: number }> = [];
+  const weightBins: { minWeight: number; maxWeight: number; count: number }[] = [];
   const totalPairs = _pairVectors.length;
   if (totalPairs > 0) {
     // Compute actual min/max weights for adaptive bins
@@ -301,7 +315,7 @@ function buildDiagnostics(
     }
     for (const w of weights) {
       const binIdx = Math.min(Math.max(Math.floor((w - effectiveMin) / binWidth), 0), 19);
-      if (weightBins[binIdx]) weightBins[binIdx]!.count++;
+      if (weightBins[binIdx]) weightBins[binIdx].count++;
     }
   }
 

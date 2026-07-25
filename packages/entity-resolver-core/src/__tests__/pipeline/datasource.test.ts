@@ -98,11 +98,15 @@ describe('runPipeline mutateInput option', () => {
     ];
     const originalName = records[0]!.name;
 
-    await runPipeline(records, {
-      blocking: { passes: [{ fields: ['city', 'name'], transforms: ['lowercase'] as const }] },
-      comparisons: [nameComparisonSpec('name')],
-      matchThreshold: 0.5,
-    }, { mutateInput: false });
+    await runPipeline(
+      records,
+      {
+        blocking: { passes: [{ fields: ['city', 'name'], transforms: ['lowercase'] as const }] },
+        comparisons: [nameComparisonSpec('name')],
+        matchThreshold: 0.5,
+      },
+      { mutateInput: false },
+    );
 
     // With mutateInput=false, original should be unchanged
     expect(records[0]!.name).toBe(originalName);

@@ -52,9 +52,7 @@ export function blockOnAll(
  * Each pass generates candidates independently, then pairs are filtered
  * to those appearing in ALL passes.
  */
-export function andBlocking(
-  passes: readonly BlockingPass[],
-): BlockingPass[] {
+export function andBlocking(passes: readonly BlockingPass[]): BlockingPass[] {
   // Mark passes as conjunctive — the caller (pipeline) must implement
   // the actual intersection logic
   return passes.map((p) => ({
@@ -67,9 +65,7 @@ export function andBlocking(
  * Combine blocking passes with OR semantics (union of pairs).
  * This is the default behavior — each pass adds more candidate pairs.
  */
-export function orBlocking(
-  passes: readonly BlockingPass[],
-): BlockingPass[] {
+export function orBlocking(passes: readonly BlockingPass[]): BlockingPass[] {
   return passes.map((p) => ({
     ...p,
     meta: { ...((p as any).meta ?? {}), conjunctive: false },
@@ -83,9 +79,7 @@ export function orBlocking(
 /**
  * Apply AND composition: keep only pairs that appear in ALL result sets.
  */
-export function intersectPairs(
-  results: readonly BlockingResult[],
-): BlockingResult {
+export function intersectPairs(results: readonly BlockingResult[]): BlockingResult {
   if (results.length === 0) {
     return { pairs: [], blockCount: 0, totalRecords: 0, reductionRatio: 1 };
   }
@@ -130,9 +124,7 @@ export function intersectPairs(
 /**
  * Apply OR composition: union of all result sets (deduplicated).
  */
-export function unionPairs(
-  results: readonly BlockingResult[],
-): BlockingResult {
+export function unionPairs(results: readonly BlockingResult[]): BlockingResult {
   const seen = new Set<string>();
   const pairs: CandidatePair[] = [];
   let totalRecords = 0;
@@ -173,9 +165,7 @@ export function subtractPairs(
     }
   }
 
-  const pairs = includeResult.pairs.filter(
-    (p) => !excludeSet.has(`${p.leftId}:${p.rightId}`),
-  );
+  const pairs = includeResult.pairs.filter((p) => !excludeSet.has(`${p.leftId}:${p.rightId}`));
 
   const total = includeResult.totalRecords;
   const totalPossible = (total * (total - 1)) / 2;

@@ -19,10 +19,18 @@ describe('ILogger interface', () => {
   });
 
   it('NoopLogger methods do not throw', () => {
-    expect(() => NoopLogger.debug('test')).not.toThrow();
-    expect(() => NoopLogger.info('test', { key: 'value' })).not.toThrow();
-    expect(() => NoopLogger.warn('test')).not.toThrow();
-    expect(() => NoopLogger.error('test', { error: new Error('real') })).not.toThrow();
+    expect(() => {
+      NoopLogger.debug('test');
+    }).not.toThrow();
+    expect(() => {
+      NoopLogger.info('test', { key: 'value' });
+    }).not.toThrow();
+    expect(() => {
+      NoopLogger.warn('test');
+    }).not.toThrow();
+    expect(() => {
+      NoopLogger.error('test', { error: new Error('real') });
+    }).not.toThrow();
   });
 
   it('NoopLogger methods are all unique function references', () => {
@@ -34,12 +42,16 @@ describe('ILogger interface', () => {
 
 describe('ILogger custom implementation', () => {
   it('custom logger receives structured context', () => {
-    const calls: Array<{ level: string; message: string; context?: Record<string, unknown> }> = [];
+    const calls: { level: string; message: string; context?: Record<string, unknown> }[] = [];
     const logger: ILogger = {
-      debug: (msg, ctx) => calls.push({ level: 'debug', message: msg, context: ctx as Record<string, unknown> }),
-      info: (msg, ctx) => calls.push({ level: 'info', message: msg, context: ctx as Record<string, unknown> }),
-      warn: (msg, ctx) => calls.push({ level: 'warn', message: msg, context: ctx as Record<string, unknown> }),
-      error: (msg, ctx) => calls.push({ level: 'error', message: msg, context: ctx as Record<string, unknown> }),
+      debug: (msg, ctx) =>
+        calls.push({ level: 'debug', message: msg, context: ctx as Record<string, unknown> }),
+      info: (msg, ctx) =>
+        calls.push({ level: 'info', message: msg, context: ctx as Record<string, unknown> }),
+      warn: (msg, ctx) =>
+        calls.push({ level: 'warn', message: msg, context: ctx as Record<string, unknown> }),
+      error: (msg, ctx) =>
+        calls.push({ level: 'error', message: msg, context: ctx as Record<string, unknown> }),
     };
 
     logger.error('disk full', { operation: 'write', diskUsage: 99 });

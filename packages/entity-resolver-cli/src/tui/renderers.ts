@@ -56,7 +56,7 @@ function padRight(s: string, width: number): string {
 // TUI Waterfall Chart (ASCII)
 // ══════════════════════════════════════════════════════════════
 
-export function renderWaterfallTUI(data: WaterfallChartData, maxWidth: number = 60): string {
+export function renderWaterfallTUI(data: WaterfallChartData, maxWidth = 60): string {
   const lines: string[] = [];
   lines.push(`${ansi.bold}Match Weight Waterfall${ansi.reset}`);
   lines.push(`${ansi.dim}Pair: #${data.recordPair.idA} ↔ #${data.recordPair.idB}${ansi.reset}`);
@@ -81,12 +81,12 @@ export function renderWaterfallTUI(data: WaterfallChartData, maxWidth: number = 
 // TUI Histogram (ASCII)
 // ══════════════════════════════════════════════════════════════
 
-export function renderHistogramTUI(data: HistogramData, maxWidth: number = 60): string {
+export function renderHistogramTUI(data: HistogramData, maxWidth = 60): string {
   const lines: string[] = [];
   lines.push(`${ansi.bold}Match Weight Distribution${ansi.reset}`);
   lines.push('─'.repeat(maxWidth));
 
-  const maxCount = Math.max(...data.bins.map((b) => b.count), 1);
+  const maxCount = Math.max(...data.bins.map((b: { count: number }) => b.count), 1);
   const barMax = maxWidth - 24;
 
   for (const bin of data.bins) {
@@ -111,7 +111,7 @@ export function renderHistogramTUI(data: HistogramData, maxWidth: number = 60): 
 // TUI m/u Parameter Table
 // ══════════════════════════════════════════════════════════════
 
-export function renderMuTableTUI(data: MuChartData, maxWidth: number = 72): string {
+export function renderMuTableTUI(data: MuChartData, maxWidth = 72): string {
   const lines: string[] = [];
   lines.push(`${ansi.bold}m/u Parameters (λ = ${data.lambda.toExponential(2)})${ansi.reset}`);
   lines.push('─'.repeat(maxWidth));
@@ -140,7 +140,7 @@ export function renderMuTableTUI(data: MuChartData, maxWidth: number = 72): stri
 // TUI Cluster Explorer (collapsible tree)
 // ══════════════════════════════════════════════════════════════
 
-export function renderClusterTreeTUI(data: ClusterExplorerData, maxWidth: number = 60): string {
+export function renderClusterTreeTUI(data: ClusterExplorerData, maxWidth = 60): string {
   const lines: string[] = [];
   lines.push(`${ansi.bold}Cluster Explorer${ansi.reset}`);
   lines.push(
@@ -171,7 +171,7 @@ export function renderThresholdTUI(
   threshold: number,
   totalPairs: number,
   aboveThreshold: number,
-  maxWidth: number = 50,
+  maxWidth = 50,
 ): string {
   const lines: string[] = [];
   lines.push(`${ansi.bold}Threshold Selection${ansi.reset}`);

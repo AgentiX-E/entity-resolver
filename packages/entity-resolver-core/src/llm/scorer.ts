@@ -9,7 +9,7 @@ import type { ILogger } from '../interfaces/ILogger.js';
 export interface LLMProviderConfig {
   /** API base URL. Default: DeepSeek API. */
   readonly apiBaseUrl?: string;
-  /** Model name. Default: deepseek-chat. */
+  /** Model name. Default: deepseek-v4-pro. */
   readonly model?: string;
   /** API key for the provider. MUST be provided by the caller (never from env). */
   readonly apiKey: string;
@@ -56,7 +56,7 @@ export interface LLMScorerResult {
  */
 export async function scoreWithLLM(
   pairs: readonly ScoredPair[],
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: LLMScorerConfig,
   logger?: ILogger,
 ): Promise<LLMScorerResult[]> {
@@ -66,7 +66,7 @@ export async function scoreWithLLM(
 
   const results: LLMScorerResult[] = [];
   const apiBase = config.apiBaseUrl ?? 'https://api.deepseek.com/v1';
-  const model = config.model ?? 'deepseek-chat';
+  const model = config.model ?? 'deepseek-v4-pro';
 
   for (const pair of pairs) {
     const score = pair.probability ?? pair.score;
@@ -78,7 +78,14 @@ export async function scoreWithLLM(
     const recordB = records[pair.rightId] ?? {};
 
     const prompt = buildComparisonPrompt(recordA, recordB);
-    const llmResult = await callLLM(apiBase, config.apiKey, model, prompt, config.maxTokens ?? 200, logger);
+    const llmResult = await callLLM(
+      apiBase,
+      config.apiKey,
+      model,
+      prompt,
+      config.maxTokens ?? 200,
+      logger,
+    );
 
     results.push({
       leftId: pair.leftId,
@@ -151,7 +158,7 @@ async function callLLM(
   }
 
   const data = (await response.json()) as {
-    choices: Array<{ message: { content: string } }>;
+    choices: { message: { content: string } }[];
   };
 
   const content = data.choices[0]?.message?.content ?? '{"score":0.5,"reasoning":"no response"}';
@@ -168,7 +175,9 @@ async function callLLM(
       reasoning: parsed.reasoning ?? 'no reasoning provided',
     };
   } catch {
-    logger?.warn('LLM JSON response parse failed — returning neutral score as graceful degradation');
+    logger?.warn(
+      'LLM JSON response parse failed — returning neutral score as graceful degradation',
+    );
     return { score: 0.5, reasoning: 'failed to parse LLM response' };
   }
 }

@@ -14,10 +14,7 @@ import { computeReductionRatio } from './types.js';
 // ══════════════════════════════════════════════════════════════
 
 /** Extract string tokens from a record's fields by splitting on non-word chars. */
-function tokenizeRecord(
-  record: Record<string, unknown>,
-  fields: readonly string[],
-): string[] {
+function tokenizeRecord(record: Record<string, unknown>, fields: readonly string[]): string[] {
   const tokens: string[] = [];
   for (const field of fields) {
     const value = record[field];
@@ -51,10 +48,7 @@ function ngrams(token: string, minSize: number, maxSize?: number): string[] {
 }
 
 /** Drop blocks that exceed the maximum size. */
-function dropBigBlocks(
-  blocks: Map<string, number[]>,
-  maxSize: number,
-): Map<string, number[]> {
+function dropBigBlocks(blocks: Map<string, number[]>, maxSize: number): Map<string, number[]> {
   const filtered = new Map<string, number[]>();
   for (const [key, entities] of blocks) {
     if (entities.length <= maxSize) {
@@ -65,9 +59,7 @@ function dropBigBlocks(
 }
 
 /** Build candidate pairs from block map. */
-function blocksToPairs(
-  blocks: Map<string, number[]>,
-): CandidatePair[] {
+function blocksToPairs(blocks: Map<string, number[]>): CandidatePair[] {
   const pairSet = new Set<string>();
   const pairs: CandidatePair[] = [];
 
@@ -107,7 +99,7 @@ export interface SuffixArraysConfig {
  * Blocks larger than maxBlockSize are dropped to prevent excessive comparisons.
  */
 export function suffixArraysBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: SuffixArraysConfig = {},
 ): BlockingResult {
   const fields = config.fields ?? Object.keys(records[0] ?? {});
@@ -144,7 +136,12 @@ export function suffixArraysBlocking(
   const resultPairs = pairs;
   const total = records.length;
   const totalPossible = (total * (total - 1)) / 2;
-  return { pairs: resultPairs, blockCount: filtered.size, totalRecords: total, reductionRatio: computeReductionRatio(resultPairs.length, totalPossible) };
+  return {
+    pairs: resultPairs,
+    blockCount: filtered.size,
+    totalRecords: total,
+    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+  };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -164,7 +161,7 @@ export interface ExtendedSuffixArraysConfig {
  * in the tokens of at least two entities.
  */
 export function extendedSuffixArraysBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: ExtendedSuffixArraysConfig = {},
 ): BlockingResult {
   const fields = config.fields ?? Object.keys(records[0] ?? {});
@@ -210,7 +207,12 @@ export function extendedSuffixArraysBlocking(
   const resultPairs = pairs;
   const total = records.length;
   const totalPossible = (total * (total - 1)) / 2;
-  return { pairs: resultPairs, blockCount: filtered.size, totalRecords: total, reductionRatio: computeReductionRatio(resultPairs.length, totalPossible) };
+  return {
+    pairs: resultPairs,
+    blockCount: filtered.size,
+    totalRecords: total,
+    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+  };
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -239,7 +241,7 @@ export interface ExtendedQGramsConfig {
  * combinations to use (higher = fewer blocks, lower = more recall).
  */
 export function extendedQGramsBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: ExtendedQGramsConfig = {},
 ): BlockingResult {
   const fields = config.fields ?? Object.keys(records[0] ?? {});
@@ -267,11 +269,7 @@ export function extendedQGramsBlocking(
 
     // Generate combinations of q-grams as blocking keys
     const numToGenerate = Math.min(maxCombos, uniqueQGrams.length);
-    const combos = generateQGramCombinations(
-      uniqueQGrams,
-      numToGenerate,
-      threshold,
-    );
+    const combos = generateQGramCombinations(uniqueQGrams, numToGenerate, threshold);
 
     for (const combo of combos) {
       const key = combo.join('|');
@@ -289,7 +287,12 @@ export function extendedQGramsBlocking(
   const resultPairs = pairs;
   const total = records.length;
   const totalPossible = (total * (total - 1)) / 2;
-  return { pairs: resultPairs, blockCount: blocks.size, totalRecords: total, reductionRatio: computeReductionRatio(resultPairs.length, totalPossible) };
+  return {
+    pairs: resultPairs,
+    blockCount: blocks.size,
+    totalRecords: total,
+    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+  };
 }
 
 /**

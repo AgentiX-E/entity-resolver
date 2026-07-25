@@ -37,10 +37,18 @@ function parseCsvLine(line: string): string[] {
   for (let i = 0; i < line.length; i++) {
     const c = line[i]!;
     if (c === '"') {
-      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') { current += '"'; i++; }
-      else { inQuotes = !inQuotes; }
-    } else if (c === ',' && !inQuotes) { result.push(current.trim()); current = ''; }
-    else { current += c; }
+      if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+        current += '"';
+        i++;
+      } else {
+        inQuotes = !inQuotes;
+      }
+    } else if (c === ',' && !inQuotes) {
+      result.push(current.trim());
+      current = '';
+    } else {
+      current += c;
+    }
   }
   result.push(current.trim());
   return result;
@@ -58,14 +66,25 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
   const command = args[0]!;
 
   switch (command) {
-    case 'health': return cmdHealth();
-    case 'help': printHelp(); return;
-    case 'dedupe': return cmdDedupe(args.slice(1));
-    case 'match': return cmdMatch(args.slice(1));
-    case 'link': return cmdMatch(args.slice(1)); // alias
-    case 'gazetteer': return cmdGazetteer(args.slice(1));
-    case 'benchmark': return cmdBenchmark(args.slice(1));
-    case 'autoconfigure': return cmdAutoconfigure(args.slice(1));
+    case 'health': {
+      cmdHealth();
+      return;
+    }
+    case 'help':
+      printHelp();
+      return;
+    case 'dedupe':
+      return cmdDedupe(args.slice(1));
+    case 'match':
+      return cmdMatch(args.slice(1));
+    case 'link':
+      return cmdMatch(args.slice(1)); // alias
+    case 'gazetteer':
+      return cmdGazetteer(args.slice(1));
+    case 'benchmark':
+      return cmdBenchmark(args.slice(1));
+    case 'autoconfigure':
+      return cmdAutoconfigure(args.slice(1));
     default:
       console.error(`Unknown command: ${command}`);
       console.error('Run `entity-resolver --help` for usage information.');
@@ -80,7 +99,11 @@ function cmdHealth(): void {
 
 async function cmdDedupe(args: string[]): Promise<void> {
   const file = args[0];
-  if (!file) { console.error('Usage: entity-resolver dedupe <file.csv> [--threshold N]'); process.exitCode = 1; return; }
+  if (!file) {
+    console.error('Usage: entity-resolver dedupe <file.csv> [--threshold N]');
+    process.exitCode = 1;
+    return;
+  }
   try {
     const records = readCsvFile(file);
     const threshold = parseFloatFlag(args, '--threshold') ?? 0.5;
@@ -91,12 +114,19 @@ async function cmdDedupe(args: string[]): Promise<void> {
     console.log(`Clusters: ${result.statistics.totalClusters}`);
     console.log(`Match rate: ${(result.statistics.matchRate * 100).toFixed(1)}%`);
     console.log(`Time: ${result.statistics.executionTimeMs}ms`);
-  } catch (err) { console.error(err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
 }
 
 async function cmdMatch(args: string[]): Promise<void> {
   const [leftFile, rightFile] = args;
-  if (!leftFile || !rightFile) { console.error('Usage: entity-resolver match <left.csv> <right.csv> [--threshold N]'); process.exitCode = 1; return; }
+  if (!leftFile || !rightFile) {
+    console.error('Usage: entity-resolver match <left.csv> <right.csv> [--threshold N]');
+    process.exitCode = 1;
+    return;
+  }
   try {
     const left = readCsvFile(leftFile);
     const right = readCsvFile(rightFile);
@@ -106,36 +136,59 @@ async function cmdMatch(args: string[]): Promise<void> {
     const result = await linkRecords(left, right, { ...auto.config, matchThreshold: threshold });
     console.log(`Cross pairs: ${result.crossPairs.length}`);
     console.log(`Match rate: ${result.statistics.matchRate}`);
-  } catch (err) { console.error(err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
 }
 
 async function cmdGazetteer(args: string[]): Promise<void> {
   const [queryFile, indexFile] = args;
-  if (!queryFile || !indexFile) { console.error('Usage: entity-resolver gazetteer <query.csv> <index.csv> [--threshold N]'); process.exitCode = 1; return; }
+  if (!queryFile || !indexFile) {
+    console.error('Usage: entity-resolver gazetteer <query.csv> <index.csv> [--threshold N]');
+    process.exitCode = 1;
+    return;
+  }
   try {
     const queries = readCsvFile(queryFile);
     const index = readCsvFile(indexFile);
     const threshold = parseFloatFlag(args, '--threshold') ?? 0.5;
     const { gazetteerMatch, autoConfigure } = await import('@agentix-e/entity-resolver-core');
     const auto = autoConfigure([...queries, ...index]);
-    const result = await gazetteerMatch(queries, index, { ...auto.config, matchThreshold: threshold });
+    const result = await gazetteerMatch(queries, index, {
+      ...auto.config,
+      matchThreshold: threshold,
+    });
     console.log(`Matches: ${result.queryToIndexMatches.length}`);
-  } catch (err) { console.error(err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
 }
 
 async function cmdBenchmark(args: string[]): Promise<void> {
   const datasetFilter = args[0];
   try {
-    const { runAllBenchmarks, formatBenchmarkReport } = await import('@agentix-e/entity-resolver-core');
+    const { runAllBenchmarks, formatBenchmarkReport } =
+      await import('@agentix-e/entity-resolver-core');
     const { results } = await runAllBenchmarks();
-    const filtered = datasetFilter ? results.filter((r) => r.dataset.includes(datasetFilter)) : results;
+    const filtered = datasetFilter
+      ? results.filter((r) => r.dataset.includes(datasetFilter))
+      : results;
     console.log(formatBenchmarkReport(filtered));
-  } catch (err) { console.error(err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
 }
 
 async function cmdAutoconfigure(args: string[]): Promise<void> {
   const file = args[0];
-  if (!file) { console.error('Usage: entity-resolver autoconfigure <file.csv>'); process.exitCode = 1; return; }
+  if (!file) {
+    console.error('Usage: entity-resolver autoconfigure <file.csv>');
+    process.exitCode = 1;
+    return;
+  }
   try {
     const records = readCsvFile(file);
     const { autoConfigure } = await import('@agentix-e/entity-resolver-core');
@@ -146,7 +199,10 @@ async function cmdAutoconfigure(args: string[]): Promise<void> {
     }
     console.log(`\nComparisons: ${result.config.comparisons.length}`);
     console.log(`Threshold: ${result.config.matchThreshold}`);
-  } catch (err) { console.error(err instanceof Error ? err.message : String(err)); process.exitCode = 1; }
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
 }
 
 function parseFloatFlag(args: string[], flag: string): number | undefined {
@@ -187,13 +243,29 @@ TUI Renderers (imported programmatically):
 `);
 }
 
-// Wire up as CLI when executed directly
-if (
-  process.argv[1]?.endsWith('/entity-resolver-cli') ||
-  process.argv[1]?.endsWith('\\entity-resolver-cli')
-) {
+// Wire up as CLI when executed directly.
+// Uses process.argv[1] to detect CLI invocation. This works because:
+// - npm bin symlinks or npx both invoke the resolved dist/index.js path
+// - When imported as a library (e.g., `import { main } from '...'`), argv[1] won't match
+// The binary name is "entity-resolver" per package.json bin field.
+const _scriptPath = process.argv[1] ?? '';
+const _isCliInvocation =
+  _scriptPath.includes('/entity-resolver') ||
+  _scriptPath.includes('\\entity-resolver') ||
+  _scriptPath === import.meta.url;
+
+if (_isCliInvocation) {
+  // Initialize with a shebang-compatible unhandled rejection handler.
+  // This catches errors that might occur before main() starts.
+  process.on('unhandledRejection', (reason) => {
+    console.error(
+      'Unhandled rejection:',
+      reason instanceof Error ? reason.message : String(reason),
+    );
+    process.exit(1);
+  });
   main().catch((err) => {
-    console.error(err);
+    console.error(err instanceof Error ? err.message : String(err));
     process.exit(1);
   });
 }

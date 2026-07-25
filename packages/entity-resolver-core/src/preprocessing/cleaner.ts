@@ -22,12 +22,10 @@ const UNICODE_FIXES: Readonly<Record<string, string>> = Object.freeze({
 });
 
 /** Moji-bake (garbled text) repair patterns. */
-const MOJIBAKE_PATTERNS: Readonly<
-  Array<{
-    pattern: RegExp;
-    replacement: string;
-  }>
-> = [
+const MOJIBAKE_PATTERNS: readonly {
+  pattern: RegExp;
+  replacement: string;
+}[] = [
   // Common UTF-8 mis-decoded as Latin-1
   { pattern: /Ã©/g, replacement: 'é' },
   { pattern: /Ã¨/g, replacement: 'è' },
@@ -122,7 +120,7 @@ export function normalizePhone(value: unknown): string {
  * Each record's string fields are repaired and normalized in-place.
  */
 export function preprocessRecords(
-  records: Array<Record<string, unknown>>,
+  records: Record<string, unknown>[],
   options?: {
     /** Fields to treat as email addresses. */
     readonly emailFields?: readonly string[];

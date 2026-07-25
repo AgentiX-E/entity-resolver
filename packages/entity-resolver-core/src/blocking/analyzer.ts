@@ -24,7 +24,7 @@ export interface BlockingAnalysisResult {
  * Uses sampling to estimate pair count and detect skew.
  */
 export function analyzeBlockingRule(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   pass: BlockingPass,
   options?: { sampleSize?: number },
 ): BlockingAnalysisResult {
@@ -82,7 +82,7 @@ export function analyzeBlockingRule(
  * Analyze all blocking rules in a config and return recommendations.
  */
 export function recommendBlockingRules(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   candidatePasses: readonly BlockingPass[],
 ): BlockingPass[] {
   const analyses = candidatePasses.map((pass) => ({

@@ -2,7 +2,6 @@
 
 import { describe, it, expect } from 'vitest';
 import { gazetteerMatch, linkRecords, autoConfigure } from '../../index.js';
-import type { GazetteerConfig, RecordLinkConfig } from '../../index.js';
 
 // ═══════════════════════════════════════════════════════════════
 // Helpers
@@ -25,7 +24,7 @@ describe('gazetteerMatch', () => {
     const result = await gazetteerMatch(queries, index, {
       comparisons: comps,
       matchThreshold: 0.5,
-    } as GazetteerConfig);
+    });
 
     expect(result.queryToIndexMatches.length).toBeGreaterThanOrEqual(1);
     const match = result.queryToIndexMatches[0]!;
@@ -46,7 +45,7 @@ describe('gazetteerMatch', () => {
     const result = await gazetteerMatch(queries, index, {
       comparisons: comps,
       matchThreshold: 0.3,
-    } as GazetteerConfig);
+    });
 
     expect(result.statistics.totalRecords).toBe(4);
     // Alice should match Alice, but Bob may not match Charlie
@@ -68,7 +67,7 @@ describe('gazetteerMatch', () => {
     const result = await gazetteerMatch(queries, index, {
       comparisons: comps,
       matchThreshold: 0.8,
-    } as GazetteerConfig);
+    });
 
     // Only Alice-Alice should pass high threshold
     expect(result.queryToIndexMatches.every((p) => p.score >= 0.8)).toBe(true);
@@ -88,7 +87,7 @@ describe('gazetteerMatch', () => {
     const result = await gazetteerMatch(queries, index, {
       comparisons: comps,
       matchThreshold: 0,
-    } as GazetteerConfig);
+    });
 
     for (const pair of result.queryToIndexMatches) {
       expect(pair.score).toBeGreaterThanOrEqual(0);
@@ -104,7 +103,7 @@ describe('gazetteerMatch', () => {
     const result = await gazetteerMatch(queries, index, {
       comparisons: comps,
       matchThreshold: 0.99,
-    } as GazetteerConfig);
+    });
 
     expect(result.queryToIndexMatches).toBeDefined();
   });
@@ -123,7 +122,7 @@ describe('linkRecords', () => {
     const result = await linkRecords(left, right, {
       comparisons: comps,
       matchThreshold: 0.3,
-    } as RecordLinkConfig);
+    });
 
     expect(result.crossPairs.length).toBeGreaterThanOrEqual(1);
     // Only cross-dataset pairs should exist
@@ -150,7 +149,7 @@ describe('linkRecords', () => {
     const result = await linkRecords(left, right, {
       comparisons: comps,
       matchThreshold: 0.3,
-    } as RecordLinkConfig);
+    });
 
     expect(result.statistics.totalRecords).toBe(5);
     expect(result.crossPairs.length).toBeGreaterThanOrEqual(2);
@@ -175,7 +174,7 @@ describe('linkRecords', () => {
     const result = await linkRecords(left, right, {
       comparisons: comps,
       matchThreshold: 0.95,
-    } as RecordLinkConfig);
+    });
 
     for (const p of result.crossPairs) {
       expect(p.score).toBeGreaterThanOrEqual(0.95);
@@ -190,7 +189,7 @@ describe('linkRecords', () => {
     const result = await linkRecords(left, right, {
       comparisons: comps,
       matchThreshold: 0,
-    } as RecordLinkConfig);
+    });
 
     for (const p of result.crossPairs) {
       expect(p.score).toBeGreaterThanOrEqual(0);
@@ -206,7 +205,7 @@ describe('linkRecords', () => {
     const result = await linkRecords(left, right, {
       comparisons: comps,
       matchThreshold: 0.99,
-    } as RecordLinkConfig);
+    });
 
     expect(result.crossPairs).toBeDefined();
     expect(result.statistics.totalRecords).toBe(2);
@@ -217,7 +216,7 @@ describe('linkRecords', () => {
     const result = await linkRecords([], [{ name: 'A' }], {
       comparisons: comps,
       matchThreshold: 0.5,
-    } as RecordLinkConfig);
+    });
     expect(result.crossPairs).toHaveLength(0);
   });
 
@@ -237,7 +236,7 @@ describe('linkRecords', () => {
       blocking: {
         passes: [{ fields: ['given_name'], transforms: ['lowercase'] }],
       },
-    } as RecordLinkConfig);
+    });
     expect(result.crossPairs).toBeDefined();
     expect(result.statistics.totalRecords).toBe(4);
   });

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
-import { DuckDBWasmStore, DuckDBWasmInitResult } from '../../index.js';
+import type { DuckDBWasmInitResult } from '../../index.js';
+import { DuckDBWasmStore } from '../../index.js';
 
 // ═══════════════════════════════════════════════════════════════
 // DuckDBWasmStore — Enterprise Distribution

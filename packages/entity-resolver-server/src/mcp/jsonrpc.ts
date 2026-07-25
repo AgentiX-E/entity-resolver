@@ -132,14 +132,18 @@ export interface McpContent {
 export function isJsonRpcRequest(value: unknown): value is JsonRpcRequest {
   if (typeof value !== 'object' || value === null) return false;
   const obj = value as Record<string, unknown>;
-  return obj['jsonrpc'] === '2.0' && typeof obj['method'] === 'string' && (typeof obj['id'] === 'string' || typeof obj['id'] === 'number');
+  return (
+    obj.jsonrpc === '2.0' &&
+    typeof obj.method === 'string' &&
+    (typeof obj.id === 'string' || typeof obj.id === 'number')
+  );
 }
 
 /** Check if a value looks like a valid JSON-RPC 2.0 notification. */
 export function isJsonRpcNotification(value: unknown): value is JsonRpcNotification {
   if (typeof value !== 'object' || value === null) return false;
   const obj = value as Record<string, unknown>;
-  return obj['jsonrpc'] === '2.0' && typeof obj['method'] === 'string' && !('id' in obj);
+  return obj.jsonrpc === '2.0' && typeof obj.method === 'string' && !('id' in obj);
 }
 
 /** Build a success response. */

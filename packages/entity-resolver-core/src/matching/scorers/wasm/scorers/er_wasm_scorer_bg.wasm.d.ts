@@ -1,5 +1,3 @@
-/* tslint:disable */
-/* eslint-disable */
 export const memory: WebAssembly.Memory;
 export const wasm_dice: (a: number, b: number, c: number, d: number) => number;
 export const wasm_jaro: (a: number, b: number, c: number, d: number) => number;

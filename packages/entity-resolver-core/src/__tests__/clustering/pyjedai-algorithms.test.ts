@@ -55,6 +55,11 @@ function expectValidResult(result: ClusteringResult, totalRecords: number) {
   expect(result.metadata).toBeDefined();
   expect(result.metadata.numClusters).toBeGreaterThanOrEqual(0);
   expect(result.metadata.averageClusterSize).toBeGreaterThanOrEqual(0);
+
+  // Verify totalRecords matches actual member + singleton count
+  let memberCount = 0;
+  for (const [, c] of result.clusters) memberCount += c.memberIds.length;
+  expect(memberCount + result.singletons.length).toBe(totalRecords);
 }
 
 /** All unique member IDs across clusters + singletons should equal totalRecords. */
@@ -73,21 +78,18 @@ function expectCompleteCoverage(result: ClusteringResult, totalRecords: number) 
 
 describe('centerClustering', () => {
   it('produces valid output with dedup pairs', async () => {
-    
     const result = centerClustering(DEDUP_PAIRS, 4);
-    expectValidResult(result);
+    expectValidResult(result, 4);
     expectCompleteCoverage(result, 4);
   });
 
   it('handles empty pairs (all singletons)', async () => {
-    
     const result = centerClustering(EMPTY_PAIRS, 3);
     expect(result.singletons.length).toBe(3);
     expect(result.clusters.size).toBe(0);
   });
 
   it('higher threshold produces fewer clusters', async () => {
-    
     const lo = centerClustering(DEDUP_PAIRS, 4, { threshold: 0.1 });
     const hi = centerClustering(DEDUP_PAIRS, 4, { threshold: 0.9 });
     // Higher threshold = fewer pairs accepted = more singletons
@@ -95,9 +97,8 @@ describe('centerClustering', () => {
   });
 
   it('edge weight normalization works for CCER pairs', async () => {
-    
     const result = centerClustering(CCER_PAIRS, 6);
-    expectValidResult(result);
+    expectValidResult(result, 6);
   });
 });
 
@@ -107,14 +108,12 @@ describe('centerClustering', () => {
 
 describe('bestMatchClustering', () => {
   it('produces valid CCER output', async () => {
-    
     const result = bestMatchClustering(CCER_PAIRS, 6);
-    expectValidResult(result);
+    expectValidResult(result, 6);
     expectCompleteCoverage(result, 6);
   });
 
   it('each source entity has at most one match', async () => {
-    
     const result = bestMatchClustering(CCER_PAIRS, 6);
     // No cluster should have > 2 members (source + target)
     for (const [, c] of result.clusters) {
@@ -123,13 +122,11 @@ describe('bestMatchClustering', () => {
   });
 
   it('throws on dedup pairs (CCER only)', async () => {
-    
     // Dedup pairs have leftId and rightId in same range
     expect(() => bestMatchClustering(DEDUP_PAIRS, 4)).toThrow();
   });
 
   it('reverse ordering produces same coverage', async () => {
-    
     const inorder = bestMatchClustering(CCER_PAIRS, 6);
     const reverse = bestMatchClustering(CCER_PAIRS, 6);
     expect(inorder.clusters.size).toBeGreaterThanOrEqual(0);
@@ -143,14 +140,12 @@ describe('bestMatchClustering', () => {
 
 describe('mergeCenterClustering', () => {
   it('produces valid CCER output', async () => {
-    
     const result = mergeCenterClustering(CCER_PAIRS, 6);
-    expectValidResult(result);
+    expectValidResult(result, 6);
     expectCompleteCoverage(result, 6);
   });
 
   it('D1 entities are always centers', async () => {
-    
     const result = mergeCenterClustering(CCER_PAIRS, 6);
     // Verify each cluster has at least one D1 entity (id < 3 for CCER_PAIRS)
     for (const [, c] of result.clusters) {
@@ -160,7 +155,6 @@ describe('mergeCenterClustering', () => {
   });
 
   it('throws on dedup pairs', async () => {
-    
     expect(() => mergeCenterClustering(DEDUP_PAIRS, 4)).toThrow();
   });
 });
@@ -171,20 +165,17 @@ describe('mergeCenterClustering', () => {
 
 describe('correlationClustering', () => {
   it('produces valid output with dedup pairs', async () => {
-    
     const result = correlationClustering(DEDUP_PAIRS, 4, { iterations: 5 });
-    expectValidResult(result);
+    expectValidResult(result, 4);
     expectCompleteCoverage(result, 4);
   });
 
   it('converges within max iterations', async () => {
-    
-    const result = correlationClustering(DEDUP_PAIRS, 4, { maxIterations: 10 });
+    const result = correlationClustering(DEDUP_PAIRS, 4, { iterations: 10 });
     expect(result.metadata.numClusters).toBeGreaterThanOrEqual(0);
   });
 
   it('handles empty pairs', async () => {
-    
     const result = correlationClustering(EMPTY_PAIRS, 3);
     expect(result.singletons.length).toBe(3);
   });
@@ -196,14 +187,12 @@ describe('correlationClustering', () => {
 
 describe('cutClustering', () => {
   it('produces valid output', async () => {
-    
     const result = cutClustering(DEDUP_PAIRS, 4);
-    expectValidResult(result);
+    expectValidResult(result, 4);
     expectCompleteCoverage(result, 4);
   });
 
   it('alpha parameter affects number of clusters', async () => {
-    
     const lo = cutClustering(DEDUP_PAIRS, 4, { alpha: 0.1 });
     const hi = cutClustering(DEDUP_PAIRS, 4, { alpha: 2.0 });
     expect(lo.metadata.numClusters).toBeGreaterThanOrEqual(0);
@@ -217,23 +206,20 @@ describe('cutClustering', () => {
 
 describe('markovClustering', () => {
   it('produces valid output', async () => {
-    
     const result = markovClustering(DEDUP_PAIRS, 4, { maxIterations: 10 });
-    expectValidResult(result);
+    expectValidResult(result, 4);
     expectCompleteCoverage(result, 4);
   });
 
   it('inflation parameter affects cluster granularity', async () => {
-    
     const result = markovClustering(DEDUP_PAIRS, 4, {
       inflationPower: 2.5,
       maxIterations: 10,
     });
-    expectValidResult(result);
+    expectValidResult(result, 4);
   });
 
   it('handles empty pairs', async () => {
-    
     const result = markovClustering(EMPTY_PAIRS, 3);
     expect(result.singletons.length).toBe(3);
   });
@@ -245,14 +231,12 @@ describe('markovClustering', () => {
 
 describe('kiralyMSMClustering', () => {
   it('produces valid CCER output', async () => {
-    
     const result = kiralyMSMClustering(CCER_PAIRS, 6);
-    expectValidResult(result);
+    expectValidResult(result, 6);
     expectCompleteCoverage(result, 6);
   });
 
   it('each source matched at most once', async () => {
-    
     const result = kiralyMSMClustering(CCER_PAIRS, 6);
     for (const [, c] of result.clusters) {
       expect(c.memberIds.length).toBeLessThanOrEqual(2);
@@ -266,14 +250,12 @@ describe('kiralyMSMClustering', () => {
 
 describe('ricochetSRClustering', () => {
   it('produces valid output', async () => {
-    
     const result = ricochetSRClustering(DEDUP_PAIRS, 4);
-    expectValidResult(result);
+    expectValidResult(result, 4);
     expectCompleteCoverage(result, 4);
   });
 
   it('handles empty pairs', async () => {
-    
     const result = ricochetSRClustering(EMPTY_PAIRS, 3);
     expect(result.singletons.length).toBe(3);
   });
@@ -285,14 +267,12 @@ describe('ricochetSRClustering', () => {
 
 describe('rowColumnClustering', () => {
   it('produces valid CCER output', async () => {
-    
     const result = rowColumnClustering(CCER_PAIRS, 6);
-    expectValidResult(result);
+    expectValidResult(result, 6);
     expectCompleteCoverage(result, 6);
   });
 
   it('produces at most 1 match per entity', async () => {
-    
     const result = rowColumnClustering(CCER_PAIRS, 6);
     for (const [, c] of result.clusters) {
       expect(c.memberIds.length).toBeLessThanOrEqual(2);

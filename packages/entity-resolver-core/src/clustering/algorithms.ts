@@ -21,7 +21,7 @@ export interface ClusteringMetadata {
 function ufFind(parent: number[], x: number): number {
   // Full path compression: recursive find with root caching
   if (parent[x] !== x && parent[x] !== undefined) {
-    parent[x] = ufFind(parent, parent[x]!);
+    parent[x] = ufFind(parent, parent[x]);
   }
   return parent[x] ?? x;
 }

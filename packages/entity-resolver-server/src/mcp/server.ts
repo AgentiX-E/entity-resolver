@@ -88,14 +88,14 @@ async function handleToolsCall(req: JsonRpcRequest): Promise<McpToolsCallResult>
 
 /** Convert an internal McpTool to the MCP protocol tool definition shape. */
 function toMcpToolDefinition(tool: McpTool) {
-  const params = tool.parameters as Record<string, unknown>;
+  const params = tool.parameters;
   return {
     name: tool.name,
     description: tool.description,
     inputSchema: {
       type: 'object' as const,
-      properties: (params['properties'] ?? {}) as Record<string, unknown>,
-      required: (params['required'] ?? []) as string[],
+      properties: (params.properties ?? {}) as Record<string, unknown>,
+      required: (params.required ?? []) as string[],
     },
   };
 }
@@ -108,7 +108,9 @@ function toMcpToolDefinition(tool: McpTool) {
  * Dispatch a JSON-RPC request to the appropriate MCP handler.
  * Returns a JSON-serializable response object.
  */
-async function dispatchMethod(req: JsonRpcRequest): Promise<JsonRpcResponse | JsonRpcErrorResponse> {
+async function dispatchMethod(
+  req: JsonRpcRequest,
+): Promise<JsonRpcResponse | JsonRpcErrorResponse | null> {
   switch (req.method) {
     case 'initialize': {
       const result = handleInitialize(req);
@@ -154,7 +156,7 @@ const sseClients = new Map<string, { send: (data: string) => void; lastPing: num
  */
 function startSSEHeartbeat(clearExisting = true): () => void {
   const HEARTBEAT_MS = 30000;
-  
+
   if (clearExisting) {
     // Kill any previous heartbeat interval
     _heartbeatId = setInterval(() => {
@@ -171,10 +173,10 @@ function startSSEHeartbeat(clearExisting = true): () => void {
         }
       }
     }, HEARTBEAT_MS);
-    
+
     _heartbeatId.unref?.(); // Don't keep the process alive
   }
-  
+
   return () => {
     if (_heartbeatId) {
       clearInterval(_heartbeatId);
@@ -204,10 +206,12 @@ function sseEndpoint(_c: Context): Response {
   const stream = new ReadableStream({
     start(controller) {
       startSSEHeartbeat(false);
-      
+
       // Register client for server-initiated events
       sseClients.set(sessionId, {
-        send: (data) => controller.enqueue(`event: message\ndata: ${data}\n\n`),
+        send: (data) => {
+          controller.enqueue(`event: message\ndata: ${data}\n\n`);
+        },
         lastPing: Date.now(),
       });
 
@@ -223,7 +227,7 @@ function sseEndpoint(_c: Context): Response {
     headers: {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      Connection: 'keep-alive',
     },
   });
 }
@@ -267,6 +271,11 @@ export function createMcpApp(): Hono {
 
     try {
       const response = await dispatchMethod(body);
+
+      // Notifications receive no response (HTTP 204 No Content)
+      if (response === null) {
+        return c.body(null, 204);
+      }
 
       // If there's an active SSE session, send the response there too
       if (sessionId) {

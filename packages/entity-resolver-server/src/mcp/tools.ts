@@ -10,7 +10,6 @@ import {
   linkRecords,
   evaluateClustering,
 } from '@agentix-e/entity-resolver-core';
-import type { PipelineConfig, GazetteerConfig } from '@agentix-e/entity-resolver-core';
 import type { Cluster, EntityId } from '@agentix-e/entity-resolver-core';
 
 /** MCP tool definition. */
@@ -132,7 +131,7 @@ export async function executeMcpTool(
     case 'er_dedupe': {
       const records = params.records as Record<string, unknown>[];
       const auto = autoConfigure(records);
-      const result = await runPipeline(records, auto.config as PipelineConfig);
+      const result = await runPipeline(records, auto.config);
       return {
         clusters: Object.fromEntries(result.clusters),
         singletons: result.singletons,
@@ -149,7 +148,7 @@ export async function executeMcpTool(
       const result = await gazetteerMatch(queryRecords, indexRecords, {
         comparisons: auto.config.comparisons,
         matchThreshold,
-      } as GazetteerConfig);
+      });
       return {
         matches: result.queryToIndexMatches.map((p) => ({
           queryIndex: p.leftId,

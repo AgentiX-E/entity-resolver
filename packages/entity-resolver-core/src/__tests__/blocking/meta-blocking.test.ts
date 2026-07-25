@@ -54,8 +54,9 @@ describe('suffixArraysBlocking', () => {
     });
     // Should pair John Smith (0) with Jon Smyth (1) or John Smith duplicate (2)
     const hasJohnPair = result.pairs.some(
-      (p) => (p.leftId === 0 && (p.rightId === 1 || p.rightId === 2)) ||
-             (p.rightId === 0 && (p.leftId === 0 || p.leftId === 1 || p.leftId === 2)),
+      (p) =>
+        (p.leftId === 0 && (p.rightId === 1 || p.rightId === 2)) ||
+        (p.rightId === 0 && (p.leftId === 0 || p.leftId === 1 || p.leftId === 2)),
     );
     expect(hasJohnPair).toBe(true);
   });

@@ -49,36 +49,38 @@ describe('extractComparisonKeys', () => {
 describe('validateParameters', () => {
   it('accepts valid parameters', () => {
     const params = createDefaultParameters(['test:*']);
-    expect(() => validateParameters(params)).not.toThrow();
+    expect(() => {
+      validateParameters(params);
+    }).not.toThrow();
   });
 
   it('throws for lambda outside (0, 1)', () => {
-    expect(() =>
-      validateParameters({ lambda: 0, mProbabilities: new Map(), uProbabilities: new Map() }),
-    ).toThrow('lambda');
-    expect(() =>
-      validateParameters({ lambda: 1, mProbabilities: new Map(), uProbabilities: new Map() }),
-    ).toThrow('lambda');
+    expect(() => {
+      validateParameters({ lambda: 0, mProbabilities: new Map(), uProbabilities: new Map() });
+    }).toThrow('lambda');
+    expect(() => {
+      validateParameters({ lambda: 1, mProbabilities: new Map(), uProbabilities: new Map() });
+    }).toThrow('lambda');
   });
 
   it('throws for m-probability outside [0, 1]', () => {
-    expect(() =>
+    expect(() => {
       validateParameters({
         lambda: 0.1,
         mProbabilities: new Map([['test:*', 1.5]]),
         uProbabilities: new Map([['test:*', 0.1]]),
-      }),
-    ).toThrow('m-probability');
+      });
+    }).toThrow('m-probability');
   });
 
   it('throws for u-probability outside [0, 1]', () => {
-    expect(() =>
+    expect(() => {
       validateParameters({
         lambda: 0.1,
         mProbabilities: new Map([['test:*', 0.5]]),
         uProbabilities: new Map([['test:*', -0.1]]),
-      }),
-    ).toThrow('u-probability');
+      });
+    }).toThrow('u-probability');
   });
 });
 

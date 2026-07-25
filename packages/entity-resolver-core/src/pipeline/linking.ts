@@ -153,7 +153,7 @@ export async function linkRecords(
 
   // Generate candidate pairs via blocking or all cross-set
   let candidates: CandidatePair[];
-  if (config.blocking && config.blocking.passes && config.blocking.passes.length > 0) {
+  if (config.blocking?.passes && config.blocking.passes.length > 0) {
     const blockingResult = standardBlocking(allRecords, config.blocking);
     // Filter to cross-set pairs only
     candidates = blockingResult.pairs.filter(

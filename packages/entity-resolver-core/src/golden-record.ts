@@ -50,7 +50,7 @@ function nonEmptyValue(v: unknown): boolean {
   return v !== null && v !== undefined && v !== '';
 }
 
-function longest(values: Array<{ value: unknown; recordIndex: number }>): unknown {
+function longest(values: { value: unknown; recordIndex: number }[]): unknown {
   let best: unknown = values[0]?.value;
   for (const v of values) {
     if (typeof v.value === 'string' && (typeof best !== 'string' || v.value.length > best.length)) {
@@ -60,7 +60,7 @@ function longest(values: Array<{ value: unknown; recordIndex: number }>): unknow
   return best;
 }
 
-function mostPopular(values: Array<{ value: unknown; recordIndex: number }>): unknown {
+function mostPopular(values: { value: unknown; recordIndex: number }[]): unknown {
   const freq = new Map<string, { value: unknown; count: number }>();
   for (const v of values) {
     const key = String(v.value);
@@ -83,7 +83,7 @@ function mostPopular(values: Array<{ value: unknown; recordIndex: number }>): un
 }
 
 function mostComplete(
-  values: Array<{ value: unknown; recordIndex: number; totalFields: number }>,
+  values: { value: unknown; recordIndex: number; totalFields: number }[],
 ): unknown {
   // Find the record with the most non-empty fields
   let best = values[0]?.value;

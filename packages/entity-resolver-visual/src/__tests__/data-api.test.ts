@@ -436,7 +436,7 @@ describe('buildWaterfallData edge cases', () => {
 
   it('handles scored pair without probability (falls back to score)', () => {
     const result = makeMockResult({
-      scoredPairs: [{ leftId: 0, rightId: 1, score: 0.5 } as any],
+      scoredPairs: [{ leftId: 0, rightId: 1, score: 0.5 }],
     });
     const data = buildWaterfallData(result, 0);
     expect(data.matchProbability).toBeGreaterThanOrEqual(0);

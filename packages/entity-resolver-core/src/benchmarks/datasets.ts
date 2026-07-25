@@ -11,6 +11,12 @@ import {
 } from './generator.js';
 import type { ILogger } from '../interfaces/ILogger.js';
 
+// ESM-compatible access to Node.js built-in modules.
+// createRequire is the standard ESM mechanism for loading CJS/Node.js built-ins.
+// This import is safe for bundlers — they handle 'node:module' via polyfills or tree-shaking.
+
+import { createRequire } from 'node:module';
+
 /** A benchmark dataset with records and ground truth clusters. */
 export interface BenchmarkDataset {
   readonly name: string;
@@ -107,15 +113,20 @@ export function parseCsvLine(line: string): string[] {
 
 /** Load the real DBLP-ACM dataset from shipped CSV files. */
 function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
-  // Dynamic import for fs — only available in Node.js
   try {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const fs = require('fs');
-    const path = require('path');
+    // Use createRequire for ESM-compatible access to Node.js built-in modules.
+    // Falls back to generated data when fs/path are unavailable (browser).
+    const nodeRequire = createRequire(import.meta.url);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const fs: any = nodeRequire('fs');
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const path: any = nodeRequire('path');
 
-    const dataDir = __dirname.endsWith('/benchmarks')
-      ? __dirname + '/data'
-      : __dirname + '/benchmarks/data';
+    // Use import.meta.url for ESM-compatible path resolution (replaces CJS __dirname).
+    const moduleDir = new URL('.', import.meta.url).pathname;
+    const dataDir = moduleDir.endsWith('/benchmarks/')
+      ? moduleDir + 'data'
+      : moduleDir + 'benchmarks/data';
 
     const dblpPath = path.join(dataDir, 'DBLP2.csv');
     const acmPath = path.join(dataDir, 'ACM.csv');
@@ -154,8 +165,8 @@ function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
       const idAcm = parts[1]?.replace(/"/g, '') ?? '';
 
       // Find record indices
-      const dblpIdx = records.findIndex((r) => r['id'] === idDblp && r['source'] === 'dblp');
-      const acmIdx = records.findIndex((r) => r['id'] === idAcm && r['source'] === 'acm');
+      const dblpIdx = records.findIndex((r) => r.id === idDblp && r.source === 'dblp');
+      const acmIdx = records.findIndex((r) => r.id === idAcm && r.source === 'acm');
 
       if (dblpIdx >= 0 && acmIdx >= 0) {
         groundTruth.set(`dblp_acm_${clusterId}`, [dblpIdx, acmIdx]);
@@ -173,7 +184,7 @@ function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
     };
   } catch (err: unknown) {
     logger?.warn(
-      `Real DBLP-ACM dataset files not available — using generated fallback: ${err instanceof Error ? err.message : String(err)}`
+      `Real DBLP-ACM dataset files not available — using generated fallback: ${err instanceof Error ? err.message : String(err)}`,
     );
     return fallbackDblpAcm();
   }

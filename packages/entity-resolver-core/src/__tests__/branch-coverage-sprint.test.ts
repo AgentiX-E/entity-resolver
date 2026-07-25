@@ -82,6 +82,6 @@ describe('PPRL Bloom — branch coverage edges', () => {
       { filterSize: 128, numHashes: 4, secretKey: 'test' },
     );
     expect(Object.keys(scores).length).toBe(3);
-    expect(scores['name']!).toBeGreaterThan(0.5);
+    expect(scores.name!).toBeGreaterThan(0.5);
   });
 });

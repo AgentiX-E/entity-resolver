@@ -100,7 +100,7 @@ export interface HistogramData {
  * Build match weight histogram data from pipeline diagnostics.
  */
 export function buildHistogramData(result: PipelineResult, threshold?: number): HistogramData {
-  let distribution: readonly MatchWeightBin[] =
+  const distribution: readonly MatchWeightBin[] =
     result.diagnostics.matchWeightDistribution.length > 0
       ? result.diagnostics.matchWeightDistribution
       : buildDefaultBins(result);
@@ -236,7 +236,7 @@ export interface RecordSummary {
  */
 export function buildClusterData(
   result: PipelineResult,
-  _records?: ReadonlyArray<Record<string, unknown>>,
+  _records?: readonly Record<string, unknown>[],
 ): ClusterExplorerData {
   const children: ClusterTreeNode[] = [];
 

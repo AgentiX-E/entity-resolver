@@ -12,14 +12,16 @@ let _wasmScorers: Readonly<Record<string, IScorer>> | null = null;
  * Attempt to load WASM-accelerated scorers.
  * Returns null if WASM is unavailable.
  */
-export async function tryLoadWasmScorers(logger?: ILogger): Promise<Readonly<Record<string, IScorer>> | null> {
+export async function tryLoadWasmScorers(
+  logger?: ILogger,
+): Promise<Readonly<Record<string, IScorer>> | null> {
   if (_wasmScorers) return _wasmScorers;
 
   try {
     // Dynamically import the compiled WASM module
     const wasm = await import('./scorers/wasm_scorer.js');
 
-    const wasmScore = wasm.wasm_score as (name: string, a: string, b: string) => number;
+    const wasmScore = wasm.wasm_score;
 
     const scorers: Record<string, IScorer> = {};
 
@@ -39,7 +41,7 @@ export async function tryLoadWasmScorers(logger?: ILogger): Promise<Readonly<Rec
     return _wasmScorers;
   } catch (err: unknown) {
     logger?.warn(
-      `WASM scorer loading failed — falling back to pure JS scorers: ${err instanceof Error ? err.message : String(err)}`
+      `WASM scorer loading failed — falling back to pure JS scorers: ${err instanceof Error ? err.message : String(err)}`,
     );
     return null;
   }

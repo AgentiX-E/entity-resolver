@@ -64,29 +64,44 @@ describe('MCP Protocol: initialize lifecycle', () => {
   });
 
   it('initialize returns capabilities', async () => {
-    const res = await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test-client', version: '1.0' },
-    } });
+    const res = await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test-client', version: '1.0' },
+      },
+    });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.result.capabilities.tools).toBeDefined();
     expect(body.result.serverInfo.name).toContain('entity-resolver');
     expect(body.result.protocolVersion).toBe('2024-11-05');
   });
 
   it('initialize rejects double init', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
-    const res = await post({ jsonrpc: '2.0', id: 2, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
+    const res = await post({
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     expect(res.status).toBe(500);
   });
 });
@@ -98,14 +113,19 @@ describe('MCP Protocol: tools/list', () => {
 
   it('returns all 7 tools', async () => {
     // Initialize first
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.result.tools.length).toBe(7);
     const names = body.result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain('er_dedupe');
@@ -118,13 +138,18 @@ describe('MCP Protocol: tools/list', () => {
   });
 
   it('tools have valid input schemas', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     for (const tool of body.result.tools) {
       expect(tool.name).toBeTruthy();
       expect(tool.description).toBeTruthy();
@@ -139,64 +164,96 @@ describe('MCP Protocol: tools/call', () => {
   });
 
   it('calls er_autoconfigure successfully', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({
-      jsonrpc: '2.0', id: 2, method: 'tools/call', params: {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
         name: 'er_autoconfigure',
         arguments: { records: [{ name: 'John', email: 'john@test.com' }] },
       },
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.result.content[0].type).toBe('text');
   }, 15000);
 
   it('calls er_analyze successfully', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({
-      jsonrpc: '2.0', id: 2, method: 'tools/call', params: {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
         name: 'er_analyze',
         arguments: { records: [{ name: 'Test', value: '123' }] },
       },
     });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.result.content).toBeDefined();
   }, 15000);
 
   it('handles unknown tool', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({
-      jsonrpc: '2.0', id: 2, method: 'tools/call', params: {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {
         name: 'nonexistent_tool',
       },
     });
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     // Unknown tool produces error (either HTTP error code or JSON-RPC error in body)
-    const hasError = res.status >= 400 || body.error || (body.result && body.result.isError);
+    const hasError = res.status >= 400 || body.error || body.result?.isError;
     expect(hasError).toBe(true);
   });
 
   it('handles missing tool name', async () => {
-    await post({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {
-      protocolVersion: '2024-11-05',
-      capabilities: {},
-      clientInfo: { name: 'test', version: '1' },
-    } });
+    await post({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'initialize',
+      params: {
+        protocolVersion: '2024-11-05',
+        capabilities: {},
+        clientInfo: { name: 'test', version: '1' },
+      },
+    });
     const res = await post({
-      jsonrpc: '2.0', id: 2, method: 'tools/call', params: {},
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'tools/call',
+      params: {},
     });
     // Missing name returns error
     expect(res.status).toBe(500);
@@ -215,21 +272,21 @@ describe('MCP Protocol: error handling', () => {
       body: 'not json',
     });
     expect(res.status).toBe(400);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.error.code).toBe(-32700);
   });
 
   it('returns invalid request for non-JSON-RPC body', async () => {
     const res = await post({ foo: 'bar' });
     expect(res.status).toBe(400);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.error.code).toBe(-32600);
   });
 
   it('returns method not found for unknown method', async () => {
     const res = await post({ jsonrpc: '2.0', id: 1, method: 'unknown_method' });
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.error.code).toBe(-32601);
   });
 
@@ -249,7 +306,7 @@ describe('SSE endpoint', () => {
   it('health endpoint returns ok', async () => {
     const res = await app.request('/health');
     expect(res.status).toBe(200);
-    const body = await res.json() as Record<string, any>;
+    const body = (await res.json()) as Record<string, any>;
     expect(body.status).toBe('ok');
     expect(body.uptime).toBeGreaterThan(0);
   });

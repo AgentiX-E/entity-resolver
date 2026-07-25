@@ -103,7 +103,10 @@ describe('MemoryEntityStore', () => {
     it('splits entity into groups', async () => {
       const store = new MemoryEntityStore();
       await store.upsertEntity({ clusterId: 'c1', memberIds: [1, 2, 3, 4], cohesion: 0.5 });
-      await store.applySplit('c1', [['1', '2'] as any, ['3', '4'] as any]);
+      await store.applySplit('c1', [
+        ['1', '2'],
+        ['3', '4'],
+      ]);
 
       // Original entity deleted
       const original = await store.getEntity('c1');
@@ -153,8 +156,8 @@ describe('MemoryConfigStore', () => {
 
   it('list returns all config names', async () => {
     const store = new MemoryConfigStore();
-    await store.save('config-a', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
-    await store.save('config-b', { blocking: {}, comparisons: [], matchThreshold: 0.7 } as any);
+    await store.save('config-a', { blocking: {}, comparisons: [], matchThreshold: 0.5 });
+    await store.save('config-b', { blocking: {}, comparisons: [], matchThreshold: 0.7 });
     const list = await store.list();
     expect(list).toHaveLength(2);
     expect(list).toContain('config-a');
@@ -163,7 +166,7 @@ describe('MemoryConfigStore', () => {
 
   it('delete removes config', async () => {
     const store = new MemoryConfigStore();
-    await store.save('temp', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
+    await store.save('temp', { blocking: {}, comparisons: [], matchThreshold: 0.5 });
     await store.delete('temp');
     expect(await store.load('temp')).toBeNull();
   });
@@ -175,11 +178,11 @@ describe('MemoryConfigStore', () => {
 
   it('save updates existing config maintains createdAt', async () => {
     const store = new MemoryConfigStore();
-    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.5 } as any);
+    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.5 });
     const first = await store.load('pipeline');
     // Wait 1ms to ensure different updatedAt
     await new Promise((r) => setTimeout(r, 1));
-    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.8 } as any);
+    await store.save('pipeline', { blocking: {}, comparisons: [], matchThreshold: 0.8 });
     const second = await store.load('pipeline');
     expect(second!.createdAt).toBe(first!.createdAt);
     expect(second!.config.matchThreshold).toBe(0.8);

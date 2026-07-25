@@ -43,7 +43,7 @@ export async function initScorers(logger?: ILogger): Promise<ScorerInitResult> {
   } catch (err: unknown) {
     // WASM unavailable — fall through to pure JS (graceful degradation)
     logger?.warn(
-      `WASM scorer initialization failed — using pure JS fallback: ${err instanceof Error ? err.message : String(err)}`
+      `WASM scorer initialization failed — using pure JS fallback: ${err instanceof Error ? err.message : String(err)}`,
     );
   }
 

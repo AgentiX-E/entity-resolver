@@ -215,5 +215,5 @@ type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 /** Strip readonly from an object. Only for internal use within state machines. */
 function mutate<T extends object>(obj: T): Mutable<T> {
-  return obj as Mutable<T>;
+  return obj;
 }

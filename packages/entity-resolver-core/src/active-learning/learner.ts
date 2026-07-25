@@ -126,7 +126,7 @@ export function trainLogisticClassifier(
   const d = features[0]!.length;
 
   // Initialize weights
-  let weights = new Array<number>(d).fill(0);
+  const weights = new Array<number>(d).fill(0);
   let bias = 0;
 
   function sigmoid(z: number): number {
@@ -135,7 +135,7 @@ export function trainLogisticClassifier(
 
   // Gradient descent
   for (let epoch = 0; epoch < epochs; epoch++) {
-    let dw = new Array<number>(d).fill(0).fill(0);
+    const dw = new Array<number>(d).fill(0).fill(0);
     let db = 0;
 
     for (let i = 0; i < n; i++) {

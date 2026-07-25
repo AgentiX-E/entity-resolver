@@ -251,7 +251,7 @@ describe('deserializeModel validation', () => {
     const em = makeSampleEMResult();
     const json = serializeModel(em, sampleComparisons, sampleBlocking, 0.5);
     const modified = JSON.parse(json) as Record<string, unknown>;
-    (modified.comparisons as Array<Record<string, unknown>>)[0] = { bad: 'spec' };
+    (modified.comparisons as Record<string, unknown>[])[0] = { bad: 'spec' };
     const result = deserializeModel(JSON.stringify(modified));
     expect(result.valid).toBe(false);
   });
@@ -260,8 +260,8 @@ describe('deserializeModel validation', () => {
     const em = makeSampleEMResult();
     const json = serializeModel(em, sampleComparisons, sampleBlocking, 0.5);
     const modified = JSON.parse(json) as Record<string, unknown>;
-    const comps = modified.comparisons as Array<Record<string, unknown>>;
-    (comps[0]!.levels as Array<Record<string, unknown>>)[0] = { x: 1 };
+    const comps = modified.comparisons as Record<string, unknown>[];
+    (comps[0]!.levels as Record<string, unknown>[])[0] = { x: 1 };
     const result = deserializeModel(JSON.stringify(modified));
     expect(result.valid).toBe(false);
   });
@@ -285,6 +285,8 @@ describe('Deserialization error edge cases', () => {
   });
 
   it('deserializeFSParamsFromJSON handles empty', () => {
-    expect(() => { deserializeFSParamsFromJSON(JSON.stringify({ m: [], u: [] })); }).toThrow();
+    expect(() => {
+      deserializeFSParamsFromJSON(JSON.stringify({ m: [], u: [] }));
+    }).toThrow();
   });
 });

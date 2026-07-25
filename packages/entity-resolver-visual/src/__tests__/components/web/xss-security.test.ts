@@ -37,8 +37,6 @@ const XSS_PAYLOADS = {
   dataUri: 'data:text/html;base64,PHNjcmlwdD5hbGVydCgxKTwvc2NyaXB0Pg==',
 };
 
-type XssPayloadMap = typeof XSS_PAYLOADS;
-
 // ══════════════════════════════════════════════════════════════
 // Helpers
 // ══════════════════════════════════════════════════════════════
@@ -130,14 +128,14 @@ describe('registerAllElements', () => {
   it('registers all 4 custom elements', () => {
     expect(customElements.get('er-waterfall')).toBe(ErWaterfallElement);
     expect(customElements.get('er-histogram')).toBe(ErHistogramElement);
-    expect(customElements.get('er-cluster-explorer')).toBe(
-      ErClusterExplorerElement,
-    );
+    expect(customElements.get('er-cluster-explorer')).toBe(ErClusterExplorerElement);
     expect(customElements.get('er-mu-chart')).toBe(ErMuChartElement);
   });
 
   it('is idempotent — does not throw on double registration', () => {
-    expect(() => registerAllElements()).not.toThrow();
+    expect(() => {
+      registerAllElements();
+    }).not.toThrow();
   });
 });
 
@@ -300,9 +298,7 @@ describe('<er-cluster-explorer> — XSS resistance', () => {
   });
 
   it('renders empty state safely', () => {
-    const el = document.createElement(
-      'er-cluster-explorer',
-    ) as ErClusterExplorerElement;
+    const el = document.createElement('er-cluster-explorer') as ErClusterExplorerElement;
     document.body.appendChild(el);
     el.setAttribute('data', '');
     assertNoXssVectors(el);
@@ -311,9 +307,7 @@ describe('<er-cluster-explorer> — XSS resistance', () => {
 
   for (const [name, payload] of Object.entries(XSS_PAYLOADS)) {
     it(`resists ${name} in cluster node label`, () => {
-      const el = document.createElement(
-        'er-cluster-explorer',
-      ) as ErClusterExplorerElement;
+      const el = document.createElement('er-cluster-explorer') as ErClusterExplorerElement;
       document.body.appendChild(el);
 
       const xssData = {
@@ -333,9 +327,7 @@ describe('<er-cluster-explorer> — XSS resistance', () => {
     });
 
     it(`resists ${name} in statistics fields`, () => {
-      const el = document.createElement(
-        'er-cluster-explorer',
-      ) as ErClusterExplorerElement;
+      const el = document.createElement('er-cluster-explorer') as ErClusterExplorerElement;
       document.body.appendChild(el);
 
       const xssData = {

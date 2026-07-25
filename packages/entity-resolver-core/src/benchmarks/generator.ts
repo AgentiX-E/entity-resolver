@@ -470,28 +470,31 @@ function generatePersonVariant(
 
   // Apply typo to one field
   if (rng.next() < 0.5) {
-    const field = rng.pick(['given_name', 'surname', 'address_city']) as 'given_name' | 'surname' | 'address_city';
-    const entityValue: string = field === 'given_name' ? entity.firstName
-      : field === 'surname' ? entity.lastName
-      : entity.city;
+    const field = rng.pick(['given_name', 'surname', 'address_city']);
+    const entityValue: string =
+      field === 'given_name'
+        ? entity.firstName
+        : field === 'surname'
+          ? entity.lastName
+          : entity.city;
     rec[field] = applyTypo(entityValue, rng);
   }
 
   // Phonetic variation
   if (rng.next() < 0.2) {
-    rec['surname'] = phoneticVariant(entity.lastName, rng);
+    rec.surname = phoneticVariant(entity.lastName, rng);
   }
 
   // Date format variation
   if (rng.next() < 0.15) {
     const [y, m, d] = entity.dob.split('-');
-    rec['date_of_birth'] = `${m}/${d}/${y}`;
+    rec.date_of_birth = `${m}/${d}/${y}`;
   }
 
   // Schema variation (field rename)
   if (rng.next() < 0.1) {
-    delete rec['address_city'];
-    rec['city'] = entity.city;
+    delete rec.address_city;
+    rec.city = entity.city;
   }
 
   return rec;
@@ -933,18 +936,18 @@ function generateProductVariant(
   // Variant-specific modifications
   if (variantIndex === 1) {
     // Store 2 — title case changes, price rounding
-    rec['name'] = entity.name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
-    rec['price'] = Math.round(entity.price * 1.05 * 100) / 100;
-    rec['manufacturer'] = entity.brand.toLowerCase();
+    rec.name = entity.name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    rec.price = Math.round(entity.price * 1.05 * 100) / 100;
+    rec.manufacturer = entity.brand.toLowerCase();
   }
   if (variantIndex === 2) {
-    rec['name'] = `NEW: ${entity.name}`;
-    rec['price'] = entity.price * 0.95;
+    rec.name = `NEW: ${entity.name}`;
+    rec.price = entity.price * 0.95;
   }
 
   // Typo in name
   if (rng.next() < 0.15) {
-    rec['name'] = applyTypo(entity.name, rng);
+    rec.name = applyTypo(entity.name, rng);
   }
 
   return rec;
@@ -1003,7 +1006,7 @@ export function generateFebrlDataset(config?: Partial<GeneratorConfig>): Generat
     for (let v = 0; v < cfg.recordsPerEntity - 1; v++) {
       const dupIdx = records.length;
       const variant = generatePersonVariant(entity, rng, v);
-      records.push(variant as RawRecord);
+      records.push(variant);
       members.push(dupIdx);
       trueMatchCount++;
     }
@@ -1062,8 +1065,8 @@ export function generateAbtBuyDataset(config?: Partial<GeneratorConfig>): Genera
     for (let s = 0; s < cfg.recordsPerEntity; s++) {
       const idx = records.length;
       const variant = generateProductVariant(prod, rng, s);
-      variant['source'] = sources[s % sources.length];
-      records.push(variant as RawRecord);
+      variant.source = sources[s % sources.length];
+      records.push(variant);
       members.push(idx);
       if (s > 0) trueMatchCount++;
     }
@@ -1075,9 +1078,9 @@ export function generateAbtBuyDataset(config?: Partial<GeneratorConfig>): Genera
   for (let n = 0; n < cfg.noiseRecords; n++) {
     const prod = rng.pick(products);
     const variant = generateProductVariant(prod, rng, rng.range(0, 2));
-    variant['source'] = rng.pick(sources);
-    variant['name'] = `${rng.pick(['Refurbished', 'Open Box', 'Clearance'])}: ${variant['name']}`;
-    records.push(variant as RawRecord);
+    variant.source = rng.pick(sources);
+    variant.name = `${rng.pick(['Refurbished', 'Open Box', 'Clearance'])}: ${variant.name}`;
+    records.push(variant);
   }
 
   return { records, groundTruth, trueMatchCount };
@@ -1117,7 +1120,7 @@ export function generateAmazonGoogleDataset(config?: Partial<GeneratorConfig>): 
       description: `${prod.brand} ${prod.category} — ${prod.ram}GB RAM, ${prod.storage}GB storage`,
       manufacturer: prod.brand,
       price: prod.price.toFixed(2),
-    } as RawRecord);
+    });
     members.push(aIdx);
 
     // Google listing
@@ -1127,7 +1130,7 @@ export function generateAmazonGoogleDataset(config?: Partial<GeneratorConfig>): 
       description: `${prod.category} by ${prod.brand}. Memory: ${prod.ram}GB. Storage: ${prod.storage}GB.`,
       manufacturer: prod.brand.toLowerCase(),
       price: (prod.price * (0.95 + rng.next() * 0.1)).toFixed(2),
-    } as RawRecord);
+    });
     members.push(gIdx);
     trueMatchCount++;
 
@@ -1142,7 +1145,7 @@ export function generateAmazonGoogleDataset(config?: Partial<GeneratorConfig>): 
       description: `Third-party accessory`,
       manufacturer: 'Generic',
       price: (rng.next() * 50).toFixed(2),
-    } as RawRecord);
+    });
   }
 
   return { records, groundTruth, trueMatchCount };
@@ -1200,7 +1203,7 @@ export function generateCoraDataset(config?: Partial<GeneratorConfig>): Generate
 
     // Primary source
     const pIdx = records.length;
-    records.push({ title, authors, venue, year } as RawRecord);
+    records.push({ title, authors, venue, year });
     members.push(pIdx);
 
     // Secondary source with variations
@@ -1213,7 +1216,7 @@ export function generateCoraDataset(config?: Partial<GeneratorConfig>): Generate
         .join('; '),
       venue: venue.toLowerCase(),
       year,
-    } as RawRecord);
+    });
     members.push(sIdx);
     trueMatchCount++;
 
@@ -1227,7 +1230,7 @@ export function generateCoraDataset(config?: Partial<GeneratorConfig>): Generate
       authors: generateAuthorList(rng),
       venue: rng.pick(venues),
       year: rng.range(2015, 2025),
-    } as RawRecord);
+    });
   }
 
   return { records, groundTruth, trueMatchCount };

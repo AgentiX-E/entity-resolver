@@ -12,7 +12,7 @@ import { applyBlockingTransforms, computeReductionRatio } from './types.js';
  * This is the first stage of pyJedAI's multi-stage pipeline.
  */
 export function tokenBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
   const pairSet = new Set<string>();
@@ -63,7 +63,7 @@ export function tokenBlocking(
  * each window.
  */
 export function sortedNeighborhood(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
   const windowSize = config.windowSize ?? 20;
@@ -107,7 +107,7 @@ export function sortedNeighborhood(
  * Pairs are the UNION of all passes.
  */
 export function multiPassBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
   const pairSet = new Set<string>();
@@ -177,7 +177,7 @@ function buildPassKey(
  */
 export function blockPurging(
   blocks: Map<string, number[]>,
-  maxBlockSize: number = 500,
+  maxBlockSize = 500,
 ): Map<string, number[]> {
   const purged = new Map<string, number[]>();
   for (const [key, indices] of blocks) {
@@ -197,7 +197,7 @@ export function blockPurging(
  */
 export function comparisonNeighborhoodPruning(
   blocks: Map<string, number[]>,
-  minNeighborWeight: number = 2,
+  minNeighborWeight = 2,
 ): Set<string> {
   const edges = new Map<string, number>();
 
@@ -226,7 +226,7 @@ export function comparisonNeighborhoodPruning(
  *   Token Blocking → Block Purging → CNP
  */
 export function metaBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
   const field = config.fields?.[0] ?? 'name';

@@ -72,7 +72,12 @@ describe('PPRL Bloom filter edges', () => {
 
   it('encodePPRL produces BloomFilter with hex', async () => {
     const { encodePPRL } = await import('../pprl/bloom.js');
-    const bf = encodePPRL('John Smith', { filterSize: 64, numHashes: 4, secretKey: 'salt', qgramSize: 2 });
+    const bf = encodePPRL('John Smith', {
+      filterSize: 64,
+      numHashes: 4,
+      secretKey: 'salt',
+      qgramSize: 2,
+    });
     expect(bf.size).toBe(64);
     const hex = bf.toHex();
     expect(hex).toMatch(/^[0-9a-f]+$/i);
@@ -85,8 +90,8 @@ describe('PPRL Bloom filter edges', () => {
       { name: 'Alice', city: 'NYC' },
       { filterSize: 64, numHashes: 4, secretKey: 'salt' },
     );
-    expect(scores['name']).toBeDefined();
-    expect(scores['city']).toBeDefined();
+    expect(scores.name).toBeDefined();
+    expect(scores.city).toBeDefined();
   });
 
   it('matchPPRL with different records returns lower scores', async () => {
@@ -96,8 +101,8 @@ describe('PPRL Bloom filter edges', () => {
       { name: 'Bob' },
       { filterSize: 64, numHashes: 4, secretKey: 'salt' },
     );
-    expect(scores['name']).toBeDefined();
-    expect(scores['name']!).toBeLessThan(1);
+    expect(scores.name).toBeDefined();
+    expect(scores.name!).toBeLessThan(1);
   });
 
   it('BloomFilter serialization round-trips', async () => {
@@ -156,31 +161,56 @@ describe('Scorer registry edges', () => {
 describe('Numeric and date scorers', () => {
   it('numericDiffScorer handles equal numbers', async () => {
     const { numericDiffScorer } = await import('../matching/scorers/js/scorers.js');
-    const s = numericDiffScorer.score(100, 100, { name: 'age', semanticType: 'numeric', cardinality: 100, isNumeric: true });
+    const s = numericDiffScorer.score(100, 100, {
+      name: 'age',
+      semanticType: 'numeric',
+      cardinality: 100,
+      isNumeric: true,
+    });
     expect(s).toBe(1);
   });
 
   it('numericDiffScorer handles large difference', async () => {
     const { numericDiffScorer } = await import('../matching/scorers/js/scorers.js');
-    const s = numericDiffScorer.score(1, 1000, { name: 'age', semanticType: 'numeric', cardinality: 100, isNumeric: true });
+    const s = numericDiffScorer.score(1, 1000, {
+      name: 'age',
+      semanticType: 'numeric',
+      cardinality: 100,
+      isNumeric: true,
+    });
     expect(s).toBeLessThan(0.1);
   });
 
   it('dateDiffScorer handles same date', async () => {
     const { dateDiffScorer } = await import('../matching/scorers/js/scorers.js');
-    const s = dateDiffScorer.score('2020-01-15', '2020-01-15', { name: 'dob', semanticType: 'date', cardinality: 100, isNumeric: false });
+    const s = dateDiffScorer.score('2020-01-15', '2020-01-15', {
+      name: 'dob',
+      semanticType: 'date',
+      cardinality: 100,
+      isNumeric: false,
+    });
     expect(s).toBe(1);
   });
 
   it('booleanMatchScorer handles true match', async () => {
     const { booleanMatchScorer } = await import('../matching/scorers/js/scorers.js');
-    const s = booleanMatchScorer.score(true, true, { name: 'active', semanticType: 'boolean', cardinality: 100, isNumeric: false });
+    const s = booleanMatchScorer.score(true, true, {
+      name: 'active',
+      semanticType: 'boolean',
+      cardinality: 100,
+      isNumeric: false,
+    });
     expect(s).toBe(1);
   });
 
   it('radialScorer produces valid range', async () => {
     const { radialScorer } = await import('../matching/scorers/js/scorers.js');
-    const s = radialScorer.score(0, 0, { name: 'coord', semanticType: 'numeric', cardinality: 100, isNumeric: true });
+    const s = radialScorer.score(0, 0, {
+      name: 'coord',
+      semanticType: 'numeric',
+      cardinality: 100,
+      isNumeric: true,
+    });
     expect(s).toBeGreaterThanOrEqual(0);
     expect(s).toBeLessThanOrEqual(1);
   });

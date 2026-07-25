@@ -12,7 +12,7 @@ import { applyBlockingTransforms, computeReductionRatio } from './types.js';
  * it matches ANY pass).
  */
 export function standardBlocking(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
   const pairSet = new Set<string>();

@@ -9,7 +9,10 @@ import { nameComparisonSpec } from '../matching/comparison.js';
 import type { Cluster } from '../types/core.js';
 import type { EntityId } from '../types/core.js';
 
-export async function runBenchmark(dataset: BenchmarkDataset, logger?: ILogger): Promise<BenchmarkResult> {
+export async function runBenchmark(
+  dataset: BenchmarkDataset,
+  logger?: ILogger,
+): Promise<BenchmarkResult> {
   const startTime = Date.now();
 
   const sample = dataset.records[0] ?? {};
@@ -20,7 +23,7 @@ export async function runBenchmark(dataset: BenchmarkDataset, logger?: ILogger):
       ? [{ fields: fields.slice(0, 2), transforms: ['strip', 'lowercase'] as const }]
       : [{ fields, transforms: ['strip', 'lowercase'] as const }];
 
-  let predClusters: Map<EntityId, Cluster> = new Map();
+  let predClusters = new Map<EntityId, Cluster>();
   let matchCount = 0;
 
   try {
@@ -76,7 +79,9 @@ export async function runAllBenchmarks(logger?: ILogger): Promise<{
       // Log the error but continue with remaining datasets.
       // Individual dataset failures should not abort the full suite.
       const msg = err instanceof Error ? err.message : String(err);
-      logger?.warn(`Skipping benchmark '${dataset.name}': ${msg}`, { operation: 'runAllBenchmarks' });
+      logger?.warn(`Skipping benchmark '${dataset.name}': ${msg}`, {
+        operation: 'runAllBenchmarks',
+      });
       results.push({
         dataset: dataset.name,
         recordCount: dataset.recordCount,

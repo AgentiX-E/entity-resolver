@@ -46,7 +46,7 @@ export interface AutoConfigResult {
 // Field name pattern matching
 // ═══════════════════════════════════════════════════════════════
 
-const PATTERNS: Readonly<Record<SemanticType, Readonly<RegExp[]>>> = {
+const PATTERNS: Readonly<Record<SemanticType, readonly RegExp[]>> = {
   email: [/^email$/i, /^e_mail$/i, /^mail$/i, /^e-mail$/i],
   phone: [/^phone$/i, /^tel$/i, /^telephone$/i, /^mobile$/i, /^cell$/i, /^contact$/i],
   name: [/^name$/i, /^full_name$/i, /^fullname$/i],

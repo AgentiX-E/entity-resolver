@@ -25,25 +25,90 @@ import {
 /** Factory type: create error from message + optional context */
 type ErrorFactory = (msg: string, context?: Record<string, unknown>) => EntityResolverError;
 
-const ERROR_SPECS: Array<{
+const ERROR_SPECS: {
   name: string;
   factory: ErrorFactory;
   expectedCode: string;
   expectedStatus: number;
-}> = [
-  { name: 'ValidationError', factory: (m, c) => new ValidationError(m, c ? { details: c } : undefined), expectedCode: 'ER_CONFIG_INVALID_INPUT', expectedStatus: 400 },
-  { name: 'ConfigurationError', factory: (m, c) => new ConfigurationError(m, c ? { details: c } : undefined), expectedCode: 'ER_CONFIG_MALFORMED', expectedStatus: 400 },
-  { name: 'IOError', factory: (m, c) => new IOError(m, c ? { details: c } : undefined), expectedCode: 'ER_IO_FAILURE', expectedStatus: 500 },
-  { name: 'ParseError', factory: (m, c) => new ParseError(m, c ? { details: c } : undefined), expectedCode: 'ER_PARSE_FAILURE', expectedStatus: 400 },
-  { name: 'ResolutionError', factory: (m, c) => new ResolutionError(m, c ? { details: c } : undefined), expectedCode: 'ER_RESOLVE_FAILURE', expectedStatus: 500 },
-  { name: 'BlockingError', factory: (m, c) => new BlockingError(m, c ? { details: c } : undefined), expectedCode: 'ER_BLOCKING_FAILURE', expectedStatus: 500 },
-  { name: 'ScoringError', factory: (m, c) => new ScoringError(m, c ? { details: c } : undefined), expectedCode: 'ER_SCORING_FAILURE', expectedStatus: 500 },
-  { name: 'ClusteringError', factory: (m, c) => new ClusteringError(m, c ? { details: c } : undefined), expectedCode: 'ER_CLUSTER_FAILURE', expectedStatus: 500 },
-  { name: 'EvaluationError', factory: (m, c) => new EvaluationError(m, c ? { details: c } : undefined), expectedCode: 'ER_EVAL_FAILURE', expectedStatus: 500 },
-  { name: 'ConvergenceError', factory: (m, c) => new ConvergenceError(m, c ? { details: c } : undefined), expectedCode: 'ER_EM_CONVERGENCE', expectedStatus: 500 },
-  { name: 'LLMError', factory: (m, c) => new LLMError(m, c ? { details: c } : undefined), expectedCode: 'ER_LLM_FAILURE', expectedStatus: 502 },
-  { name: 'AuthError', factory: (m, c) => new AuthError(m, c ? { details: c } : undefined), expectedCode: 'ER_AUTH_FAILURE', expectedStatus: 401 },
-  { name: 'InternalError', factory: (m, c) => new InternalError(m, c ? { details: c } : undefined), expectedCode: 'ER_INTERNAL', expectedStatus: 500 },
+}[] = [
+  {
+    name: 'ValidationError',
+    factory: (m, c) => new ValidationError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_CONFIG_INVALID_INPUT',
+    expectedStatus: 400,
+  },
+  {
+    name: 'ConfigurationError',
+    factory: (m, c) => new ConfigurationError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_CONFIG_MALFORMED',
+    expectedStatus: 400,
+  },
+  {
+    name: 'IOError',
+    factory: (m, c) => new IOError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_IO_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'ParseError',
+    factory: (m, c) => new ParseError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_PARSE_FAILURE',
+    expectedStatus: 400,
+  },
+  {
+    name: 'ResolutionError',
+    factory: (m, c) => new ResolutionError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_RESOLVE_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'BlockingError',
+    factory: (m, c) => new BlockingError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_BLOCKING_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'ScoringError',
+    factory: (m, c) => new ScoringError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_SCORING_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'ClusteringError',
+    factory: (m, c) => new ClusteringError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_CLUSTER_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'EvaluationError',
+    factory: (m, c) => new EvaluationError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_EVAL_FAILURE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'ConvergenceError',
+    factory: (m, c) => new ConvergenceError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_EM_CONVERGENCE',
+    expectedStatus: 500,
+  },
+  {
+    name: 'LLMError',
+    factory: (m, c) => new LLMError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_LLM_FAILURE',
+    expectedStatus: 502,
+  },
+  {
+    name: 'AuthError',
+    factory: (m, c) => new AuthError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_AUTH_FAILURE',
+    expectedStatus: 401,
+  },
+  {
+    name: 'InternalError',
+    factory: (m, c) => new InternalError(m, c ? { details: c } : undefined),
+    expectedCode: 'ER_INTERNAL',
+    expectedStatus: 500,
+  },
 ];
 
 // ══════════════════════════════════════════════════════════════

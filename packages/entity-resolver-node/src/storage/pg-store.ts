@@ -7,6 +7,7 @@ import type { IEntityStore, ICloseableStore, EntityRecord } from '@agentix-e/ent
 import { IOError } from '@agentix-e/entity-resolver-core';
 import type { ILogger } from '@agentix-e/entity-resolver-core';
 import { NoopLogger } from '@agentix-e/entity-resolver-core';
+import { createRequire } from 'node:module';
 import type { Pool, PoolConfig } from 'pg';
 
 /** mTLS configuration — all paths in PEM format. */
@@ -78,8 +79,8 @@ export function buildPoolConfig(config: PgStoreConfig, logger: ILogger = NoopLog
     host: config.host ?? 'localhost',
     port: config.port ?? 5432,
     database: config.database,
-    user: config.user ?? process.env['PGUSER'] ?? 'postgres',
-    password: config.password ?? process.env['PGPASSWORD'],
+    user: config.user ?? process.env.PGUSER ?? 'postgres',
+    password: config.password ?? process.env.PGPASSWORD,
     max: config.poolSize ?? 10,
   };
 
@@ -92,7 +93,11 @@ export function buildPoolConfig(config: PgStoreConfig, logger: ILogger = NoopLog
       try {
         ssl.ca = readPemFile(config.tls.ca);
       } catch (err) {
-        logger.warn('Failed to read PEM CA file', { operation: 'buildPoolConfig', file: config.tls.ca, cause: String(err) });
+        logger.warn('Failed to read PEM CA file', {
+          operation: 'buildPoolConfig',
+          file: config.tls.ca,
+          cause: String(err),
+        });
         throw new IOError(`Failed to read PEM CA certificate: ${config.tls.ca}`);
       }
     }
@@ -100,7 +105,11 @@ export function buildPoolConfig(config: PgStoreConfig, logger: ILogger = NoopLog
       try {
         ssl.cert = readPemFile(config.tls.cert);
       } catch (err) {
-        logger.warn('Failed to read PEM cert file', { operation: 'buildPoolConfig', file: config.tls.cert, cause: String(err) });
+        logger.warn('Failed to read PEM cert file', {
+          operation: 'buildPoolConfig',
+          file: config.tls.cert,
+          cause: String(err),
+        });
         throw new IOError(`Failed to read PEM client certificate: ${config.tls.cert}`);
       }
     }
@@ -108,7 +117,11 @@ export function buildPoolConfig(config: PgStoreConfig, logger: ILogger = NoopLog
       try {
         ssl.key = readPemFile(config.tls.key);
       } catch (err) {
-        logger.warn('Failed to read PEM key file', { operation: 'buildPoolConfig', file: config.tls.key, cause: String(err) });
+        logger.warn('Failed to read PEM key file', {
+          operation: 'buildPoolConfig',
+          file: config.tls.key,
+          cause: String(err),
+        });
         throw new IOError(`Failed to read PEM private key: ${config.tls.key}`);
       }
     }
@@ -147,18 +160,19 @@ function readPemFile(pathOrContent: string): string {
   }
 }
 
-/** Lazily import fs module (ESM-safe via createRequire from 'module'). */
+/** Lazily import fs module (ESM-safe via createRequire from 'node:module'). */
 let _fsModule: { readFileSync: (path: string, encoding: string) => string } | null = null;
 
 function getFsModule(): { readFileSync: (path: string, encoding: string) => string } {
   if (!_fsModule) {
-    // In ESM, require is not globally available. Use createRequire from 'module'
+    // In ESM, dynamic require is not available. Use createRequire from 'node:module'
     // which is the standard ESM-compatible way to load CommonJS modules.
-    const { createRequire } = require('node:module') as { createRequire: (url: string) => NodeRequire };
     const nodeRequire = createRequire(import.meta.url);
     _fsModule = nodeRequire('node:fs');
   }
-  return _fsModule;
+  // Non-null: always set by the branch above on first call.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  return _fsModule!;
 }
 
 /** Convert a pg row to an EntityRecord. */

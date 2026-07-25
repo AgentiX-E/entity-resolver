@@ -71,7 +71,9 @@ describe('CLI main function', () => {
 
   it('benchmark prints report', async () => {
     await main(['benchmark']);
-    expect(consoleOutput.some((l) => l.includes('Entity Resolver Benchmark') || l.length > 0)).toBe(true);
+    expect(consoleOutput.some((l) => l.includes('Entity Resolver Benchmark') || l.length > 0)).toBe(
+      true,
+    );
   }, 30000);
 
   it('autoconfigure without file shows usage error', async () => {

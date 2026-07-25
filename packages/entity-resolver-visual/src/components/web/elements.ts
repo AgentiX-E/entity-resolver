@@ -81,10 +81,7 @@ function createStyleElement(css: string): HTMLStyleElement {
  * Create a <div> with inline styles. Returns the element so callers can
  * further customize or append children via safe DOM APIs.
  */
-function createDiv(
-  styles: string,
-  ...children: (string | Node)[]
-): HTMLDivElement {
+function createDiv(styles: string, ...children: (string | Node)[]): HTMLDivElement {
   const div = document.createElement('div');
   div.setAttribute('style', styles);
   for (const child of children) {
@@ -110,11 +107,7 @@ function createSpan(styles: string, text: string | number): HTMLSpanElement {
 /**
  * Empty the shadow root and append a style element plus content.
  */
-function resetShadowRoot(
-  root: ShadowRoot,
-  css: string,
-  ...children: Node[]
-): void {
+function resetShadowRoot(root: ShadowRoot, css: string, ...children: Node[]): void {
   while (root.firstChild) {
     root.removeChild(root.firstChild);
   }
@@ -181,7 +174,7 @@ border: 1px solid var(--er-color-border);
 border-radius: var(--er-border-radius);
 box-shadow: var(--er-shadow);`;
 
-function buildFullCss(extra: string = ''): string {
+function buildFullCss(extra = ''): string {
   return `${BASE_HOST_CSS}\n${extra}`;
 }
 
@@ -198,11 +191,7 @@ export class ErWaterfallElement extends ErBaseElement {
     this.render();
   }
 
-  attributeChangedCallback(
-    name: string,
-    _oldValue: string | null,
-    newValue: string | null,
-  ): void {
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data') {
       this._data = this.parseDataAttr<WaterfallChartData>(newValue);
       this.render();
@@ -224,7 +213,10 @@ export class ErWaterfallElement extends ErBaseElement {
 
     const card = createDiv(CARD_CSS);
     card.setAttribute('role', 'img');
-    card.setAttribute('aria-label', `Waterfall chart: match weight ${escapeHtml(this._data.totalWeight.toFixed(2))}`);
+    card.setAttribute(
+      'aria-label',
+      `Waterfall chart: match weight ${escapeHtml(this._data.totalWeight.toFixed(2))}`,
+    );
     const themeStyle = this.buildThemeStyle();
 
     // Title row
@@ -246,10 +238,7 @@ export class ErWaterfallElement extends ErBaseElement {
         ),
       );
 
-      const barColor =
-        bar.weight >= 0
-          ? 'var(--er-color-match)'
-          : 'var(--er-color-nonmatch)';
+      const barColor = bar.weight >= 0 ? 'var(--er-color-match)' : 'var(--er-color-nonmatch)';
       const barWidth = Math.max(1, Math.abs(bar.weight * 10));
       const barDiv = createDiv(
         `flex: 1; background: ${barColor}; height: var(--er-bar-height); border-radius: var(--er-border-radius); min-width: ${barWidth}px;`,
@@ -291,11 +280,7 @@ export class ErHistogramElement extends ErBaseElement {
     this.render();
   }
 
-  attributeChangedCallback(
-    name: string,
-    _oldValue: string | null,
-    newValue: string | null,
-  ): void {
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data') {
       this._data = this.parseDataAttr<HistogramData>(newValue);
       this.render();
@@ -374,11 +359,7 @@ export class ErClusterExplorerElement extends ErBaseElement {
     this.render();
   }
 
-  attributeChangedCallback(
-    name: string,
-    _oldValue: string | null,
-    newValue: string | null,
-  ): void {
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data') {
       this._data = this.parseDataAttr<ClusterExplorerData>(newValue);
       this.render();
@@ -388,10 +369,7 @@ export class ErClusterExplorerElement extends ErBaseElement {
     }
   }
 
-  private buildTreeNodeElement(
-    node: ClusterTreeNode,
-    depth: number,
-  ): HTMLDivElement {
+  private buildTreeNodeElement(node: ClusterTreeNode, depth: number): HTMLDivElement {
     const indent = depth * 16;
     const hasChildren = node.children && node.children.length > 0;
     const sizeInfo = node.size > 1 ? ` (${escapeHtml(node.size)} records)` : '';
@@ -403,7 +381,7 @@ export class ErClusterExplorerElement extends ErBaseElement {
     );
 
     if (hasChildren) {
-      for (const child of node.children!) {
+      for (const child of node.children) {
         div.appendChild(this.buildTreeNodeElement(child, depth + 1));
       }
     }
@@ -465,11 +443,7 @@ export class ErMuChartElement extends ErBaseElement {
     this.render();
   }
 
-  attributeChangedCallback(
-    name: string,
-    _oldValue: string | null,
-    newValue: string | null,
-  ): void {
+  attributeChangedCallback(name: string, _oldValue: string | null, newValue: string | null): void {
     if (name === 'data') {
       this._data = this.parseDataAttr<MuChartData>(newValue);
       this.render();
@@ -500,18 +474,12 @@ export class ErMuChartElement extends ErBaseElement {
 
     // Build table using safe DOM APIs
     const table = document.createElement('table');
-    table.setAttribute(
-      'style',
-      'width: 100%; border-collapse: collapse;',
-    );
+    table.setAttribute('style', 'width: 100%; border-collapse: collapse;');
 
     // thead
     const thead = document.createElement('thead');
     const headerRow = document.createElement('tr');
-    headerRow.setAttribute(
-      'style',
-      'border-bottom: 2px solid var(--er-color-border);',
-    );
+    headerRow.setAttribute('style', 'border-bottom: 2px solid var(--er-color-border);');
     for (const headerText of ['Field', 'Level', 'm', 'u', 'Weight']) {
       const th = document.createElement('th');
       th.setAttribute('style', 'text-align: left; padding: 4px 8px;');
@@ -539,26 +507,17 @@ export class ErMuChartElement extends ErBaseElement {
         row.appendChild(tdLevel);
 
         const tdM = document.createElement('td');
-        tdM.setAttribute(
-          'style',
-          'padding: 4px 8px; color: var(--er-color-match);',
-        );
+        tdM.setAttribute('style', 'padding: 4px 8px; color: var(--er-color-match);');
         tdM.textContent = escapeHtml(level.mProbability.toFixed(4));
         row.appendChild(tdM);
 
         const tdU = document.createElement('td');
-        tdU.setAttribute(
-          'style',
-          'padding: 4px 8px; color: var(--er-color-nonmatch);',
-        );
+        tdU.setAttribute('style', 'padding: 4px 8px; color: var(--er-color-nonmatch);');
         tdU.textContent = escapeHtml(level.uProbability.toFixed(4));
         row.appendChild(tdU);
 
         const tdWeight = document.createElement('td');
-        tdWeight.setAttribute(
-          'style',
-          'padding: 4px 8px; font-weight: bold;',
-        );
+        tdWeight.setAttribute('style', 'padding: 4px 8px; font-weight: bold;');
         tdWeight.textContent = `${level.weight >= 0 ? '+' : ''}${escapeHtml(level.weight.toFixed(2))}`;
         row.appendChild(tdWeight);
 

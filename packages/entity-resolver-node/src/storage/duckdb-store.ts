@@ -59,12 +59,7 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
   private queryAll(sql: string, ...params: unknown[]): Promise<DuckDBRow[]> {
     return new Promise((resolve) => {
       const db = this.db as { all(sql: string, ...args: unknown[]): void };
-      (
-        db.all as (
-          sql: string,
-          ...args: [...unknown[], (err: Error | null, rows: DuckDBRow[]) => void]
-        ) => void
-      )(sql, ...params, (_err: Error | null, rows: DuckDBRow[]) => {
+      db.all(sql, ...params, (_err: Error | null, rows: DuckDBRow[]) => {
         resolve(rows ?? []);
       });
     });
@@ -73,9 +68,9 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
   private queryRun(sql: string, ...params: unknown[]): Promise<void> {
     return new Promise((resolve) => {
       const db = this.db as { run(sql: string, ...args: unknown[]): void };
-      (db.run as (sql: string, ...args: [...unknown[], () => void]) => void)(sql, ...params, () =>
-        resolve(),
-      );
+      db.run(sql, ...params, () => {
+        resolve();
+      });
     });
   }
 
@@ -96,7 +91,7 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
     return rows.length > 0 ? this.rowToEntity(rows[0]!) : null;
   }
 
-  async queryNeighbors(id: EntityId, hops: number = 1): Promise<EntityRecord[]> {
+  async queryNeighbors(id: EntityId, hops = 1): Promise<EntityRecord[]> {
     if (!this.ready) return this.fallback.queryNeighbors(id, hops);
     const allRows = await this.queryAll(
       'SELECT cluster_id, members_json, cohesion FROM er_entities',
@@ -190,7 +185,9 @@ export class DuckDBStore implements IEntityStore, ICloseableStore {
   async close(): Promise<void> {
     return new Promise((resolve) => {
       const db = this.db as { close(cb: () => void): void };
-      db.close(() => resolve());
+      db.close(() => {
+        resolve();
+      });
     });
   }
 }

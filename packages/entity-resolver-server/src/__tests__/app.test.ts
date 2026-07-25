@@ -466,7 +466,7 @@ describe('API endpoints', () => {
     const app = createApp();
     const res = await app.request('/api/v1/benchmarks');
     expect(res.status).toBe(200);
-    const body = (await res.json()) as Array<Record<string, unknown>>;
+    const body = (await res.json()) as Record<string, unknown>[];
     expect(Array.isArray(body)).toBe(true);
     expect(body.length).toBeGreaterThan(0);
     expect(body[0]!.name).toBeTruthy();

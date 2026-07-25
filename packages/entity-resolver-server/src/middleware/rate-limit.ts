@@ -126,10 +126,7 @@ export function createRateLimitMiddleware(config: RateLimitConfig = {}): RateLim
  * With trusted proxies configured, if the direct IP is in the trusted list,
  * the rightmost entry from X-Forwarded-For is used.
  */
-function resolveClientIp(
-  c: Context,
-  trustedProxies?: readonly string[],
-): string {
+function resolveClientIp(c: Context, trustedProxies?: readonly string[]): string {
   // Get the actual connecting IP (not spoofable headers)
   const directIp =
     c.req.header('CF-Connecting-IP') ??
@@ -149,7 +146,10 @@ function resolveClientIp(
   // Direct IP is trusted — use X-Forwarded-For (rightmost entry)
   const xff = c.req.header('X-Forwarded-For');
   if (xff) {
-    const ips = xff.split(',').map((ip) => ip.trim()).filter(Boolean);
+    const ips = xff
+      .split(',')
+      .map((ip) => ip.trim())
+      .filter(Boolean);
     if (ips.length > 0) {
       return ips[ips.length - 1]!;
     }

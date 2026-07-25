@@ -10,7 +10,10 @@ vi.mock('@duckdb/duckdb-wasm', () => {
     query: vi.fn().mockImplementation((sql: string, params?: unknown[]) => {
       // Handle INSERT/REPLACE
       if (sql.includes('INSERT OR REPLACE') && Array.isArray(params) && params.length >= 3) {
-        memTable.set(String(params[0]), { members_json: String(params[1]), cohesion: Number(params[2]) });
+        memTable.set(String(params[0]), {
+          members_json: String(params[1]),
+          cohesion: Number(params[2]),
+        });
         return Promise.resolve(undefined);
       }
       // Handle DELETE
@@ -22,14 +25,26 @@ vi.mock('@duckdb/duckdb-wasm', () => {
       if (sql.includes('WHERE cluster_id') && Array.isArray(params) && params.length >= 1) {
         const row = memTable.get(String(params[0]));
         return Promise.resolve({
-          toArray: () => row ? [{ cluster_id: String(params[0]), members_json: row.members_json, cohesion: row.cohesion }] : [],
+          toArray: () =>
+            row
+              ? [
+                  {
+                    cluster_id: String(params[0]),
+                    members_json: row.members_json,
+                    cohesion: row.cohesion,
+                  },
+                ]
+              : [],
         });
       }
       // Handle SELECT without WHERE
       return Promise.resolve({
-        toArray: () => Array.from(memTable.entries()).map(([id, v]) => ({
-          cluster_id: id, members_json: v.members_json, cohesion: v.cohesion,
-        })),
+        toArray: () =>
+          Array.from(memTable.entries()).map(([id, v]) => ({
+            cluster_id: id,
+            members_json: v.members_json,
+            cohesion: v.cohesion,
+          })),
       });
     }),
     close: vi.fn().mockResolvedValue(undefined),
@@ -43,8 +58,12 @@ vi.mock('@duckdb/duckdb-wasm', () => {
     default: {},
     AsyncDuckDB: vi.fn().mockImplementation(() => mockDB),
     ConsoleLogger: vi.fn(),
-    getJsDelivrBundles: vi.fn().mockReturnValue([{ mainModule: 'mock.wasm', mainWorker: 'mock-worker.js' }]),
-    selectBundle: vi.fn().mockResolvedValue({ mainModule: 'mock.wasm', mainWorker: 'mock-worker.js' }),
+    getJsDelivrBundles: vi
+      .fn()
+      .mockReturnValue([{ mainModule: 'mock.wasm', mainWorker: 'mock-worker.js' }]),
+    selectBundle: vi
+      .fn()
+      .mockResolvedValue({ mainModule: 'mock.wasm', mainWorker: 'mock-worker.js' }),
     DuckDBBundle: {},
     DuckDBDataProtocol: {},
   };
@@ -55,8 +74,14 @@ describe('DuckDBWasmStore init paths', () => {
     vi.clearAllMocks();
     // Mock Worker and Blob for WASM worker creation
     vi.stubGlobal('Worker', vi.fn());
-    vi.stubGlobal('Blob', vi.fn().mockImplementation((content: string[]) => content));
-    vi.stubGlobal('URL', { createObjectURL: vi.fn().mockReturnValue('blob:mock'), revokeObjectURL: vi.fn() });
+    vi.stubGlobal(
+      'Blob',
+      vi.fn().mockImplementation((content: string[]) => content),
+    );
+    vi.stubGlobal('URL', {
+      createObjectURL: vi.fn().mockReturnValue('blob:mock'),
+      revokeObjectURL: vi.fn(),
+    });
   });
 
   it('offline mode uses memory fallback', async () => {
@@ -83,7 +108,10 @@ describe('DuckDBWasmStore init paths', () => {
 
   it('init with fallback URLs', async () => {
     const store = new DuckDBWasmStore({
-      wasmFallbackUrls: ['https://cdn1.example.com/duckdb.wasm', 'https://cdn2.example.com/duckdb.wasm'],
+      wasmFallbackUrls: [
+        'https://cdn1.example.com/duckdb.wasm',
+        'https://cdn2.example.com/duckdb.wasm',
+      ],
     });
     const result = await store.init();
     expect(result.wasmActive).toBe(true);
@@ -146,7 +174,10 @@ describe('DuckDBWasmStore init paths', () => {
     const store = new DuckDBWasmStore({});
     await store.init();
     await store.upsertEntity({ clusterId: 'big', memberIds: [1, 2, 3, 4], cohesion: 0.5 });
-    await store.applySplit('big', [['1', '2'], ['3', '4']]);
+    await store.applySplit('big', [
+      ['1', '2'],
+      ['3', '4'],
+    ]);
     const s0 = await store.getEntity('big_split_0');
     const s1 = await store.getEntity('big_split_1');
     expect(s0).not.toBeNull();

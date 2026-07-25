@@ -2,11 +2,7 @@
  * Tests for memory guard utilities.
  */
 import { describe, it, expect } from 'vitest';
-import {
-  checkMemory,
-  isMemoryHigh,
-  estimateBlockingMemory,
-} from '../../utils/memory-guard.js';
+import { checkMemory, isMemoryHigh, estimateBlockingMemory } from '../../utils/memory-guard.js';
 
 describe('checkMemory', () => {
   it('returns MemorySnapshot with heapUsed and heapTotal', () => {
@@ -32,9 +28,7 @@ describe('checkMemory', () => {
   });
 
   it('throws when exceeding error threshold', () => {
-    expect(() =>
-      checkMemory({ errorThreshold: 1 }),
-    ).toThrow('Memory usage');
+    expect(() => checkMemory({ errorThreshold: 1 })).toThrow('Memory usage');
   });
 
   it('uses default thresholds when no config provided', () => {

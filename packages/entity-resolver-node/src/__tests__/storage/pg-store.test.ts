@@ -136,9 +136,6 @@ describe('buildPoolConfig', () => {
     // Should throw IOError — no silent fallback to raw string
     expect(() => buildPoolConfig(config)).toThrow('Failed to read PEM CA certificate');
   });
-    const result = buildPoolConfig(config);
-    expect(result.ssl).toBeDefined();
-  });
 
   it('default poolSize is 10', () => {
     const config: PgStoreConfig = {

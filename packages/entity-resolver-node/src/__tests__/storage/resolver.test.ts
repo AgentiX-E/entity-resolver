@@ -50,7 +50,10 @@ describe('buildPoolConfig', () => {
 
   it('accepts custom host and port', () => {
     const config = buildPoolConfig({
-      database: 'mydb', host: 'pg.example.com', port: 5433, user: 'admin',
+      database: 'mydb',
+      host: 'pg.example.com',
+      port: 5433,
+      user: 'admin',
     });
     expect(config.host).toBe('pg.example.com');
     expect(config.port).toBe(5433);
@@ -70,10 +73,10 @@ describe('buildPoolConfig', () => {
     expect(config.ssl).toBeDefined();
     if (config.ssl && typeof config.ssl === 'object') {
       const ssl = config.ssl as Record<string, unknown>;
-      expect(ssl['ca']).toBe('CA-CERT-CONTENT');
-      expect(ssl['cert']).toBe('CLIENT-CERT');
-      expect(ssl['key']).toBe('CLIENT-KEY');
-      expect(ssl['servername']).toBe('db.example.com');
+      expect(ssl.ca).toBe('CA-CERT-CONTENT');
+      expect(ssl.cert).toBe('CLIENT-CERT');
+      expect(ssl.key).toBe('CLIENT-KEY');
+      expect(ssl.servername).toBe('db.example.com');
     }
   });
 
@@ -83,7 +86,7 @@ describe('buildPoolConfig', () => {
       tls: { rejectUnauthorized: false },
     });
     if (config.ssl && typeof config.ssl === 'object') {
-      expect((config.ssl as Record<string, unknown>)['rejectUnauthorized']).toBe(false);
+      expect((config.ssl as Record<string, unknown>).rejectUnauthorized).toBe(false);
     }
   });
 });

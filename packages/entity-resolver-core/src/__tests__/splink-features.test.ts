@@ -12,7 +12,7 @@ describe('EM max_pairs sampling', () => {
   it('maxPairs reduces pair count without breaking estimation', async () => {
     const { estimateParameters } = await import('../fellegi-sunter/em.js');
     const vectors = Array.from({ length: 200 }, () => [
-      { field: 'name', level: 'exact_match' as const, value: 1, score: 1 },
+      { field: 'name', level: 'exact_match' as const, value: 1, score: 1, scorer: 'exact' },
     ]);
     const result = estimateParameters(vectors, { maxPairs: 50 });
     expect(result.iterations).toBeGreaterThan(0);
@@ -22,8 +22,8 @@ describe('EM max_pairs sampling', () => {
   it('handles maxPairs > total pairs (no-op)', async () => {
     const { estimateParameters } = await import('../fellegi-sunter/em.js');
     const vectors = [
-      [{ field: 'name', level: 'exact_match' as const, value: 1, score: 1 }],
-      [{ field: 'name', level: 'strong_match' as const, value: 0.8, score: 0.8 }],
+      [{ field: 'name', level: 'exact_match' as const, value: 1, score: 1, scorer: 'exact' }],
+      [{ field: 'name', level: 'strong_match' as const, value: 0.8, score: 0.8, scorer: 'exact' }],
     ];
     const result = estimateParameters(vectors, { maxPairs: 999 });
     expect(result.iterations).toBeGreaterThan(0);
@@ -37,9 +37,7 @@ describe('EM max_pairs sampling', () => {
 describe('computeGraphMetrics', () => {
   it('computes metrics for simple two-node cluster', async () => {
     const { computeGraphMetrics } = await import('../clustering/graph-metrics.js');
-    const pairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.9, probability: 0.9 },
-    ];
+    const pairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.9, probability: 0.9 }];
     const clusters = new Map([['c1', { memberIds: [0, 1], cohesion: 0.9 }]]);
     const metrics = computeGraphMetrics(pairs, clusters, 3);
     expect(metrics.totalEntities).toBe(3);
@@ -111,7 +109,7 @@ describe('composable blocking', () => {
     pairs: prs.map(([l, r]) => ({ leftId: l, rightId: r })),
     blockCount: 1,
     totalRecords: total,
-    reductionRatio: 1 - prs.length / (total * (total - 1) / 2),
+    reductionRatio: 1 - prs.length / ((total * (total - 1)) / 2),
   });
 
   it('blockOnField creates blocking pass', async () => {
@@ -129,8 +127,20 @@ describe('composable blocking', () => {
 
   it('intersect keeps common pairs only', async () => {
     const { intersectPairs } = await import('../blocking/composable.js');
-    const r1 = makeResult([[0, 1], [0, 2]], 4);
-    const r2 = makeResult([[0, 1], [1, 2]], 4);
+    const r1 = makeResult(
+      [
+        [0, 1],
+        [0, 2],
+      ],
+      4,
+    );
+    const r2 = makeResult(
+      [
+        [0, 1],
+        [1, 2],
+      ],
+      4,
+    );
     const result = intersectPairs([r1, r2]);
     expect(result.pairs.length).toBe(1);
     expect(result.pairs[0]!.leftId).toBe(0);
@@ -155,7 +165,13 @@ describe('composable blocking', () => {
 
   it('subtract removes pairs', async () => {
     const { subtractPairs } = await import('../blocking/composable.js');
-    const r1 = makeResult([[0, 1], [0, 2]], 4);
+    const r1 = makeResult(
+      [
+        [0, 1],
+        [0, 2],
+      ],
+      4,
+    );
     const r2 = makeResult([[0, 1]], 4);
     const result = subtractPairs(r1, [r2]);
     expect(result.pairs.length).toBe(1);

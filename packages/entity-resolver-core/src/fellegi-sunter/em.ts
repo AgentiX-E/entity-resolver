@@ -83,7 +83,7 @@ export function estimateParameters(
     // Deterministic hash-based sampling: keep pairs where hash(leftId, rightId) < threshold
     const sampleRatio = maxPairs / pairVectors.length;
     const sampledVectors: ComparisonVector[][] = [];
-    
+
     for (let i = 0; i < pairVectors.length; i++) {
       if (simpleHash32(i) < sampleRatio * 0xffffffff) {
         sampledVectors.push(pairVectors[i] as ComparisonVector[]);
@@ -91,9 +91,12 @@ export function estimateParameters(
     }
     // Ensure at least 2 pairs for meaningful estimation
     if (sampledVectors.length < 2 && pairVectors.length >= 2) {
-      sampledVectors.push(pairVectors[0] as ComparisonVector[], pairVectors[1] as ComparisonVector[]);
+      sampledVectors.push(
+        pairVectors[0] as ComparisonVector[],
+        pairVectors[1] as ComparisonVector[],
+      );
     }
-    
+
     effectiveVectors = sampledVectors;
   } else {
     effectiveVectors = pairVectors;
@@ -380,7 +383,7 @@ function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): voi
     return levelRank(levelB!) - levelRank(levelA!);
   });
 
-  const mBlocks: Array<{ indices: number[]; avgValue: number; totalWeight: number }> = [];
+  const mBlocks: { indices: number[]; avgValue: number; totalWeight: number }[] = [];
   for (let i = 0; i < mLevels.length; i++) {
     const key = mLevels[i]!;
     const mVal = state.mProbabilities.get(key) ?? 0.5;
@@ -418,7 +421,7 @@ function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): voi
     return levelRank(levelA!) - levelRank(levelB!);
   });
 
-  const uBlocks: Array<{ indices: number[]; avgValue: number; totalWeight: number }> = [];
+  const uBlocks: { indices: number[]; avgValue: number; totalWeight: number }[] = [];
   for (let i = 0; i < uLevels.length; i++) {
     const key = uLevels[i]!;
     const uVal = state.uProbabilities.get(key) ?? 0.1;
@@ -502,7 +505,7 @@ export function clampProb(p: number): number {
 /** Simple 32-bit hash for deterministic pair sampling (Splink-style). */
 function simpleHash32(n: number): number {
   let h = n | 0;
-  h = ((h ^ 61) ^ (h >>> 16)) * 9;
+  h = (h ^ 61 ^ (h >>> 16)) * 9;
   h = h ^ (h >>> 4);
   h = h * 0x27d4eb2d;
   h = h ^ (h >>> 15);

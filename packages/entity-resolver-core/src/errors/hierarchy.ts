@@ -41,12 +41,7 @@ export abstract class EntityResolverError extends Error {
   public readonly context: ErrorContext;
   public readonly timestamp: string;
 
-  constructor(
-    message: string,
-    code: ErrorCode,
-    statusCode: number,
-    context: ErrorContext = {},
-  ) {
+  constructor(message: string, code: ErrorCode, statusCode: number, context: ErrorContext = {}) {
     super(message);
     this.name = this.constructor.name;
     this.code = code;
@@ -163,11 +158,7 @@ export class AuthError extends EntityResolverError {
 export class RateLimitError extends EntityResolverError {
   public readonly retryAfterSeconds: number;
 
-  constructor(
-    message: string,
-    retryAfterSeconds: number,
-    context?: ErrorContext,
-  ) {
+  constructor(message: string, retryAfterSeconds: number, context?: ErrorContext) {
     super(message, 'ER_RATE_LIMITED', 429, context);
     this.retryAfterSeconds = retryAfterSeconds;
   }
@@ -187,33 +178,31 @@ export class InternalError extends EntityResolverError {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ErrorCtor = new (...args: any[]) => EntityResolverError;
 
-const ERROR_CLASS_MAP: Map<string, ErrorCtor> = new Map([
-  ['ER_CONFIG_INVALID_INPUT', ValidationError as ErrorCtor],
-  ['ER_CONFIG_MALFORMED', ConfigurationError as ErrorCtor],
-  ['ER_IO_FAILURE', IOError as ErrorCtor],
-  ['ER_PARSE_FAILURE', ParseError as ErrorCtor],
-  ['ER_RESOLVE_FAILURE', ResolutionError as ErrorCtor],
-  ['ER_BLOCKING_FAILURE', BlockingError as ErrorCtor],
-  ['ER_SCORING_FAILURE', ScoringError as ErrorCtor],
-  ['ER_CLUSTER_FAILURE', ClusteringError as ErrorCtor],
-  ['ER_EVAL_FAILURE', EvaluationError as ErrorCtor],
-  ['ER_EM_CONVERGENCE', ConvergenceError as ErrorCtor],
-  ['ER_LLM_FAILURE', LLMError as ErrorCtor],
-  ['ER_AUTH_FAILURE', AuthError as ErrorCtor],
-  ['ER_RATE_LIMITED', RateLimitError as ErrorCtor],
-  ['ER_INTERNAL', InternalError as ErrorCtor],
+const ERROR_CLASS_MAP = new Map<string, ErrorCtor>([
+  ['ER_CONFIG_INVALID_INPUT', ValidationError],
+  ['ER_CONFIG_MALFORMED', ConfigurationError],
+  ['ER_IO_FAILURE', IOError],
+  ['ER_PARSE_FAILURE', ParseError],
+  ['ER_RESOLVE_FAILURE', ResolutionError],
+  ['ER_BLOCKING_FAILURE', BlockingError],
+  ['ER_SCORING_FAILURE', ScoringError],
+  ['ER_CLUSTER_FAILURE', ClusteringError],
+  ['ER_EVAL_FAILURE', EvaluationError],
+  ['ER_EM_CONVERGENCE', ConvergenceError],
+  ['ER_LLM_FAILURE', LLMError],
+  ['ER_AUTH_FAILURE', AuthError],
+  ['ER_RATE_LIMITED', RateLimitError],
+  ['ER_INTERNAL', InternalError],
 ]);
 
 /**
  * Reconstruct a typed error from its JSON representation.
  * Returns a plain Error if the code is unknown.
  */
-export function reconstructError(
-  json: Record<string, unknown>,
-): EntityResolverError | Error {
-  const code = json['code'] as string | undefined;
-  const message = String(json['message'] ?? 'Unknown error');
-  const context = (json['context'] as ErrorContext) ?? {};
+export function reconstructError(json: Record<string, unknown>): EntityResolverError | Error {
+  const code = json.code as string | undefined;
+  const message = String(json.message ?? 'Unknown error');
+  const context = (json.context as ErrorContext) ?? {};
 
   if (!code) {
     return new Error(message);
@@ -225,9 +214,9 @@ export function reconstructError(
     Object.assign(err, {
       message,
       code,
-      statusCode: json['statusCode'] as number,
+      statusCode: json.statusCode as number,
       context,
-      timestamp: json['timestamp'] as string,
+      timestamp: json.timestamp as string,
       name: Ctor.name,
     });
     return err;
@@ -242,7 +231,7 @@ export function reconstructError(
  */
 export function wrapError(
   err: unknown,
-  fallbackMessage: string = 'An unexpected error occurred',
+  fallbackMessage = 'An unexpected error occurred',
 ): EntityResolverError {
   if (err instanceof EntityResolverError) {
     return err;

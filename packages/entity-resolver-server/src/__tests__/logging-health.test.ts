@@ -38,8 +38,8 @@ describe('Health check', () => {
   it('includes registered component status', () => {
     registerHealthComponent('database', () => ({ status: 'ok', message: 'Connected' }));
     const result = getHealth();
-    expect(result.components['database']).toBeDefined();
-    expect(result.components['database']!.status).toBe('ok');
+    expect(result.components.database).toBeDefined();
+    expect(result.components.database!.status).toBe('ok');
   });
 
   it('reports degraded when component is degraded', () => {
