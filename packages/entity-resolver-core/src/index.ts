@@ -162,6 +162,10 @@ export {
   deserializeFSParamsFromJSON,
 } from './fellegi-sunter/model-serialization.js';
 
+// SQL EM Estimation
+export type { SqlEMOptions, SqlEMResult } from './fellegi-sunter/sql-em.js';
+export { sqlEstimateParameters } from './fellegi-sunter/sql-em.js';
+
 // Blocking
 export type {
   CandidatePair,
