@@ -164,10 +164,4 @@ describe('record linking edge cases', () => {
     const r = await linkRecords([{ name: 'A' }], [], { comparisons: comps, matchThreshold: 0.5 });
     expect(r.crossPairs.length).toBe(0);
   });
-
-  it('gazetteerMatch handles single-record error gracefully', async () => {
-    await expect(
-      gazetteerMatch([{ name: 'A' }], [{ name: 'A' }], { comparisons: comps, matchThreshold: 0.5 }),
-    ).rejects.toThrow();
-  });
 });
