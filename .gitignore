@@ -12,3 +12,4 @@ target/
 test-results/
 e2e/wasm-cache/
 .env
+core.*
