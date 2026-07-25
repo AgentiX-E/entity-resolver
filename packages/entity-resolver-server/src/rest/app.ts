@@ -28,6 +28,7 @@ import { createRateLimitMiddleware } from '../middleware/rate-limit.js';
 import type { AuthConfig } from '../middleware/auth.js';
 import type { RateLimitConfig } from '../middleware/rate-limit.js';
 import { getMcpTools, executeMcpTool } from '../mcp/tools.js';
+import { metricsMiddleware, metricsEndpoint, recordPipeline } from '../metrics/prometheus.js';
 
 /** Server configuration. */
 export interface ServerConfig {
@@ -251,10 +252,16 @@ export function createApp(config: ServerConfig = {}): Hono {
   // Request tracking for graceful drain
   app.use('*', requestTrackingMiddleware());
 
+  // Metrics collection (outermost for accurate timing)
+  app.use('*', metricsMiddleware());
+
   // ── Routes ──
 
   // Health check (no auth required — bypassed in auth middleware)
   app.get('/health', (c: Context) => c.json(getHealth()));
+
+  // Prometheus metrics endpoint
+  app.get('/metrics', metricsEndpoint);
 
   // Deduplicate records
   app.post('/api/v1/dedupe', async (c: Context) => {
@@ -268,6 +275,11 @@ export function createApp(config: ServerConfig = {}): Hono {
     try {
       const auto = autoConfigure(records);
       const result = await runPipeline(records, auto.config);
+      recordPipeline(
+        records.length,
+        result.statistics.totalClusters,
+        result.statistics.executionTimeMs,
+      );
       return c.json({
         clusters: Object.fromEntries(result.clusters),
         statistics: result.statistics,

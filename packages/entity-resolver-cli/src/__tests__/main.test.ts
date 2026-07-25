@@ -19,7 +19,9 @@ function writeTempCsv(name: string, content: string): string {
 function cleanup(): void {
   try {
     if (existsSync(TEST_DIR)) rmSync(TEST_DIR, { recursive: true, force: true });
-  } catch { /* ignore cleanup errors */ }
+  } catch {
+    /* ignore cleanup errors */
+  }
 }
 
 const PERSON_CSV = `given_name,surname,date_of_birth,address_city,email

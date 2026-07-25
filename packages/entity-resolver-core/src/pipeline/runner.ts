@@ -14,6 +14,8 @@ import type { BlockingConfig, CandidatePair } from '../blocking/types.js';
 import type { ComparisonSpec, ComparisonVector } from '../matching/comparison.js';
 import type { ScoredPair } from '../types/core.js';
 import type { ClusteringResult } from '../clustering/algorithms.js';
+import type { ILogger } from '../interfaces/ILogger.js';
+import { NoopLogger } from '../interfaces/ILogger.js';
 import { ValidationError } from '../errors/hierarchy.js';
 import { preprocessRecords } from '../preprocessing/cleaner.js';
 import { standardBlocking } from '../blocking/standard.js';
@@ -49,6 +51,8 @@ export interface PipelineOptions {
    * Default: true (in-place). Set false to preserve input.
    */
   readonly mutateInput?: boolean;
+  /** Structured logger for pipeline stage instrumentation. Default: NoopLogger. */
+  readonly logger?: ILogger;
 }
 
 /**
@@ -67,7 +71,15 @@ export async function runPipeline(
   options?: PipelineOptions,
   _groundTruth?: Map<string, number[]>,
 ): Promise<PipelineResult> {
-  // ���� Input validation ����
+  const logger = options?.logger ?? NoopLogger;
+  const startTime = Date.now();
+
+  logger.info('Pipeline started', {
+    operation: 'runPipeline',
+    recordCount: records.length,
+  });
+
+  // ── Input validation ──
   if (!Array.isArray(records) || records.length === 0) {
     throw new ValidationError('records must be a non-empty array', {
       operation: 'runPipeline',
@@ -93,16 +105,29 @@ export async function runPipeline(
     );
   }
 
-  const startTime = Date.now();
-
   // Stage 1: Preprocessing (in-place by default to avoid structuredClone overhead)
   const mutateInput = options?.mutateInput ?? true;
   const cleaned: RawRecord[] = mutateInput ? records : structuredClone(records);
   preprocessRecords(cleaned);
 
+  logger.debug('Preprocessing complete', {
+    operation: 'runPipeline',
+    stage: 'preprocessing',
+    mutateInput,
+    elapsedMs: Date.now() - startTime,
+  });
+
   // Stage 2: Blocking
   const blockingResult = standardBlocking(cleaned, config.blocking);
   const candidates = blockingResult.pairs;
+
+  logger.debug('Blocking complete', {
+    operation: 'runPipeline',
+    stage: 'blocking',
+    candidateCount: candidates.length,
+    reductionRatio: blockingResult.reductionRatio,
+    elapsedMs: Date.now() - startTime,
+  });
 
   // Stage 3: Matching �? generate comparison vectors grouped by pair
   const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
@@ -113,6 +138,15 @@ export async function runPipeline(
     epsilon: options?.emEpsilon ?? 1e-6,
   });
   const params = emResult.parameters;
+
+  logger.debug('EM parameter estimation complete', {
+    operation: 'runPipeline',
+    stage: 'em',
+    iterations: emResult.iterations,
+    converged: emResult.converged,
+    logLikelihood: emResult.logLikelihood,
+    elapsedMs: Date.now() - startTime,
+  });
 
   // Stage 3c: Compute match weights + TF adjustment
   let tfLookup: TFAdjustmentLookup | undefined;
@@ -132,6 +166,16 @@ export async function runPipeline(
 
   // Stage 4: Clustering
   const clustering = connectedComponents(scoredPairs, records.length, config.matchThreshold);
+
+  logger.info('Pipeline complete', {
+    operation: 'runPipeline',
+    totalRecords: records.length,
+    clusterCount: clustering.metadata.numClusters,
+    candidateCount: candidates.length,
+    matchCount:
+      clustering.metadata.numClusters > 0 ? records.length - clustering.singletons.length : 0,
+    totalElapsedMs: Date.now() - startTime,
+  });
 
   // Build final result
   const statistics = buildStatistics(records.length, clustering, emResult, startTime);

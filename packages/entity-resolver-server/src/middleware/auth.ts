@@ -45,8 +45,8 @@ export interface JwtValidationResult {
  */
 export function createAuthMiddleware(config: AuthConfig) {
   return async (c: Context, next: Next) => {
-    // Allow health endpoint without auth
-    if (c.req.path === '/health') {
+    // Allow health and metrics endpoints without auth
+    if (c.req.path === '/health' || c.req.path === '/metrics') {
       return next();
     }
 

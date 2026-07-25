@@ -39,7 +39,19 @@ export {
   JSONRPC_ERRORS,
 } from './mcp/jsonrpc.js';
 
-// Logging & Health
+// Logging, Metrics & Health
 export { createLogger, logger } from './logging/logger.js';
 export type { ComponentStatus, HealthCheckResult } from './logging/health.js';
-export { registerHealthComponent, getHealth } from './logging/health.js';
+export { registerHealthComponent, getHealth, initHealthComponents } from './logging/health.js';
+
+// Metrics
+export {
+  requestCounter,
+  requestDuration,
+  pipelineDuration,
+  pipelineRecordsTotal,
+  pipelineClustersTotal,
+  metricsMiddleware,
+  metricsEndpoint,
+  recordPipeline,
+} from './metrics/prometheus.js';
