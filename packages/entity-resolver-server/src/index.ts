@@ -55,3 +55,7 @@ export {
   metricsEndpoint,
   recordPipeline,
 } from './metrics/prometheus.js';
+
+// Trace Context (W3C traceparent)
+export type { TraceContext } from './middleware/trace.js';
+export { traceContextMiddleware, getTraceContext } from './middleware/trace.js';

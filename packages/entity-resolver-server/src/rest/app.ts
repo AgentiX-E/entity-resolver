@@ -30,6 +30,7 @@ import type { AuthConfig } from '../middleware/auth.js';
 import type { RateLimitConfig } from '../middleware/rate-limit.js';
 import { getMcpTools, executeMcpTool } from '../mcp/tools.js';
 import { metricsMiddleware, metricsEndpoint, recordPipeline } from '../metrics/prometheus.js';
+import { traceContextMiddleware } from '../middleware/trace.js';
 
 /** Server configuration. */
 export interface ServerConfig {
@@ -252,6 +253,9 @@ export function createApp(config: ServerConfig = {}): Hono {
 
   // Request tracking for graceful drain
   app.use('*', requestTrackingMiddleware());
+
+  // Trace context propagation (W3C traceparent)
+  app.use('*', traceContextMiddleware());
 
   // Metrics collection (outermost for accurate timing)
   app.use('*', metricsMiddleware());
