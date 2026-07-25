@@ -78,6 +78,7 @@ describe('Benchmark runner edge cases', () => {
     const result = await runBenchmark({
       name: 'empty',
       description: '',
+      type: 'deduplication' as const,
       recordCount: 0,
       trueMatchCount: 0,
       records: [],
@@ -93,6 +94,7 @@ describe('Benchmark runner edge cases', () => {
     const result = await runBenchmark({
       name: 'single',
       description: '',
+      type: 'deduplication' as const,
       recordCount: 1,
       trueMatchCount: 0,
       records: [{ name: 'Only' }],

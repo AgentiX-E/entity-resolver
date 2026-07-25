@@ -17,14 +17,23 @@ import type { ILogger } from '../interfaces/ILogger.js';
 
 import { createRequire } from 'node:module';
 
+/** Type of entity resolution problem. */
+export type BenchmarkType = 'deduplication' | 'record_linkage';
+
 /** A benchmark dataset with records and ground truth clusters. */
 export interface BenchmarkDataset {
   readonly name: string;
   readonly description: string;
+  /** Whether this is a deduplication or record_linkage problem. */
+  readonly type: BenchmarkType;
   readonly recordCount: number;
   readonly trueMatchCount: number;
   readonly records: RawRecord[];
   readonly groundTruth: Map<string, number[]>;
+  /** For record_linkage: which records belong to the left dataset (indices). */
+  readonly leftIndices?: readonly number[];
+  /** For record_linkage: which records belong to the right dataset (indices). */
+  readonly rightIndices?: readonly number[];
 }
 
 /** Result of running a benchmark. */
@@ -53,6 +62,7 @@ export function loadFebrl(): BenchmarkDataset {
     name: 'FEBRL 5000',
     description:
       'Person records with typos, phonetic variants, date format variations, and schema changes',
+    type: 'deduplication',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
     records: gen.records,
@@ -174,13 +184,24 @@ function loadRealDblpAcm(logger?: ILogger): BenchmarkDataset {
       }
     }
 
+    // Build left/right indices for record_linkage benchmark
+    const leftIndices: number[] = [];
+    const rightIndices: number[] = [];
+    for (let i = 0; i < records.length; i++) {
+      if (records[i]?.source === 'dblp') leftIndices.push(i);
+      else rightIndices.push(i);
+    }
+
     return {
       name: 'DBLP-ACM',
       description: 'Bibliographic records from DBLP and ACM digital libraries with perfect mapping',
+      type: 'record_linkage',
       recordCount: records.length,
       trueMatchCount: groundTruth.size,
       records,
       groundTruth,
+      leftIndices,
+      rightIndices,
     };
   } catch (err: unknown) {
     logger?.warn(
@@ -201,6 +222,7 @@ export function fallbackDblpAcm(): BenchmarkDataset {
   return {
     name: 'DBLP-ACM',
     description: 'Generated bibliographic records with title/author/venue variations',
+    type: 'deduplication',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
     records: gen.records,
@@ -225,6 +247,7 @@ export function loadAbtBuy(): BenchmarkDataset {
   });
   return {
     name: 'Abt-Buy',
+    type: 'deduplication',
     description:
       'Product listings from Abt.com, Buy.com, Newegg with title/price/category variations',
     recordCount: gen.records.length,
@@ -247,6 +270,7 @@ export function loadAmazonGoogle(): BenchmarkDataset {
   });
   return {
     name: 'Amazon-Google',
+    type: 'deduplication',
     description: 'Cross-retailer product matching with description text differences',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
@@ -268,6 +292,7 @@ export function loadWdcProducts(): BenchmarkDataset {
   });
   return {
     name: 'WDC Products',
+    type: 'deduplication',
     description: 'Smartphone product listings with spec variations across retailers',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
@@ -289,6 +314,7 @@ export function loadWdcOffers(): BenchmarkDataset {
   });
   return {
     name: 'WDC Offers',
+    type: 'deduplication',
     description: 'Book merchant offers with price/condition variations',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
@@ -310,6 +336,7 @@ export function loadItunesAmazon(): BenchmarkDataset {
   });
   return {
     name: 'iTunes-Amazon',
+    type: 'deduplication',
     description: 'Music album matching with artist name format and remastered edition variations',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
@@ -331,6 +358,7 @@ export function loadCora(): BenchmarkDataset {
   });
   return {
     name: 'Cora',
+    type: 'deduplication',
     description: 'Academic citations with author format and venue abbreviation variations',
     recordCount: gen.records.length,
     trueMatchCount: gen.trueMatchCount,
