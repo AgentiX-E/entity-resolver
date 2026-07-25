@@ -155,9 +155,10 @@ describe('record linking edge cases', () => {
     { field: 'name', scorerName: 'exact', levels: [{ label: 'exact_match', threshold: 0.99 }] },
   ];
 
-  it('gazetteerMatch empty queries', async () => {
-    const r = await gazetteerMatch([], [{ name: 'A' }], { comparisons: comps, matchThreshold: 0.5 });
-    expect(r.queryToIndexMatches.length).toBe(0);
+  it('gazetteerMatch empty queries throws validation error', async () => {
+    await expect(
+      gazetteerMatch([], [{ name: 'A' }], { comparisons: comps, matchThreshold: 0.5 }),
+    ).rejects.toThrow();
   });
 
   it('linkRecords empty right', async () => {
