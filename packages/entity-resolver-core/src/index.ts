@@ -215,6 +215,10 @@ export {
 // SQL Blocking
 export { sqlBlocking } from './blocking/sql-blocking.js';
 
+// TF-IDF Blocking
+export type { TfIdfBlockingConfig } from './blocking/tfidf-blocking.js';
+export { tfidfBlocking, bm25Score, computeAvgDocLen } from './blocking/tfidf-blocking.js';
+
 // Clustering
 export type { ClusteringResult, ClusteringMetadata } from './clustering/algorithms.js';
 export { connectedComponents, dbscanClustering, uniqueMapping } from './clustering/algorithms.js';
