@@ -149,4 +149,34 @@ describe('CSV parsing edges', () => {
     const result = parseCsvLine('"""","normal"');
     expect(result.length).toBe(2);
   });
+
+  it('handles escaped quotes inside quoted fields', async () => {
+    const { parseCsvLine } = await import('../../benchmarks/datasets.js');
+    const result = parseCsvLine('"say ""hello"" world",simple');
+    expect(result).toEqual(['say "hello" world', 'simple']);
+  });
+
+  it('handles trailing comma', async () => {
+    const { parseCsvLine } = await import('../../benchmarks/datasets.js');
+    const result = parseCsvLine('a,b,');
+    expect(result).toEqual(['a', 'b', '']);
+  });
+
+  it('handles unclosed quotes by treating rest as value', async () => {
+    const { parseCsvLine } = await import('../../benchmarks/datasets.js');
+    const result = parseCsvLine('"unclosed value,next');
+    expect(result.length).toBeGreaterThanOrEqual(1);
+  });
+
+  it('handles quoted field with comma inside', async () => {
+    const { parseCsvLine } = await import('../../benchmarks/datasets.js');
+    const result = parseCsvLine('"New York, NY",10001');
+    expect(result).toEqual(['New York, NY', '10001']);
+  });
+
+  it('handles only commas', async () => {
+    const { parseCsvLine } = await import('../../benchmarks/datasets.js');
+    const result = parseCsvLine(',,');
+    expect(result).toEqual(['', '', '']);
+  });
 });

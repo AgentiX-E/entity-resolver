@@ -165,4 +165,86 @@ describe('autoConfigure', () => {
     const result = autoConfigure(records);
     expect(result.config.tfFields).toBeDefined();
   });
+
+  it('detects date values by content (YYYY-MM-DD format)', () => {
+    const records = Array.from({ length: 10 }, (_, i) => ({
+      event_date: `2023-0${(i % 9) + 1}-15`,
+    }));
+    const result = autoConfigure(records);
+    const dateField = result.fields.find((f) => f.name === 'event_date');
+    expect(dateField).toBeDefined();
+    expect(dateField!.semanticType).toBe('date');
+  });
+
+  it('detects numeric values by content', () => {
+    const records = Array.from({ length: 10 }, (_, i) => ({ val: String(i * 1.5) }));
+    const result = autoConfigure(records);
+    const numField = result.fields.find((f) => f.name === 'val');
+    expect(numField).toBeDefined();
+    expect(numField!.semanticType).toBe('numeric');
+    expect(numField!.isNumeric).toBe(true);
+  });
+
+  it('handles empty dataset gracefully', () => {
+    const result = autoConfigure([]);
+    expect(result.fields).toHaveLength(0);
+    expect(result.confidence).toBe(0);
+    expect(result.warnings).toContain('Empty dataset');
+  });
+
+  it('generates warning for low-confidence fields', () => {
+    const records = [{ xyz_unknown_field: 'some value' }];
+    const result = autoConfigure(records);
+    expect(result.fields[0]!.confidence).toBeLessThan(0.7);
+    expect(result.warnings.length).toBeGreaterThan(0);
+  });
+
+  it('uses soundex on single-name blocking for small datasets', () => {
+    // Only one name field without surname → soundex-only blocking
+    const records = [{ given_name: 'John', city: 'NY' }];
+    const result = autoConfigure(records);
+    const passes = result.config.blocking.passes ?? [];
+    expect(passes.length).toBeGreaterThan(0);
+    const hasSoundex = passes.some(
+      (p) => p.transforms.includes('soundex'),
+    );
+    expect(hasSoundex).toBe(true);
+  });
+
+  it('returns 0.7 threshold for high-confidence fields', () => {
+    const records = [
+      { email: 'a@b.com', phone: '123-4567', name: 'Test' },
+      { email: 'c@d.com', phone: '789-0123', name: 'Other' },
+    ];
+    const result = autoConfigure(records);
+    expect(result.config.matchThreshold).toBe(0.7);
+  });
+});
+
+describe('detectFields edge cases', () => {
+  it('returns empty for empty records array', async () => {
+    const { detectFields } = await import('../../index.js');
+    expect(detectFields([])).toHaveLength(0);
+  });
+
+  it('detects postcode-like alphanumeric values', () => {
+    const records = Array.from({ length: 10 }, (_, i) => ({
+      code: `AB${i}CD`,
+    }));
+    const result = autoConfigure(records);
+    const field = result.fields.find((f) => f.name === 'code');
+    expect(field!).toBeDefined();
+    // 3-10 alphanumeric chars may be detected as postcode if >80% match
+    expect(field!.semanticType).toBe('postcode');
+  });
+
+  it('falls back to text for unrecognized patterns', () => {
+    const records = Array.from({ length: 10 }, (_, i) => ({
+      mystery_column: `xyz-${i}-abc-def-ghi`,
+    }));
+    const result = autoConfigure(records);
+    const field = result.fields.find((f) => f.name === 'mystery_column');
+    expect(field!.semanticType).toBe('text');
+    expect(field!.confidence).toBe(0.5);
+  });
 });
