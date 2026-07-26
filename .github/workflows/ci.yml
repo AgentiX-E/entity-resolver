@@ -47,7 +47,7 @@ jobs:
   test:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 10
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
@@ -65,7 +65,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Run tests (no coverage for speed)
-        run: pnpm -r --parallel exec vitest run
+        run: pnpm -r exec vitest run
 
   coverage:
     name: Coverage (Node 22, ubuntu)
