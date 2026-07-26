@@ -17,7 +17,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && mkdir -p dist/matching/scorers/wasm dist/benchmarks && cp -r src/matching/scorers/wasm/scorers dist/matching/scorers/wasm/ && cp -r src/benchmarks/data dist/benchmarks/",
+    "build": "tsc -p tsconfig.json && node -e \"require('fs').cpSync('src/matching/scorers/wasm/scorers','dist/matching/scorers/wasm/scorers',{recursive:true})\" && node -e \"require('fs').cpSync('src/benchmarks/data','dist/benchmarks/data',{recursive:true})\"",
     "test": "vitest run --coverage",
     "lint": "eslint src/",
     "typecheck": "tsc -p tsconfig.json --noEmit",

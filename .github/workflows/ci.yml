@@ -63,6 +63,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - name: Run tests (no coverage for speed)
         run: pnpm -r --parallel exec vitest run
 
