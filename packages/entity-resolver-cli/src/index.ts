@@ -249,10 +249,15 @@ TUI Renderers (imported programmatically):
 // - When imported as a library (e.g., `import { main } from '...'`), argv[1] won't match
 // The binary name is "entity-resolver" per package.json bin field.
 const _scriptPath = process.argv[1] ?? '';
+const _modulePath = import.meta.url.startsWith('file://')
+  ? import.meta.url.slice(7) // Strip file:// prefix for comparison
+  : import.meta.url;
 const _isCliInvocation =
-  _scriptPath.includes('/entity-resolver') ||
-  _scriptPath.includes('\\entity-resolver') ||
-  _scriptPath === import.meta.url;
+  _scriptPath.includes('/entity-resolver-cli/') ||
+  _scriptPath.includes('\\entity-resolver-cli\\') ||
+  _scriptPath === _modulePath ||
+  _scriptPath.endsWith('/entity-resolver') ||
+  _scriptPath.endsWith('\\entity-resolver');
 
 if (_isCliInvocation) {
   // Initialize with a shebang-compatible unhandled rejection handler.
