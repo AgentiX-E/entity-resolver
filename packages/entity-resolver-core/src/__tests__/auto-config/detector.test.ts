@@ -205,9 +205,7 @@ describe('autoConfigure', () => {
     const result = autoConfigure(records);
     const passes = result.config.blocking.passes ?? [];
     expect(passes.length).toBeGreaterThan(0);
-    const hasSoundex = passes.some(
-      (p) => p.transforms.includes('soundex'),
-    );
+    const hasSoundex = passes.some((p) => p.transforms.includes('soundex'));
     expect(hasSoundex).toBe(true);
   });
 
@@ -229,7 +227,7 @@ describe('detectFields edge cases', () => {
 
   it('detects postcode-like alphanumeric values', () => {
     const records = Array.from({ length: 10 }, (_, i) => ({
-      code: `AB${i}CD`,
+      code: `AB${i} 2CD`,
     }));
     const result = autoConfigure(records);
     const field = result.fields.find((f) => f.name === 'code');

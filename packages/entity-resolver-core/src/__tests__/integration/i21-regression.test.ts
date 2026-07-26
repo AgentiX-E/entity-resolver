@@ -11,8 +11,9 @@ describe('MemoryEntityStore.queryNeighbors', () => {
     await store.upsertEntity({ clusterId: 'e3', memberIds: [3, 4], cohesion: 0.7 });
 
     const neighbors = await store.queryNeighbors('e1');
-    expect(neighbors.length).toBe(1); // e2 shares member 1
-    expect(neighbors[0]!.clusterId).toBe('e2');
+    expect(neighbors.length).toBe(2); // self (e1) + e2 shares member 1
+    expect(neighbors[0]!.clusterId).toBe('e1');
+    expect(neighbors[1]!.clusterId).toBe('e2');
   });
 
   it('multi-hop traverses graph', async () => {

@@ -5,8 +5,8 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      // Branches at 89 (documented 89.77, target 95 in I21).
-      thresholds: { statements: 97, branches: 89, functions: 98, lines: 97 },
+      // All dimensions target ≥95%.
+      thresholds: { statements: 95, branches: 95, functions: 95, lines: 95 },
       include: ['src/**/*.ts'],
       exclude: [
         'src/**/*.d.ts',

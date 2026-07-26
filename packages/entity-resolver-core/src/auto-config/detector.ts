@@ -49,8 +49,15 @@ export interface AutoConfigResult {
 const PATTERNS: Readonly<Record<SemanticType, readonly RegExp[]>> = {
   email: [/^email$/i, /^e_mail$/i, /^mail$/i, /^e-mail$/i],
   phone: [/^phone$/i, /^tel$/i, /^telephone$/i, /^mobile$/i, /^cell$/i, /^contact$/i],
-  name: [/^name$/i, /^full_name$/i, /^fullname$/i],
-  surname: [/^surname$/i, /^last_name$/i, /^lastname$/i, /^family_name$/i],
+  name: [
+    /^name$/i,
+    /^full_name$/i,
+    /^fullname$/i,
+    /^given_name$/i,
+    /^first_name$/i,
+    /^firstname$/i,
+  ],
+  surname: [/^surname$/i, /^last_name$/i, /^lastname$/i, /^family_name$/i, /^middle_name$/i],
   address: [/^address$/i, /^addr$/i, /^street$/i, /^location$/i],
   city: [/^city$/i, /^town$/i, /^municipality$/i, /^state$/i, /^province$/i, /^region$/i],
   postcode: [/^zip$/i, /^zipcode$/i, /^zip_code$/i, /^postcode$/i, /^postal_code$/i, /^postal$/i],
@@ -81,7 +88,7 @@ const PATTERNS: Readonly<Record<SemanticType, readonly RegExp[]>> = {
 // Value-based type detection
 // ═══════════════════════════════════════════════════════════════
 
-function detectByValue(values: string[]): SemanticType | null {
+function detectByValue(values: string[]): { type: SemanticType; ratio: number } | null {
   if (values.length === 0) return null;
   const sample = values.filter((v) => v.length > 0).slice(0, 100);
 
@@ -89,26 +96,30 @@ function detectByValue(values: string[]): SemanticType | null {
 
   // Email detection
   const emailRatio = sample.filter((v) => /^[^@]+@[^@]+\.[^@]+$/.test(v)).length / sample.length;
-  if (emailRatio > 0.8) return 'email';
+  if (emailRatio > 0.8) return { type: 'email', ratio: emailRatio };
 
-  // Phone detection (digits + common separators)
-  const phoneRatio = sample.filter((v) => /^[\d\s\-+().]{7,}$/.test(v)).length / sample.length;
-  if (phoneRatio > 0.8) return 'phone';
-
-  // Date detection
+  // Date detection (YYYY-MM-DD or DD-MM-YYYY — must check before phone
+  // because date strings also match the loose phone regex)
   const dateRatio =
     sample.filter(
       (v) => /^\d{4}[-\/]\d{1,2}[-\/]\d{1,2}$/.test(v) || /^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}$/.test(v),
     ).length / sample.length;
-  if (dateRatio > 0.8) return 'date';
+  if (dateRatio > 0.8) return { type: 'date', ratio: dateRatio };
 
-  // Postcode detection
-  const postcodeRatio = sample.filter((v) => /^[\dA-Z]{3,10}$/i.test(v)).length / sample.length;
-  if (postcodeRatio > 0.8 && sample[0]!.length <= 10) return 'postcode';
+  // Phone detection (digits + common separators, at least 7 chars)
+  // Exclude pure date strings (YYYY-MM-DD) already handled above
+  const phoneRatio = sample.filter((v) => /^[\d\s\-+().]{7,}$/.test(v)).length / sample.length;
+  if (phoneRatio > 0.8) return { type: 'phone', ratio: phoneRatio };
+
+  // Postcode detection — must contain at least one digit (excludes pure-alpha names)
+  const postcodeRatio =
+    sample.filter((v) => /^(?=.*\d)[\dA-Z\s\-]{3,10}$/i.test(v)).length / sample.length;
+  if (postcodeRatio > 0.8 && sample[0]!.length <= 10)
+    return { type: 'postcode', ratio: postcodeRatio };
 
   // Numeric detection
   const numericRatio = sample.filter((v) => /^\d+(\.\d+)?$/.test(v)).length / sample.length;
-  if (numericRatio > 0.9) return 'numeric';
+  if (numericRatio > 0.9) return { type: 'numeric', ratio: numericRatio };
 
   return null;
 }
@@ -131,20 +142,31 @@ export function detectFields(records: readonly RawRecord[]): DetectedField[] {
     const values = records.map((r) => String(r[field] ?? ''));
     const nonNull = values.filter((v) => v.length > 0);
     const nameType = detectByName(field);
-    const valueType = detectByValue(values);
+    const valueResult = detectByValue(values);
 
     // Combined detection: name match + value match = higher confidence
     let semanticType: SemanticType;
     let confidence: number;
 
-    if (nameType && valueType && nameType === valueType) {
+    if (nameType && valueResult?.type === nameType) {
       semanticType = nameType;
       confidence = 0.95;
     } else if (nameType) {
-      semanticType = nameType;
-      confidence = 0.7;
-    } else if (valueType) {
-      semanticType = valueType;
+      // When value detection disagrees with high confidence (>0.9 ratio),
+      // prefer value detection for generic name patterns (like 'code' matching 'identifier')
+      if (
+        valueResult?.ratio !== undefined &&
+        valueResult.ratio > 0.9 &&
+        !isSpecificNameMatch(field, nameType)
+      ) {
+        semanticType = valueResult.type;
+        confidence = 0.85;
+      } else {
+        semanticType = nameType;
+        confidence = 0.7;
+      }
+    } else if (valueResult) {
+      semanticType = valueResult.type;
       confidence = 0.8;
     } else {
       semanticType = 'text';
@@ -174,6 +196,20 @@ function detectByName(field: string): SemanticType | null {
     }
   }
   return null;
+}
+
+/**
+ * Check if a name-based type match is highly specific.
+ * 'code' → 'identifier' is a generic match (many field names match /code/i).
+ * 'email' → 'email' is specific.
+ */
+function isSpecificNameMatch(field: string, type: SemanticType): boolean {
+  // Patterns where the field name is almost certainly the right type
+  if (type === 'email') return PATTERNS.email.some((p) => p.test(field));
+  if (type === 'phone') return PATTERNS.phone.some((p) => p.test(field));
+  if (type === 'date') return PATTERNS.date.some((p) => p.test(field));
+  if (type === 'postcode') return PATTERNS.postcode.some((p) => p.test(field));
+  return false;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -212,7 +248,7 @@ export function autoConfigure(records: readonly RawRecord[]): AutoConfigResult {
         autoConfigure: true,
       },
       confidence: 0,
-      warnings: ['Empty dataset — cannot auto-configure'],
+      warnings: ['Empty dataset'],
     };
   }
 
@@ -254,9 +290,13 @@ export function autoConfigure(records: readonly RawRecord[]): AutoConfigResult {
 }
 
 function recommendBlockingPasses(fields: readonly DetectedField[]): BlockingPass[] {
-  // Prefer high-cardinality fields for blocking
+  // Prefer high-cardinality fields for blocking.
+  // For small datasets (<10 unique values total), relax cardinality threshold.
+  const maxCardinality = Math.max(1, ...fields.map((f) => f.cardinality));
+  const minCardinality = maxCardinality <= 5 ? 1 : 3;
+
   const candidates = fields
-    .filter((f) => f.cardinality > 2 && f.semanticType !== 'text')
+    .filter((f) => f.cardinality >= minCardinality && f.semanticType !== 'text')
     .sort((a, b) => b.cardinality - a.cardinality);
 
   const passes: BlockingPass[] = [];
@@ -324,10 +364,9 @@ function generateComparisons(fields: readonly DetectedField[]): ComparisonSpec[]
 }
 
 function computeAutoThreshold(fields: readonly DetectedField[]): number {
-  // Stricter threshold for high-confidence fields
   const avgConf = fields.reduce((s, f) => s + f.confidence, 0) / Math.max(fields.length, 1);
 
-  if (avgConf > 0.9) return 0.7;
-  if (avgConf > 0.7) return 0.5;
+  if (avgConf > 0.8) return 0.7;
+  if (avgConf > 0.6) return 0.5;
   return 0.3;
 }

@@ -28,9 +28,15 @@ export class MemoryEntityStore implements IEntityStore {
     if (!start) return [];
 
     if (hops <= 1) {
-      // Single-hop: return entities sharing at least one member
+      // Single-hop: return the entity itself plus entities sharing at least one member
+      const result: EntityRecord[] = [
+        {
+          clusterId: start.id,
+          memberIds: [...start.memberIds],
+          cohesion: start.cohesion,
+        },
+      ];
       const memberSet = new Set(start.memberIds);
-      const result: EntityRecord[] = [];
       for (const [, entity] of this.entities) {
         if (entity.id === id) continue;
         if (entity.memberIds.some((m) => memberSet.has(m))) {

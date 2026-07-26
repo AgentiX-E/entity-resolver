@@ -21,11 +21,7 @@ function mockFetch(status: number, body: unknown) {
 }
 
 /** Create a mock fetch that succeeds on attempt N (1-indexed). */
-function mockFetchSucceedOnAttempt(
-  succeedOn: number,
-  successBody: unknown,
-  errorStatus = 500,
-) {
+function mockFetchSucceedOnAttempt(succeedOn: number, successBody: unknown, errorStatus = 500) {
   let callCount = 0;
   return async () => {
     callCount++;
@@ -78,9 +74,7 @@ describe('scoreWithLLM config validation', () => {
 
 describe('scoreWithLLM boundary range', () => {
   it('skips pairs above candidateHi', async () => {
-    const pairs: ScoredPair[] = [
-      { leftId: 0, rightId: 1, score: 0.99, probability: 0.99 },
-    ];
+    const pairs: ScoredPair[] = [{ leftId: 0, rightId: 1, score: 0.99, probability: 0.99 }];
     const results = await scoreWithLLM(pairs, testRecords, {
       candidateLo: 0.4,
       candidateHi: 0.6,
@@ -126,15 +120,21 @@ describe('scoreWithLLM boundary range', () => {
 describe('scoreWithLLM mock: successful responses', () => {
   let originalFetch: typeof globalThis.fetch;
 
-  beforeAll(() => { originalFetch = globalThis.fetch; });
-  afterAll(() => { globalThis.fetch = originalFetch; });
+  beforeAll(() => {
+    originalFetch = globalThis.fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = originalFetch;
+  });
 
   it('returns parsed score and reasoning', async () => {
     globalThis.fetch = mockFetch(200, {
       choices: [{ message: { content: '{"score":0.82,"reasoning":"typo in surname"}' } }],
     });
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
     });
     expect(results).toHaveLength(1);
     expect(results[0]!.llmScore).toBe(0.82);
@@ -142,15 +142,23 @@ describe('scoreWithLLM mock: successful responses', () => {
   });
 
   it('clamps score to [0, 1]', async () => {
-    globalThis.fetch = mockFetch(200, { choices: [{ message: { content: '{"score":1.5,"reasoning":"x"}' } }] });
+    globalThis.fetch = mockFetch(200, {
+      choices: [{ message: { content: '{"score":1.5,"reasoning":"x"}' } }],
+    });
     const r1 = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
     });
     expect(r1[0]!.llmScore).toBe(1.0);
 
-    globalThis.fetch = mockFetch(200, { choices: [{ message: { content: '{"score":-0.3,"reasoning":"x"}' } }] });
+    globalThis.fetch = mockFetch(200, {
+      choices: [{ message: { content: '{"score":-0.3,"reasoning":"x"}' } }],
+    });
     const r2 = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
     });
     expect(r2[0]!.llmScore).toBe(0.0);
   });
@@ -160,7 +168,9 @@ describe('scoreWithLLM mock: successful responses', () => {
       choices: [{ message: { content: '```json\n{"score":0.65,"reasoning":"test"}\n```' } }],
     });
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
     });
     expect(results[0]!.llmScore).toBe(0.65);
   });
@@ -168,7 +178,9 @@ describe('scoreWithLLM mock: successful responses', () => {
   it('falls back to neutral on malformed JSON', async () => {
     globalThis.fetch = mockFetch(200, { choices: [{ message: { content: 'not-valid-json' } }] });
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
     });
     expect(results[0]!.llmScore).toBe(0.5);
     expect(results[0]!.reasoning).toContain('failed to parse');
@@ -182,9 +194,15 @@ describe('scoreWithLLM mock: successful responses', () => {
 describe('scoreWithLLM retry and backoff', () => {
   let originalFetch: typeof globalThis.fetch;
 
-  beforeAll(() => { originalFetch = globalThis.fetch; });
-  afterAll(() => { globalThis.fetch = originalFetch; });
-  beforeEach(() => { resetCircuitBreaker(); });
+  beforeAll(() => {
+    originalFetch = globalThis.fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = originalFetch;
+  });
+  beforeEach(() => {
+    resetCircuitBreaker();
+  });
 
   it('retries on 429 rate limit and succeeds on retry', async () => {
     globalThis.fetch = mockFetchSucceedOnAttempt(
@@ -193,8 +211,11 @@ describe('scoreWithLLM retry and backoff', () => {
       429,
     );
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      maxRetries: 2, retryBaseMs: 10,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      maxRetries: 2,
+      retryBaseMs: 10,
     });
     expect(results).toHaveLength(1);
     expect(results[0]!.llmScore).toBe(0.75);
@@ -208,8 +229,11 @@ describe('scoreWithLLM retry and backoff', () => {
       500,
     );
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      maxRetries: 3, retryBaseMs: 10,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      maxRetries: 3,
+      retryBaseMs: 10,
     });
     expect(results).toHaveLength(1);
     expect(results[0]!.llmScore).toBe(0.55);
@@ -222,8 +246,11 @@ describe('scoreWithLLM retry and backoff', () => {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
     };
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      maxRetries: 3, retryBaseMs: 10,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      maxRetries: 3,
+      retryBaseMs: 10,
     });
     // Should NOT throw — graceful degradation for batch processing
     expect(callCount).toBe(1); // No retries on auth
@@ -237,8 +264,11 @@ describe('scoreWithLLM retry and backoff', () => {
       return new Response(JSON.stringify({ error: 'boom' }), { status: 503 });
     };
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      maxRetries: 1, retryBaseMs: 10,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      maxRetries: 1,
+      retryBaseMs: 10,
     });
     expect(callCount).toBe(2); // initial + 1 retry
     expect(results[0]!.llmScore).toBe(0.5); // Neutral score
@@ -253,9 +283,15 @@ describe('scoreWithLLM retry and backoff', () => {
 describe('scoreWithLLM circuit breaker', () => {
   let originalFetch: typeof globalThis.fetch;
 
-  beforeAll(() => { originalFetch = globalThis.fetch; });
-  afterAll(() => { globalThis.fetch = originalFetch; });
-  beforeEach(() => { resetCircuitBreaker(); });
+  beforeAll(() => {
+    originalFetch = globalThis.fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = originalFetch;
+  });
+  beforeEach(() => {
+    resetCircuitBreaker();
+  });
 
   it('trips after consecutive failures exceed threshold', async () => {
     let callCount = 0;
@@ -265,7 +301,9 @@ describe('scoreWithLLM circuit breaker', () => {
     };
 
     const config: LLMScorerConfig = {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
       circuitBreakerThreshold: 2,
       circuitBreakerCooldownMs: 60000,
       maxRetries: 0,
@@ -293,11 +331,14 @@ describe('scoreWithLLM circuit breaker', () => {
     resetCircuitBreaker();
 
     // First call fails
-    globalThis.fetch = async () =>
-      new Response(JSON.stringify({ error: 'fail' }), { status: 500 });
+    globalThis.fetch = async () => new Response(JSON.stringify({ error: 'fail' }), { status: 500 });
     await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      circuitBreakerThreshold: 3, maxRetries: 0, batchSize: 1,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      circuitBreakerThreshold: 3,
+      maxRetries: 0,
+      batchSize: 1,
     });
 
     // Second call succeeds — resets circuit
@@ -305,21 +346,32 @@ describe('scoreWithLLM circuit breaker', () => {
       choices: [{ message: { content: '{"score":0.9,"reasoning":"good"}' } }],
     });
     const r2 = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      circuitBreakerThreshold: 3, maxRetries: 0, batchSize: 1,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      circuitBreakerThreshold: 3,
+      maxRetries: 0,
+      batchSize: 1,
     });
     expect(r2[0]!.llmScore).toBe(0.9);
 
     // Third call fails again — should NOT trip (counter was reset)
-    globalThis.fetch = async () =>
-      new Response(JSON.stringify({ error: 'fail' }), { status: 500 });
+    globalThis.fetch = async () => new Response(JSON.stringify({ error: 'fail' }), { status: 500 });
     await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      circuitBreakerThreshold: 3, maxRetries: 0, batchSize: 1,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      circuitBreakerThreshold: 3,
+      maxRetries: 0,
+      batchSize: 1,
     });
     const r4 = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      circuitBreakerThreshold: 3, maxRetries: 0, batchSize: 1,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      circuitBreakerThreshold: 3,
+      maxRetries: 0,
+      batchSize: 1,
     });
     // Only 1 failure since reset — circuit should still be closed
     expect(r4[0]!.llmScore).toBe(0.5);
@@ -334,28 +386,42 @@ describe('scoreWithLLM circuit breaker', () => {
 describe('scoreWithLLM batch processing', () => {
   let originalFetch: typeof globalThis.fetch;
 
-  beforeAll(() => { originalFetch = globalThis.fetch; });
-  afterAll(() => { globalThis.fetch = originalFetch; });
-  beforeEach(() => { resetCircuitBreaker(); });
+  beforeAll(() => {
+    originalFetch = globalThis.fetch;
+  });
+  afterAll(() => {
+    globalThis.fetch = originalFetch;
+  });
+  beforeEach(() => {
+    resetCircuitBreaker();
+  });
 
   it('processes batch of boundary pairs concurrently', async () => {
     let callCount = 0;
     globalThis.fetch = async () => {
       callCount++;
       return new Response(
-        JSON.stringify({ choices: [{ message: { content: `{"score":0.6,"reasoning":"p${callCount}"}` } }] }),
+        JSON.stringify({
+          choices: [{ message: { content: `{"score":0.6,"reasoning":"p${callCount}"}` } }],
+        }),
         { status: 200 },
       );
     };
 
     const pairs: ScoredPair[] = Array.from({ length: 4 }, (_, i) => ({
-      leftId: i, rightId: i + 1, score: 0.5, probability: 0.5,
+      leftId: i,
+      rightId: i + 1,
+      score: 0.5,
+      probability: 0.5,
     }));
     const records = Array.from({ length: 6 }, (_, i) => ({ a: i }));
 
     const results = await scoreWithLLM(pairs, records, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      batchSize: 2, maxRetries: 0,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      batchSize: 2,
+      maxRetries: 0,
     });
     expect(results).toHaveLength(4);
     expect(callCount).toBe(4); // All 4 pairs called (2 pairs per batch × 2 batches)
@@ -375,13 +441,19 @@ describe('scoreWithLLM batch processing', () => {
     };
 
     const pairs: ScoredPair[] = Array.from({ length: 2 }, (_, i) => ({
-      leftId: i, rightId: i + 1, score: 0.5, probability: 0.5,
+      leftId: i,
+      rightId: i + 1,
+      score: 0.5,
+      probability: 0.5,
     }));
     const records = Array.from({ length: 4 }, (_, i) => ({ a: i }));
 
     const results = await scoreWithLLM(pairs, records, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: 'mock-key',
-      batchSize: 2, maxRetries: 0,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: 'mock-key',
+      batchSize: 2,
+      maxRetries: 0,
     });
 
     expect(results).toHaveLength(2);
@@ -400,38 +472,54 @@ describe('scoreWithLLM integration (real API)', () => {
   const apiKey = process.env.DEEPSEEK_API_KEY;
   const skipIfNoKey = apiKey ? it : it.skip;
 
-  beforeEach(() => { resetCircuitBreaker(); });
+  beforeEach(() => {
+    resetCircuitBreaker();
+  });
 
-  skipIfNoKey('resolves boundary pair with real LLM', async () => {
-    const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: apiKey!,
-    });
-    expect(results).toHaveLength(1);
-    expect(typeof results[0]!.llmScore).toBe('number');
-    expect(results[0]!.llmScore).toBeGreaterThanOrEqual(0);
-    expect(results[0]!.llmScore).toBeLessThanOrEqual(1);
-    expect(results[0]!.reasoning.length).toBeGreaterThan(0);
-  }, 30000);
+  skipIfNoKey(
+    'resolves boundary pair with real LLM',
+    async () => {
+      const results = await scoreWithLLM(boundaryPair, testRecords, {
+        candidateLo: 0.4,
+        candidateHi: 0.6,
+        apiKey: apiKey!,
+      });
+      expect(results).toHaveLength(1);
+      expect(typeof results[0]!.llmScore).toBe('number');
+      expect(results[0]!.llmScore).toBeGreaterThanOrEqual(0);
+      expect(results[0]!.llmScore).toBeLessThanOrEqual(1);
+      expect(results[0]!.reasoning.length).toBeGreaterThan(0);
+    },
+    30000,
+  );
 
-  skipIfNoKey('circuit breaker handles real API failures', async () => {
-    const config: LLMScorerConfig = {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: apiKey!,
-      circuitBreakerThreshold: 3,
-      circuitBreakerCooldownMs: 5000,
-      maxRetries: 1,
-      retryBaseMs: 100,
-      batchSize: 1,
-    };
-    // With a valid key, this makes real API calls — tests that circuit
-    // breaker infrastructure doesn't crash on successful calls
-    const results = await scoreWithLLM(boundaryPair, testRecords, config);
-    expect(results).toHaveLength(1);
-    expect(typeof results[0]!.llmScore).toBe('number');
-  }, 30000);
+  skipIfNoKey(
+    'circuit breaker handles real API failures',
+    async () => {
+      const config: LLMScorerConfig = {
+        candidateLo: 0.4,
+        candidateHi: 0.6,
+        apiKey: apiKey!,
+        circuitBreakerThreshold: 3,
+        circuitBreakerCooldownMs: 5000,
+        maxRetries: 1,
+        retryBaseMs: 100,
+        batchSize: 1,
+      };
+      // With a valid key, this makes real API calls — tests that circuit
+      // breaker infrastructure doesn't crash on successful calls
+      const results = await scoreWithLLM(boundaryPair, testRecords, config);
+      expect(results).toHaveLength(1);
+      expect(typeof results[0]!.llmScore).toBe('number');
+    },
+    30000,
+  );
 
   it('returns neutral scores on auth failure with fake key', async () => {
     const results = await scoreWithLLM(boundaryPair, testRecords, {
-      candidateLo: 0.4, candidateHi: 0.6, apiKey: TEST_API_KEY,
+      candidateLo: 0.4,
+      candidateHi: 0.6,
+      apiKey: TEST_API_KEY,
       maxRetries: 0,
     });
     expect(results).toHaveLength(1);
