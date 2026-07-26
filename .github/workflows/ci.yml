@@ -47,7 +47,7 @@ jobs:
   test:
     name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
     runs-on: ${{ matrix.os }}
-    timeout-minutes: 45
+    timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
@@ -55,36 +55,49 @@ jobs:
         node-version: ['22', '24']
     steps:
       - uses: actions/checkout@v7
-
       - uses: pnpm/action-setup@v4
         with:
           version: 9.15.0
-
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Run tests (no coverage for speed)
+        run: pnpm -r exec vitest run
 
+  coverage:
+    name: Coverage (Node 22, ubuntu)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [lint, typecheck, test]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
       - name: Run tests with coverage
         env:
           NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm test
-
       - name: Upload coverage to Codecov
-        if: matrix.os == 'ubuntu-latest' && matrix.node-version == '22'
         uses: codecov/codecov-action@v7
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: packages/*/coverage/coverage-final.json
           fail_ci_if_error: true
-
       - name: Upload coverage artifact
-        if: always() && matrix.os == 'ubuntu-latest'
-        uses: actions/upload-artifact@v4
+        if: always()
+        uses: actions/upload-artifact@v5
         with:
-          name: coverage-${{ matrix.node-version }}
+          name: coverage-report
           path: packages/*/coverage/
           retention-days: 7
 
