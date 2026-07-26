@@ -56,9 +56,10 @@ function assertNoXssVectors(element: HTMLElement): void {
   // 1. Must not contain actual <script> tags
   expect(html).not.toMatch(/<script[\s>\/]/i);
 
-  // 2. Must not contain inline event handler attributes
-  //    (onerror=, onload=, etc. as DOM attributes, not text content)
-  expect(html).not.toMatch(/\s+on\w+\s*=\s*["']/i);
+  // 2. Must not contain inline event handler attributes as real HTML attributes.
+  //    Only match on\w+= patterns within HTML element context (between < and >),
+  //    not within <style> CSS content or text nodes.
+  expect(html).not.toMatch(/<[^>]*\s+on\w+\s*=\s*["'][^>]*>/i);
 
   // 3. Must not contain javascript: protocol in href/src/action attributes
   expect(html).not.toMatch(/(?:href|src|action|formaction)\s*=\s*["']\s*javascript\s*:/i);
