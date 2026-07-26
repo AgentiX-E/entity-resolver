@@ -77,6 +77,8 @@ export async function runBenchmark(
   try {
     const result = await runPipeline(dataset.records, config, {
       mutateInput: true,
+      maxPairs: 150000,
+      maxEmPairs: 2000,
     });
     predClusters = result.clusters as Map<EntityId, Cluster>;
     matchCount = result.statistics.matchedRecords;
@@ -100,6 +102,8 @@ export async function runBenchmark(
         };
         const broadResult = await runPipeline(dataset.records, broadConfig, {
           mutateInput: true,
+          maxPairs: 150000,
+          maxEmPairs: 2000,
         });
         // Keep the better of the two runs
         const broadMatches = broadResult.statistics.matchedRecords;

@@ -20,6 +20,7 @@ import { ValidationError } from '../errors/hierarchy.js';
 import { preprocessRecords } from '../preprocessing/cleaner.js';
 import { standardBlocking } from '../blocking/standard.js';
 import { estimateParameters } from '../fellegi-sunter/em.js';
+import type { EMOptions } from '../fellegi-sunter/em.js';
 import { computeAggregateMatchWeight } from '../fellegi-sunter/match-weight.js';
 import { buildTermFrequencies, TFAdjustmentLookup } from '../fellegi-sunter/tf-adjust.js';
 import { generateComparisonVectors } from '../matching/comparison.js';
@@ -51,6 +52,20 @@ export interface PipelineOptions {
    * Default: true (in-place). Set false to preserve input.
    */
   readonly mutateInput?: boolean;
+  /**
+   * Maximum number of candidate pairs to process in the pipeline.
+   * When set, candidates beyond this limit are deterministically
+   * sampled. Critical for large datasets where blocking produces
+   * O(N²) pairs.
+   * Default: undefined (no cap).
+   */
+  readonly maxPairs?: number;
+  /**
+   * Maximum number of pairs to use for EM parameter estimation.
+   * Deterministic hash-based sampling for reproducibility.
+   * Default: undefined (no cap — uses all pairs).
+   */
+  readonly maxEmPairs?: number;
   /** Structured logger for pipeline stage instrumentation. Default: NoopLogger. */
   readonly logger?: ILogger;
 }
@@ -119,7 +134,24 @@ export async function runPipeline(
 
   // Stage 2: Blocking
   const blockingResult = standardBlocking(cleaned, config.blocking);
-  const candidates = blockingResult.pairs;
+  let candidates: readonly CandidatePair[] = blockingResult.pairs;
+
+  // Cap candidate pairs for performance on large datasets.
+  const maxPairs = options?.maxPairs;
+  if (maxPairs && maxPairs > 0 && candidates.length > maxPairs) {
+    const sampled: CandidatePair[] = [];
+    const ratio = maxPairs / candidates.length;
+    for (let i = 0; i < candidates.length; i++) {
+      const h = ((i * 2654435761) >>> 0) / 0xffffffff;
+      if (h < ratio) sampled.push(candidates[i]!);
+    }
+    if (sampled.length < 10 && candidates.length >= 10) {
+      for (let i = 0; i < Math.min(10, candidates.length); i++) {
+        sampled.push(candidates[i]!);
+      }
+    }
+    candidates = sampled;
+  }
 
   logger.debug('Blocking complete', {
     operation: 'runPipeline',
@@ -133,10 +165,12 @@ export async function runPipeline(
   const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
   // Stage 3b: Estimate FS parameters via EM (per-pair posteriors)
-  const emResult = estimateParameters(pairVectors, {
+  const emOptions: EMOptions = {
     maxIterations: options?.maxEmIterations ?? 30,
     epsilon: options?.emEpsilon ?? 1e-6,
-  });
+    ...(options?.maxEmPairs ? { maxPairs: options.maxEmPairs } : {}),
+  };
+  const emResult = estimateParameters(pairVectors, emOptions);
   const params = emResult.parameters;
 
   logger.debug('EM parameter estimation complete', {
