@@ -30,9 +30,10 @@ const result = await dedupe(records);
 - **8 pruning methods**: WEP, CEP, CNP, RCNP, WNP, BLAST, RWNP, CP
 - **Streaming**: IDataSource interface with AsyncIterable
 - **Privacy**: PPRL Bloom filter encoding
-- **LLM scorer**: Optional DeepSeek/OpenAI boundary-pair resolution
+- **LLM scorer**: Optional DeepSeek/OpenAI boundary-pair resolution with circuit breaker, exponential backoff retry, and batch processing
 - **Active learning**: Uncertainty sampling + logistic classifier
 - **Golden record**: Field-level survivorship (most_popular, longest, source_priority)
+- **Pipeline optimization**: maxPairs candidate capping + maxEmPairs training sampling for large datasets
 
 ## Interfaces
 
@@ -54,5 +55,5 @@ interface ILogger { debug, info, warn, error }
 - **License**: MIT
 - **Package manager**: pnpm 9.15.0
 - **Node**: >= 22.0.0
-- **CI**: Ubuntu + Windows + macOS, Node 20 + 22, 95% coverage thresholds
+- **CI**: Ubuntu + Windows + macOS, Node 22 + 24, verified coverage thresholds
 - **Author**: Lambertyan — AgentiX-E

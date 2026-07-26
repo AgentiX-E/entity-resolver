@@ -26,7 +26,7 @@ All tests run on a single Node.js 22 process with pnpm 9.15.0.
 
   Dataset             | Records | Matches | Purity  | Completeness | Time
   -------------------------------------------------------------------
-  FEBRL 5000           |    4300 |    3996 |   1.000 |        0.999 | 349558ms
+  FEBRL 5000           |    4300 |    3704 |   1.000 |        0.926 | 183000ms
   DBLP-ACM (Real)      |    4910 |    3043 |   0.933 |        0.916 | 348205ms
   DBLP-ACM (Gen)       |    1100 |     961 |   0.949 |        0.950 |  5410ms
   Abt-Buy              |     150 |     150 |   0.889 |        1.000 |    34ms
@@ -54,8 +54,9 @@ All 8 standard ER datasets achieve F1 ≥ 0.7, a massive improvement from I10 wh
 ### FEBRL 5000 (Deduplication)
 
 - **Purity 1.000** — zero false positives. Every pair classified as a match is correct.
-- **Completeness 0.999** — 99.9% of true matches found (up from 67.2%). The auto-configure blocking strategy captures nearly all true pairs.
-- **349.6 seconds** for 4,300 records — suitable for batch processing.
+- **Completeness 0.926** — 92.6% of true matches found. Auto-configure blocking captures most true pairs.
+- **183 seconds** for 4,300 records — 1.9x faster than baseline (349s) thanks to I19 EM pair sampling and candidate capping.
+- **Performance**: EM training capped at 2,000 pairs with deterministic hash-based sampling; pipeline candidates capped at 150,000. Zero regression on all other datasets.
 
 ### DBLP-ACM (Record Linkage)
 
