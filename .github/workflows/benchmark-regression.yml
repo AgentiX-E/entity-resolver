@@ -10,7 +10,7 @@ jobs:
   benchmark:
     name: Benchmarks
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
 
@@ -30,7 +30,7 @@ jobs:
 
       - name: Run benchmarks (current branch)
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           node --input-type=module -e "
             import { runAllBenchmarks, formatBenchmarkReport } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
@@ -72,7 +72,7 @@ jobs:
 
       - name: Run benchmarks (main branch)
         env:
-          NODE_OPTIONS: --max-old-space-size=4096
+          NODE_OPTIONS: --max-old-space-size=6144
         run: |
           node --input-type=module -e "
             import { runAllBenchmarks } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
