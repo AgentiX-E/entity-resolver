@@ -4,6 +4,7 @@
 // Test categories:
 //   Mock tests — run everywhere in CI without API key
 //   Integration tests — requires DEEPSEEK_API_KEY env var, skipped otherwise
+/// <reference lib="dom" />
 
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { scoreWithLLM, resetCircuitBreaker } from '../../index.js';
