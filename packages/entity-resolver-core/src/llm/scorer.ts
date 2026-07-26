@@ -1,6 +1,12 @@
 // LLM-assisted boundary-pair scorer for entity-resolver.
 // Uses an LLM (DeepSeek, OpenAI-compatible) to resolve ambiguous pairs.
 // API key is injected via configuration — NEVER in code or environment variables.
+//
+// Production-hardened with:
+// - Circuit breaker: pauses on consecutive failures to prevent API abuse
+// - Exponential backoff retry: transient failures (429/500/503) are retried
+// - Batch processing: boundary pairs are scored in configurable parallel batches
+// - Graceful degradation: circuit-open returns neutral scores, not errors
 
 import type { ScoredPair } from '../types/core.js';
 import type { ILogger } from '../interfaces/ILogger.js';
@@ -44,15 +50,69 @@ export interface LLMScorerResult {
   readonly reasoning: string;
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Circuit breaker state (module-level — shared across calls)
+// ═══════════════════════════════════════════════════════════════
+
+interface CircuitState {
+  consecutiveFailures: number;
+  openSince: number | null;
+}
+
+const _circuit = new Map<string, CircuitState>();
+
+function getCircuitState(key: string): CircuitState {
+  const existing = _circuit.get(key);
+  if (existing) return existing;
+  const fresh: CircuitState = { consecutiveFailures: 0, openSince: null };
+  _circuit.set(key, fresh);
+  return fresh;
+}
+
+/**
+ * Check if the circuit is open (requests should be blocked).
+ * Returns true if the circuit breaker has tripped and the cooldown hasn't elapsed.
+ */
+function isCircuitOpen(state: CircuitState, cooldownMs: number): boolean {
+  if (state.openSince === null) return false;
+  if (Date.now() - state.openSince >= cooldownMs) {
+    // Cooldown elapsed — reset to half-open
+    state.openSince = null;
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Reset the circuit breaker state for testing.
+ * @internal Not part of the public API.
+ */
+export function resetCircuitBreaker(key?: string): void {
+  if (key) {
+    _circuit.delete(key);
+  } else {
+    _circuit.clear();
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Public API
+// ═══════════════════════════════════════════════════════════════
+
 /**
  * Score ambiguous boundary pairs using an LLM.
  *
  * Pairs with scores in [candidateLo, candidateHi] are sent to the LLM
  * for semantic judgment. Pairs outside this range are returned as-is.
  *
+ * Features:
+ * - Circuit breaker: pauses after N consecutive failures
+ * - Exponential backoff retry on transient errors (429, 500, 503)
+ * - Configurable batch parallelism
+ * - Graceful degradation: returns neutral scores when circuit is open
+ *
  * The API key MUST be provided via config.apiKey — never read from
- * environment variables or hardcoded. This ensures the caller controls
- * credential lifecycle and injection (e.g., from a secret manager).
+ * environment variables or hardcoded.
  */
 export async function scoreWithLLM(
   pairs: readonly ScoredPair[],
@@ -64,39 +124,206 @@ export async function scoreWithLLM(
     throw new Error('LLMScorerConfig.apiKey is required for LLM scoring');
   }
 
-  const results: LLMScorerResult[] = [];
   const apiBase = config.apiBaseUrl ?? 'https://api.deepseek.com/v1';
   const model = config.model ?? 'deepseek-v4-pro';
+  const batchSize = config.batchSize ?? 5;
+  const maxRetries = config.maxRetries ?? 3;
+  const retryBaseMs = config.retryBaseMs ?? 1000;
+  const cbThreshold = config.circuitBreakerThreshold ?? 5;
+  const cbCooldownMs = config.circuitBreakerCooldownMs ?? 60000;
 
-  for (const pair of pairs) {
-    const score = pair.probability ?? pair.score;
+  // Filter to boundary pairs only
+  const boundaryPairs = pairs.filter((p) => {
+    const score = p.probability ?? p.score;
+    return score >= config.candidateLo && score <= config.candidateHi;
+  });
 
-    // Only send boundary pairs to LLM
-    if (score < config.candidateLo || score > config.candidateHi) continue;
+  if (boundaryPairs.length === 0) return [];
 
-    const recordA = records[pair.leftId] ?? {};
-    const recordB = records[pair.rightId] ?? {};
+  // Circuit breaker check
+  const circuitKey = `${apiBase}:${model}`;
+  const circuit = getCircuitState(circuitKey);
 
-    const prompt = buildComparisonPrompt(recordA, recordB);
-    const llmResult = await callLLM(
-      apiBase,
-      config.apiKey,
-      model,
-      prompt,
-      config.maxTokens ?? 200,
-      logger,
-    );
-
-    results.push({
+  if (isCircuitOpen(circuit, cbCooldownMs)) {
+    logger?.warn('LLM scorer circuit breaker is open — returning neutral scores', {
+      operation: 'scoreWithLLM',
+      circuitKey,
+      consecutiveFailures: circuit.consecutiveFailures,
+    });
+    // Graceful degradation: return neutral scores for all boundary pairs
+    return boundaryPairs.map((pair) => ({
       leftId: pair.leftId,
       rightId: pair.rightId,
-      originalScore: score,
-      llmScore: llmResult.score,
-      reasoning: llmResult.reasoning,
-    });
+      originalScore: pair.probability ?? pair.score,
+      llmScore: 0.5,
+      reasoning: 'circuit breaker open — LLM unavailable',
+    }));
+  }
+
+  const sharedState: SharedState = {
+    apiBase,
+    apiKey: config.apiKey,
+    model,
+    maxTokens: config.maxTokens ?? 200,
+    maxRetries,
+    retryBaseMs,
+    circuit,
+    cbThreshold,
+    cbCooldownMs,
+    ...(logger !== undefined ? { logger } : {}),
+  };
+
+  // Process boundary pairs in batches
+  const results: LLMScorerResult[] = [];
+  const batches = chunkArray(boundaryPairs, batchSize);
+
+  for (const batch of batches) {
+    if (isCircuitOpen(circuit, cbCooldownMs)) {
+      // Circuit opened mid-processing — add neutral scores for remaining pairs
+      for (const pair of batch) {
+        results.push({
+          leftId: pair.leftId,
+          rightId: pair.rightId,
+          originalScore: pair.probability ?? pair.score,
+          llmScore: 0.5,
+          reasoning: 'circuit breaker opened during processing',
+        });
+      }
+      continue;
+    }
+
+    // Score batch concurrently
+    const batchResults = await Promise.allSettled(
+      batch.map((pair) => {
+        const recordA = records[pair.leftId] ?? {};
+        const recordB = records[pair.rightId] ?? {};
+        const prompt = buildComparisonPrompt(recordA, recordB);
+        return callLLMWithRetry(prompt, sharedState);
+      }),
+    );
+
+    for (let i = 0; i < batch.length; i++) {
+      const pair = batch[i]!;
+      const settled = batchResults[i]!;
+
+      if (settled.status === 'fulfilled') {
+        const llmResult = settled.value;
+        results.push({
+          leftId: pair.leftId,
+          rightId: pair.rightId,
+          originalScore: pair.probability ?? pair.score,
+          llmScore: llmResult.score,
+          reasoning: llmResult.reasoning,
+        });
+        // Success resets circuit
+        circuit.consecutiveFailures = 0;
+        circuit.openSince = null;
+      } else {
+        // Failure increments circuit
+        circuit.consecutiveFailures++;
+        if (circuit.consecutiveFailures >= cbThreshold) {
+          circuit.openSince = Date.now();
+          logger?.warn('LLM scorer circuit breaker tripped', {
+            operation: 'scoreWithLLM',
+            circuitKey,
+            consecutiveFailures: circuit.consecutiveFailures,
+          });
+        }
+        // Return neutral score for failed pair
+        results.push({
+          leftId: pair.leftId,
+          rightId: pair.rightId,
+          originalScore: pair.probability ?? pair.score,
+          llmScore: 0.5,
+          reasoning: `LLM error: ${settled.reason instanceof Error ? settled.reason.message : String(settled.reason)}`,
+        });
+      }
+    }
   }
 
   return results;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Internal helpers
+// ═══════════════════════════════════════════════════════════════
+
+interface SharedState {
+  apiBase: string;
+  apiKey: string;
+  model: string;
+  maxTokens: number;
+  maxRetries: number;
+  retryBaseMs: number;
+  circuit: CircuitState;
+  cbThreshold: number;
+  cbCooldownMs: number;
+  logger?: ILogger;
+}
+
+/**
+ * Call the LLM API with exponential backoff retry.
+ * Retries on transient errors: 429 (rate limit), 500, 502, 503.
+ */
+async function callLLMWithRetry(
+  prompt: string,
+  state: SharedState,
+): Promise<{ score: number; reasoning: string }> {
+  let lastError: Error | undefined;
+
+  for (let attempt = 0; attempt <= state.maxRetries; attempt++) {
+    try {
+      return await callLLM(
+        state.apiBase,
+        state.apiKey,
+        state.model,
+        prompt,
+        state.maxTokens,
+        state.logger,
+      );
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err : new Error(String(err));
+
+      // Don't retry on auth errors (401, 403)
+      if (isAuthError(err)) throw lastError;
+
+      // Don't retry on last attempt
+      if (attempt >= state.maxRetries) throw lastError;
+
+      // Exponential backoff
+      const delay = state.retryBaseMs * Math.pow(2, attempt);
+      state.logger?.warn(
+        `LLM API call failed (attempt ${attempt + 1}/${state.maxRetries + 1}), retrying in ${delay}ms`,
+        { operation: 'callLLMWithRetry', cause: lastError.message },
+      );
+      await sleep(delay);
+    }
+  }
+
+  throw lastError ?? new Error('LLM API call failed with no error captured');
+}
+
+/** Check if an error is an authentication error (not retryable). */
+function isAuthError(err: unknown): boolean {
+  if (err instanceof Error) {
+    const msg = err.message;
+    return msg.includes(' 401') || msg.includes(' 403');
+  }
+  return false;
+}
+
+/** Sleep for the given number of milliseconds. */
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** Split an array into chunks of the given size. */
+function chunkArray<T>(arr: readonly T[], size: number): T[][] {
+  const result: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) {
+    result.push(arr.slice(i, i + size));
+  }
+  return result;
 }
 
 /** Build a comparison prompt for the LLM. */
@@ -164,7 +391,6 @@ async function callLLM(
   const content = data.choices[0]?.message?.content ?? '{"score":0.5,"reasoning":"no response"}';
 
   try {
-    // Parse JSON from response (may contain markdown code fences)
     const jsonStr = content
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
