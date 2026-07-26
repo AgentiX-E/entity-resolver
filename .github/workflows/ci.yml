@@ -64,8 +64,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (no coverage for speed)
-        run: pnpm -r exec vitest run
+      - name: Run tests (forked pool to prevent OOM)
+        run: pnpm -r exec vitest run --pool forks
 
   coverage:
     name: Coverage (Node 22, ubuntu)
