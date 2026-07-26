@@ -5,7 +5,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      thresholds: { statements: 85, branches: 73, functions: 90, lines: 85 },
+      thresholds: { statements: 88, branches: 73, functions: 93, lines: 88 },
     },
   },
 });
