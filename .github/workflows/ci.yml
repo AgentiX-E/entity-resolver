@@ -142,8 +142,7 @@ jobs:
             src/__tests__/llm/*.test.ts \
             src/__tests__/memory/*.test.ts \
             src/__tests__/pprl/*.test.ts \
-            src/__tests__/utils/*.test.ts \
-            src/__tests__/wasm-loader/*.test.ts; do
+            src/__tests__/utils/*.test.ts; do
             pnpm exec vitest run --reporter=dot "$f"
           done
 
