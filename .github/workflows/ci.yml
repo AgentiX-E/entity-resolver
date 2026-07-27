@@ -66,10 +66,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests
+      - name: Run tests (single vitest workspace)
         env:
           NODE_OPTIONS: --max-old-space-size=7168
-        run: pnpm -r exec vitest run
+        run: vitest run --reporter=basic
 
   coverage:
     name: Coverage (Node 22, ubuntu)
