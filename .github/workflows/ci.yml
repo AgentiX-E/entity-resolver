@@ -75,47 +75,16 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (7 batches, ~8 files each)
+      - name: Run tests (one vitest process per file)
+        env:
+          NODE_OPTIONS: --max-old-space-size=3072
         run: |
           set -e
           cd packages/entity-resolver-core
-          # Each vitest invocation must stay under ~8 files to avoid
-          # esbuild collect-phase OOM in GitHub free-tier runner.
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/{active-learning,auto-config,benchmarks}/*.test.ts \
-            src/__tests__/branch-coverage-i19.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/blocking/*.test.ts \
-            src/__tests__/{branch-coverage-sprint,clustering}/*.test.ts \
-            src/__tests__/comparison.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/{errors,evaluation}/*.test.ts \
-            src/__tests__/fellegi-sunter/em.test.ts \
-            src/__tests__/golden-record.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/fellegi-sunter/{field-independence,match-weight,model-serialization,parameters,tf-adjust}.test.ts \
-            src/__tests__/final-branches.test.ts \
-            src/__tests__/{interfaces,integration}/*.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/llm/scorer.test.ts \
-            src/__tests__/memory/entity-store.test.ts \
-            src/__tests__/pipeline/{datasource,incremental,linking}.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/pprl/bloom.test.ts \
-            src/__tests__/preprocessing.test.ts \
-            src/__tests__/preprocessing/cjk.test.ts \
-            src/__tests__/registry.test.ts
-
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/scorers.test.ts \
-            src/__tests__/splink-features.test.ts \
-            src/__tests__/{utils,wasm-loader}/*.test.ts \
-            src/__tests__/placeholder.test.ts
+          # Each file runs in its own vitest process — memory freed after.
+          for f in $(find src/__tests__ -name '*.test.ts' | sort); do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
 
   # ═══════════════════════════════════════════════════════════
   # Benchmark Regression — runs on push and PR
