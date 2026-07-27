@@ -59,14 +59,20 @@ jobs:
       - run: pnpm format
 
   # ═══════════════════════════════════════════════════════════
-  # Test — batched (8 files/batch)
-  # Each batch is an independent vitest process to avoid
-  # esbuild collect-phase OOM on 49-file suite.
+  # Test — split into 4 categories, each runs in parallel
   # ═══════════════════════════════════════════════════════════
   test:
-    name: Test
+    name: Test (${{ matrix.category }})
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        category:
+          - core
+          - em
+          - pipeline
+          - integration
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -75,14 +81,69 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (one vitest process per file)
+      - name: Run core tests
+        if: matrix.category == 'core'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
-          set -e
           cd packages/entity-resolver-core
-          # Each file runs in its own vitest process — memory freed after.
-          for f in $(find src/__tests__ -name '*.test.ts' | sort); do
+          for f in \
+            src/__tests__/placeholder.test.ts \
+            src/__tests__/branch-coverage-i19.test.ts \
+            src/__tests__/branch-coverage-sprint.test.ts \
+            src/__tests__/final-branches.test.ts \
+            src/__tests__/comparison.test.ts \
+            src/__tests__/golden-record.test.ts \
+            src/__tests__/preprocessing.test.ts \
+            src/__tests__/registry.test.ts \
+            src/__tests__/scorers.test.ts \
+            src/__tests__/splink-features.test.ts \
+            src/__tests__/clustering/*.test.ts \
+            src/__tests__/errors/*.test.ts \
+            src/__tests__/evaluation/*.test.ts \
+            src/__tests__/preprocessing/*.test.ts \
+            src/__tests__/interfaces/*.test.ts; do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
+
+      - name: Run EM tests
+        if: matrix.category == 'em'
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
+        run: |
+          cd packages/entity-resolver-core
+          for f in src/__tests__/fellegi-sunter/*.test.ts; do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
+
+      - name: Run pipeline tests
+        if: matrix.category == 'pipeline'
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
+        run: |
+          cd packages/entity-resolver-core
+          for f in \
+            src/__tests__/active-learning/*.test.ts \
+            src/__tests__/auto-config/*.test.ts \
+            src/__tests__/blocking/*.test.ts \
+            src/__tests__/pipeline/*.test.ts \
+            src/__tests__/benchmarks/*.test.ts; do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
+
+      - name: Run integration tests
+        if: matrix.category == 'integration'
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
+        run: |
+          cd packages/entity-resolver-core
+          for f in \
+            src/__tests__/integration/*.test.ts \
+            src/__tests__/llm/*.test.ts \
+            src/__tests__/memory/*.test.ts \
+            src/__tests__/pprl/*.test.ts \
+            src/__tests__/utils/*.test.ts \
+            src/__tests__/wasm-loader/*.test.ts; do
             pnpm exec vitest run --reporter=dot "$f"
           done
 
