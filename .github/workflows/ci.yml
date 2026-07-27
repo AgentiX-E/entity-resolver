@@ -77,7 +77,7 @@ jobs:
       - run: pnpm build
       - name: Run tests (one vitest process per file)
         env:
-          NODE_OPTIONS: --max-old-space-size=3072
+          NODE_OPTIONS: --max-old-space-size=7168
         run: |
           set -e
           cd packages/entity-resolver-core
