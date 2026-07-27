@@ -69,7 +69,7 @@ jobs:
       - name: Run tests (single vitest workspace)
         env:
           NODE_OPTIONS: --max-old-space-size=7168
-        run: pnpm exec vitest run --reporter=basic
+        run: pnpm -r exec vitest run --reporter=basic
 
   coverage:
     name: Coverage (Node 22, ubuntu)
