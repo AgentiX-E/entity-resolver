@@ -11,6 +11,8 @@ permissions:
 jobs:
   auto-review:
     name: Automated PR Review
+    # Skip Dependabot PRs — they consume runner slots for trivial version bumps
+    if: github.actor != 'dependabot[bot]'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

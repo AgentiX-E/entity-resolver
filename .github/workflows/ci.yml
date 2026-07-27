@@ -6,6 +6,12 @@ on:
   pull_request:
     branches: [master]
 
+# Latest push always wins — cancels in-progress runs from earlier commits.
+# Ensures the most recent commit gets dedicated runner allocation.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   lint:
     name: Lint
