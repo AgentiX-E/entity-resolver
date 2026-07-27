@@ -1,0 +1,2 @@
+src/__tests__/utils/memory-guard.test.ts
+src/__tests__/wasm-loader.test.ts

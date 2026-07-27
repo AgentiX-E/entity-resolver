@@ -1,0 +1,12 @@
+src/__tests__/active-learning/learner.test.ts
+src/__tests__/auto-config/detector.test.ts
+src/__tests__/benchmarks/dataset-edge.test.ts
+src/__tests__/blocking/all.test.ts
+src/__tests__/blocking/meta-blocking.test.ts
+src/__tests__/branch-coverage-i19.test.ts
+src/__tests__/branch-coverage-sprint.test.ts
+src/__tests__/clustering/algorithms.test.ts
+src/__tests__/clustering/pyjedai-algorithms.test.ts
+src/__tests__/comparison.test.ts
+src/__tests__/errors/hierarchy.test.ts
+src/__tests__/evaluation/cross-validate.test.ts

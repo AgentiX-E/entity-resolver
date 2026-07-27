@@ -66,10 +66,19 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (single vitest workspace)
+      - name: Run tests (batched — 4 batches, ~12 files each)
         env:
-          NODE_OPTIONS: --max-old-space-size=7168
-        run: pnpm -C packages/entity-resolver-core exec vitest run --fileParallelism=false --reporter=basic
+          NODE_OPTIONS: --max-old-space-size=4096
+        run: |
+          set -e
+          cd packages/entity-resolver-core
+          FILES=$(find src/__tests__ -name '*.test.ts' | sort)
+          echo "$FILES" | split -l 12 - batch_
+          for batch in batch_*; do
+            echo "=== Batch: $(wc -l < $batch) files ==="
+            xargs pnpm exec vitest run --reporter=dot < $batch
+            rm $batch
+          done
 
   coverage:
     name: Coverage (Node 22, ubuntu)
