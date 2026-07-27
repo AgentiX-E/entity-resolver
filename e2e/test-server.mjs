@@ -7,7 +7,7 @@ const app = createApp();
 const server = createServer(async (req, res) => {
   const headers = new Headers();
   for (let i = 0; i < req.rawHeaders.length; i += 2) {
-    headers.set(req.rawHeaders[i]!, req.rawHeaders[i + 1]!);
+    headers.set(req.rawHeaders[i] ?? '', req.rawHeaders[i + 1] ?? '');
   }
   const url = `http://localhost${req.url}`;
   let body = null;
