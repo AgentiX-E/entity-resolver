@@ -24,8 +24,9 @@ export default defineConfig({
       reuseExistingServer: false,
     },
     // 3) Hono REST API server for endpoint tests
+    // Uses .mjs wrapper to bypass tsconfig references chain.
     {
-      command: 'pnpm tsx e2e/test-server.ts',
+      command: 'node e2e/test-server.mjs',
       url: 'http://localhost:3000/health',
       timeout: 15000,
       reuseExistingServer: false,
