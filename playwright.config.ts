@@ -25,7 +25,7 @@ export default defineConfig({
     },
     // 3) Hono REST API server for endpoint tests
     {
-      command: 'pnpm tsx e2e/test-server.ts',
+      command: 'node --import tsx/esm e2e/test-server.ts',
       url: 'http://localhost:3000/health',
       timeout: 15000,
       reuseExistingServer: false,
