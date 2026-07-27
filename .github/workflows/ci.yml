@@ -257,7 +257,6 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - name: Run E2E tests
         env:
-          TSX_TSCONFIG_PATH: e2e/tsconfig.json
         run: npx playwright test
 
   # ═══════════════════════════════════════════════════════════
