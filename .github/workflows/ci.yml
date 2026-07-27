@@ -256,7 +256,6 @@ jobs:
       - run: pnpm build
       - run: npx playwright install chromium --with-deps
       - name: Run E2E tests
-        env:
         run: npx playwright test
 
   # ═══════════════════════════════════════════════════════════
