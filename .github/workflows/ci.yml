@@ -64,7 +64,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (forked pool to prevent OOM)
+      - name: Run tests
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
         run: pnpm -r exec vitest run
 
   coverage:
