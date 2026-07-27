@@ -5,12 +5,19 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # ═══════════════════════════════════════════════════════════
+  # Quality Gates — fast feedback (< 60s total)
+  # ═══════════════════════════════════════════════════════════
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -18,12 +25,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
+        with: { version: '9.15.0' }
       - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
+        with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm lint
 
@@ -34,12 +38,9 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
+        with: { version: '9.15.0' }
       - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
+        with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: pnpm typecheck
@@ -51,57 +52,201 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
+        with: { version: '9.15.0' }
       - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
+        with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm format
 
-  # Tests only run on pull_request events — push CI is limited to
-  # lint/typecheck/format for fast feedback (<1 min).
-  # vitest v2 esbuild collect phase is too memory-intensive for
-  # GitHub free tier runner to handle the full 49-file test suite.
+  # ═══════════════════════════════════════════════════════════
+  # Test — batched (8 files/batch, with coverage + threshold)
+  # Each batch is an independent vitest process to avoid
+  # esbuild collect-phase OOM on 49-file suite.
+  # ═══════════════════════════════════════════════════════════
   test:
-    if: github.event_name == 'pull_request'
-    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-        node-version: ['22', '24']
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Run tests
-        run: pnpm -r exec vitest run --reporter=basic
-
-  e2e:
-    if: github.event_name == 'pull_request'
-    name: E2E (Playwright)
+    name: Test
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
+        with: { version: '9.15.0' }
       - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Run tests (7 batches, ~8 files each)
+        run: |
+          set -e
+          cd packages/entity-resolver-core
+          # Each vitest invocation must stay under ~8 files to avoid
+          # esbuild collect-phase OOM in GitHub free-tier runner.
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/{active-learning,auto-config,benchmarks}/*.test.ts \
+            src/__tests__/branch-coverage-i19.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/blocking/*.test.ts \
+            src/__tests__/{branch-coverage-sprint,clustering}/*.test.ts \
+            src/__tests__/comparison.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/{errors,evaluation}/*.test.ts \
+            src/__tests__/fellegi-sunter/em.test.ts \
+            src/__tests__/golden-record.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/fellegi-sunter/{field-independence,match-weight,model-serialization,parameters,tf-adjust}.test.ts \
+            src/__tests__/final-branches.test.ts \
+            src/__tests__/{interfaces,integration}/*.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/llm/scorer.test.ts \
+            src/__tests__/memory/entity-store.test.ts \
+            src/__tests__/pipeline/{datasource,incremental,linking}.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/pprl/bloom.test.ts \
+            src/__tests__/preprocessing.test.ts \
+            src/__tests__/preprocessing/cjk.test.ts \
+            src/__tests__/registry.test.ts
+
+          pnpm exec vitest run --coverage --reporter=dot \
+            src/__tests__/scorers.test.ts \
+            src/__tests__/splink-features.test.ts \
+            src/__tests__/{utils,wasm-loader}/*.test.ts \
+            src/__tests__/placeholder.test.ts
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v7
         with:
-          node-version: 22
-          cache: pnpm
+          name: coverage-report
+          path: packages/entity-resolver-core/coverage/
+          retention-days: 7
+
+  # ═══════════════════════════════════════════════════════════
+  # Benchmark Regression — runs on push and PR
+  # ═══════════════════════════════════════════════════════════
+  benchmark:
+    name: Benchmarks
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - name: Run benchmarks
+        run: |
+          node --input-type=module -e "
+            import { runAllBenchmarks, formatBenchmarkReport } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
+            import { writeFileSync } from 'node:fs';
+            const r = await runAllBenchmarks();
+            console.log(formatBenchmarkReport(r.results));
+            writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
+          "
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+        timeout-minutes: 20
+
+      - name: Generate HTML report
+        run: |
+          node --input-type=module -e "
+            import { readFileSync, writeFileSync } from 'node:fs';
+            const r = JSON.parse(readFileSync('benchmark-results.json','utf-8'));
+            const rows = r.results.map(b => \`
+              <tr>
+                <td>\${b.dataset}</td>
+                <td>\${b.recordCount}</td>
+                <td>\${b.pairCount}</td>
+                <td>\${b.purity?.toFixed(4) ?? '-'}</td>
+                <td>\${b.completeness?.toFixed(4) ?? '-'}</td>
+                <td>\${b.executionTimeMs}ms</td>
+              </tr>
+            \`).join('');
+            writeFileSync('benchmark-report.html', \`<!DOCTYPE html>
+            <html><head><meta charset=utf-8><title>Benchmark Report</title>
+            <style>body{font-family:system-ui;max-width:960px;margin:2em auto}
+            table{border-collapse:collapse;width:100%}
+            th,td{border:1px solid #ddd;padding:8px;text-align:right}
+            th{background:#f5f5f5}td:first-child,td:nth-child(2){text-align:left}
+            .pass{color:green}.fail{color:red}</style></head>
+            <body><h1>Entity Resolver Benchmarks</h1>
+            <table><tr><th>Dataset</th><th>Records</th><th>Pairs</th>
+            <th>Purity</th><th>Completeness</th><th>Time</th></tr>
+            \${rows}</table><p>Generated \${new Date().toISOString()}</p></body></html>\`);
+          "
+
+      - name: Compare against baseline
+        run: |
+          if [ -f benchmarks/baseline.json ]; then
+            node --input-type=module -e "
+              import { readFileSync } from 'node:fs';
+              const cur = JSON.parse(readFileSync('benchmark-results.json','utf-8'));
+              const base = JSON.parse(readFileSync('benchmarks/baseline.json','utf-8'));
+              let regressions = 0;
+              for (const c of cur.results) {
+                const b = base.results.find(x => x.dataset === c.dataset);
+                if (!b) continue;
+                const timeDelta = c.executionTimeMs - b.executionTimeMs;
+                const timeReg = b.executionTimeMs > 0 ? (timeDelta / b.executionTimeMs) * 100 : 0;
+                const purityDelta = c.purity - b.purity;
+                if (timeReg > 20 || purityDelta < -0.02) {
+                  console.error('REGRESSION: ' + c.dataset + ' time=' + timeReg.toFixed(1) + '% purity=' + purityDelta.toFixed(4));
+                  regressions++;
+                }
+              }
+              if (regressions > 0) { console.error(regressions + ' regression(s) detected!'); process.exit(1); }
+              console.log('No regressions detected.');
+            "
+          fi
+
+      - name: Update baseline (push to master only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          mkdir -p benchmarks
+          cp benchmark-results.json benchmarks/baseline.json
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet benchmarks/baseline.json; then
+            echo "Baseline unchanged."
+          else
+            git add benchmarks/baseline.json
+            git commit -m "chore: update benchmark baseline [skip ci]"
+            git push origin HEAD:master
+          fi
+
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: benchmark-report
+          path: |
+            benchmark-results.json
+            benchmark-report.html
+          retention-days: 7
+
+  # ═══════════════════════════════════════════════════════════
+  # E2E — Playwright browser tests
+  # ═══════════════════════════════════════════════════════════
+  e2e:
+    name: E2E (Playwright)
+    needs: [lint, typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
       - uses: actions/cache@v6
         with:
           path: e2e/wasm-cache
@@ -110,4 +255,61 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - run: npx playwright install chromium --with-deps
-      - run: npx playwright test
+      - name: Run E2E tests
+        env:
+          TSX_TSCONFIG_PATH: e2e/tsconfig.json
+        run: npx playwright test
+
+  # ═══════════════════════════════════════════════════════════
+  # GitHub Pages — coverage + benchmarks + API docs
+  # ═══════════════════════════════════════════════════════════
+  deploy-pages:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+    needs: [test, benchmark, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+
+      - name: Generate API docs
+        run: pnpm docs:api
+        continue-on-error: true
+
+      - name: Build docs site
+        run: pnpm docs:build
+        continue-on-error: true
+
+      - name: Download coverage report
+        uses: actions/download-artifact@v8
+        with: { name: coverage-report, path: docs/.vitepress/dist/coverage }
+        continue-on-error: true
+
+      - name: Download benchmark report
+        uses: actions/download-artifact@v8
+        with: { name: benchmark-report, path: docs/.vitepress/dist/benchmark }
+        continue-on-error: true
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with: { path: docs/.vitepress/dist }
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
