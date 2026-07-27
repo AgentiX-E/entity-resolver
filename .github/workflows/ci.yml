@@ -66,19 +66,16 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run tests (batched — 4 batches, ~12 files each)
+      - name: Run tests (4 batches, ~12 files each)
         env:
           NODE_OPTIONS: --max-old-space-size=4096
         run: |
           set -e
           cd packages/entity-resolver-core
-          FILES=$(find src/__tests__ -name '*.test.ts' | sort)
-          echo "$FILES" | split -l 12 - batch_
-          for batch in batch_*; do
-            echo "=== Batch: $(wc -l < $batch) files ==="
-            xargs pnpm exec vitest run --reporter=dot < $batch
-            rm $batch
-          done
+          pnpm exec vitest run --reporter=dot src/__tests__/{active-learning,auto-config,benchmarks,blocking}/*.test.ts src/__tests__/{branch,branch-coverage-sprint}.test.ts
+          pnpm exec vitest run --reporter=dot src/__tests__/{clustering,comparison,errors,evaluation}/*.test.ts src/__tests__/{golden-record,interfaces}/*.test.ts
+          pnpm exec vitest run --reporter=dot src/__tests__/{fellegi-sunter,integration,llm,memory}/*.test.ts src/__tests__/{pipeline,placeholder}.test.ts
+          pnpm exec vitest run --reporter=dot src/__tests__/{pprl,preprocessing,registry,scorers,splink-features,utils,wasm-loader}/*.test.ts src/__tests__/final-branches.test.ts
 
   coverage:
     name: Coverage (Node 22, ubuntu)
