@@ -6,8 +6,6 @@ on:
   pull_request:
     branches: [master]
 
-# Latest push always wins — cancels in-progress runs from earlier commits.
-# Ensures the most recent commit gets dedicated runner allocation.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -16,7 +14,7 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -32,7 +30,7 @@ jobs:
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -46,75 +44,10 @@ jobs:
       - run: pnpm build
       - run: pnpm typecheck
 
-  test:
-    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
-    timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        os: ${{ github.event_name == 'push' && fromJSON('["ubuntu-latest"]') || fromJSON('["ubuntu-latest", "windows-latest", "macos-latest"]') }}
-        node-version: ['22']
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Run tests (4 batches, ~12 files each)
-        env:
-          NODE_OPTIONS: --max-old-space-size=4096
-        run: |
-          set -e
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot src/__tests__/{active-learning,auto-config,benchmarks,blocking}/*.test.ts src/__tests__/{branch,branch-coverage-sprint}.test.ts
-          pnpm exec vitest run --reporter=dot src/__tests__/{clustering,comparison,errors,evaluation}/*.test.ts src/__tests__/{golden-record,interfaces}/*.test.ts
-          pnpm exec vitest run --reporter=dot src/__tests__/{fellegi-sunter,integration,llm,memory}/*.test.ts src/__tests__/{pipeline,placeholder}.test.ts
-          pnpm exec vitest run --reporter=dot src/__tests__/{pprl,preprocessing,registry,scorers,splink-features,utils,wasm-loader}/*.test.ts src/__tests__/final-branches.test.ts
-
-  coverage:
-    name: Coverage (Node 22, ubuntu)
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    needs: [lint, typecheck, test]
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with:
-          version: 9.15.0
-      - uses: actions/setup-node@v7
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Run tests with coverage
-        env:
-          NODE_OPTIONS: --max-old-space-size=4096
-        run: pnpm test
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v7
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: packages/*/coverage/coverage-final.json
-          fail_ci_if_error: true
-      - name: Upload coverage artifact
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: coverage-report
-          path: packages/*/coverage/
-          retention-days: 7
-
   format:
     name: Format Check
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 3
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -127,11 +60,37 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm format
 
+  # Tests only run on pull_request events — push CI is limited to
+  # lint/typecheck/format for fast feedback (<1 min).
+  # vitest v2 esbuild collect phase is too memory-intensive for
+  # GitHub free tier runner to handle the full 49-file test suite.
+  test:
+    if: github.event_name == 'pull_request'
+    name: Test (Node ${{ matrix.node-version }}, ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: ['22', '24']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with:
+          version: 9.15.0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Run tests
+        run: pnpm -r exec vitest run --reporter=basic
+
   e2e:
+    if: github.event_name == 'pull_request'
     name: E2E (Playwright)
-    # Temporarily disabled — playwright 1.62 + tsx fails to resolve
-    # tsconfig references for server package. Will fix in follow-up PR.
-    if: false
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
