@@ -50,6 +50,19 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
     },
   },
+  // Server package — tsconfig references removed to avoid tsx/playwright
+  // resolution failures in CI. Suppress type-dependent rules that require
+  // cross-package type resolution.
+  {
+    files: ['packages/entity-resolver-server/src/**/*.ts'],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-return': 'off',
+      '@typescript-eslint/no-unsafe-argument': 'off',
+    },
+  },
   {
     ignores: ['dist/', 'coverage/', '*.config.*', 'vitest.*', 'e2e/', '**/scorers/wasm/scorers/*.js', '**/scorers/wasm/scorers/*.d.ts', 'packages/*/dist/'],
   },
