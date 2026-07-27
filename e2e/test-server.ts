@@ -1,5 +1,6 @@
 // Simple HTTP server entry point for Playwright E2E tests.
-import { createApp } from '../packages/entity-resolver-server/src/index.js';
+// Uses built dist — built by pnpm build before E2E step.
+import { createApp } from '../packages/entity-resolver-server/dist/index.js';
 import { createServer } from 'node:http';
 
 const app = createApp();

@@ -1,8 +1,8 @@
 // Server E2E tests — validates REST API endpoints via Playwright APIRequestContext.
 // Covers pipeline error catch blocks not reachable via vitest app.request().
 import { test, expect } from '@playwright/test';
-import { createApp } from '../packages/entity-resolver-server/src/index.js';
-import type { ServerConfig } from '../packages/entity-resolver-server/src/index.js';
+import { createApp } from '../packages/entity-resolver-server/dist/index.js';
+import type { ServerConfig } from '../packages/entity-resolver-server/dist/index.js';
 
 function buildRequestHandler(config: ServerConfig = {}) {
   const app = createApp(config);
