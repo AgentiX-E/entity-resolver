@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   # ═══════════════════════════════════════════════════════════
-  # Quality Gates — fast feedback (< 60s total)
+  # Quality Gates — fast feedback (< 60s)
   # ═══════════════════════════════════════════════════════════
   lint:
     name: Lint
@@ -59,20 +59,13 @@ jobs:
       - run: pnpm format
 
   # ═══════════════════════════════════════════════════════════
-  # Test — split into 4 categories, each runs in parallel
+  # Step 1: Core tests — the foundation package (38 files)
   # ═══════════════════════════════════════════════════════════
-  test:
-    name: Test (${{ matrix.category }})
+  test-core:
+    name: Test (core)
+    needs: [typecheck]
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    strategy:
-      fail-fast: false
-      matrix:
-        category:
-          - core-a
-          - core-b
-          - em-and-rest
-          - pipeline-heavy
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -81,10 +74,8 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run core tests (batch A)
-        if: matrix.category == 'core-a'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
+      - name: Core batch 1 (~8 files)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
@@ -97,10 +88,8 @@ jobs:
             src/__tests__/preprocessing.test.ts \
             src/__tests__/errors/hierarchy.test.ts
 
-      - name: Run core tests (batch B)
-        if: matrix.category == 'core-b'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
+      - name: Core batch 2 (~8 files)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
@@ -113,10 +102,8 @@ jobs:
             src/__tests__/evaluation/metrics.test.ts \
             src/__tests__/interfaces/logger.test.ts
 
-      - name: Run EM + rest tests
-        if: matrix.category == 'em-and-rest'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
+      - name: Core batch 3 (~7 files)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
@@ -126,36 +113,121 @@ jobs:
             src/__tests__/fellegi-sunter/model-serialization.test.ts \
             src/__tests__/fellegi-sunter/parameters.test.ts \
             src/__tests__/fellegi-sunter/tf-adjust.test.ts \
-            src/__tests__/integration/pipeline-e2e.test.ts \
+            src/__tests__/integration/pipeline-e2e.test.ts
+
+      - name: Core batch 4 (~8 files)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
             src/__tests__/llm/scorer.test.ts \
             src/__tests__/memory/entity-store.test.ts \
             src/__tests__/pprl/bloom.test.ts \
             src/__tests__/utils/memory-guard.test.ts \
             src/__tests__/active-learning/learner.test.ts \
-            src/__tests__/auto-config/detector.test.ts
+            src/__tests__/auto-config/detector.test.ts \
+            src/__tests__/blocking/all.test.ts \
+            src/__tests__/pipeline/datasource.test.ts
 
-      - name: Run pipeline tests (one file per process — heavy datasets)
-        if: matrix.category == 'pipeline-heavy'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
+      - name: Core batch 5 (~2 files — heavy datasets)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           for f in \
-            src/__tests__/blocking/all.test.ts \
-            src/__tests__/pipeline/datasource.test.ts \
             src/__tests__/pipeline/incremental.test.ts \
             src/__tests__/benchmarks/dataset-edge.test.ts; do
             pnpm exec vitest run --reporter=dot "$f"
           done
 
   # ═══════════════════════════════════════════════════════════
-  # Benchmark Regression — runs on push and PR
+  # Step 2: Node + Browser tests — parallel, depend on core
+  # ═══════════════════════════════════════════════════════════
+  test-node:
+    name: Test (node)
+    needs: [test-core]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-node exec vitest run --reporter=dot
+
+  test-browser:
+    name: Test (browser)
+    needs: [test-core]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-browser exec vitest run --reporter=dot
+
+  # ═══════════════════════════════════════════════════════════
+  # Step 3: Server + Visual + CLI — parallel, dep on node+browser
+  # ═══════════════════════════════════════════════════════════
+  test-server:
+    name: Test (server)
+    needs: [test-node, test-browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-server exec vitest run --reporter=dot
+
+  test-visual:
+    name: Test (visual)
+    needs: [test-node, test-browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-visual exec vitest run --reporter=dot
+
+  test-cli:
+    name: Test (cli)
+    needs: [test-node, test-browser]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-cli exec vitest run --reporter=dot
+
+  # ═══════════════════════════════════════════════════════════
+  # Step 4: Benchmarks — depends on quality gates
   # ═══════════════════════════════════════════════════════════
   benchmark:
     name: Benchmarks
     needs: [lint, typecheck]
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     permissions:
       contents: write
     steps:
@@ -178,7 +250,7 @@ jobs:
           "
         env:
           NODE_OPTIONS: --max-old-space-size=7168
-        timeout-minutes: 40
+        timeout-minutes: 35
 
       - name: Generate HTML report
         run: |
@@ -286,7 +358,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════
   deploy-pages:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-    needs: [test, benchmark, e2e]
+    needs: [test-server, test-visual, test-cli, benchmark, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -298,7 +370,6 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
-
       - uses: pnpm/action-setup@v6
         with: { version: '9.15.0' }
       - uses: actions/setup-node@v7
