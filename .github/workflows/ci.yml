@@ -140,13 +140,6 @@ jobs:
           pnpm exec vitest run --reporter=dot \
             src/__tests__/pipeline/linking.test.ts
 
-      - name: Core batch 4c — pipeline/runner (one file per process)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/pipeline/runner.test.ts
-
       - name: Core batch 5 (3 files — medium datasets)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
@@ -183,8 +176,8 @@ jobs:
   # collect to hang even in per-file vitest.  Runs independently
   # so it does not block the needs chain below.
   # ═══════════════════════════════════════════════════════════
-  test-pyjedai:
-    name: Test (pyjedai)
+  test-heavy:
+    name: Test (heavy)
     needs: [typecheck]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -201,6 +194,11 @@ jobs:
         run: |
           pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
             src/__tests__/clustering/pyjedai-algorithms.test.ts
+      - name: Run pipeline/runner
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
+            src/__tests__/pipeline/runner.test.ts
 
   # ═══════════════════════════════════════════════════════════
   # Step 2: Node + Browser tests — parallel, depend on core
