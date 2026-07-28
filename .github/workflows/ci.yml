@@ -107,13 +107,6 @@ jobs:
             src/__tests__/evaluation/cross-validate.test.ts \
             src/__tests__/evaluation/metrics.test.ts
 
-      - name: Core batch 2c — pyjedai-algorithms (one file per process — heavy deps)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/clustering/pyjedai-algorithms.test.ts
-
       - name: Core batch 3 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
@@ -171,6 +164,31 @@ jobs:
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
             src/__tests__/benchmarks/dataset-edge.test.ts
+
+  # ═══════════════════════════════════════════════════════════
+  # Heavy standalone test — pyjedai-algorithms has an expensive
+  # dependency chain (algorithms-pyjedai.js) that causes esbuild
+  # collect to hang even in per-file vitest.  Runs independently
+  # so it does not block the needs chain below.
+  # ═══════════════════════════════════════════════════════════
+  test-pyjedai:
+    name: Test (pyjedai)
+    needs: [typecheck]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Run pyjedai-algorithms
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
+            src/__tests__/clustering/pyjedai-algorithms.test.ts
 
   # ═══════════════════════════════════════════════════════════
   # Step 2: Node + Browser tests — parallel, depend on core
