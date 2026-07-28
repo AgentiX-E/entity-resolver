@@ -98,15 +98,21 @@ jobs:
             src/__tests__/splink-features.test.ts \
             src/__tests__/clustering/algorithms.test.ts
 
-      - name: Core batch 2b (4 files)
+      - name: Core batch 2b (3 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
-            src/__tests__/clustering/pyjedai-algorithms.test.ts \
             src/__tests__/preprocessing/cjk.test.ts \
             src/__tests__/evaluation/cross-validate.test.ts \
             src/__tests__/evaluation/metrics.test.ts
+
+      - name: Core batch 2c — pyjedai-algorithms (one file per process — heavy deps)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/clustering/pyjedai-algorithms.test.ts
 
       - name: Core batch 3 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
