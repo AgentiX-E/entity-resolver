@@ -175,8 +175,8 @@ jobs:
             writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
           "
         env:
-          NODE_OPTIONS: --max-old-space-size=6144
-        timeout-minutes: 20
+          NODE_OPTIONS: --max-old-space-size=7168
+        timeout-minutes: 40
 
       - name: Generate HTML report
         run: |
