@@ -143,17 +143,19 @@ jobs:
             src/__tests__/active-learning/learner.test.ts \
             src/__tests__/auto-config/detector.test.ts
 
-      - name: Run pipeline tests
+      - name: Run pipeline tests (one file per process — heavy datasets)
         if: matrix.category == 'pipeline'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
           cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
+          for f in \
             src/__tests__/blocking/all.test.ts \
             src/__tests__/pipeline/datasource.test.ts \
             src/__tests__/pipeline/incremental.test.ts \
-            src/__tests__/benchmarks/dataset-edge.test.ts
+            src/__tests__/benchmarks/dataset-edge.test.ts; do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
 
   # ═══════════════════════════════════════════════════════════
   # Benchmark Regression — runs on push and PR
