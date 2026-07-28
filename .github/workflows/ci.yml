@@ -69,7 +69,8 @@ jobs:
       fail-fast: false
       matrix:
         category:
-          - core
+          - core-a
+          - core-b
           - em-and-integration
           - pipeline
     steps:
@@ -80,8 +81,8 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Run core tests
-        if: matrix.category == 'core'
+      - name: Run core tests (batch A)
+        if: matrix.category == 'core-a'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
@@ -95,12 +96,22 @@ jobs:
             src/__tests__/golden-record.test.ts \
             src/__tests__/preprocessing.test.ts \
             src/__tests__/registry.test.ts \
+            src/__tests__/clustering/*.test.ts \
+            src/__tests__/errors/*.test.ts; do
+            pnpm exec vitest run --reporter=dot "$f"
+          done
+
+      - name: Run core tests (batch B)
+        if: matrix.category == 'core-b'
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
+        run: |
+          cd packages/entity-resolver-core
+          for f in \
             src/__tests__/scorers.test.ts \
             src/__tests__/splink-features.test.ts \
-            src/__tests__/clustering/*.test.ts \
-            src/__tests__/errors/*.test.ts \
-            src/__tests__/evaluation/*.test.ts \
             src/__tests__/preprocessing/*.test.ts \
+            src/__tests__/evaluation/*.test.ts \
             src/__tests__/interfaces/*.test.ts; do
             pnpm exec vitest run --reporter=dot "$f"
           done
