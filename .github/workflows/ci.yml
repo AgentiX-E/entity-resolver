@@ -95,8 +95,6 @@ jobs:
             src/__tests__/comparison.test.ts \
             src/__tests__/golden-record.test.ts \
             src/__tests__/preprocessing.test.ts \
-            src/__tests__/registry.test.ts \
-            src/__tests__/clustering/*.test.ts \
             src/__tests__/errors/*.test.ts; do
             pnpm exec vitest run --reporter=dot "$f"
           done
@@ -108,8 +106,10 @@ jobs:
         run: |
           cd packages/entity-resolver-core
           for f in \
+            src/__tests__/registry.test.ts \
             src/__tests__/scorers.test.ts \
             src/__tests__/splink-features.test.ts \
+            src/__tests__/clustering/*.test.ts \
             src/__tests__/preprocessing/*.test.ts \
             src/__tests__/evaluation/*.test.ts \
             src/__tests__/interfaces/*.test.ts; do
