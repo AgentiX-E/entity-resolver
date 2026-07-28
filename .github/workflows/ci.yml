@@ -74,7 +74,7 @@ jobs:
         with: { node-version: '22', cache: 'pnpm' }
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
-      - name: Core batch 1 (~8 files)
+      - name: Core batch 1 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
@@ -88,7 +88,7 @@ jobs:
             src/__tests__/preprocessing.test.ts \
             src/__tests__/errors/hierarchy.test.ts
 
-      - name: Core batch 2 (~8 files)
+      - name: Core batch 2 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
@@ -97,25 +97,26 @@ jobs:
             src/__tests__/scorers.test.ts \
             src/__tests__/splink-features.test.ts \
             src/__tests__/clustering/algorithms.test.ts \
+            src/__tests__/clustering/pyjedai-algorithms.test.ts \
             src/__tests__/preprocessing/cjk.test.ts \
             src/__tests__/evaluation/cross-validate.test.ts \
-            src/__tests__/evaluation/metrics.test.ts \
-            src/__tests__/interfaces/logger.test.ts
+            src/__tests__/evaluation/metrics.test.ts
 
-      - name: Core batch 3 (~7 files)
+      - name: Core batch 3 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
           pnpm exec vitest run --reporter=dot \
+            src/__tests__/interfaces/logger.test.ts \
             src/__tests__/fellegi-sunter/em.test.ts \
             src/__tests__/fellegi-sunter/field-independence.test.ts \
             src/__tests__/fellegi-sunter/match-weight.test.ts \
             src/__tests__/fellegi-sunter/model-serialization.test.ts \
             src/__tests__/fellegi-sunter/parameters.test.ts \
             src/__tests__/fellegi-sunter/tf-adjust.test.ts \
-            src/__tests__/integration/pipeline-e2e.test.ts
+            src/__tests__/wasm-loader.test.ts
 
-      - name: Core batch 4 (~8 files)
+      - name: Core batch 4 (8 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
@@ -126,18 +127,38 @@ jobs:
             src/__tests__/utils/memory-guard.test.ts \
             src/__tests__/active-learning/learner.test.ts \
             src/__tests__/auto-config/detector.test.ts \
-            src/__tests__/blocking/all.test.ts \
-            src/__tests__/pipeline/datasource.test.ts
+            src/__tests__/pipeline/linking.test.ts \
+            src/__tests__/pipeline/runner.test.ts
 
-      - name: Core batch 5 (~2 files — heavy datasets)
+      - name: Core batch 5 (3 files — medium datasets)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
-          for f in \
-            src/__tests__/pipeline/incremental.test.ts \
-            src/__tests__/benchmarks/dataset-edge.test.ts; do
-            pnpm exec vitest run --reporter=dot "$f"
-          done
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/blocking/meta-blocking.test.ts \
+            src/__tests__/pipeline/datasource.test.ts \
+            src/__tests__/integration/i21-regression.test.ts
+
+      - name: Core batch 6 — blocking/all (one file per process — heavy dataset)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/blocking/all.test.ts
+
+      - name: Core batch 7 — pipeline/incremental (one file per process — heavy dataset)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/pipeline/incremental.test.ts
+
+      - name: Core batch 8 — benchmarks/dataset-edge (one file per process — heavy dataset)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/benchmarks/dataset-edge.test.ts
 
   # ═══════════════════════════════════════════════════════════
   # Step 2: Node + Browser tests — parallel, depend on core
