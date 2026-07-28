@@ -163,13 +163,6 @@ jobs:
           pnpm exec vitest run --reporter=dot \
             src/__tests__/pipeline/incremental.test.ts
 
-      - name: Core batch 8 — benchmarks/dataset-edge (one file per process — heavy dataset)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/benchmarks/dataset-edge.test.ts
-
   # ═══════════════════════════════════════════════════════════
   # Heavy standalone test — pyjedai-algorithms has an expensive
   # dependency chain (algorithms-pyjedai.js) that causes esbuild
@@ -199,6 +192,11 @@ jobs:
         run: |
           pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
             src/__tests__/pipeline/runner.test.ts
+      - name: Run benchmarks/dataset-edge
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
+            src/__tests__/benchmarks/dataset-edge.test.ts
 
   # ═══════════════════════════════════════════════════════════
   # Step 2: Node + Browser tests — parallel, depend on core
