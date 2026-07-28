@@ -121,7 +121,7 @@ jobs:
             src/__tests__/fellegi-sunter/tf-adjust.test.ts \
             src/__tests__/wasm-loader.test.ts
 
-      - name: Core batch 4 (8 files)
+      - name: Core batch 4 (6 files)
         env: { NODE_OPTIONS: '--max-old-space-size=7168' }
         run: |
           cd packages/entity-resolver-core
@@ -131,8 +131,20 @@ jobs:
             src/__tests__/pprl/bloom.test.ts \
             src/__tests__/utils/memory-guard.test.ts \
             src/__tests__/active-learning/learner.test.ts \
-            src/__tests__/auto-config/detector.test.ts \
-            src/__tests__/pipeline/linking.test.ts \
+            src/__tests__/auto-config/detector.test.ts
+
+      - name: Core batch 4b — pipeline/linking (one file per process)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
+            src/__tests__/pipeline/linking.test.ts
+
+      - name: Core batch 4c — pipeline/runner (one file per process)
+        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
+        run: |
+          cd packages/entity-resolver-core
+          pnpm exec vitest run --reporter=dot \
             src/__tests__/pipeline/runner.test.ts
 
       - name: Core batch 5 (3 files — medium datasets)
