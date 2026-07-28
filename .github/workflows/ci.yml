@@ -71,9 +71,8 @@ jobs:
         category:
           - core-a
           - core-b
-          - em
-          - rest
-          - pipeline
+          - em-and-rest
+          - pipeline-heavy
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -114,8 +113,8 @@ jobs:
             src/__tests__/evaluation/metrics.test.ts \
             src/__tests__/interfaces/logger.test.ts
 
-      - name: Run EM tests
-        if: matrix.category == 'em'
+      - name: Run EM + rest tests
+        if: matrix.category == 'em-and-rest'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
@@ -126,15 +125,7 @@ jobs:
             src/__tests__/fellegi-sunter/match-weight.test.ts \
             src/__tests__/fellegi-sunter/model-serialization.test.ts \
             src/__tests__/fellegi-sunter/parameters.test.ts \
-            src/__tests__/fellegi-sunter/tf-adjust.test.ts
-
-      - name: Run rest tests
-        if: matrix.category == 'rest'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
+            src/__tests__/fellegi-sunter/tf-adjust.test.ts \
             src/__tests__/integration/pipeline-e2e.test.ts \
             src/__tests__/llm/scorer.test.ts \
             src/__tests__/memory/entity-store.test.ts \
@@ -144,7 +135,7 @@ jobs:
             src/__tests__/auto-config/detector.test.ts
 
       - name: Run pipeline tests (one file per process — heavy datasets)
-        if: matrix.category == 'pipeline'
+        if: matrix.category == 'pipeline-heavy'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
