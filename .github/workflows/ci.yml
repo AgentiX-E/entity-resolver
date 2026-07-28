@@ -70,9 +70,8 @@ jobs:
       matrix:
         category:
           - core
-          - em
+          - em-and-integration
           - pipeline
-          - integration
     steps:
       - uses: actions/checkout@v7
       - uses: pnpm/action-setup@v6
@@ -106,38 +105,13 @@ jobs:
             pnpm exec vitest run --reporter=dot "$f"
           done
 
-      - name: Run EM tests
-        if: matrix.category == 'em'
+      - name: Run EM + integration tests
+        if: matrix.category == 'em-and-integration'
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         run: |
           cd packages/entity-resolver-core
-          for f in src/__tests__/fellegi-sunter/*.test.ts; do
-            pnpm exec vitest run --reporter=dot "$f"
-          done
-
-      - name: Run pipeline tests
-        if: matrix.category == 'pipeline'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
-        run: |
-          cd packages/entity-resolver-core
-          for f in \
-            src/__tests__/active-learning/*.test.ts \
-            src/__tests__/auto-config/*.test.ts \
-            src/__tests__/blocking/*.test.ts \
-            src/__tests__/pipeline/*.test.ts \
-            src/__tests__/benchmarks/*.test.ts; do
-            pnpm exec vitest run --reporter=dot "$f"
-          done
-
-      - name: Run integration tests
-        if: matrix.category == 'integration'
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
-        run: |
-          cd packages/entity-resolver-core
-          for f in \
+          for f in src/__tests__/fellegi-sunter/*.test.ts \
             src/__tests__/integration/*.test.ts \
             src/__tests__/llm/*.test.ts \
             src/__tests__/memory/*.test.ts \
