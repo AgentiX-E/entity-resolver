@@ -2,6 +2,7 @@
 // Uses an LLM (DeepSeek, OpenAI-compatible) to resolve ambiguous pairs.
 // API key is injected via configuration — NEVER in code or environment variables.
 //
+import { LLMError } from '../errors/hierarchy.js';
 // Production-hardened with:
 // - Circuit breaker: pauses on consecutive failures to prevent API abuse
 // - Exponential backoff retry: transient failures (429/500/503) are retried
@@ -121,7 +122,7 @@ export async function scoreWithLLM(
   logger?: ILogger,
 ): Promise<LLMScorerResult[]> {
   if (!config.apiKey) {
-    throw new Error('LLMScorerConfig.apiKey is required for LLM scoring');
+    throw new LLMError('LLMScorerConfig.apiKey is required for LLM scoring');
   }
 
   const apiBase = config.apiBaseUrl ?? 'https://api.deepseek.com/v1';
@@ -381,7 +382,7 @@ async function callLLM(
 
   if (!response.ok) {
     const errText = await response.text().catch(() => '');
-    throw new Error(`LLM API error ${response.status}: ${errText}`);
+    throw new LLMError(`LLM API error ${response.status}: ${errText}`);
   }
 
   const data = (await response.json()) as {

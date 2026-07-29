@@ -1,10 +1,4 @@
-/**
- * Memory guard utility for large dataset processing.
- *
- * Monitors heap usage and provides configurable thresholds for
- * warning/error on excessive memory consumption. Useful for
- * streaming pipeline stages that may accumulate data.
- */
+import { InternalError } from '../errors/hierarchy.js';
 
 /** Memory guard state and thresholds. */
 export interface MemoryGuardConfig {
@@ -56,7 +50,7 @@ export function checkMemory(config?: MemoryGuardConfig): MemorySnapshot {
   }
 
   if (heapUsed > errorThreshold) {
-    throw new Error(
+    throw new InternalError(
       `Memory usage ${(heapUsed / MB).toFixed(0)}MB exceeds error threshold ${(errorThreshold / MB).toFixed(0)}MB`,
     );
   }

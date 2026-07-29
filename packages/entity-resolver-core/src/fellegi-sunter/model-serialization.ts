@@ -2,6 +2,7 @@
 // Enables save/load of trained models for production deployment without re-training.
 
 import type { FSParameters } from '../fellegi-sunter/parameters.js';
+import { ParseError } from '../errors/hierarchy.js';
 import { validateParameters } from '../fellegi-sunter/parameters.js';
 import type { EMResult } from '../fellegi-sunter/em.js';
 import type { ComparisonSpec } from '../matching/comparison.js';
@@ -182,16 +183,16 @@ export function deserializeFSParamsFromJSON(json: string): FSParameters {
   try {
     raw = JSON.parse(json);
   } catch (e) {
-    throw new Error(`Invalid JSON: ${String(e)}`, { cause: e });
+    throw new ParseError(`Invalid JSON: ${String(e)}`);
   }
 
   if (!isRecord(raw)) {
-    throw new Error('Parameters must be a JSON object');
+    throw new ParseError('Parameters must be a JSON object');
   }
 
   const errors = validateSerializedFSParams(raw);
   if (errors.length > 0) {
-    throw new Error(`Invalid FS parameters: ${errors.join('; ')}`);
+    throw new ParseError(`Invalid FS parameters: ${errors.join('; ')}`);
   }
 
   const params: FSParameters = {

@@ -11,6 +11,8 @@
  * Algorithms marked "CCER only" throw if a pair links two records from the same dataset.
  */
 
+import { ClusteringError } from '../errors/hierarchy.js';
+
 import type { ScoredPair, EntityId, Cluster } from '../types/core.js';
 
 // ---------------------------------------------------------------------------
@@ -301,7 +303,9 @@ export function bestMatchClustering(
 
     // CCER guard: left < right must hold after sort — else this is Dirty ER
     if (d1 >= d2) {
-      throw new Error('BestMatchClustering is CCER only. Found pair with same-dataset entities.');
+      throw new ClusteringError(
+        'BestMatchClustering is CCER only. Found pair with same-dataset entities.',
+      );
     }
 
     const sourceEnt = order === 'inorder' ? d1 : d2;
@@ -383,7 +387,9 @@ export function mergeCenterClustering(
     if (sim <= threshold) continue;
     const [d1, d2] = p.leftId < p.rightId ? [p.leftId, p.rightId] : [p.rightId, p.leftId];
     if (d1 >= d2) {
-      throw new Error('MergeCenterClustering is CCER only. Found pair with same-dataset entities.');
+      throw new ClusteringError(
+        'MergeCenterClustering is CCER only. Found pair with same-dataset entities.',
+      );
     }
     edgeList.push([d1, d2, sim]);
   }
@@ -1184,7 +1190,7 @@ export function kiralyMSMClustering(
   for (const p of pairs) {
     const [d1, d2] = p.leftId < p.rightId ? [p.leftId, p.rightId] : [p.rightId, p.leftId];
     if (d1 >= d2) {
-      throw new Error('KiralyMSM is CCER only. Found pair with same-dataset entities.');
+      throw new ClusteringError('KiralyMSM is CCER only. Found pair with same-dataset entities.');
     }
     maxD1 = Math.max(maxD1, d1);
   }
@@ -1609,7 +1615,9 @@ export function rowColumnClustering(
   for (const p of pairs) {
     const [d1, d2] = p.leftId < p.rightId ? [p.leftId, p.rightId] : [p.rightId, p.leftId];
     if (d1 >= d2) {
-      throw new Error('RowColumnClustering is CCER only. Found pair with same-dataset entities.');
+      throw new ClusteringError(
+        'RowColumnClustering is CCER only. Found pair with same-dataset entities.',
+      );
     }
     maxD1 = Math.max(maxD1, d1);
     maxD2 = Math.max(maxD2, d2);
