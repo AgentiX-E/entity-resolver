@@ -121,6 +121,7 @@ export function multiPassBlocking(
     };
   }
 
+  let totalBlocks = 0;
   for (const pass of config.passes) {
     const blocks = new Map<string, number[]>();
 
@@ -131,6 +132,8 @@ export function multiPassBlocking(
       block.push(i);
       blocks.set(key, block);
     }
+
+    totalBlocks += blocks.size;
 
     for (const [, indices] of blocks) {
       if (indices.length < 2 || indices.length > 500) continue;
@@ -149,7 +152,7 @@ export function multiPassBlocking(
     pairs,
     totalRecords: records.length,
     reductionRatio: computeReductionRatio(pairs.length, records.length),
-    blockCount: pairSet.size,
+    blockCount: totalBlocks,
   };
 }
 

@@ -35,7 +35,10 @@ describe('POST /api/v1/extract', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         text: '下午3点开会',
-        fields: [{ name: 'time', type: 'time' }, { name: 'title', type: 'string' }],
+        fields: [
+          { name: 'time', type: 'time' },
+          { name: 'title', type: 'string' },
+        ],
         intent: 'meeting',
       }),
     });

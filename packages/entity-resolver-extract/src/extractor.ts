@@ -1,18 +1,18 @@
 /**
- * extract() �? Main entity extraction orchestrator.
+ * extract() �? Main entity extraction orchestrator.
  *
  * Implements the "Pattern-First, LLM-Last" cascade architecture:
- *   Layer 1 (I13): Pattern Match �? regex + dictionary, <1ms, ~70% coverage
- *   Layer 2 (I16): ONNX NER      �? GLiNER zero-shot, <20ms, ~20% coverage
- *   Layer 3 (I16): LLM Fallback  �? DeepSeek/OpenAI, <2s, ~10% coverage
+ *   Layer 1 (I13): Pattern Match �? regex + dictionary, <1ms, ~70% coverage
+ *   Layer 2 (I16): ONNX NER      �? GLiNER zero-shot, <20ms, ~20% coverage
+ *   Layer 3 (I16): LLM Fallback  �? DeepSeek/OpenAI, <2s, ~10% coverage
  *
  * For I13, only Layer 1 is implemented. Layers 2 and 3 are stubs
  * that return null, allowing the system to function in pattern-only mode.
  *
  * Two extraction modes:
- *   General mode:   extract(schema, text) �? pure schema-driven
+ *   General mode:   extract(schema, text) �? pure schema-driven
  *   Intent-enhanced: extract(schema, text, { intent: 'alarm', context: {...} })
- *                    �? uses intent context to boost relevant field extraction
+ *                    �? uses intent context to boost relevant field extraction
  *   Intent-enhanced mode is implemented in I15.
  */
 
@@ -23,11 +23,7 @@ import type { FieldExtraction } from './pattern/pattern-extractor.js';
 import { normalizeText } from './normalization/value-normalizer.js';
 import { coerce } from './normalization/type-coercion.js';
 import type { CoercionTarget } from './normalization/type-coercion.js';
-import {
-  resolveIntent,
-  applyIntentContext,
-  applyDefaults,
-} from './context/intent-context.js';
+import { resolveIntent, applyIntentContext, applyDefaults } from './context/intent-context.js';
 import type { IntentContextResult } from './context/intent-context.js';
 import {
   inheritSlots,
@@ -51,7 +47,7 @@ export interface ExtractionResult {
 }
 
 /**
- * Schema field descriptor �? minimal representation derived from
+ * Schema field descriptor �? minimal representation derived from
  * zod schema introspection. In I13 this is manually constructed;
  * in I16 it will be auto-derived from actual zod schemas.
  */
@@ -73,21 +69,21 @@ export interface ExtractOptions {
   previousResult?: ExtractionResult;
   /** Previous context for multi-turn dialog (I15) */
   previousContext?: ExtractionContext;
-  /** Custom PatternRegistry �? if not provided, builtins are used */
+  /** Custom PatternRegistry �? if not provided, builtins are used */
   registry?: PatternRegistry;
   /** Enable ONNX NER layer (I16) */
   enableOnnx?: boolean;
   /** Enable LLM fallback (I16) */
   enableLlm?: boolean;
   /**
-   * Inject ONNX extraction results for testing. (I16 �? internal test hook)
-   * Maps field name �? FieldExtraction.
+   * Inject ONNX extraction results for testing. (I16 �? internal test hook)
+   * Maps field name �? FieldExtraction.
    * @internal
    */
   _onnxInjection?: Map<string, FieldExtraction>;
   /**
-   * Inject LLM extraction results for testing. (I16 �? internal test hook)
-   * Maps field name �? FieldExtraction.
+   * Inject LLM extraction results for testing. (I16 �? internal test hook)
+   * Maps field name �? FieldExtraction.
    * @internal
    */
   _llmInjection?: Map<string, FieldExtraction>;
@@ -155,10 +151,10 @@ export function extract(
   // ── Layer 1: Pattern Match ─────────────────────────────────────────
   const patternResult = extractPatterns(normalizedText, fieldTypes, registry);
 
-  // ── Layer 2: ONNX NER (stub �? I16) ─────────────────────────────────
+  // ── Layer 2: ONNX NER (stub �? I16) ─────────────────────────────────
   const onnxResult = options._onnxInjection ?? new Map<string, FieldExtraction>();
 
-  // ── Layer 3: LLM Fallback (stub �? I16) ─────────────────────────────
+  // ── Layer 3: LLM Fallback (stub �? I16) ─────────────────────────────
   const llmResult = options._llmInjection ?? new Map<string, FieldExtraction>();
 
   // ── Assemble results ───────────────────────────────────────────────
@@ -197,7 +193,7 @@ export function extract(
       continue;
     }
 
-    // No match found �? set undefined
+    // No match found �? set undefined
     values[field.name] = undefined;
     provenance[field.name] = 'pattern'; // attempted but failed
     confidence[field.name] = 0;
@@ -219,14 +215,15 @@ export function extract(
         if (values[key] === undefined && mergedValues[key] !== undefined) {
           values[key] = mergedValues[key];
           provenance[key] = 'pattern'; // defaults act like pattern layer
-          confidence[key] = 0.50; // default values have moderate confidence
+          confidence[key] = 0.5; // default values have moderate confidence
         }
       }
     }
   }
 
   // ── I15: Slot inheritance ──────────────────────────────────────────
-  const previousCtx = options.previousContext ??
+  const previousCtx =
+    options.previousContext ??
     (options.previousResult
       ? buildExtractionContext(
           options.previousResult.values,
@@ -322,7 +319,11 @@ export async function extractAsync(
 export { PatternRegistry } from './pattern/pattern-registry.js';
 export { registerBuiltins } from './pattern/builtin-patterns.js';
 export { extractPatterns } from './pattern/pattern-extractor.js';
-export type { PatternMatch, PatternMatcher, PatternRegistration } from './pattern/pattern-registry.js';
+export type {
+  PatternMatch,
+  PatternMatcher,
+  PatternRegistration,
+} from './pattern/pattern-registry.js';
 export type { FieldExtraction, PatternExtractionResult } from './pattern/pattern-extractor.js';
 export { normalizeText } from './normalization/value-normalizer.js';
 export { coerce, coerceAll } from './normalization/type-coercion.js';

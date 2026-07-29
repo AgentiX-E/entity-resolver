@@ -29,7 +29,7 @@ describe('parseTemporal — relative days (Chinese)', () => {
 
   it('parses 明天 (tomorrow)', () => {
     const results = parseTemporal('明天下午3点', { referenceDate: FIXED_NOW });
-    const dateResult = results.find(r => r.date !== null);
+    const dateResult = results.find((r) => r.date !== null);
     expect(dateResult).toBeDefined();
     expect(dateResult!.date).toBe('2024-06-16');
   });
@@ -77,7 +77,7 @@ describe('parseTemporal — absolute CJK dates', () => {
   it('parses 2024年1月15日', () => {
     const results = parseTemporal('会议日期：2024年1月15日', { referenceDate: FIXED_NOW });
     expect(results.length).toBeGreaterThanOrEqual(1);
-    const dateResult = results.find(r => r.date !== null);
+    const dateResult = results.find((r) => r.date !== null);
     expect(dateResult).toBeDefined();
     expect(dateResult!.date).toBe('2024-01-15');
     expect(dateResult!.confidence).toBeGreaterThan(0.9);
@@ -86,7 +86,7 @@ describe('parseTemporal — absolute CJK dates', () => {
   it('parses 2024年12月31日', () => {
     const results = parseTemporal('截止：2024年12月31日');
     expect(results.length).toBeGreaterThanOrEqual(1);
-    const dateResult = results.find(r => r.date !== null);
+    const dateResult = results.find((r) => r.date !== null);
     expect(dateResult).toBeDefined();
     expect(dateResult!.date).toBe('2024-12-31');
   });
@@ -331,14 +331,25 @@ describe('parseTemporal — CJK accuracy ≥ 95%', () => {
       if (expectedDate) {
         const dateMatch = results.find((r) => r.date === expectedDate);
         if (dateMatch) passed++;
-        else console.log(`FAIL: "${text}" expected date ${expectedDate}, got:`, results.map(r => r.date));
+        else
+          console.log(
+            `FAIL: "${text}" expected date ${expectedDate}, got:`,
+            results.map((r) => r.date),
+          );
       } else if (expectedTime) {
         const timeMatch = results.find((r) => r.time === expectedTime);
         if (timeMatch) passed++;
-        else console.log(`FAIL: "${text}" expected time ${expectedTime}, got:`, results.map(r => r.time));
+        else
+          console.log(
+            `FAIL: "${text}" expected time ${expectedTime}, got:`,
+            results.map((r) => r.time),
+          );
       }
     }
     const accuracy = passed / allCases.length;
-    expect(accuracy, `CJK temporal accuracy: ${passed}/${allCases.length} = ${(accuracy * 100).toFixed(1)}%`).toBeGreaterThanOrEqual(0.95);
+    expect(
+      accuracy,
+      `CJK temporal accuracy: ${passed}/${allCases.length} = ${(accuracy * 100).toFixed(1)}%`,
+    ).toBeGreaterThanOrEqual(0.95);
   });
 });

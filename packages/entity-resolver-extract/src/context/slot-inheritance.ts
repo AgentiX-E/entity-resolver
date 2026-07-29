@@ -43,10 +43,10 @@ export interface ExtractionContext {
 
 /** Patterns that indicate the user is explicitly modifying a previous slot */
 const CHANGE_PATTERNS: RegExp[] = [
-  /(?:改[成为到]?|换成?|改成?|换成?|换成?|修改[成为]?|更新[成为]?|换成?|变更?)/iu,            // Chinese: 改/改成/换成/修改/更新
-  /(?:change|update|modify|set|switch|replace)\s+(?:to|with|as)?/iu,                 // English
-  /(?:変[更え]|変更|修正)/iu,                                                          // Japanese
-  /(?:변경|수정|바꾸)/iu,                                                                // Korean
+  /(?:改[成为到]?|换成?|改成?|换成?|换成?|修改[成为]?|更新[成为]?|换成?|变更?)/iu, // Chinese: 改/改成/换成/修改/更新
+  /(?:change|update|modify|set|switch|replace)\s+(?:to|with|as)?/iu, // English
+  /(?:変[更え]|変更|修正)/iu, // Japanese
+  /(?:변경|수정|바꾸)/iu, // Korean
 ];
 
 /** Patterns that indicate the user is canceling */
@@ -55,8 +55,7 @@ const CANCEL_PATTERNS: RegExp[] = [
 ];
 
 /** "Not X, but Y" correction patterns */
-const CORRECTION_PATTERN =
-  /(?:不是|不对|错了?|不是这样的?|no\b|wrong|違う|아니)/iu;
+const CORRECTION_PATTERN = /(?:不是|不对|错了?|不是这样的?|no\b|wrong|違う|아니)/iu;
 
 /**
  * Detect if text contains slot modification intent.

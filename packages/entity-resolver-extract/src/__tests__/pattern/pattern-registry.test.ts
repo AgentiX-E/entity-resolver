@@ -16,7 +16,8 @@ describe('PatternRegistry', () => {
       name: 'test',
       extract: (text: string) => {
         const match = /hello/.exec(text);
-        if (match) return [{ value: 'hello', confidence: 1.0, matchedText: match[0], offset: match.index }];
+        if (match)
+          return [{ value: 'hello', confidence: 1.0, matchedText: match[0], offset: match.index }];
         return [];
       },
     };

@@ -13,11 +13,11 @@
  *   3. Provide a calibrated confidence score
  *
  * Confidence scoring guidelines:
- *   0.95+  ‚Ä? Unambiguous match with strict format validation
- *   0.80-0.94 ‚Ä? Good match with minor ambiguity
- *   0.60-0.79 ‚Ä? Probable match with format heuristics
- *   0.40-0.59 ‚Ä? Weak match, may need ONNX/LLM verification
- *   <0.40   ‚Ä? Not returned (treated as no match)
+ *   0.95+  ÔøΩ? Unambiguous match with strict format validation
+ *   0.80-0.94 ÔøΩ? Good match with minor ambiguity
+ *   0.60-0.79 ÔøΩ? Probable match with format heuristics
+ *   0.40-0.59 ÔøΩ? Weak match, may need ONNX/LLM verification
+ *   <0.40   ÔøΩ? Not returned (treated as no match)
  */
 
 import type { PatternMatch, PatternMatcher } from './pattern-registry.js';
@@ -41,7 +41,7 @@ const emailMatcher: PatternMatcher = {
     const raw = match[0];
     // Penalize disposable domains and suspicious TLDs lightly
     const disposableDomains = /@(?:example\.(?:com|org|net)|test\.com|email\.com)$/i;
-    const confidence = disposableDomains.test(raw) ? 0.80 : 0.95;
+    const confidence = disposableDomains.test(raw) ? 0.8 : 0.95;
 
     return [
       {
@@ -59,7 +59,7 @@ const emailMatcher: PatternMatcher = {
 /**
  * International and Chinese phone number patterns.
  * Matches: +86-138-0000-0000, 13800000000, (010) 1234-5678, 1-800-555-0199
- * Uses regex-based heuristics ‚Ä? TODO(I16): integrate libphonenumber-js for validation.
+ * Uses regex-based heuristics ÔøΩ? TODO(I16): integrate libphonenumber-js for validation.
  */
 const phoneRegex =
   /(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{1,4}\)?[-.\s]?)?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{3,10}\b/;
@@ -76,8 +76,8 @@ const phoneMatcher: PatternMatcher = {
     if (digitCount < 7) return [];
 
     // Confidence based on digit count and format
-    let confidence = 0.70;
-    if (digitCount >= 10 && digitCount <= 15) confidence = 0.90;
+    let confidence = 0.7;
+    if (digitCount >= 10 && digitCount <= 15) confidence = 0.9;
     if (raw.startsWith('+')) confidence += 0.05;
 
     return [
@@ -98,7 +98,8 @@ const urlMatcher: PatternMatcher = {
   extract(text: string): PatternMatch[] {
     // Find the best URL match, skipping email-like patterns.
     // The global regex iterates all matches to find one without '@' ambiguity.
-    const regex = /\b(?:(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*))/gi;
+    const regex =
+      /\b(?:(?:https?:\/\/)?(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,63}\b(?:[-a-zA-Z0-9()@:%_+.~#?&/=]*))/gi;
     let match: RegExpExecArray | null;
     while ((match = regex.exec(text)) !== null) {
       const raw = match[0];
@@ -181,9 +182,9 @@ const numberMatcher: PatternMatcher = {
 
     let value: unknown = parsed;
     if (isPercent) value = parsed / 100;
-    // Currency is returned as number ‚Ä? caller can apply currency context
+    // Currency is returned as number ÔøΩ? caller can apply currency context
 
-    let confidence = 0.90;
+    let confidence = 0.9;
     if (hasCurrency) confidence = 0.92;
     if (isPercent) confidence = 0.95;
     if (/[eE][+-]?\d+/.test(cleaned)) confidence = 0.88; // scientific notation
@@ -204,13 +205,13 @@ const numberMatcher: PatternMatcher = {
 /**
  * Multi-language boolean matcher.
  * English: true/false, yes/no, y/n, on/off, 1/0
- * Chinese: Êò?/Âê?, ÂØ?/Èî?, Áú?/ÂÅ?, Êú?/Êó?, ÂºÄ/ÂÖ?
+ * Chinese: ÔøΩ?/ÔøΩ?, ÔøΩ?/ÔøΩ?, ÔøΩ?/ÔøΩ?, ÔøΩ?/ÔøΩ?, ÂºÄ/ÔøΩ?
  */
 const booleanPatterns: Array<{ pattern: RegExp; value: boolean; lang: string }> = [
   // English
   { pattern: /\b(?:true|yes|y|on)\b/i, value: true, lang: 'en' },
   { pattern: /\b(?:false|no|n|off)\b/i, value: false, lang: 'en' },
-  // Chinese °™ use hex escapes to avoid encoding issues with unicode chars
+  // Chinese ÔøΩÔøΩ use hex escapes to avoid encoding issues with unicode chars
   { pattern: /(?:\u662f|\u5bf9|\u771f|\u6709|\u5f00)/u, value: true, lang: 'zh' },
   { pattern: /(?:\u5426|\u4e0d|\u9519|\u5047|\u65e0|\u6ca1|\u5173)/u, value: false, lang: 'zh' },
 ];
@@ -257,18 +258,20 @@ const booleanMatcher: PatternMatcher = {
  * ISO 8601 and common date format matcher.
  * Formats: 2024-01-15, 2024/01/15, 15/01/2024, Jan 15 2024, January 15, 2024
  *
- * NOTE: CJK date parsing (2024Âπ?1Êú?15Êó?, ÊòéÂ§©, ‰∏ãÂë®‰∏?) is handled by the temporal
+ * NOTE: CJK date parsing (2024ÔøΩ?1ÔøΩ?15ÔøΩ?, ÊòéÂ§©, ‰∏ãÂë®ÔøΩ?) is handled by the temporal
  * parser in I14. This matcher covers Western date formats only.
  */
 const dateRegexes: Array<{ pattern: RegExp; format: string }> = [
   { pattern: /\b(\d{4})-(\d{2})-(\d{2})\b/, format: 'YYYY-MM-DD' },
   { pattern: /\b(\d{4})\/(\d{2})\/(\d{2})\b/, format: 'YYYY/MM/DD' },
   {
-    pattern: /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b/i,
+    pattern:
+      /\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\s+(\d{1,2})(?:st|nd|rd|th)?,?\s+(\d{4})\b/i,
     format: 'MMM DD YYYY',
   },
   {
-    pattern: /\b(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?),?\s+(\d{4})\b/i,
+    pattern:
+      /\b(\d{1,2})(?:st|nd|rd|th)?\s+(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|Jun(?:e)?|Jul(?:y)?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?),?\s+(\d{4})\b/i,
     format: 'DD MMM YYYY',
   },
 ];
@@ -303,8 +306,7 @@ const dateMatcher: PatternMatcher = {
   name: 'date',
   extract(text: string): PatternMatch[] {
     // Try ISO 8601 formats first (unambiguous)
-    const isoMatch =
-      /\b(\d{4})-(\d{2})-(\d{2})(?:[Tt](\d{2}):(\d{2})(?::(\d{2}))?)?\b/.exec(text);
+    const isoMatch = /\b(\d{4})-(\d{2})-(\d{2})(?:[Tt](\d{2}):(\d{2})(?::(\d{2}))?)?\b/.exec(text);
     if (isoMatch) {
       const [, year, month, day, hour, minute, second] = isoMatch;
       const dateStr = `${year}-${month}-${day}`;
@@ -369,7 +371,7 @@ const dateMatcher: PatternMatcher = {
       return [
         {
           value: parsed,
-          confidence: 0.90,
+          confidence: 0.9,
           matchedText: match[0],
           offset: match.index,
         },
@@ -386,8 +388,7 @@ const dateMatcher: PatternMatcher = {
  * Matches time expressions in 12h and 24h formats.
  * Formats: 14:30, 2:30 PM, 02:30:00, 2pm, 2:30:45
  */
-const timeRegex =
-  /\b(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(am|pm|AM|PM|‰∏äÂçà|‰∏ãÂçà)?\b/;
+const timeRegex = /\b(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(am|pm|AM|PM|‰∏äÂçà|‰∏ãÂçà)?\b/;
 
 const timeMatcher: PatternMatcher = {
   name: 'time',

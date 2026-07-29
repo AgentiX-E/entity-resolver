@@ -486,12 +486,14 @@ export function createApp(config: ServerConfig = {}): Hono {
 
     const schema = z.object({
       text: z.string(),
-      fields: z.array(z.object({
-        name: z.string(),
-        type: z.string(),
-        description: z.string().optional(),
-        required: z.boolean().optional(),
-      })),
+      fields: z.array(
+        z.object({
+          name: z.string(),
+          type: z.string(),
+          description: z.string().optional(),
+          required: z.boolean().optional(),
+        }),
+      ),
       intent: z.string().optional(),
       enableLlm: z.boolean().optional(),
     });

@@ -18,8 +18,10 @@ describe('CLI extract command', () => {
     try {
       await main([
         'extract',
-        '--text', 'Contact john@example.com for details',
-        '--fields', 'email:email',
+        '--text',
+        'Contact john@example.com for details',
+        '--fields',
+        'email:email',
       ]);
     } finally {
       console.log = origLog;
@@ -36,11 +38,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', 'Call +86-138-0000-0000',
-        '--fields', 'phone:phone',
-      ]);
+      await main(['extract', '--text', 'Call +86-138-0000-0000', '--fields', 'phone:phone']);
     } finally {
       console.log = origLog;
     }
@@ -55,11 +53,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', '下午3点开会',
-        '--fields', 'time:time',
-      ]);
+      await main(['extract', '--text', '下午3点开会', '--fields', 'time:time']);
     } finally {
       console.log = origLog;
     }
@@ -75,11 +69,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', 'enabled: true',
-        '--fields', 'enabled:boolean',
-      ]);
+      await main(['extract', '--text', 'enabled: true', '--fields', 'enabled:boolean']);
     } finally {
       console.log = origLog;
     }
@@ -94,11 +84,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', 'Price: $99.99',
-        '--fields', 'price:number',
-      ]);
+      await main(['extract', '--text', 'Price: $99.99', '--fields', 'price:number']);
     } finally {
       console.log = origLog;
     }
@@ -115,9 +101,12 @@ describe('CLI extract command', () => {
     try {
       await main([
         'extract',
-        '--text', '下午3点',
-        '--fields', 'time:time,title:string',
-        '--intent', 'alarm',
+        '--text',
+        '下午3点',
+        '--fields',
+        'time:time,title:string',
+        '--intent',
+        'alarm',
       ]);
     } finally {
       console.log = origLog;
@@ -149,11 +138,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', 'Visit https://example.com',
-        '--fields', 'url:url',
-      ]);
+      await main(['extract', '--text', 'Visit https://example.com', '--fields', 'url:url']);
     } finally {
       console.log = origLog;
     }
@@ -168,11 +153,7 @@ describe('CLI extract command', () => {
     console.log = (...args: unknown[]) => logs.push(String(args[0]));
 
     try {
-      await main([
-        'extract',
-        '--text', '2024-01-15 is the date',
-        '--fields', 'date:date',
-      ]);
+      await main(['extract', '--text', '2024-01-15 is the date', '--fields', 'date:date']);
     } finally {
       console.log = origLog;
     }

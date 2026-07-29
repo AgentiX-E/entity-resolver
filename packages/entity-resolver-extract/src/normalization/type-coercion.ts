@@ -94,7 +94,10 @@ function coerceNumber(value: unknown): CoercionResult {
 
   const str = String(value).trim();
   // Strip formatting: commas, spaces, currency symbols, percentage signs
-  const cleaned = str.replace(/[,_\s]/g, '').replace(/[%]/g, '').replace(/\p{Sc}/gu, '');
+  const cleaned = str
+    .replace(/[,_\s]/g, '')
+    .replace(/[%]/g, '')
+    .replace(/\p{Sc}/gu, '');
 
   const num = parseFloat(cleaned);
   if (isNaN(num)) {
@@ -181,8 +184,15 @@ function coerceTime(value: unknown): CoercionResult {
     if (/^\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
       const [h, m, s] = trimmed.split(':').map(Number);
       if (
-        h !== undefined && m !== undefined && s !== undefined &&
-        h >= 0 && h <= 23 && m >= 0 && m <= 59 && s >= 0 && s <= 59
+        h !== undefined &&
+        m !== undefined &&
+        s !== undefined &&
+        h >= 0 &&
+        h <= 23 &&
+        m >= 0 &&
+        m <= 59 &&
+        s >= 0 &&
+        s <= 59
       ) {
         return { value: trimmed, success: true, rawValue: value, targetType: 'time' };
       }

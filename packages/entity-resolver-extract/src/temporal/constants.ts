@@ -34,16 +34,13 @@ export interface MonthEntry {
 // ─── Relative date units ─────────────────────────────────────────────
 
 /** Today / 今天 / 今日 / 本日 / 오늘 */
-export const TODAY_PATTERN =
-  /(?:today|今[天日]|本日|오늘|금일)/iu;
+export const TODAY_PATTERN = /(?:today|今[天日]|本日|오늘|금일)/iu;
 
 /** Tomorrow / 明天 / 明日 / 내일 */
-export const TOMORROW_PATTERN =
-  /(?:tomorrow|明[天日]|내일)/iu;
+export const TOMORROW_PATTERN = /(?:tomorrow|明[天日]|내일)/iu;
 
 /** Yesterday / 昨天 / 昨日 / 어제 */
-export const YESTERDAY_PATTERN =
-  /(?:yesterday|昨[天日]|어제)/iu;
+export const YESTERDAY_PATTERN = /(?:yesterday|昨[天日]|어제)/iu;
 
 /** Day after tomorrow / 后天 / 明後日 / 모레 */
 export const DAY_AFTER_TOMORROW_PATTERN =
@@ -73,8 +70,7 @@ export const DAY_OF_WEEK_PATTERNS: DayOfWeekEntry[] = [
 ];
 
 /** Weekend patterns */
-export const WEEKEND_PATTERN =
-  /(?:weekend|周[末未]|週末|주말)/iu;
+export const WEEKEND_PATTERN = /(?:weekend|周[末未]|週末|주말)/iu;
 
 // ─── Named months (CJK) ──────────────────────────────────────────────
 
@@ -107,25 +103,101 @@ export const NAMED_MONTHS_CJK: MonthEntry[] = [
  * The cycle starts at 甲子 (index 0).
  */
 export const SEXAGENARY_CYCLE: string[] = [
-  '甲子', '乙丑', '丙寅', '丁卯', '戊辰', '己巳', '庚午', '辛未', '壬申', '癸酉',
-  '甲戌', '乙亥', '丙子', '丁丑', '戊寅', '己卯', '庚辰', '辛巳', '壬午', '癸未',
-  '甲申', '乙酉', '丙戌', '丁亥', '戊子', '己丑', '庚寅', '辛卯', '壬辰', '癸巳',
-  '甲午', '乙未', '丙申', '丁酉', '戊戌', '己亥', '庚子', '辛丑', '壬寅', '癸卯',
-  '甲辰', '乙巳', '丙午', '丁未', '戊申', '己酉', '庚戌', '辛亥', '壬子', '癸丑',
-  '甲寅', '乙卯', '丙辰', '丁巳', '戊午', '己未', '庚申', '辛酉', '壬戌', '癸亥',
+  '甲子',
+  '乙丑',
+  '丙寅',
+  '丁卯',
+  '戊辰',
+  '己巳',
+  '庚午',
+  '辛未',
+  '壬申',
+  '癸酉',
+  '甲戌',
+  '乙亥',
+  '丙子',
+  '丁丑',
+  '戊寅',
+  '己卯',
+  '庚辰',
+  '辛巳',
+  '壬午',
+  '癸未',
+  '甲申',
+  '乙酉',
+  '丙戌',
+  '丁亥',
+  '戊子',
+  '己丑',
+  '庚寅',
+  '辛卯',
+  '壬辰',
+  '癸巳',
+  '甲午',
+  '乙未',
+  '丙申',
+  '丁酉',
+  '戊戌',
+  '己亥',
+  '庚子',
+  '辛丑',
+  '壬寅',
+  '癸卯',
+  '甲辰',
+  '乙巳',
+  '丙午',
+  '丁未',
+  '戊申',
+  '己酉',
+  '庚戌',
+  '辛亥',
+  '壬子',
+  '癸丑',
+  '甲寅',
+  '乙卯',
+  '丙辰',
+  '丁巳',
+  '戊午',
+  '己未',
+  '庚申',
+  '辛酉',
+  '壬戌',
+  '癸亥',
 ];
 
 /** Heavenly stems (天干) */
 export const HEAVENLY_STEMS = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸'];
 
 /** Earthly branches (地支) */
-export const EARTHLY_BRANCHES = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+export const EARTHLY_BRANCHES = [
+  '子',
+  '丑',
+  '寅',
+  '卯',
+  '辰',
+  '巳',
+  '午',
+  '未',
+  '申',
+  '酉',
+  '戌',
+  '亥',
+];
 
 /** Zodiac animals associated with earthly branches */
 export const ZODIAC: Record<string, string> = {
-  '子': '鼠', '丑': '牛', '寅': '虎', '卯': '兔',
-  '辰': '龙', '巳': '蛇', '午': '马', '未': '羊',
-  '申': '猴', '酉': '鸡', '戌': '狗', '亥': '猪',
+  子: '鼠',
+  丑: '牛',
+  寅: '虎',
+  卯: '兔',
+  辰: '龙',
+  巳: '蛇',
+  午: '马',
+  未: '羊',
+  申: '猴',
+  酉: '鸡',
+  戌: '狗',
+  亥: '猪',
 };
 
 // ─── Japanese era names ──────────────────────────────────────────────
@@ -144,10 +216,34 @@ export interface EraEntry {
 
 export const JAPANESE_ERAS: EraEntry[] = [
   { name: '令和', pattern: /(?:令和|れいわ|Reiwa)/iu, startYear: 2019, startMonth: 5, startDay: 1 },
-  { name: '平成', pattern: /(?:平成|へいせい|Heisei)/iu, startYear: 1989, startMonth: 1, startDay: 8 },
-  { name: '昭和', pattern: /(?:昭和|しょうわ|Showa)/iu, startYear: 1926, startMonth: 12, startDay: 25 },
-  { name: '大正', pattern: /(?:大正|たいしょう|Taisho)/iu, startYear: 1912, startMonth: 7, startDay: 30 },
-  { name: '明治', pattern: /(?:明治|めいじ|Meiji)/iu, startYear: 1868, startMonth: 10, startDay: 23 },
+  {
+    name: '平成',
+    pattern: /(?:平成|へいせい|Heisei)/iu,
+    startYear: 1989,
+    startMonth: 1,
+    startDay: 8,
+  },
+  {
+    name: '昭和',
+    pattern: /(?:昭和|しょうわ|Showa)/iu,
+    startYear: 1926,
+    startMonth: 12,
+    startDay: 25,
+  },
+  {
+    name: '大正',
+    pattern: /(?:大正|たいしょう|Taisho)/iu,
+    startYear: 1912,
+    startMonth: 7,
+    startDay: 30,
+  },
+  {
+    name: '明治',
+    pattern: /(?:明治|めいじ|Meiji)/iu,
+    startYear: 1868,
+    startMonth: 10,
+    startDay: 23,
+  },
 ];
 
 // ─── Korean era/calendar ─────────────────────────────────────────────
@@ -160,33 +256,73 @@ export const KOREAN_DANGI_PATTERN = /(?:단기|檀紀|Dangi)/iu;
 
 // ─── Lunar calendar markers ──────────────────────────────────────────
 
-export const LUNAR_CALENDAR_MARKER =
-  /(?:农历|陰曆|旧暦|旧历|음력|lunar\s*calendar)/iu;
+export const LUNAR_CALENDAR_MARKER = /(?:农历|陰曆|旧暦|旧历|음력|lunar\s*calendar)/iu;
 
 /** Lunar month names */
 export const LUNAR_MONTHS: Record<string, number> = {
-  '正月': 1, '一月': 1, '端月': 1,
-  '二月': 2, '杏月': 2,
-  '三月': 3, '桃月': 3,
-  '四月': 4, '槐月': 4,
-  '五月': 5, '榴月': 5, '蒲月': 5,
-  '六月': 6, '荷月': 6,
-  '七月': 7, '巧月': 7, '兰月': 7,
-  '八月': 8, '桂月': 8,
-  '九月': 9, '菊月': 9,
-  '十月': 10, '阳月': 10,
-  '十一月': 11, '冬月': 11, '葭月': 11,
-  '十二月': 12, '腊月': 12, '冰月': 12,
+  正月: 1,
+  一月: 1,
+  端月: 1,
+  二月: 2,
+  杏月: 2,
+  三月: 3,
+  桃月: 3,
+  四月: 4,
+  槐月: 4,
+  五月: 5,
+  榴月: 5,
+  蒲月: 5,
+  六月: 6,
+  荷月: 6,
+  七月: 7,
+  巧月: 7,
+  兰月: 7,
+  八月: 8,
+  桂月: 8,
+  九月: 9,
+  菊月: 9,
+  十月: 10,
+  阳月: 10,
+  十一月: 11,
+  冬月: 11,
+  葭月: 11,
+  十二月: 12,
+  腊月: 12,
+  冰月: 12,
 };
 
 /** Lunar day names */
 export const LUNAR_DAYS: Record<string, number> = {
-  '初一': 1, '初二': 2, '初三': 3, '初四': 4, '初五': 5,
-  '初六': 6, '初七': 7, '初八': 8, '初九': 9, '初十': 10,
-  '十一': 11, '十二': 12, '十三': 13, '十四': 14, '十五': 15,
-  '十六': 16, '十七': 17, '十八': 18, '十九': 19, '二十': 20,
-  '廿一': 21, '廿二': 22, '廿三': 23, '廿四': 24, '廿五': 25,
-  '廿六': 26, '廿七': 27, '廿八': 28, '廿九': 29, '三十': 30,
+  初一: 1,
+  初二: 2,
+  初三: 3,
+  初四: 4,
+  初五: 5,
+  初六: 6,
+  初七: 7,
+  初八: 8,
+  初九: 9,
+  初十: 10,
+  十一: 11,
+  十二: 12,
+  十三: 13,
+  十四: 14,
+  十五: 15,
+  十六: 16,
+  十七: 17,
+  十八: 18,
+  十九: 19,
+  二十: 20,
+  廿一: 21,
+  廿二: 22,
+  廿三: 23,
+  廿四: 24,
+  廿五: 25,
+  廿六: 26,
+  廿七: 27,
+  廿八: 28,
+  廿九: 29,
+  三十: 30,
 };
 
 // ─── Relative quantifiers ────────────────────────────────────────────
@@ -198,19 +334,38 @@ export const NEXT_PATTERN = /(?:next|下[个個]?|来|來|다음|내[년달주�
 export const LAST_PATTERN = /(?:last|previous|上[个個]?|前[个個]?|去|지난|전[년달주])/iu;
 
 /** "This" — 这/本/今/이번/금 (this week/month/year) */
-export const THIS_PATTERN = /(?:this|这[个個]?|這[个個]?|本[周週年月]|今[周週年月]|이번|금[년월주])/iu;
+export const THIS_PATTERN =
+  /(?:this|这[个個]?|這[个個]?|本[周週年月]|今[周週年月]|이번|금[년월주])/iu;
 
 /** "N units ago" — N天前/N日前/N日前/N일 전 */
-export const AGO_PATTERN = /(\d+|[一二三四五六七八九十百千万]+)\s*(?:天|日|周|週|个?月|年|시간|일|주|개월|년)\s*(?:前|ago|전|まえ)/iu;
+export const AGO_PATTERN =
+  /(\d+|[一二三四五六七八九十百千万]+)\s*(?:天|日|周|週|个?月|年|시간|일|주|개월|년)\s*(?:前|ago|전|まえ)/iu;
 
 /** "N units after/later" — N天后/N日后/N日後/N일 후 */
-export const AFTER_PATTERN = /(\d+|[一二三四五六七八九十百千万]+)\s*(?:天|日|周|週|个?月|年|시간|일|주|개월|년)\s*(?:后|後|後|after|later|후|あと)/iu;
+export const AFTER_PATTERN =
+  /(\d+|[一二三四五六七八九十百千万]+)\s*(?:天|日|周|週|个?月|年|시간|일|주|개월|년)\s*(?:后|後|後|after|later|후|あと)/iu;
 
 /** Chinese numeral mapping (digit characters → numeric value) */
 export const CHINESE_NUMERALS: Record<string, number> = {
-  '零': 0, '一': 1, '二': 2, '两': 2, '兩': 2, '三': 3, '四': 4,
-  '五': 5, '六': 6, '七': 7, '八': 8, '九': 9, '十': 10,
-  '百': 100, '千': 1000, '万': 10000, '萬': 10000, '亿': 100000000, '億': 100000000,
+  零: 0,
+  一: 1,
+  二: 2,
+  两: 2,
+  兩: 2,
+  三: 3,
+  四: 4,
+  五: 5,
+  六: 6,
+  七: 7,
+  八: 8,
+  九: 9,
+  十: 10,
+  百: 100,
+  千: 1000,
+  万: 10000,
+  萬: 10000,
+  亿: 100000000,
+  億: 100000000,
 };
 
 // ─── Time-of-day markers ─────────────────────────────────────────────
@@ -224,7 +379,11 @@ export interface TimeOfDayEntry {
 }
 
 export const TIME_OF_DAY_MARKERS: TimeOfDayEntry[] = [
-  { pattern: /(?:凌晨|早[晨上]?|清晨|morning|朝|あさ|오전\s*일찍)/iu, hourRange: [0, 12], defaultHour: 8 },
+  {
+    pattern: /(?:凌晨|早[晨上]?|清晨|morning|朝|あさ|오전\s*일찍)/iu,
+    hourRange: [0, 12],
+    defaultHour: 8,
+  },
   { pattern: /(?:上午|午前|오전|ごぜん)/iu, hourRange: [0, 12], defaultHour: 9 },
   { pattern: /(?:中午|正午|noon|正午|낮|ひる)/iu, hourRange: [11, 13], defaultHour: 12 },
   { pattern: /(?:下午|午后|午後|오후|ごご)/iu, hourRange: [12, 18], defaultHour: 14 },

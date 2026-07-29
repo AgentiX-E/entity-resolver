@@ -14,13 +14,10 @@ import { autoConfigure, runPipeline } from '@agentix-e/entity-resolver-core';
 describe('Full pipeline: extract → resolve', () => {
   it('extracts structured fields and resolves record duplicates', async () => {
     // Step 1: Extract fields from text
-    const extraction = extract(
-      'Contact john@example.com office: +1-555-0199',
-      [
-        { name: 'email', type: 'email' },
-        { name: 'phone', type: 'phone' },
-      ],
-    );
+    const extraction = extract('Contact john@example.com office: +1-555-0199', [
+      { name: 'email', type: 'email' },
+      { name: 'phone', type: 'phone' },
+    ]);
 
     expect(extraction.values.email).toBe('john@example.com');
     expect(extraction.values.phone).toBeDefined();
@@ -42,13 +39,10 @@ describe('Full pipeline: extract → resolve', () => {
   });
 
   it('extract with intent produces enhanced results', () => {
-    const general = extract(
-      '明天3点',
-      [
-        { name: 'time', type: 'time' },
-        { name: 'title', type: 'string' },
-      ],
-    );
+    const general = extract('明天3点', [
+      { name: 'time', type: 'time' },
+      { name: 'title', type: 'string' },
+    ]);
 
     const enhanced = extract(
       '明天3点',
@@ -95,14 +89,11 @@ describe('Full pipeline: extract → resolve', () => {
   });
 
   it('handles empty extract gracefully', () => {
-    const result = extract(
-      'no useful data here',
-      [
-        { name: 'email', type: 'email' },
-        { name: 'phone', type: 'phone' },
-        { name: 'url', type: 'url' },
-      ],
-    );
+    const result = extract('no useful data here', [
+      { name: 'email', type: 'email' },
+      { name: 'phone', type: 'phone' },
+      { name: 'url', type: 'url' },
+    ]);
 
     expect(result.values.email).toBeUndefined();
     expect(result.values.phone).toBeUndefined();

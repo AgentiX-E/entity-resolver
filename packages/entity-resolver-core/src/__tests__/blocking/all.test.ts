@@ -548,3 +548,68 @@ describe('blocking empty/null field values', () => {
     expect(result.estimatedPairCount).toBeGreaterThan(0);
   });
 });
+
+// ─── P0 Regression: blockCount semantic correctness ──────────────
+
+describe('P0 regression: blockCount reports actual block groups', () => {
+  it('standardBlocking reports block count (not pair count)', () => {
+    const records = [
+      { city: 'NYC' },
+      { city: 'NYC' },
+      { city: 'NYC' },
+      { city: 'LA' },
+      { city: 'LA' },
+    ];
+    const result = standardBlocking(records, {
+      fields: ['city'],
+    });
+
+    // Records: NYC(3) + LA(2) = 2 distinct blocking groups
+    // Pairs: C(3,2) + C(2,2) = 3 + 1 = 4 pairs
+    // blockCount MUST be 2 (blocking groups), NOT 4 (pairs)
+    expect(result.blockCount).toBe(2);
+    expect(result.pairs.length).toBe(4);
+  });
+
+  it('multiPassBlocking reports block count across passes', () => {
+    const records = [
+      { name: 'John', city: 'NYC' },
+      { name: 'John', city: 'LA' },
+      { name: 'Jane', city: 'NYC' },
+      { name: 'Jane', city: 'LA' },
+    ];
+    const result = multiPassBlocking(records, {
+      passes: [
+        { fields: ['name'], transforms: [] },
+        { fields: ['city'], transforms: [] },
+      ],
+    });
+
+    // 2 passes: name blocks (John, Jane) + city blocks (NYC, LA) = 4 blocks total
+    // blockCount MUST be blocks, not pair-count
+    expect(result.blockCount).toBe(4);
+    expect(result.pairs.length).toBeGreaterThan(0);
+  });
+});
+
+// ─── P0 Regression: computeReductionRatio parameter correctness ────
+
+describe('P0 regression: computeReductionRatio receives totalRecords', () => {
+  it('returns valid ratio [0,1] for standard usage', () => {
+    // With 5 records, max pairs = 5*4/2 = 10
+    // 1 pair generated -> ratio should be 1 - 1/10 = 0.9
+    const records = [{ key: 'A' }, { key: 'A' }, { key: 'B' }, { key: 'C' }, { key: 'D' }];
+    const result = standardBlocking(records, { fields: ['key'] });
+    // 2 records share 'A' -> 1 pair. reduction = 1 - 1/10 = 0.9
+    expect(result.reductionRatio).toBeGreaterThan(0.85);
+    expect(result.reductionRatio).toBeLessThanOrEqual(1.0);
+  });
+
+  it('blocking with all unique keys yields reduction close to 1', () => {
+    const records = [{ key: 'A' }, { key: 'B' }, { key: 'C' }];
+    const result = standardBlocking(records, { fields: ['key'] });
+    // All unique -> 0 pairs -> reductionRatio = 1
+    expect(result.reductionRatio).toBe(1);
+    expect(result.blockCount).toBe(3);
+  });
+});

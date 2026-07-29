@@ -25,6 +25,8 @@ export function standardBlocking(
     },
   ];
 
+  let totalBlockCount = 0;
+
   for (const pass of passes) {
     // Group records by blocking key
     const blocks = new Map<string, number[]>();
@@ -36,6 +38,8 @@ export function standardBlocking(
       block.push(i);
       blocks.set(key, block);
     }
+
+    totalBlockCount += blocks.size;
 
     // Generate pairwise combinations within each block
     for (const [, indices] of blocks) {
@@ -51,7 +55,7 @@ export function standardBlocking(
   }
 
   const pairs = parsePairSet(pairSet);
-  const blockCount = pairSet.size;
+  const blockCount = totalBlockCount;
   const reductionRatio = computeReductionRatio(pairs.length, totalRecords);
 
   return { pairs, totalRecords, reductionRatio, blockCount };

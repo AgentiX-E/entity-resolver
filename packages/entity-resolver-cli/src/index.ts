@@ -212,8 +212,12 @@ async function cmdExtract(args: string[]): Promise<void> {
   const text = textIdx >= 0 && textIdx + 1 < args.length ? args[textIdx + 1] : null;
 
   if (!text) {
-    console.error('Usage: entity-resolver extract --text "<text>" [--intent <intent>] [--fields field:type,...]');
-    console.error('Example: entity-resolver extract --text "明天下午3点开会" --fields time:time,date:date,title:string');
+    console.error(
+      'Usage: entity-resolver extract --text "<text>" [--intent <intent>] [--fields field:type,...]',
+    );
+    console.error(
+      'Example: entity-resolver extract --text "明天下午3点开会" --fields time:time,date:date,title:string',
+    );
     process.exitCode = 1;
     return;
   }
@@ -232,18 +236,22 @@ async function cmdExtract(args: string[]): Promise<void> {
       });
     } else {
       // Default fields for general extraction
-      fields = [
-        { name: 'text', type: 'string' },
-      ];
+      fields = [{ name: 'text', type: 'string' }];
     }
 
     const result = extract(text, fields, intent ? { intent } : {});
 
-    console.log(JSON.stringify({
-      values: result.values,
-      provenance: result.provenance,
-      confidence: result.confidence,
-    }, null, 2));
+    console.log(
+      JSON.stringify(
+        {
+          values: result.values,
+          provenance: result.provenance,
+          confidence: result.confidence,
+        },
+        null,
+        2,
+      ),
+    );
   } catch (err) {
     console.error(err instanceof Error ? err.message : String(err));
     process.exitCode = 1;

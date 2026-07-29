@@ -135,12 +135,12 @@ export function suffixArraysBlocking(
   const pairs = blocksToPairs(filtered);
   const resultPairs = pairs;
   const total = records.length;
-  const totalPossible = (total * (total - 1)) / 2;
+
   return {
     pairs: resultPairs,
     blockCount: filtered.size,
     totalRecords: total,
-    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+    reductionRatio: computeReductionRatio(resultPairs.length, total),
   };
 }
 
@@ -206,12 +206,12 @@ export function extendedSuffixArraysBlocking(
   const pairs = blocksToPairs(filtered);
   const resultPairs = pairs;
   const total = records.length;
-  const totalPossible = (total * (total - 1)) / 2;
+
   return {
     pairs: resultPairs,
     blockCount: filtered.size,
     totalRecords: total,
-    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+    reductionRatio: computeReductionRatio(resultPairs.length, total),
   };
 }
 
@@ -286,12 +286,12 @@ export function extendedQGramsBlocking(
   const pairs = blocksToPairs(blocks);
   const resultPairs = pairs;
   const total = records.length;
-  const totalPossible = (total * (total - 1)) / 2;
+
   return {
     pairs: resultPairs,
     blockCount: blocks.size,
     totalRecords: total,
-    reductionRatio: computeReductionRatio(resultPairs.length, totalPossible),
+    reductionRatio: computeReductionRatio(resultPairs.length, total),
   };
 }
 

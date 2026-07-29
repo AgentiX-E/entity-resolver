@@ -75,7 +75,7 @@ describe('detectCorrection', () => {
 describe('inheritSlots', () => {
   const prevCtx = buildExtractionContext(
     { time: '15:00:00', date: '2024-06-16', title: 'Meeting', location: 'Room 201' },
-    { time: 0.95, date: 0.95, title: 0.85, location: 0.80 },
+    { time: 0.95, date: 0.95, title: 0.85, location: 0.8 },
     { time: 'pattern', date: 'pattern', title: 'pattern', location: 'pattern' },
   );
 
@@ -94,24 +94,14 @@ describe('inheritSlots', () => {
   });
 
   it('overrides modified slot with new value', () => {
-    const result = inheritSlots(
-      { time: '17:00:00' },
-      { time: 0.90 },
-      prevCtx,
-      '改成5点',
-    );
+    const result = inheritSlots({ time: '17:00:00' }, { time: 0.9 }, prevCtx, '改成5点');
 
     expect(result.values.time).toBe('17:00:00');
     expect(result.modifiedFields).toContain('time');
   });
 
   it('preserves other slots during modification', () => {
-    const result = inheritSlots(
-      { time: '17:00:00' },
-      { time: 0.90 },
-      prevCtx,
-      '改成5点',
-    );
+    const result = inheritSlots({ time: '17:00:00' }, { time: 0.9 }, prevCtx, '改成5点');
 
     expect(result.values.date).toBe('2024-06-16');
     expect(result.values.title).toBe('Meeting');
@@ -119,12 +109,7 @@ describe('inheritSlots', () => {
   });
 
   it('returns canceled state for cancellation text', () => {
-    const result = inheritSlots(
-      {},
-      {},
-      prevCtx,
-      '取消',
-    );
+    const result = inheritSlots({}, {}, prevCtx, '取消');
 
     expect(result.canceled).toBe(true);
     expect(result.values._canceled).toBe(true);
@@ -144,12 +129,7 @@ describe('inheritSlots', () => {
   });
 
   it('tracks inherited fields', () => {
-    const result = inheritSlots(
-      { time: '17:00:00' },
-      { time: 0.90 },
-      prevCtx,
-      '改成5点',
-    );
+    const result = inheritSlots({ time: '17:00:00' }, { time: 0.9 }, prevCtx, '改成5点');
 
     expect(result.inheritedFields).toContain('date');
     expect(result.inheritedFields).toContain('title');
@@ -159,7 +139,7 @@ describe('inheritSlots', () => {
   it('does not inherit when confidence significantly lower', () => {
     const result = inheritSlots(
       { time: '09:00:00' },
-      { time: 0.40 }, // much lower confidence
+      { time: 0.4 }, // much lower confidence
       prevCtx,
       'maybe 9am?',
     );
@@ -170,12 +150,7 @@ describe('inheritSlots', () => {
 
   it('handles empty previous context gracefully', () => {
     const emptyCtx = buildExtractionContext({}, {}, {});
-    const result = inheritSlots(
-      { title: 'New meeting' },
-      { title: 0.85 },
-      emptyCtx,
-      'new meeting',
-    );
+    const result = inheritSlots({ title: 'New meeting' }, { title: 0.85 }, emptyCtx, 'new meeting');
     expect(result.values.title).toBe('New meeting');
   });
 });

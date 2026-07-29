@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import {
-  llmExtract,
-  resetLLMCircuitBreaker,
-  getCircuitBreakerState,
-} from '../llm-extractor.js';
+import { llmExtract, resetLLMCircuitBreaker, getCircuitBreakerState } from '../llm-extractor.js';
 import type { FieldDescriptor } from '../../extractor.js';
 
 const originalEnv = process.env['DEEPSEEK_API_KEY'];
@@ -31,10 +27,7 @@ describe('llmExtract', () => {
     });
 
     it('returns not-attempted when no API key is configured', async () => {
-      const result = await llmExtract(
-        'test text',
-        [{ name: 'field', type: 'string' }],
-      );
+      const result = await llmExtract('test text', [{ name: 'field', type: 'string' }]);
 
       expect(result.attempted).toBe(false);
       expect(result.values).toBeNull();
@@ -87,14 +80,11 @@ describe('llmExtract', () => {
         return;
       }
 
-      const result = await llmExtract(
-        'John Smith is 25 years old and lives in New York',
-        [
-          { name: 'name', type: 'string', description: 'Full name' },
-          { name: 'age', type: 'number', description: 'Age' },
-          { name: 'city', type: 'string', description: 'City name' },
-        ],
-      );
+      const result = await llmExtract('John Smith is 25 years old and lives in New York', [
+        { name: 'name', type: 'string', description: 'Full name' },
+        { name: 'age', type: 'number', description: 'Age' },
+        { name: 'city', type: 'string', description: 'City name' },
+      ]);
 
       expect(result.attempted).toBe(true);
       if (result.values) {
@@ -110,13 +100,10 @@ describe('llmExtract', () => {
         return;
       }
 
-      const result = await llmExtract(
-        'Meeting on January 15 2024 at 2:30 PM',
-        [
-          { name: 'date', type: 'date', description: 'Meeting date' },
-          { name: 'time', type: 'time', description: 'Meeting time' },
-        ],
-      );
+      const result = await llmExtract('Meeting on January 15 2024 at 2:30 PM', [
+        { name: 'date', type: 'date', description: 'Meeting date' },
+        { name: 'time', type: 'time', description: 'Meeting time' },
+      ]);
 
       expect(result.attempted).toBe(true);
       if (result.values) {

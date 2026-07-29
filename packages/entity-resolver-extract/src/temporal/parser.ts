@@ -62,10 +62,7 @@ export interface ParseTemporalOptions {
  * Parse temporal expressions from text.
  * Returns all temporal matches sorted by confidence (descending).
  */
-export function parseTemporal(
-  text: string,
-  options: ParseTemporalOptions = {},
-): TemporalResult[] {
+export function parseTemporal(text: string, options: ParseTemporalOptions = {}): TemporalResult[] {
   const results: TemporalResult[] = [];
   const now = options.referenceDate ?? new Date();
 
@@ -160,11 +157,7 @@ function addDays(d: Date, days: number): Date {
  * "Next Monday": the Monday of next week
  * "Last Monday": the Monday of last week
  */
-function resolveDayOfWeek(
-  now: Date,
-  targetDow: number,
-  direction: 'this' | 'next' | 'last',
-): Date {
+function resolveDayOfWeek(now: Date, targetDow: number, direction: 'this' | 'next' | 'last'): Date {
   const currentDow = now.getDay();
 
   if (direction === 'last') {
@@ -187,11 +180,7 @@ function resolveDayOfWeek(
 
 // ─── Absolute CJK Date ───────────────────────────────────────────────
 
-function parseAbsoluteCJKDate(
-  text: string,
-  _now: Date,
-  results: TemporalResult[],
-): void {
+function parseAbsoluteCJKDate(text: string, _now: Date, results: TemporalResult[]): void {
   const match = CJK_DATE_PATTERN.exec(text);
   if (!match) return;
 
@@ -228,11 +217,7 @@ function parseAbsoluteCJKDate(
 
 // ─── Absolute CJK Time ───────────────────────────────────────────────
 
-function parseAbsoluteCJKTime(
-  text: string,
-  _now: Date,
-  results: TemporalResult[],
-): void {
+function parseAbsoluteCJKTime(text: string, _now: Date, results: TemporalResult[]): void {
   const match = CJK_TIME_PATTERN.exec(text);
   if (!match) return;
 
@@ -272,7 +257,7 @@ function parseAbsoluteCJKTime(
     `${String(seconds).padStart(2, '0')}`;
 
   let confidence = 0.85;
-  if (ampmStr) confidence = 0.90;
+  if (ampmStr) confidence = 0.9;
   if (seconds > 0) confidence += 0.02;
   if (halfOrQuarter) confidence += 0.03;
 
@@ -289,11 +274,7 @@ function parseAbsoluteCJKTime(
 
 // ─── Relative Days ───────────────────────────────────────────────────
 
-function parseRelativeDays(
-  text: string,
-  now: Date,
-  results: TemporalResult[],
-): void {
+function parseRelativeDays(text: string, now: Date, results: TemporalResult[]): void {
   const patterns: Array<{ pattern: RegExp; days: number; confidence: number }> = [
     { pattern: TODAY_PATTERN, days: 0, confidence: 0.95 },
     { pattern: TOMORROW_PATTERN, days: 1, confidence: 0.95 },
@@ -314,11 +295,7 @@ function parseRelativeDays(
 
 // ─── Day of Week ─────────────────────────────────────────────────────
 
-function parseDayOfWeek(
-  text: string,
-  now: Date,
-  results: TemporalResult[],
-): void {
+function parseDayOfWeek(text: string, now: Date, results: TemporalResult[]): void {
   for (const dow of DAY_OF_WEEK_PATTERNS) {
     const match = dow.pattern.exec(text);
     if (!match) continue;
@@ -341,11 +318,7 @@ function parseDayOfWeek(
 
 // ─── Named Months ────────────────────────────────────────────────────
 
-function parseNamedMonths(
-  text: string,
-  now: Date,
-  results: TemporalResult[],
-): void {
+function parseNamedMonths(text: string, now: Date, results: TemporalResult[]): void {
   for (const month of NAMED_MONTHS_CJK) {
     const match = month.pattern.exec(text);
     if (!match) continue;
@@ -358,18 +331,14 @@ function parseNamedMonths(
       targetDate.setFullYear(targetDate.getFullYear() + 1);
     }
 
-    pushDateResult(results, targetDate, match, 0.80, 'month');
+    pushDateResult(results, targetDate, match, 0.8, 'month');
     return;
   }
 }
 
 // ─── Sexagenary Year ─────────────────────────────────────────────────
 
-function parseSexagenaryYear(
-  text: string,
-  now: Date,
-  results: TemporalResult[],
-): void {
+function parseSexagenaryYear(text: string, now: Date, results: TemporalResult[]): void {
   for (let i = 0; i < SEXAGENARY_CYCLE.length; i++) {
     const stemBranch = SEXAGENARY_CYCLE[i]!;
     if (!text.includes(stemBranch)) continue;
@@ -382,7 +351,13 @@ function parseSexagenaryYear(
     }
 
     const targetDate = new Date(targetYear, 0, 1);
-    pushDateResult(results, targetDate, { 0: stemBranch, index: text.indexOf(stemBranch) } as unknown as RegExpExecArray, 0.70, 'year');
+    pushDateResult(
+      results,
+      targetDate,
+      { 0: stemBranch, index: text.indexOf(stemBranch) } as unknown as RegExpExecArray,
+      0.7,
+      'year',
+    );
     return;
   }
 }

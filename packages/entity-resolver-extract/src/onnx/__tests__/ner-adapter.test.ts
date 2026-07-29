@@ -3,9 +3,7 @@ import { onnxExtract, isOnnxAvailable } from '../ner-adapter.js';
 
 describe('onnxExtract (stub)', () => {
   it('returns null values (stub implementation)', async () => {
-    const result = await onnxExtract('test text', [
-      { name: 'field', type: 'string' },
-    ]);
+    const result = await onnxExtract('test text', [{ name: 'field', type: 'string' }]);
     expect(result.values).toBeNull();
     expect(result.confidence).toBe(0);
   });

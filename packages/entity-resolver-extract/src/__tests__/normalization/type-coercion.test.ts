@@ -227,19 +227,13 @@ describe('coerceAll', () => {
   });
 
   it('falls back to string for unknown types', () => {
-    const results = coerceAll(
-      { x: 'hello' },
-      {},
-    );
+    const results = coerceAll({ x: 'hello' }, {});
     expect(results.get('x')!.value).toBe('hello');
     expect(results.get('x')!.targetType).toBe('string');
   });
 
   it('marks failed coercions', () => {
-    const results = coerceAll(
-      { x: 'hello' },
-      { x: 'number' as never },
-    );
+    const results = coerceAll({ x: 'hello' }, { x: 'number' as never });
     expect(results.get('x')!.success).toBe(false);
   });
 });

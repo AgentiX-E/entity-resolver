@@ -40,11 +40,13 @@ export interface PromptOutput {
  * The user prompt is the text to extract from.
  */
 export function buildExtractionPrompt(input: PromptInput): PromptOutput {
-  const fieldSchemas = input.fields.map((f) => {
-    const typeHint = getTypeHint(f.type);
-    const desc = f.description ?? f.name;
-    return `  "${f.name}": ${typeHint} // ${desc}`;
-  }).join('\n');
+  const fieldSchemas = input.fields
+    .map((f) => {
+      const typeHint = getTypeHint(f.type);
+      const desc = f.description ?? f.name;
+      return `  "${f.name}": ${typeHint} // ${desc}`;
+    })
+    .join('\n');
 
   const requiredFields = input.fields
     .filter((f) => f.required)

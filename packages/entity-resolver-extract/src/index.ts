@@ -23,11 +23,7 @@ export {
   coerceAll,
 } from './extractor.js';
 
-export type {
-  ExtractionResult,
-  FieldDescriptor,
-  ExtractOptions,
-} from './extractor.js';
+export type { ExtractionResult, FieldDescriptor, ExtractOptions } from './extractor.js';
 
 export type {
   PatternMatch,
@@ -35,10 +31,7 @@ export type {
   PatternRegistration,
 } from './pattern/pattern-registry.js';
 
-export type {
-  FieldExtraction,
-  PatternExtractionResult,
-} from './pattern/pattern-extractor.js';
+export type { FieldExtraction, PatternExtractionResult } from './pattern/pattern-extractor.js';
 
 export { parseTemporal } from './temporal/parser.js';
 export type { TemporalResult, ParseTemporalOptions } from './temporal/parser.js';
@@ -50,7 +43,11 @@ export {
   applyIntentContext,
   applyDefaults,
 } from './context/intent-context.js';
-export type { IntentDefinition, IntentField, IntentContextResult } from './context/intent-context.js';
+export type {
+  IntentDefinition,
+  IntentField,
+  IntentContextResult,
+} from './context/intent-context.js';
 
 export {
   inheritSlots,
