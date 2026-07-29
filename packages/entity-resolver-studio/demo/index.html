@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>entity-resolver-studio — Interactive Labeling Demo</title>
+<style>
+  body { margin: 0; padding: 24px; font-family: system-ui, sans-serif; background: #f5f5f5; }
+  header { max-width: 960px; margin: 0 auto 24px; }
+  h1 { font-size: 20px; margin: 0; }
+  .subtitle { color: #6b7280; font-size: 14px; margin-top: 4px; }
+  main { max-width: 960px; margin: 0 auto; background: white; border-radius: 12px;
+         box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+  #app { padding: 24px; }
+  .empty-state { text-align: center; padding: 60px; color: #9ca3af; }
+  .controls { display: flex; gap: 8px; margin-bottom: 16px; }
+  .controls input { flex: 1; padding: 8px 12px; border: 1px solid #d1d5db;
+                     border-radius: 6px; font-size: 14px; font-family: inherit; }
+  .controls button { padding: 8px 16px; border: none; border-radius: 6px;
+                     font-size: 14px; cursor: pointer; font-family: inherit; }
+  .btn-start { background: #3b82f6; color: white; }
+  .btn-reset { background: #6b7280; color: white; }
+  .progress-bar { height: 4px; background: #e5e7eb; border-radius: 2px; margin-top: 16px; }
+  .progress-fill { height: 100%; background: #3b82f6; border-radius: 2px; transition: width 0.3s; }
+  .stats { display: flex; gap: 16px; margin-top: 8px; font-size: 13px; color: #6b7280; }
+</style>
+</head>
+<body>
+<header>
+  <h1>entity-resolver-studio</h1>
+  <p class="subtitle">Interactive record pair labeling · Keyboard: Y=Match N=No S=Skip U=Undo</p>
+</header>
+<main>
+  <div id="app">
+    <div class="empty-state">Click "Start Session" to load sample pairs.</div>
+  </div>
+</main>
+
+<script type="module">
+  // Simulated demo data — import real scored pairs from entity-resolver-core in production
+  const demoRecords = [
+    { name: 'John Smith', city: 'New York', email: 'john@example.com' },
+    { name: 'Jon Smyth', city: 'NYC', email: 'john@example.com' },
+    { name: 'Jane Doe', city: 'Los Angeles', email: 'jane@example.com' },
+    { name: 'Janet Doe', city: 'LA', email: 'jane.doe@example.com' },
+    { name: 'Robert Brown', city: 'Chicago', email: 'rob@example.com' },
+    { name: 'Bob Brown', city: 'Chicago', email: 'rob.brown@example.com' },
+  ];
+
+  const demoPairs = [
+    { leftId: 0, rightId: 1, score: 0.72 },
+    { leftId: 2, rightId: 3, score: 0.81 },
+    { leftId: 4, rightId: 5, score: 0.68 },
+    { leftId: 0, rightId: 2, score: 0.15 },
+    { leftId: 1, rightId: 4, score: 0.22 },
+    { leftId: 3, rightId: 5, score: 0.34 },
+  ];
+
+  const { createStudioSession, studioNextBatch, studioApply, studioReset } =
+    await import('./src/session.js');
+
+  const { StudioPairReviewElement } =
+    await import('./src/components/pair-review.js');
+
+  const app = document.getElementById('app');
+  let session = null;
+  let currentIndex = 0;
+
+  function render() {
+    if (!session) {
+      app.innerHTML = `
+        <div class="empty-state">
+          <p>No session active.</p>
+          <button class="btn-start" id="btn-start">Start Session</button>
+        </div>
+      `;
+      document.getElementById('btn-start')?.addEventListener('click', startSession);
+      return;
+    }
+
+    const batch = studioNextBatch(session);
+    if (!batch) {
+      const total = session.pairs.length;
+      const matched = session.pairs.filter(p => p.label === true).length;
+      app.innerHTML = `
+        <div style="text-align:center;padding:40px">
+          <p style="font-size:18px;color:#16a34a">All ${total} pairs labeled!</p>
+          <p style="color:#6b7280">${matched} matched · ${total - matched} not matched</p>
+          <button class="btn-reset" id="btn-reset" style="margin-top:12px">Reset & Restart</button>
+        </div>
+      `;
+      document.getElementById('btn-reset')?.addEventListener('click', resetSession);
+      return;
+    }
+
+    const pair = batch.pairs[currentIndex];
+    const done = session.pairs.filter(p => p.label !== null).length;
+    const total = session.totalCount;
+    const pct = total > 0 ? (done / total * 100) : 0;
+
+    app.innerHTML = `
+      <div class="controls">
+        <span style="font-size:14px;font-weight:600;align-self:center">
+          Batch ${batch.batchNumber}/${batch.totalBatches}
+        </span>
+        <div style="flex:1"></div>
+        <button class="btn-reset" id="btn-reset">Reset</button>
+      </div>
+      <studio-pair-review id="review"></studio-pair-review>
+      <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+      <div class="stats">
+        <span>${done}/${total} labeled</span>
+        <span>Score: ${(pair.machineScore * 100).toFixed(0)}%</span>
+        <span>Keyboard: Y/N/S/U</span>
+      </div>
+    `;
+
+    const review = document.getElementById('review');
+    if (review) {
+      review.setPair(pair, currentIndex, batch.pairs.length);
+      review.addEventListener('studio-action', (e) => {
+        const { action } = e.detail;
+        if (action === 'match') applyLabel(true);
+        else if (action === 'no-match') applyLabel(false);
+        else if (action === 'skip') nextPair();
+      });
+    }
+
+    // Keyboard shortcuts
+    const handler = (e) => {
+      if (e.key === 'y') { e.preventDefault(); applyLabel(true); }
+      else if (e.key === 'n') { e.preventDefault(); applyLabel(false); }
+      else if (e.key === 's') { e.preventDefault(); nextPair(); }
+      else if (e.key === 'u') { e.preventDefault(); undoLast(); }
+    };
+    document.addEventListener('keydown', handler, { once: false });
+    window._kbHandler = handler;
+
+    document.getElementById('btn-reset')?.addEventListener('click', resetSession);
+  }
+
+  function startSession() {
+    session = createStudioSession(demoPairs, demoRecords, 4, 20);
+    currentIndex = 0;
+    render();
+  }
+
+  function applyLabel(isMatch) {
+    if (!session) return;
+    const batch = studioNextBatch(session);
+    const pair = batch?.pairs[currentIndex];
+    if (pair) {
+      studioApply(session, [{ pairId: pair.id, isMatch }]);
+      nextPair();
+    }
+  }
+
+  function nextPair() {
+    currentIndex++;
+    const batch = session ? studioNextBatch(session) : null;
+    if (batch && currentIndex >= batch.pairs.length) currentIndex = 0;
+    render();
+  }
+
+  function undoLast() {
+    if (!session) return;
+    for (let i = session.pairs.length - 1; i >= 0; i--) {
+      const p = session.pairs[i];
+      if (p.label !== null) { p.label = null; p.labeledAt = null; break; }
+    }
+    render();
+  }
+
+  function resetSession() {
+    if (session) studioReset(session);
+    currentIndex = 0;
+    render();
+  }
+
+  if (document.removeEventListener && window._kbHandler) {
+    document.removeEventListener('keydown', window._kbHandler);
+  }
+
+  render();
+</script>
+</body>
+</html>

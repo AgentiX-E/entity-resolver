@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { studioVersion } from '../index.js';
 import { createStudioSession, studioNextBatch, studioApply, studioReset } from '../session.js';
+import { createStudioMachine } from '../state-machine.js';
 import type { ScoredPair } from '@agentix-e/entity-resolver-core';
 
 function mk(s: number): ScoredPair {
@@ -110,5 +111,70 @@ describe('StudioPairReviewElement', () => {
 describe('studioVersion', () => {
   it('is semver string', () => {
     expect(studioVersion).toMatch(/^\d+\.\d+\.\d+$/);
+  });
+});
+
+// ─── State Machine ────────────────────────────────────────────────
+
+describe('createStudioMachine', () => {
+  it('start creates session and batch', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    expect(state.session).not.toBeNull();
+    expect(state.batch).not.toBeNull();
+  });
+
+  it('match labels current pair as true', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'match' });
+    expect(state.session!.pairs[0]!.label).toBe(true);
+  });
+
+  it('noMatch labels current pair as false', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'noMatch' });
+    expect(state.session!.pairs[0]!.label).toBe(false);
+  });
+
+  it('skip advances selectedIndex', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
+    dispatch({ type: 'skip' });
+    expect(state.selectedIndex).toBe(1);
+  });
+
+  it('undo reverts last label', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'match' });
+    dispatch({ type: 'undo' });
+    expect(state.session!.pairs[0]!.label).toBe(null);
+  });
+
+  it('reset clears all labels', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'match' });
+    dispatch({ type: 'reset' });
+    expect(state.session!.pairs[0]!.label).toBe(null);
+  });
+
+  it('nextBatch advances', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    const pairs = Array.from({ length: 5 }, () => mk(0.5));
+    dispatch({ type: 'start', pairs, records, batchSize: 2 });
+    for (let i = 0; i < 2; i++) dispatch({ type: 'match' });
+    dispatch({ type: 'nextBatch' });
+    expect(state.batch).not.toBeNull();
+  });
+
+  it('selectPrev goes back', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
+    dispatch({ type: 'skip' });
+    dispatch({ type: 'selectPrev' });
+    expect(state.selectedIndex).toBe(0);
   });
 });

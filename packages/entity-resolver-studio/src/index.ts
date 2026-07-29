@@ -9,6 +9,9 @@
 export { createStudioSession, studioNextBatch, studioApply, studioReset } from './session.js';
 export type { StudioSession, StudioPair, StudioBatch, FieldScore } from './session.js';
 
+export { createStudioMachine } from './state-machine.js';
+export type { StudioState, StudioAction } from './state-machine.js';
+
 export { StudioPairReviewElement } from './components/pair-review.js';
 
 export const studioVersion = '0.1.0';
