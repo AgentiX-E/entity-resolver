@@ -122,6 +122,7 @@ export function multiPassBlocking(
   }
 
   let totalBlocks = 0;
+  const effectiveMaxBlockSize = Math.max(100, Math.floor(records.length / 100));
   for (const pass of config.passes) {
     const blocks = new Map<string, number[]>();
 
@@ -136,7 +137,7 @@ export function multiPassBlocking(
     totalBlocks += blocks.size;
 
     for (const [, indices] of blocks) {
-      if (indices.length < 2 || indices.length > 500) continue;
+      if (indices.length < 2 || indices.length > effectiveMaxBlockSize) continue;
       for (let i = 0; i < indices.length; i++) {
         for (let j = i + 1; j < indices.length; j++) {
           const a = indices[i]!;
