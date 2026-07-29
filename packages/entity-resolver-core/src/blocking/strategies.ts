@@ -1,7 +1,7 @@
 // Token Blocking + Sorted Neighborhood + Multi-pass + Meta-blocking strategies.
 
 import type { CandidatePair, BlockingConfig, BlockingResult, BlockingTransform } from './types.js';
-import { applyBlockingTransforms, computeReductionRatio } from './types.js';
+import { applyBlockingTransforms, computeReductionRatio, parseCandidatePairs } from './types.js';
 
 // ─── Token Blocking (pyJedAI-style) ────────────────────────────
 
@@ -46,7 +46,7 @@ export function tokenBlocking(
     }
   }
 
-  const pairs = parsePairs(pairSet);
+  const pairs = parseCandidatePairs(pairSet);
   return {
     pairs,
     totalRecords: records.length,
@@ -91,7 +91,7 @@ export function sortedNeighborhood(
     }
   }
 
-  const pairs = parsePairs(pairSet);
+  const pairs = parseCandidatePairs(pairSet);
   return {
     pairs,
     totalRecords: records.length,
@@ -147,7 +147,7 @@ export function multiPassBlocking(
     }
   }
 
-  const pairs = parsePairs(pairSet);
+  const pairs = parseCandidatePairs(pairSet);
   return {
     pairs,
     totalRecords: records.length,
@@ -274,12 +274,3 @@ export function metaBlocking(
 }
 
 // ─── Helpers ────────────────────────────────────────────────────
-
-function parsePairs(pairSet: Set<string>): CandidatePair[] {
-  const pairs: CandidatePair[] = [];
-  for (const entry of pairSet) {
-    const [left, right] = entry.split(':');
-    pairs.push({ leftId: Number(left), rightId: Number(right) });
-  }
-  return pairs;
-}

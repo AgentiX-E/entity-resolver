@@ -1,8 +1,8 @@
 // Standard Blocking — Splink-style multi-rule blocking.
 // Supports `block_on("first_name", "surname")` syntax with UNION of multiple rules.
 
-import type { CandidatePair, BlockingConfig, BlockingPass, BlockingResult } from './types.js';
-import { applyBlockingTransforms, computeReductionRatio } from './types.js';
+import type { BlockingConfig, BlockingPass, BlockingResult } from './types.js';
+import { applyBlockingTransforms, computeReductionRatio, parseCandidatePairs } from './types.js';
 
 /**
  * Standard blocking: groups records by blocking key and produces
@@ -54,7 +54,7 @@ export function standardBlocking(
     }
   }
 
-  const pairs = parsePairSet(pairSet);
+  const pairs = parseCandidatePairs(pairSet);
   const blockCount = totalBlockCount;
   const reductionRatio = computeReductionRatio(pairs.length, totalRecords);
 
@@ -74,16 +74,6 @@ function buildBlockingKey(record: Record<string, unknown>, pass: BlockingPass): 
     parts.push(transformed);
   }
   return parts.join('::');
-}
-
-/** Parse a Set of "leftId:rightId" strings into CandidatePair array. */
-function parsePairSet(pairSet: Set<string>): CandidatePair[] {
-  const pairs: CandidatePair[] = [];
-  for (const entry of pairSet) {
-    const [left, right] = entry.split(':');
-    pairs.push({ leftId: Number(left), rightId: Number(right) });
-  }
-  return pairs;
 }
 
 /**

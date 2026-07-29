@@ -408,3 +408,48 @@ describe('Property: scorers are symmetric', () => {
     });
   }
 });
+
+// ─── Semantic accuracy — precise expected values ─────────────────
+
+describe('Semantic accuracy (precise expected values)', () => {
+  it('damerau_levenshtein: CAKE vs ACKE = 0.75', () => {
+    const scorer = damerauLevenshteinScorer;
+    // CAKE -> ACKE: transpose C/A (1 op), 4 chars -> 1 - 1/4 = 0.75
+    const result = scorer.score('CAKE', 'ACKE', TEST_FIELD);
+    expect(result).toBeCloseTo(0.75, 3);
+  });
+
+  it('damerau_levenshtein: ABCD vs ABCD = 1.0', () => {
+    const scorer = damerauLevenshteinScorer;
+    expect(scorer.score('ABCD', 'ABCD', TEST_FIELD)).toBe(1.0);
+  });
+
+  it('damerau_levenshtein: ABCD vs ABDC = 0.75 (one transposition)', () => {
+    const scorer = damerauLevenshteinScorer;
+    const result = scorer.score('ABCD', 'ABDC', TEST_FIELD);
+    expect(result).toBeCloseTo(0.75, 3);
+  });
+
+  it('levenshtein: kitten vs sitting = 0.57', () => {
+    const scorer = levenshteinScorer;
+    // kitten(6) -> sitting(7): 3 ops -> 1 - 3/Math.max(6,7) = 4/7
+    const result = scorer.score('kitten', 'sitting', TEST_FIELD);
+    expect(result).toBeCloseTo(4 / 7, 4);
+  });
+
+  it('levenshtein: identical strings = 1.0', () => {
+    const scorer = levenshteinScorer;
+    expect(scorer.score('hello', 'hello', TEST_FIELD)).toBe(1.0);
+  });
+
+  it('levenshtein: completely different = 0.0', () => {
+    const scorer = levenshteinScorer;
+    expect(scorer.score('abc', 'xyz', TEST_FIELD)).toBe(0.0);
+  });
+
+  it('jaro_winkler: Martha vs Marhta has prefix bonus', () => {
+    const scorer = jaroWinklerScorer;
+    const result = scorer.score('Martha', 'Marhta', TEST_FIELD);
+    expect(result).toBeGreaterThan(0.95);
+  });
+});

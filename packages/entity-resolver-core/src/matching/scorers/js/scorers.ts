@@ -398,7 +398,7 @@ export const radialScorer: IScorer = {
 
 // ─── Aggregated scorer map ─────────────────────────────────────
 
-/** All 20 scorers in a name-indexed map. */
+/** All 19 built-in scorers in a name-indexed map. */
 export const ALL_SCORERS: Readonly<Record<string, IScorer>> = Object.freeze({
   exact: exactScorer,
   levenshtein: levenshteinScorer,

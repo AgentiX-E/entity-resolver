@@ -63,6 +63,18 @@ export function computeReductionRatio(pairCount: number, totalRecords: number): 
   return 1 - pairCount / totalPossiblePairs;
 }
 
+/** Parse a set of "left:right" pair strings into CandidatePair array. */
+export function parseCandidatePairs(pairSet: Set<string>): CandidatePair[] {
+  const pairs: CandidatePair[] = [];
+  for (const pair of pairSet) {
+    const [left, right] = pair.split(':');
+    if (left !== undefined && right !== undefined) {
+      pairs.push({ leftId: parseInt(left, 10), rightId: parseInt(right, 10) });
+    }
+  }
+  return pairs;
+}
+
 /** Apply transforms to a field value for blocking key generation. */
 export function applyBlockingTransforms(
   value: string,
