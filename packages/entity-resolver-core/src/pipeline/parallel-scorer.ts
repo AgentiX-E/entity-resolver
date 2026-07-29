@@ -17,7 +17,7 @@
  */
 
 import type { RawRecord, ScoredPair } from '../types/core.js';
-import type { FieldMetadata, FieldMuParams } from '../types/core.js';
+import type { FieldMetadata } from '../types/core.js';
 
 /**
  * Batch comparison config.
@@ -39,7 +39,7 @@ export interface BatchConfig {
 export async function compareBlocks(
   records: readonly RawRecord[],
   blocks: Array<readonly { leftId: number; rightId: number }[]>,
-  comparisons: readonly FieldMuParams[],
+  comparisons: readonly Record<string, unknown>[],
   fieldMeta: Map<string, FieldMetadata>,
   config: BatchConfig = {},
 ): Promise<ScoredPair[]> {
@@ -70,7 +70,8 @@ export async function compareBlocks(
 async function compareBlock(
   block: readonly { leftId: number; rightId: number }[],
   records: readonly RawRecord[],
-  comparisons: readonly FieldMuParams[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  comparisons: readonly Record<string, unknown>[],
   fieldMeta: Map<string, FieldMetadata>,
 ): Promise<ScoredPair[]> {
   const { generateComparisonVectors } = await import('../matching/comparison.js');
@@ -79,16 +80,19 @@ async function compareBlock(
   for (const pair of block) {
     const a = records[pair.leftId]!;
     const b = records[pair.rightId]!;
-    const vecs = generateComparisonVectors(a, b, comparisons, fieldMeta);
+    const vecs = generateComparisonVectors(
+      a,
+      b,
+      comparisons as ReadonlyArray<Record<string, unknown>> as never,
+      fieldMeta as never,
+    );
 
-    // Fast aggregate: weighted average of comparison vector scores
+    // Compute aggregate score from comparison vectors
     let scoreSum = 0;
     let scoreCount = 0;
     for (const vec of vecs) {
-      for (const level of vec.levels) {
-        scoreSum += level.match ? level.weight : 0;
-        scoreCount += level.weight;
-      }
+      scoreSum += vec.score;
+      scoreCount++;
     }
     const score = scoreCount > 0 ? scoreSum / scoreCount : 0;
 
