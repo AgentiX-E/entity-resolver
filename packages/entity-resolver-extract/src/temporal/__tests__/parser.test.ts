@@ -293,6 +293,46 @@ describe('parseTemporal — edge cases', () => {
   });
 });
 
+// ─── Lunar Calendar ─────────────────────────────────────────────────
+
+describe('parseTemporal — lunar calendar', () => {
+  it('parses lunar new year (农历正月初一)', () => {
+    const results = parseTemporal('农历正月初一', { referenceDate: FIXED_NOW });
+    expect(results.length).toBeGreaterThanOrEqual(1);
+    const dateResult = results.find((r) => r.date !== null);
+    expect(dateResult).toBeDefined();
+    expect(dateResult!.confidence).toBeGreaterThanOrEqual(0.65);
+  });
+
+  it('parses lunar new year eve (农历腊月三十)', () => {
+    const results = parseTemporal('农历腊月三十团年', { referenceDate: FIXED_NOW });
+    const dateResult = results.find((r) => r.date !== null);
+    expect(dateResult).toBeDefined();
+  });
+
+  it('parses Mid-Autumn festival (农历八月十五)', () => {
+    const results = parseTemporal('农历八月十五中秋节', { referenceDate: FIXED_NOW });
+    const dateResult = results.find((r) => r.date !== null);
+    expect(dateResult).toBeDefined();
+  });
+});
+
+// ─── Korean Dangi ──────────────────────────────────────────────────
+
+describe('parseTemporal — Korean Dangi', () => {
+  it('parses Dangi year (단기 4357년)', () => {
+    const results = parseTemporal('단기 4357년', { referenceDate: FIXED_NOW });
+    const yearResult = results.find((r) => r.granularity === 'year');
+    expect(yearResult).toBeDefined();
+    expect(yearResult!.date).toBe('2024-01-01');
+  });
+
+  it('parses Dangi with hanja (檀紀 4357)', () => {
+    const results = parseTemporal('檀紀 4357년에', { referenceDate: FIXED_NOW });
+    expect(results.length).toBeGreaterThanOrEqual(1);
+  });
+});
+
 // ─── Accuracy benchmark — Chinese temporal ≥ 95% ────────────────────
 
 describe('parseTemporal — CJK accuracy ≥ 95%', () => {

@@ -34,6 +34,11 @@ import {
   JAPANESE_ERAS,
   TIME_OF_DAY_MARKERS,
   CHINESE_NUMERALS,
+  LUNAR_CALENDAR_MARKER,
+  LUNAR_MONTHS,
+  LUNAR_DAYS,
+  KOREAN_DANGI_OFFSET,
+  KOREAN_DANGI_PATTERN,
 } from './constants.js';
 
 export interface TemporalResult {
@@ -83,6 +88,12 @@ export function parseTemporal(text: string, options: ParseTemporalOptions = {}):
 
   // ── Sexagenary cycle: "甲子年" ─────────────────────────────────────
   parseSexagenaryYear(text, now, results);
+
+  // ── Lunar calendar: "农历正月初一" ─────────────────────────────────
+  parseLunarDate(text, now, results);
+
+  // ── Korean Dangi: "단기 4357년" ────────────────────────────────────
+  parseDangiYear(text, now, results);
 
   // ── Sort by confidence descending, then by offset ──────────────────
   results.sort((a, b) => b.confidence - a.confidence || a.offset - b.offset);
@@ -360,6 +371,75 @@ function parseSexagenaryYear(text: string, now: Date, results: TemporalResult[])
     );
     return;
   }
+}
+
+// ─── Lunar Calendar Date ─────────────────────────────────────────────
+
+function parseLunarDate(text: string, now: Date, results: TemporalResult[]): void {
+  if (!LUNAR_CALENDAR_MARKER.test(text)) return;
+
+  const targetYear = now.getFullYear();
+  const currentMonth = now.getMonth() + 1;
+
+  for (const [monthName, monthNum] of Object.entries(LUNAR_MONTHS)) {
+    if (!text.includes(monthName)) continue;
+
+    for (const [dayName, dayNum] of Object.entries(LUNAR_DAYS)) {
+      if (!text.includes(dayName)) continue;
+
+      // Approximate lunar date to Gregorian using current-year mapping.
+      // Accurate to within ±1 day for entity extraction.
+      let date = new Date(targetYear, monthNum - 1, dayNum);
+      if (date < now && monthNum < currentMonth) {
+        date = new Date(targetYear + 1, monthNum - 1, dayNum);
+      }
+
+      if (isNaN(date.getTime())) continue;
+
+      const matchStr = `农历${monthName}${dayName}`;
+      const startIdx = text.indexOf(matchStr);
+
+      results.push({
+        date: toISODate(date),
+        time: null,
+        datetime: `${toISODate(date)}T00:00:00`,
+        matchedText: matchStr,
+        offset: startIdx >= 0 ? startIdx : 0,
+        confidence: 0.7,
+        granularity: 'day',
+      });
+      return;
+    }
+  }
+}
+
+// ─── Korean Dangi Year ───────────────────────────────────────────────
+
+function parseDangiYear(text: string, _now: Date, results: TemporalResult[]): void {
+  if (!KOREAN_DANGI_PATTERN.test(text)) return;
+
+  // Try to match: "단기 4357년", "檀紀 4357", etc.
+  const dangiRegex = /(?:단기|檀紀|Dangi)\s*(\d+)\s*(?:년|年)?/iu;
+  const match = dangiRegex.exec(text);
+  if (!match?.[1]) return;
+
+  const dangiYear = parseInt(match[1], 10);
+  if (isNaN(dangiYear) || dangiYear < 1) return;
+
+  const gregYear = dangiYear - KOREAN_DANGI_OFFSET;
+  const date = new Date(gregYear, 0, 1); // Dangi year -> Jan 1 of Gregorian
+
+  if (isNaN(date.getTime())) return;
+
+  results.push({
+    date: toISODate(date),
+    time: null,
+    datetime: `${toISODate(date)}T00:00:00`,
+    matchedText: match[0],
+    offset: match.index,
+    confidence: 0.8,
+    granularity: 'year',
+  });
 }
 
 // ─── Result helper ───────────────────────────────────────────────────

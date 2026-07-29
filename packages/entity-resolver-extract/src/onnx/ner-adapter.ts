@@ -1,24 +1,14 @@
 /**
- * ONNX NER Adapter — Zero-shot entity extraction via ONNX models.
+ * ONNX NER Adapter — Zero-shot entity extraction via GLiNER ONNX model.
  *
- * This is Layer 2 of the extraction cascade (Pattern → ONNX → LLM).
+ * Layer 2 of the extraction cascade (Pattern → ONNX → LLM).
  *
- * Current status: STUB — real implementation requires:
- *   - npm install @huggingface/transformers gliner
- *   - ONNX model download (GLiNER-small, ~50MB)
- *   - Model warm-up on first use
+ * Uses the `gliner` TypeScript package which wraps @xenova/transformers
+ * to run GLiNER models via ONNX Runtime. GLiNER performs zero-shot NER:
+ * given text + entity type labels, it predicts spans without training.
  *
- * Architecture:
- *   GLiNER models take text + entity type names and predict spans.
- *   This is ideal for schema-driven extraction: pass field names as
- *   entity types and get span predictions without training data.
- *
- * TODO: Implement with @huggingface/transformers + gliner
- *   - Load GLiNER-small ONNX model
- *   - Pass field names as zero-shot entity types
- *   - Return span predictions with confidence scores
- *   - Cache model in memory for reuse
- *   - Fall back to pattern extraction on model load failure
+ * Model: GLiNER-small-v2.1 (~50MB ONNX), downloaded on first use.
+ * Lazy initialization with graceful degradation.
  *
  * Reference: https://github.com/urchade/GLiNER
  */
@@ -26,35 +16,128 @@
 import type { FieldDescriptor } from '../extractor.js';
 
 export interface OnnxExtractResult {
-  /** Extracted values keyed by field name (null if not available) */
   values: Record<string, unknown> | null;
-  /** Per-field confidence [0, 1] */
   confidence: number;
 }
 
-/**
- * Extract entities using ONNX NER model. (STUB)
- *
- * This is a placeholder that returns null for all fields.
- * Real implementation in a future iteration will load the
- * GLiNER ONNX model and perform zero-shot NER inference.
- */
-export async function onnxExtract(
-  _text: string,
-  _fields: FieldDescriptor[],
-): Promise<OnnxExtractResult> {
-  // STUB: Real GLiNER integration pending
-  // TODO: Load @huggingface/transformers + gliner
-  // TODO: Download GLiNER-small ONNX model
-  // TODO: Run inference and extract spans
-  return {
-    values: null,
-    confidence: 0,
-  };
+interface GlinerEntity {
+  entity: string;
+  text: string;
+  score: number;
 }
 
-/** Check whether ONNX extraction is available. */
+interface GlinerWrapper {
+  extract: (text: string, labels: string[]) => Promise<GlinerEntity[]>;
+}
+
+let modelLoaded = false;
+let modelLoadError: string | null = null;
+let glinerWrapper: GlinerWrapper | null = null;
+
+export async function onnxExtract(
+  text: string,
+  fields: FieldDescriptor[],
+): Promise<OnnxExtractResult> {
+  if (modelLoadError) return { values: null, confidence: 0 };
+
+  if (!modelLoaded) {
+    try {
+      await initializeModel();
+    } catch (err) {
+      modelLoadError = err instanceof Error ? err.message : String(err);
+      return { values: null, confidence: 0 };
+    }
+  }
+
+  if (!glinerWrapper) return { values: null, confidence: 0 };
+
+  try {
+    const labels = fields.map((f) => f.name);
+    const entities = await glinerWrapper.extract(text, labels);
+
+    if (!entities || entities.length === 0) {
+      return { values: null, confidence: 0 };
+    }
+
+    const values: Record<string, unknown> = {};
+    for (const entity of entities) {
+      const label = entity.entity ?? '';
+      if (label && fields.some((f) => f.name === label)) {
+        if (!(label in values)) {
+          values[label] = entity.text ?? '';
+        }
+      }
+    }
+
+    const avgConfidence = entities.reduce((sum, e) => sum + (e.score ?? 0.5), 0) / entities.length;
+
+    return {
+      values: Object.keys(values).length > 0 ? values : null,
+      confidence: Math.min(avgConfidence, 0.85),
+    };
+  } catch {
+    return { values: null, confidence: 0 };
+  }
+}
+
 export function isOnnxAvailable(): boolean {
-  // STUB: Check for model availability
-  return false;
+  return modelLoaded && glinerWrapper !== null && !modelLoadError;
+}
+
+export function getOnnxError(): string | null {
+  return modelLoadError;
+}
+
+export function resetOnnxState(): void {
+  modelLoaded = false;
+  modelLoadError = null;
+  glinerWrapper = null;
+}
+
+// ─── Internal initialization ────────────────────────────────────────
+
+async function initializeModel(): Promise<void> {
+  try {
+    // Dynamic import — only loaded when ONNX is needed
+    const { Gliner } = await import('gliner');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const instance = new Gliner({
+      tokenizerPath: 'https://huggingface.co/urchade/gliner_small-v2.1/resolve/main/tokenizer.json',
+      onnxSettings: {
+        modelPath: 'https://huggingface.co/urchade/gliner_small-v2.1/resolve/main/onnx/model.onnx',
+      },
+      maxWidth: 512,
+      modelType: 'base',
+    });
+
+    glinerWrapper = {
+      extract: async (inputText: string, labels: string[]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const result = await (instance as any).extract({
+          texts: [inputText],
+          entities: labels,
+          flatNer: true,
+          threshold: 0.3,
+        });
+
+        if (!result || !Array.isArray(result)) return [];
+        // Gliner returns nested results — flatten entity arrays
+        return result
+          .flat()
+          .filter((e: GlinerEntity) => e?.entity && e?.text)
+          .map((e: GlinerEntity) => ({
+            entity: e.entity,
+            text: e.text,
+            score: e.score ?? 0.5,
+          }));
+      },
+    };
+
+    modelLoaded = true;
+  } catch (err) {
+    throw new Error(
+      `GLiNER model initialization failed: ${err instanceof Error ? err.message : String(err)}`,
+    );
+  }
 }

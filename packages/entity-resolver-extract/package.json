@@ -24,7 +24,9 @@
     "clean": "rm -rf dist *.tsbuildinfo coverage"
   },
   "dependencies": {
-    "@agentix-e/entity-resolver-core": "workspace:*"
+    "@agentix-e/entity-resolver-core": "workspace:*",
+    "@huggingface/transformers": "^4.2.0",
+    "gliner": "^0.0.19"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^2.0.0",
