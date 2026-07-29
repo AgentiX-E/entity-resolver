@@ -1,0 +1,66 @@
+[
+  {
+    "records": 100,
+    "total": 130,
+    "er_sql": {
+      "total_ms": 6,
+      "blocking_ms": 2,
+      "comparison_ms": 2,
+      "scoring_ms": 2,
+      "pairs": 960,
+      "blocked": 960
+    },
+    "splink": {
+      "total_ms": 16,
+      "pairs": 1532
+    }
+  },
+  {
+    "records": 200,
+    "total": 260,
+    "er_sql": {
+      "total_ms": 8,
+      "blocking_ms": 2,
+      "comparison_ms": 2,
+      "scoring_ms": 4,
+      "pairs": 3745,
+      "blocked": 3745
+    },
+    "splink": {
+      "total_ms": 16,
+      "pairs": 6095
+    }
+  },
+  {
+    "records": 500,
+    "total": 650,
+    "er_sql": {
+      "total_ms": 32,
+      "blocking_ms": 4,
+      "comparison_ms": 6,
+      "scoring_ms": 22,
+      "pairs": 23403,
+      "blocked": 23403
+    },
+    "splink": {
+      "total_ms": 14,
+      "pairs": 38275
+    }
+  },
+  {
+    "records": 1000,
+    "total": 1300,
+    "er_sql": {
+      "total_ms": 123,
+      "blocking_ms": 9,
+      "comparison_ms": 21,
+      "scoring_ms": 93,
+      "pairs": 91297,
+      "blocked": 91297
+    },
+    "splink": {
+      "total_ms": 17,
+      "pairs": 149888
+    }
+  }
+]
