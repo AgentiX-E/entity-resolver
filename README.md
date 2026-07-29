@@ -10,34 +10,57 @@ A stateless, pure-computation entity resolver engine with WASM acceleration. Bui
 
 ## Philosophy
 
-**Entity Resolver is pure computation.** `f(records) → {clusters, matchPairs, scores}`. No side effects. No I/O. No internal mutable state. Runs anywhere JavaScript runs.
+**Entity Resolver is the unified TypeScript entity processing platform.** Three pipelines, one engine:
+
+1. **extract** — Text → Structured Entities (schema-driven, pattern-first, LLM-optional)
+2. **resolve** — Records → Clusters (probabilistic record linkage + deduplication)
+3. **link** — Entity → KB ID (gazetteer-first private KB linking)
+
+Pure computation. No side effects. No I/O. No internal mutable state. Runs anywhere JavaScript runs.
 
 ## Packages
 
 | Package | Description | npm |
 |---------|-------------|-----|
 | `entity-resolver-core` | Stateless computation engine with WASM acceleration and DI interface contracts | `@agentix-e/entity-resolver-core` |
+| `entity-resolver-extract` | Schema-driven entity extraction engine (pattern + ONNX + LLM cascade) | `@agentix-e/entity-resolver-extract` |
+| `entity-resolver-link` | Schema-aware private KB entity linking (gazetteer-first) | `@agentix-e/entity-resolver-link` |
 | `entity-resolver-node` | Node.js adapters (FileDataSource, SqliteEntityStore, FileConfigStore) | `@agentix-e/entity-resolver-node` |
 | `entity-resolver-browser` | Browser adapters (FetchDataSource, IndexedDBEntityStore, LocalStorageConfigStore) | `@agentix-e/entity-resolver-browser` |
 | `entity-resolver-server` | Deployable HTTP/gRPC/MCP API service (stateless by default) | `@agentix-e/entity-resolver-server` |
-| `entity-resolver-cli` | Command-line tool for deduplication, matching, and diagnostics | `@agentix-e/entity-resolver-cli` |
+| `entity-resolver-cli` | Command-line tool for deduplication, matching, and extraction | `@agentix-e/entity-resolver-cli` |
 | `entity-resolver-visual` | Framework-agnostic, embeddable diagnostic components (3-layer: Data API + Headless + Web Components) | `@agentix-e/entity-resolver-visual` |
 | `entity-resolver` | Umbrella facade — one import, all packages | `@agentix-e/entity-resolver` |
 
 ## Quick Start
 
+### Entity Extraction (Text → Structured)
+
 ```typescript
-// Pure computation — zero I/O, runs anywhere
-import { dedupe } from '@agentix-e/entity-resolver-core';
+import { extract } from '@agentix-e/entity-resolver-extract';
 
-const records = [
-  { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },
-  { name: 'Jon Smyth',   dob: '1990-01-15', city: 'NYC' },
-  { name: 'Jane Doe',    dob: '1985-06-20', city: 'Los Angeles' },
-];
+const result = extract(
+  'Contact john@example.com or call +86-138-0000-0000, price: $99.99',
+  [
+    { name: 'email', type: 'email' },
+    { name: 'phone', type: 'phone' },
+    { name: 'price', type: 'number' },
+  ],
+);
 
-const result = await dedupe(records);
-// result.clusters:  { clusterId → recordIds }
+// result.values = { email: 'john@example.com', phone: '+86-138-0000-0000', price: 99.99 }
+// result.provenance = { email: 'pattern', phone: 'pattern', price: 'pattern' }
+```
+
+**Extraction features:**
+- 8 built-in field types: email, phone, url, number, integer, boolean, date, time
+- CJK temporal parsing (Chinese/Japanese/Korean calendar systems)
+- Intent-enhanced mode (alarm/reminder/schedule/message/search)
+- Multi-turn slot inheritance for dialog
+- LLM fallback via DeepSeek API (optional)
+- CLI: `er extract --text "下午3点开会" --fields time:time,title:string --intent meeting`
+
+### Entity Resolution (Deduplication)
 // result.scores:    pairwise match probabilities
 // result.diagnostics: waterfall data, histograms, m/u charts
 ```
