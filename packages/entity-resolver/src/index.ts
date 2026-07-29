@@ -6,6 +6,8 @@
 //
 // This package aggregates:
 //   - @agentix-e/entity-resolver-core
+//   - @agentix-e/entity-resolver-extract
+//   - @agentix-e/entity-resolver-link
 //   - @agentix-e/entity-resolver-node
 //   - @agentix-e/entity-resolver-browser
 //   - @agentix-e/entity-resolver-server
@@ -13,6 +15,8 @@
 //   - @agentix-e/entity-resolver-visual
 
 export * from '@agentix-e/entity-resolver-core';
+export * from '@agentix-e/entity-resolver-extract';
+export * from '@agentix-e/entity-resolver-link';
 export * from '@agentix-e/entity-resolver-node';
 export * from '@agentix-e/entity-resolver-browser';
 export * from '@agentix-e/entity-resolver-server';

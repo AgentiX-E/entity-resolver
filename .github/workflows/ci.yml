@@ -164,6 +164,39 @@ jobs:
             src/__tests__/pipeline/incremental.test.ts
 
   # ═══════════════════════════════════════════════════════════
+  # Extract + Link packages — light skeleton tests (I12)
+  # ═══════════════════════════════════════════════════════════
+  test-extract:
+    name: Test (extract)
+    needs: [test-core]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-extract exec vitest run --reporter=dot
+
+  test-link:
+    name: Test (link)
+    needs: [test-core]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: '9.15.0' }
+      - uses: actions/setup-node@v7
+        with: { node-version: '22', cache: 'pnpm' }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm -C packages/entity-resolver-link exec vitest run --reporter=dot
+
+  # ═══════════════════════════════════════════════════════════
   # Heavy standalone test — pyjedai-algorithms has an expensive
   # dependency chain (algorithms-pyjedai.js) that causes esbuild
   # collect to hang even in per-file vitest.  Runs independently
@@ -438,16 +471,13 @@ jobs:
 
       - name: Generate API docs
         run: pnpm docs:api
-        continue-on-error: true
 
       - name: Build docs site
         run: pnpm docs:build
-        continue-on-error: true
 
       - name: Download benchmark report
         uses: actions/download-artifact@v8
         with: { name: benchmark-report, path: docs/.vitepress/dist/benchmark }
-        continue-on-error: true
 
       - name: Setup Pages
         uses: actions/configure-pages@v6

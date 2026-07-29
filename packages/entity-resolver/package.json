@@ -27,6 +27,8 @@
     "@agentix-e/entity-resolver-browser": "workspace:*",
     "@agentix-e/entity-resolver-cli": "workspace:*",
     "@agentix-e/entity-resolver-core": "workspace:*",
+    "@agentix-e/entity-resolver-extract": "workspace:*",
+    "@agentix-e/entity-resolver-link": "workspace:*",
     "@agentix-e/entity-resolver-node": "workspace:*",
     "@agentix-e/entity-resolver-server": "workspace:*",
     "@agentix-e/entity-resolver-visual": "workspace:*"
