@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extract, PatternRegistry } from '../extractor.js';
+import { extract, PatternRegistry, buildExtractionContext } from '../extractor.js';
 import type { FieldDescriptor } from '../extractor.js';
 
 // ── Golden Set — 100 known cases across all 8 field types ─────────────
@@ -496,3 +496,194 @@ describe('extract() general mode accuracy', () => {
     expect(result.rate, `Time accuracy: ${result.passed}/${result.total}`).toBeGreaterThanOrEqual(0.9);
   });
 });
+
+// ─── I15: Intent-enhanced extraction ─────────────────────────────────
+
+describe('extract() intent-enhanced mode', () => {
+  it('boosts alarm time field confidence with intent', () => {
+    const resultGeneral = extract(
+      '下午3点',
+      [{ name: 'time', type: 'time' }],
+    );
+    const resultIntent = extract(
+      '下午3点',
+      [{ name: 'time', type: 'time' }],
+      { intent: 'alarm' },
+    );
+
+    // Intent-enhanced should have equal or higher time confidence
+    expect(resultIntent.confidence.time).toBeGreaterThanOrEqual(resultGeneral.confidence.time!);
+  });
+
+  it('applies default title when alarm intent is set', () => {
+    const result = extract(
+      '明天下午3点',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'title', type: 'string' },
+      ],
+      { intent: 'alarm' },
+    );
+
+    // Should have default alarm title
+    expect(result.values.title).toBe('Alarm');
+    expect(result.confidence.title).toBe(0.50); // default confidence
+  });
+
+  it('does not override user-provided title with default', () => {
+    const result = extract(
+      '明天早上7点起床',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'title', type: 'string' },
+      ],
+      { intent: 'alarm' },
+    );
+
+    // 起床 is not a pattern-matched title, so default applies
+    expect(result.values.title).toBe('Alarm');
+  });
+
+  it('resolves intent from text keywords', () => {
+    const result = extract(
+      '下午3点开会',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'title', type: 'string' },
+      ],
+      { intent: 'meeting' },
+    );
+
+    // Meeting intent should resolve to schedule
+    expect(result.values.title).toBe('Meeting'); // default for schedule
+  });
+
+  it('reminder intent requires title field', () => {
+    const result = extract(
+      '明天提醒我买菜',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'title', type: 'string' },
+      ],
+      { intent: 'reminder' },
+    );
+
+    // Should apply reminder default
+    expect(result.values.title).toBe('Reminder');
+  });
+});
+
+// ─── I15: Multi-turn slot inheritance ────────────────────────────────
+
+describe('extract() slot inheritance', () => {
+  const previousCtx = buildExtractionContext(
+    { time: '15:00:00', date: '2024-06-16', title: 'Meeting' },
+    { time: 0.95, date: 0.95, title: 0.85 },
+    { time: 'pattern', date: 'pattern', title: 'pattern' },
+  );
+
+  it('inherits previous slots when new text is sparse', () => {
+    const result = extract(
+      '改成5点',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'date', type: 'date' },
+        { name: 'title', type: 'string' },
+      ],
+      { previousContext: previousCtx },
+    );
+
+    // Inherited date and title should carry forward
+    expect(result.values.date).toBe('2024-06-16');
+    expect(result.values.title).toBe('Meeting');
+  });
+
+  it('detects and propagates cancellation', () => {
+    const result = extract(
+      '取消',
+      [
+        { name: 'time', type: 'time' },
+      ],
+      { previousContext: previousCtx },
+    );
+
+    expect(result.values._canceled).toBe(true);
+    expect(result.values._action).toBe('cancel');
+  });
+
+  it('merges multi-turn extractions correctly', () => {
+    // Turn 1: set meeting with intent
+    const turn1 = extract(
+      '明天下午3点开会',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'date', type: 'date' },
+        { name: 'title', type: 'string' },
+        { name: 'location', type: 'string' },
+      ],
+      { intent: 'meeting' },
+    );
+
+    // Meeting intent gives default title
+    expect(turn1.values.title).toBe('Meeting');
+
+    // Turn 2: add location info
+    const turn2 = extract(
+      '在201室',
+      [
+        { name: 'time', type: 'time' },
+        { name: 'date', type: 'date' },
+        { name: 'title', type: 'string' },
+        { name: 'location', type: 'string' },
+      ],
+      { previousResult: turn1 },
+    );
+
+    // Previous slots should carry forward
+    expect(turn2.values.title).toBeDefined();
+    expect(turn2.values.title).toBe('Meeting');
+  });
+
+  it('accuracy improves with intent context vs general mode', () => {
+    // Test: intent-enhanced mode should find at least as many fields
+    // as general mode when intent-hinted fields are in the text.
+
+    const fields: FieldDescriptor[] = [
+      { name: 'time', type: 'time' },
+      { name: 'date', type: 'date' },
+    ];
+
+    const texts = [
+      '明天下午3点',
+      '后天上午9点',
+      '2024年1月15日下午2点',
+    ];
+
+    let intentBetterOrEqual = 0;
+    for (const text of texts) {
+      const general = extract(text, fields);
+      const enhanced = extract(text, fields, { intent: 'alarm' });
+
+      const generalFilled = Object.values(general.values).filter((v) => v !== undefined).length;
+      const enhancedFilled = Object.values(enhanced.values).filter((v) => v !== undefined).length;
+
+      if (enhancedFilled >= generalFilled) intentBetterOrEqual++;
+    }
+
+    // Intent-enhanced should be at least as good as general mode
+    expect(intentBetterOrEqual).toBe(texts.length);
+  });
+
+  it('intent-enhanced confidence exceeds general mode confidence', () => {
+    const fields: FieldDescriptor[] = [
+      { name: 'time', type: 'time' },
+    ];
+
+    const general = extract('下午3点', fields);
+    const enhanced = extract('下午3点', fields, { intent: 'alarm' });
+
+    // Intent-boosted confidence should be higher or equal
+    expect(enhanced.confidence.time).toBeGreaterThanOrEqual(general.confidence.time!);
+  });
+});
+

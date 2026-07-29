@@ -42,6 +42,24 @@ export type {
 export { parseTemporal } from './temporal/parser.js';
 export type { TemporalResult, ParseTemporalOptions } from './temporal/parser.js';
 
+export {
+  resolveIntent,
+  registerIntent,
+  lookupIntent,
+  applyIntentContext,
+  applyDefaults,
+} from './context/intent-context.js';
+export type { IntentDefinition, IntentField, IntentContextResult } from './context/intent-context.js';
+
+export {
+  inheritSlots,
+  buildExtractionContext,
+  detectModification,
+  detectCancellation,
+  detectCorrection,
+} from './context/slot-inheritance.js';
+export type { ExtractionContext, InheritResult } from './context/slot-inheritance.js';
+
 export type { CoercionResult, CoercionTarget } from './normalization/type-coercion.js';
 
 export const extractVersion = '0.1.0';

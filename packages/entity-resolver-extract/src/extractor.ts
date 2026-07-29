@@ -23,6 +23,18 @@ import type { FieldExtraction } from './pattern/pattern-extractor.js';
 import { normalizeText } from './normalization/value-normalizer.js';
 import { coerce } from './normalization/type-coercion.js';
 import type { CoercionTarget } from './normalization/type-coercion.js';
+import {
+  resolveIntent,
+  applyIntentContext,
+  applyDefaults,
+} from './context/intent-context.js';
+import type { IntentContextResult } from './context/intent-context.js';
+import {
+  inheritSlots,
+  buildExtractionContext,
+  detectCancellation,
+} from './context/slot-inheritance.js';
+import type { ExtractionContext } from './context/slot-inheritance.js';
 
 // Re-export the ExtractionResult interface
 export interface ExtractionResult {
@@ -55,8 +67,10 @@ export interface FieldDescriptor {
 export interface ExtractOptions {
   /** Intent name for intent-enhanced mode (I15) */
   intent?: string;
-  /** Context from previous turns for slot inheritance (I15) */
-  context?: Record<string, unknown>;
+  /** Previous extraction result for slot inheritance (I15) */
+  previousResult?: ExtractionResult;
+  /** Previous context for multi-turn dialog (I15) */
+  previousContext?: ExtractionContext;
   /** Custom PatternRegistry — if not provided, builtins are used */
   registry?: PatternRegistry;
   /** Enable ONNX NER layer (I16) */
@@ -187,6 +201,68 @@ export function extract(
     confidence[field.name] = 0;
   }
 
+  // ── I15: Intent-enhanced mode ───────────────────────────────────────
+  let intentContext: IntentContextResult | undefined;
+  if (options.intent) {
+    intentContext = resolveIntent(options.intent, normalizedText);
+    if (intentContext) {
+      // Apply confidence boosts for intent-relevant fields
+      const boostedConfidence = applyIntentContext(confidence, intentContext);
+      for (const key of Object.keys(boostedConfidence)) {
+        confidence[key] = boostedConfidence[key]!;
+      }
+      // Apply default values for unfilled fields
+      const mergedValues = applyDefaults(values, intentContext.defaults);
+      for (const key of Object.keys(mergedValues)) {
+        if (values[key] === undefined && mergedValues[key] !== undefined) {
+          values[key] = mergedValues[key];
+          provenance[key] = 'pattern'; // defaults act like pattern layer
+          confidence[key] = 0.50; // default values have moderate confidence
+        }
+      }
+    }
+  }
+
+  // ── I15: Slot inheritance ──────────────────────────────────────────
+  const previousCtx = options.previousContext ??
+    (options.previousResult
+      ? buildExtractionContext(
+          options.previousResult.values,
+          options.previousResult.confidence,
+          options.previousResult.provenance,
+        )
+      : undefined);
+
+  if (previousCtx) {
+    if (detectCancellation(normalizedText)) {
+      return {
+        values: { _canceled: true, _action: 'cancel' },
+        provenance: { _canceled: 'pattern', _action: 'pattern' },
+        confidence: { _canceled: 1.0, _action: 1.0 },
+        normalizedText,
+      };
+    }
+
+    const inherited = inheritSlots(values, confidence, previousCtx, normalizedText);
+    if (inherited.canceled) {
+      return {
+        values: { _canceled: true, _action: 'cancel' },
+        provenance: { _canceled: 'pattern', _action: 'pattern' },
+        confidence: { _canceled: 1.0, _action: 1.0 },
+        normalizedText,
+      };
+    }
+
+    // Merge inherited values
+    for (const key of Object.keys(inherited.values)) {
+      if (!key.startsWith('_')) {
+        if (!(key in values) || values[key] === undefined) {
+          values[key] = inherited.values[key];
+        }
+      }
+    }
+  }
+
   return { values, provenance, confidence, normalizedText };
 }
 
@@ -200,3 +276,5 @@ export type { FieldExtraction, PatternExtractionResult } from './pattern/pattern
 export { normalizeText } from './normalization/value-normalizer.js';
 export { coerce, coerceAll } from './normalization/type-coercion.js';
 export type { CoercionResult, CoercionTarget } from './normalization/type-coercion.js';
+export { buildExtractionContext } from './context/slot-inheritance.js';
+export type { ExtractionContext } from './context/slot-inheritance.js';
