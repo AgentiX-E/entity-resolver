@@ -8,10 +8,6 @@
 // Design principle: "Pattern-First, LLM-Last"
 // The cascade ensures 90% of extractions cost $0 while maintaining 100% coverage.
 
-// TODO(I15): Implement context-aware extraction (intent-enhanced mode)
-// TODO(I16): Implement GLiNER ONNX NER adapter
-// TODO(I16): Implement LLM extraction fallback with Instructor-style validation loop
-
 export {
   extract,
   extractAsync,
@@ -59,5 +55,11 @@ export {
 export type { ExtractionContext, InheritResult } from './context/slot-inheritance.js';
 
 export type { CoercionResult, CoercionTarget } from './normalization/type-coercion.js';
+
+export { onnxExtract, isOnnxAvailable, resetOnnxState, getOnnxError } from './onnx/ner-adapter.js';
+export type { OnnxExtractResult } from './onnx/ner-adapter.js';
+
+export { llmExtract, resetLLMCircuitBreaker, getCircuitBreakerState } from './llm/llm-extractor.js';
+export type { LLMExtractOptions, LLMExtractResult } from './llm/llm-extractor.js';
 
 export const extractVersion = '0.1.0';

@@ -61,6 +61,19 @@ const result = extract(
 - CLI: `er extract --text "下午3点开会" --fields time:time,title:string --intent meeting`
 
 ### Entity Resolution (Deduplication)
+
+```typescript
+// Pure computation — zero I/O, runs anywhere
+import { dedupe } from '@agentix-e/entity-resolver-core';
+
+const records = [
+  { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },
+  { name: 'Jon Smyth',   dob: '1990-01-15', city: 'NYC' },
+  { name: 'Jane Doe',    dob: '1985-06-20', city: 'Los Angeles' },
+];
+
+const result = await dedupe(records);
+// result.clusters:  { clusterId → recordIds }
 // result.scores:    pairwise match probabilities
 // result.diagnostics: waterfall data, histograms, m/u charts
 ```
