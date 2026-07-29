@@ -174,6 +174,10 @@ function securityHeadersMiddleware(): (c: Context, next: Next) => Promise<void> 
     c.res.headers.set('X-XSS-Protection', '1; mode=block');
     c.res.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
     c.res.headers.set('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
+    c.res.headers.set(
+      'Content-Security-Policy',
+      "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    );
   };
 }
 

@@ -1,3 +1,4 @@
+import { ScoringError } from '../../errors/hierarchy.js';
 // ScorerRegistry — central scorer management.
 // Auto-detects WASM availability and provides the fastest available scorer set.
 
@@ -78,7 +79,9 @@ export function getScorer(name: string): IScorer {
   const scorers = getScorers();
   const scorer = scorers[name];
   if (!scorer) {
-    throw new Error(`Unknown scorer: "${name}". Available: ${Object.keys(scorers).join(', ')}`);
+    throw new ScoringError(
+      `Unknown scorer: "${name}". Available: ${Object.keys(scorers).join(', ')}`,
+    );
   }
   return scorer;
 }

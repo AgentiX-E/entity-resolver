@@ -1,3 +1,4 @@
+import { ConvergenceError } from '../errors/hierarchy.js';
 /**
  * SQL-based EM parameter estimation for Fellegi-Sunter.
  *
@@ -91,7 +92,9 @@ export async function sqlEstimateParameters(
   options: SqlEMOptions = {},
 ): Promise<SqlEMResult> {
   if (pairVectors.length === 0) {
-    throw new Error('Cannot estimate parameters from empty pair set');
+    throw new ConvergenceError('Cannot estimate parameters from empty pair set', {
+      details: { pairCount: 0 },
+    });
   }
 
   const tableName = options.tableName ?? '__er_comparison_vectors';

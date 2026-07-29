@@ -1,3 +1,4 @@
+import { ValidationError } from '../errors/hierarchy.js';
 // Fellegi-Sunter probability model parameters.
 // Represents m-probability, u-probability, and lambda (prior match probability).
 
@@ -107,16 +108,16 @@ export function freezeParameters(params: {
  */
 export function validateParameters(params: FSParameters): void {
   if (params.lambda <= 0 || params.lambda >= 1) {
-    throw new Error(`lambda must be in (0, 1), got ${params.lambda}`);
+    throw new ValidationError(`lambda must be in (0, 1), got ${params.lambda}`);
   }
 
   for (const [key, m] of params.mProbabilities) {
     if (m < 0 || m > 1) {
-      throw new Error(`m-probability for "${key}" out of range: ${m}`);
+      throw new ValidationError(`m-probability for "${key}" out of range: ${m}`);
     }
     const u = params.uProbabilities.get(key);
     if (u !== undefined && (u < 0 || u > 1)) {
-      throw new Error(`u-probability for "${key}" out of range: ${u}`);
+      throw new ValidationError(`u-probability for "${key}" out of range: ${u}`);
     }
   }
 }

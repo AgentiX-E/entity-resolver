@@ -3,6 +3,8 @@
 // using the standard EM formulation with per-pair posteriors.
 //
 // Reference: Winkler (1988), "Using the EM Algorithm for Weight Computation
+
+import { ConvergenceError } from '../errors/hierarchy.js';
 // in the Fellegi-Sunter Model of Record Linkage"
 
 import type { ComparisonVector } from '../matching/comparison.js';
@@ -72,7 +74,9 @@ export function estimateParameters(
   const { maxIterations = 30, epsilon = 1e-6 } = options;
 
   if (pairVectors.length === 0) {
-    throw new Error('Cannot estimate parameters from empty pair set');
+    throw new ConvergenceError('Cannot estimate parameters from empty pair set', {
+      details: { pairCount: 0 },
+    });
   }
 
   // Splink-style hash-based deterministic sampling for large datasets
