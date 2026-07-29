@@ -98,6 +98,41 @@ export async function runPipeline(
   _groundTruth?: Map<string, number[]>,
 ): Promise<PipelineResult> {
   const logger = options?.logger ?? NoopLogger;
+
+  // Full SQL pushdown path (DuckDB/PostgreSQL/Spark)
+  if (options?.sqlBackend) {
+    const { runSqlPipeline } = await import('./sql-pipeline.js');
+    const sqlResult = await runSqlPipeline(records, config, options.sqlBackend);
+    const clusters = new Map<number, number[]>();
+    for (const pair of sqlResult.pairs) {
+      const key = Math.min(pair.leftId, pair.rightId);
+      if (!clusters.has(key)) clusters.set(key, []);
+      clusters.get(key)!.push(Math.max(pair.leftId, pair.rightId));
+    }
+    return {
+      clusters,
+      scoredPairs: sqlResult.pairs.map((p) => ({
+        leftId: p.leftId,
+        rightId: p.rightId,
+        score: p.score,
+      })),
+      diagnostics: {
+        blocking: {
+          candidateCount: sqlResult.stats.blockedPairs,
+          reductionRatio:
+            sqlResult.stats.blockedPairs / ((records.length * (records.length - 1)) / 2),
+        },
+        matching: {},
+        clustering: {},
+        timing: sqlResult.timing,
+      },
+      statistics: {
+        totalPairs: sqlResult.stats.scoredPairs,
+        matchPairs: sqlResult.stats.scoredPairs,
+      },
+    } as unknown as PipelineResult;
+  }
+
   const startTime = Date.now();
 
   logger.info('Pipeline started', {

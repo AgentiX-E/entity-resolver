@@ -28,7 +28,11 @@ export async function runSqlPipeline(
   const cols = Object.keys(records[0] ?? {});
   const inputTable = `__er_in_${Date.now()}`;
 
-  await backend.createTempTable(records, { name: inputTable });
+  // Add records with auto-increment row_id
+  const recordsWithId = records.map((r, i) => ({ __row_id: i, ...r }));
+  await backend.createTempTable(recordsWithId, { name: inputTable });
+
+  // Use __row_id for join keys
 
   // Stage 1: SQL blocking
   const t0 = performance.now();
@@ -52,6 +56,8 @@ export async function runSqlPipeline(
   const compTable = `__er_cp_${Date.now()}`;
   const compSql = buildCompSql(inputTable, blockedTable, compTable, config.comparisons, cols);
   await backend.exec(compSql);
+  console.log('Comp SQL length:', compSql.length);
+  console.log('Comp SQL:\n', compSql.slice(0, 500));
   const compMs = performance.now() - t1;
 
   // Stage 3: EM parameter estimation
@@ -91,20 +97,20 @@ function buildBlockSql(
   config: PipelineConfig,
   cols: readonly string[],
 ): string {
-  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? 'unique_id') as string;
+  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
   const passes = config.blocking?.passes ?? [
     { fields: [fallbackField], transforms: config.blocking?.transforms ?? [] },
   ];
 
   const parts = passes.map((p) => {
-    const conditions = (p.fields ?? [cols[0] ?? 'unique_id'])
+    const conditions = (p.fields ?? [cols[0] ?? '__row_id'])
       .map((f) =>
         p.transforms?.[0] === 'lowercase'
           ? `LOWER(l."${f}") = LOWER(r."${f}")`
           : `l."${f}" = r."${f}"`,
       )
       .join(' AND ');
-    return `SELECT DISTINCT l.unique_id AS left_id, r.unique_id AS right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.unique_id < r.unique_id`;
+    return `SELECT DISTINCT l.__row_id AS left_id, r.__row_id AS right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id < r.__row_id`;
   });
   return `CREATE TABLE ${dst} AS ${parts.join(' UNION ')}`;
 }
@@ -139,7 +145,7 @@ function buildCompSql(
     })
     .join(',\n');
 
-  return `CREATE TABLE ${dst} AS SELECT b.left_id, b.right_id,\n${exprs}\nFROM ${blk} b JOIN ${src} l ON l.unique_id=b.left_id JOIN ${src} r ON r.unique_id=b.right_id`;
+  return `CREATE TABLE ${dst} AS SELECT b.left_id, b.right_id,\n${exprs}\nFROM ${blk} b JOIN ${src} l ON l.__row_id=b.left_id JOIN ${src} r ON r.__row_id=b.right_id`;
 }
 
 function buildScoredSql(
