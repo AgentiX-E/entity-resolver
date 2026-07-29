@@ -275,6 +275,34 @@ importers:
         specifier: ^2.0.0
         version: 2.1.9(@types/node@25.9.5)(@vitest/ui@2.1.9)(jsdom@29.1.1)
 
+  packages/entity-resolver-studio:
+    dependencies:
+      '@agentix-e/entity-resolver-browser':
+        specifier: workspace:*
+        version: link:../entity-resolver-browser
+      '@agentix-e/entity-resolver-core':
+        specifier: workspace:*
+        version: link:../entity-resolver-core
+      '@agentix-e/entity-resolver-visual':
+        specifier: workspace:*
+        version: link:../entity-resolver-visual
+    devDependencies:
+      '@vitest/coverage-v8':
+        specifier: ^2.0.0
+        version: 2.1.9(vitest@2.1.9)
+      eslint:
+        specifier: ^9.0.0
+        version: 9.39.5
+      jsdom:
+        specifier: ^29.1.1
+        version: 29.1.1
+      typescript:
+        specifier: ^5.7.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.0
+        version: 2.1.9(@types/node@25.9.5)(@vitest/ui@2.1.9)(jsdom@29.1.1)
+
   packages/entity-resolver-visual:
     dependencies:
       '@agentix-e/entity-resolver-core':

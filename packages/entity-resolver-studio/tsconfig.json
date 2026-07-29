@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"]
+  },
+  "include": ["src"],
+  "references": [
+    { "path": "../entity-resolver-core" },
+    { "path": "../entity-resolver-visual" },
+    { "path": "../entity-resolver-browser" }
+  ]
+}

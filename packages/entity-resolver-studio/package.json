@@ -1,0 +1,36 @@
+{
+  "name": "@agentix-e/entity-resolver-studio",
+  "version": "0.1.0",
+  "description": "entity-resolver-studio — Interactive labeling and cluster review application",
+  "license": "MIT",
+  "author": "Lambertyan",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run --coverage",
+    "lint": "eslint src/",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "clean": "rm -rf dist *.tsbuildinfo coverage"
+  },
+  "dependencies": {
+    "@agentix-e/entity-resolver-browser": "workspace:*",
+    "@agentix-e/entity-resolver-core": "workspace:*",
+    "@agentix-e/entity-resolver-visual": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitest/coverage-v8": "^2.0.0",
+    "eslint": "^9.0.0",
+    "jsdom": "^29.1.1",
+    "typescript": "^5.7.0",
+    "vitest": "^2.0.0"
+  }
+}

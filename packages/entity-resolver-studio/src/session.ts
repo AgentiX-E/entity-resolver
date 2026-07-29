@@ -1,75 +1,73 @@
 /**
- * Interactive Labeling Data API — Layer 1.
+ * Studio Labeling Session — Core logic for interactive record pair labeling.
  *
- * Pure JSON functions for building labeling sessions from scored pairs.
- * Zero rendering dependencies. Framework-agnostic.
+ * Depends on:
+ *   - @agentix-e/entity-resolver-core (selectUncertainPairs, trainClassifier)
+ *   - @agentix-e/entity-resolver-browser (IndexedDB persistence)
  *
- * Names prefixed 'labeling' to avoid collisions with core's active-learning
- * module when re-exported through the umbrella package.
+ * Pure logic, no DOM dependencies. The Web Components in components/ consume this.
  */
 import type { ScoredPair } from '@agentix-e/entity-resolver-core';
 
-export interface LabelingPair {
-  readonly id: string;
-  readonly left: Record<string, unknown>;
-  readonly right: Record<string, unknown>;
-  readonly machineScore: number;
-  readonly fieldScores: readonly FieldScore[];
+export interface StudioPair {
+  id: string;
+  left: Record<string, unknown>;
+  right: Record<string, unknown>;
+  machineScore: number;
+  fieldScores: readonly FieldScore[];
   label: boolean | null;
   labeledAt: number | null;
 }
 
 export interface FieldScore {
-  readonly fieldName: string;
-  readonly leftValue: unknown;
-  readonly rightValue: unknown;
-  readonly score: number;
+  fieldName: string;
+  leftValue: unknown;
+  rightValue: unknown;
+  score: number;
 }
 
-export interface LabelingBatch {
-  readonly pairs: readonly LabelingPair[];
-  readonly batchNumber: number;
-  readonly totalBatches: number;
-  readonly sessionProgress: number;
+export interface StudioBatch {
+  pairs: readonly StudioPair[];
+  batchNumber: number;
+  totalBatches: number;
+  progress: number;
 }
 
-export interface LabelingSession {
-  readonly sessionId: string;
-  readonly pairs: LabelingPair[];
-  readonly totalCount: number;
-  readonly batchSize: number;
+export interface StudioSession {
+  sessionId: string;
+  pairs: StudioPair[];
+  totalCount: number;
+  batchSize: number;
 }
 
-/** Create a labeling session from scored pairs, selecting most uncertain first. */
-export function labelingCreateSession(
+export function createStudioSession(
   scoredPairs: readonly ScoredPair[],
   records: readonly Record<string, unknown>[],
   batchSize = 10,
   maxPairs = 200,
-): LabelingSession {
-  const sessionId = `erl_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+): StudioSession {
+  const id = `erls_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
-  const uncertainPairs = scoredPairs
+  const uncertain = scoredPairs
     .map((p) => ({ pair: p, u: 1 - Math.abs(2 * (p.probability ?? p.score) - 1) }))
     .sort((a, b) => b.u - a.u)
     .slice(0, maxPairs)
     .map((e) => e.pair);
 
-  const pairs: LabelingPair[] = uncertainPairs.map((pair, i) => ({
-    id: `p${i}`,
+  const pairs: StudioPair[] = uncertain.map((pair, i) => ({
+    id: `sp${i}`,
     left: records[pair.leftId] ?? {},
     right: records[pair.rightId] ?? {},
     machineScore: pair.probability ?? pair.score,
-    fieldScores: fieldScores(records[pair.leftId] ?? {}, records[pair.rightId] ?? {}),
+    fieldScores: diffFields(records[pair.leftId] ?? {}, records[pair.rightId] ?? {}),
     label: null,
     labeledAt: null,
   }));
 
-  return { sessionId, pairs, totalCount: pairs.length, batchSize };
+  return { sessionId: id, pairs, totalCount: pairs.length, batchSize };
 }
 
-/** Get the next batch of unlabeled pairs, or null if done. */
-export function labelingNextBatch(session: LabelingSession): LabelingBatch | null {
+export function studioNextBatch(session: StudioSession): StudioBatch | null {
   const unlabeled = session.pairs.filter((p) => p.label === null);
   if (unlabeled.length === 0) return null;
   const batch = unlabeled.slice(0, session.batchSize);
@@ -78,13 +76,12 @@ export function labelingNextBatch(session: LabelingSession): LabelingBatch | nul
     pairs: batch,
     batchNumber: Math.floor(done / session.batchSize) + 1,
     totalBatches: Math.ceil(session.totalCount / session.batchSize),
-    sessionProgress: session.totalCount > 0 ? done / session.totalCount : 0,
+    progress: session.totalCount > 0 ? done / session.totalCount : 0,
   };
 }
 
-/** Apply human labels to pairs. Only sets label if currently null. */
-export function labelingApply(
-  session: LabelingSession,
+export function studioApply(
+  session: StudioSession,
   labels: readonly { pairId: string; isMatch: boolean }[],
 ): void {
   const map = new Map(labels.map((l) => [l.pairId, l.isMatch]));
@@ -97,19 +94,14 @@ export function labelingApply(
   }
 }
 
-/** Reset all labels. */
-export function labelingReset(session: LabelingSession): void {
+export function studioReset(session: StudioSession): void {
   for (const p of session.pairs) {
     p.label = null;
     p.labeledAt = null;
   }
 }
 
-/** Compute per-field similarity scores for diff highlighting. */
-function fieldScores(
-  left: Record<string, unknown>,
-  right: Record<string, unknown>,
-): FieldScore[] {
+function diffFields(left: Record<string, unknown>, right: Record<string, unknown>): FieldScore[] {
   const fields = new Set([...Object.keys(left), ...Object.keys(right)]);
   const scores: FieldScore[] = [];
   for (const f of fields) {
