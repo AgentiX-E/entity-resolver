@@ -13,10 +13,13 @@
       "import": "./dist/index.js"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "test": "vitest run --coverage",
+    "test:e2e": "playwright test",
     "lint": "eslint src/",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "clean": "rm -rf dist *.tsbuildinfo coverage"
@@ -27,6 +30,7 @@
     "@agentix-e/entity-resolver-visual": "workspace:*"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.0",
     "@vitest/coverage-v8": "^2.0.0",
     "eslint": "^9.0.0",
     "jsdom": "^29.1.1",
