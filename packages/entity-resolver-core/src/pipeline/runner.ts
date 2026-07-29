@@ -15,12 +15,15 @@ import type { ComparisonSpec, ComparisonVector } from '../matching/comparison.js
 import type { ScoredPair } from '../types/core.js';
 import type { ClusteringResult } from '../clustering/algorithms.js';
 import type { ILogger } from '../interfaces/ILogger.js';
+import type { ISqlBackend } from '../interfaces/ISqlBackend.js';
 import { NoopLogger } from '../interfaces/ILogger.js';
 import { ValidationError } from '../errors/hierarchy.js';
 import { preprocessRecords } from '../preprocessing/cleaner.js';
 import { standardBlocking } from '../blocking/standard.js';
 import { estimateParameters } from '../fellegi-sunter/em.js';
-import type { EMOptions } from '../fellegi-sunter/em.js';
+import type { EMOptions, EMResult } from '../fellegi-sunter/em.js';
+import { sqlEstimateParameters } from '../fellegi-sunter/sql-em.js';
+import type { SqlEMResult } from '../fellegi-sunter/sql-em.js';
 import { computeAggregateMatchWeight } from '../fellegi-sunter/match-weight.js';
 import { buildTermFrequencies, TFAdjustmentLookup } from '../fellegi-sunter/tf-adjust.js';
 import { generateComparisonVectors } from '../matching/comparison.js';
@@ -68,6 +71,14 @@ export interface PipelineOptions {
   readonly maxEmPairs?: number;
   /** Structured logger for pipeline stage instrumentation. Default: NoopLogger. */
   readonly logger?: ILogger;
+  /**
+   * Optional SQL backend for EM parameter estimation.
+   * When provided, comparison vectors are stored in SQL temp tables
+   * and EM iterations use the database engine for data access,
+   * reducing JS memory pressure on large datasets (100K+ pairs).
+   * Falls back to in-memory EM if not provided.
+   */
+  readonly sqlBackend?: ISqlBackend;
 }
 
 /**
@@ -164,13 +175,22 @@ export async function runPipeline(
   // Stage 3: Matching �? generate comparison vectors grouped by pair
   const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
-  // Stage 3b: Estimate FS parameters via EM (per-pair posteriors)
-  const emOptions: EMOptions = {
-    maxIterations: options?.maxEmIterations ?? 30,
-    epsilon: options?.emEpsilon ?? 1e-6,
-    ...(options?.maxEmPairs ? { maxPairs: options.maxEmPairs } : {}),
-  };
-  const emResult = estimateParameters(pairVectors, emOptions);
+  // Stage 3b: Estimate FS parameters via EM
+  // Uses SQL backend when available for reduced JS memory pressure on large datasets
+  let emResult: EMResult | SqlEMResult;
+  if (options?.sqlBackend) {
+    emResult = await sqlEstimateParameters(options.sqlBackend, pairVectors, {
+      maxIterations: options.maxEmIterations ?? 30,
+      epsilon: options.emEpsilon ?? 1e-6,
+    });
+  } else {
+    const emOpts: EMOptions = {
+      maxIterations: options?.maxEmIterations ?? 30,
+      epsilon: options?.emEpsilon ?? 1e-6,
+      ...(options?.maxEmPairs ? { maxPairs: options.maxEmPairs } : {}),
+    };
+    emResult = estimateParameters(pairVectors, emOpts);
+  }
   const params = emResult.parameters;
 
   logger.debug('EM parameter estimation complete', {

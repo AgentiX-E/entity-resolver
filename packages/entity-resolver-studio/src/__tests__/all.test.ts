@@ -277,3 +277,28 @@ describe('state machine coverage edges', () => {
     expect(state.session).toBeNull();
   });
 });
+
+// ─── Branch edge: empty string continue ─────────────────────────
+
+describe('session diffFields branches', () => {
+  it('skips field when both values are null/undefined', () => {
+    const recsWithNull = [
+      { name: 'A', extra: null },
+      { name: 'B', extra: null },
+    ];
+    const s = createStudioSession([mk(0.85)], recsWithNull, 10, 100);
+    const p = s.pairs[0]!;
+    // 'extra' field with both null should be skipped (continue branch)
+    const extra = p.fieldScores.find((f) => f.fieldName === 'extra');
+    expect(extra).toBeUndefined();
+  });
+
+  it('skips field when both values are undefined', () => {
+    const recsWithUnset: Array<Record<string, unknown>> = [{ name: 'A' }, { name: 'B' }];
+    const s = createStudioSession([mk(0.85)], recsWithUnset, 10, 100);
+    const p = s.pairs[0]!;
+    // Only 'name' field should appear
+    expect(p.fieldScores.length).toBe(1);
+    expect(p.fieldScores[0]!.fieldName).toBe('name');
+  });
+});
