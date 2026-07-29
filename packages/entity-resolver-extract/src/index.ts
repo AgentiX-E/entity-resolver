@@ -14,6 +14,7 @@
 
 export {
   extract,
+  extractAsync,
   PatternRegistry,
   registerBuiltins,
   extractPatterns,
