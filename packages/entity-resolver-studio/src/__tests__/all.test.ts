@@ -178,3 +178,102 @@ describe('createStudioMachine', () => {
     expect(state.selectedIndex).toBe(0);
   });
 });
+
+// ─── Edge Case: non-string field comparison ──────────────────────
+
+describe('session edge cases', () => {
+  it('compares boolean fields correctly (match=1, diff=0)', () => {
+    const recordsWithBool = [
+      { name: 'A', active: true },
+      { name: 'A', active: false },
+    ];
+    const s = createStudioSession([mk(0.85)], recordsWithBool, 10, 100);
+    const p = s.pairs[0]!;
+    const f = p.fieldScores.find((x) => x.fieldName === 'active');
+    expect(f!.score).toBe(0.0);
+  });
+
+  it('compares numeric fields with equality', () => {
+    const recordsWithNum = [
+      { id: 42, name: 'A' },
+      { id: 42, name: 'B' },
+    ];
+    const s = createStudioSession([mk(0.85)], recordsWithNum, 10, 100);
+    const p = s.pairs[0]!;
+    const f = p.fieldScores.find((x) => x.fieldName === 'id');
+    expect(f!.score).toBe(1.0);
+  });
+});
+
+// ─── State machine edge cases ────────────────────────────────────
+
+describe('state machine edge cases', () => {
+  it('selectNext at last index does not advance past end', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'selectNext' });
+    expect(state.selectedIndex).toBe(0);
+  });
+
+  it('selectPrev at index 0 stays at 0', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'selectPrev' });
+    expect(state.selectedIndex).toBe(0);
+  });
+
+  it('undo does nothing for unlabeled session', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'undo' });
+    expect(state.session!.pairs[0]!.label).toBe(null);
+  });
+
+  it('skip at last index wraps back for next batch', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
+    dispatch({ type: 'skip' });
+    // With only 1 pair, skip cannot advance — stays at 0
+    expect(state.selectedIndex).toBe(0);
+  });
+});
+
+// ─── Coverage: remaining branch edges ────────────────────────────
+
+describe('state machine coverage edges', () => {
+  it('skip with null batch is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'skip' });
+    expect(state.session).toBeNull();
+  });
+
+  it('match with null session is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'match' });
+    expect(state.session).toBeNull();
+  });
+
+  it('noMatch with null session is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'noMatch' });
+    expect(state.session).toBeNull();
+  });
+
+  it('undo with null session is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'undo' });
+    expect(state.session).toBeNull();
+  });
+
+  it('reset with null session is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'reset' });
+    expect(state.session).toBeNull();
+  });
+
+  it('nextBatch with null session is a no-op', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'nextBatch' });
+    expect(state.session).toBeNull();
+  });
+});
