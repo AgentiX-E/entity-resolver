@@ -172,8 +172,10 @@ export async function runPipeline(
     elapsedMs: Date.now() - startTime,
   });
 
-  // Stage 3: Matching �? generate comparison vectors grouped by pair
-  const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
+  // Stage 3: Matching — generate comparison vectors
+  let pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
+
+  // Parallel block scoring: enriches scores without replacing EM vectors
 
   // Stage 3b: Estimate FS parameters via EM
   // Uses SQL backend when available for reduced JS memory pressure on large datasets
