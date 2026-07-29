@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@agentix-e/entity-resolver-core": "workspace:*",
+    "@agentix-e/entity-resolver-extract": "workspace:*",
     "hono": "^4.12.32",
     "jose": "^6.2.4",
     "pino": "^10.3.1",

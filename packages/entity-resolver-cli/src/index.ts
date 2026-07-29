@@ -85,6 +85,8 @@ export async function main(args: string[] = process.argv.slice(2)): Promise<void
       return cmdBenchmark(args.slice(1));
     case 'autoconfigure':
       return cmdAutoconfigure(args.slice(1));
+    case 'extract':
+      return cmdExtract(args.slice(1));
     default:
       console.error(`Unknown command: ${command}`);
       console.error('Run `entity-resolver --help` for usage information.');
@@ -205,6 +207,57 @@ async function cmdAutoconfigure(args: string[]): Promise<void> {
   }
 }
 
+async function cmdExtract(args: string[]): Promise<void> {
+  const textIdx = args.indexOf('--text');
+  const text = textIdx >= 0 && textIdx + 1 < args.length ? args[textIdx + 1] : null;
+
+  if (!text) {
+    console.error('Usage: entity-resolver extract --text "<text>" [--intent <intent>] [--fields field:type,...]');
+    console.error('Example: entity-resolver extract --text "明天下午3点开会" --fields time:time,date:date,title:string');
+    process.exitCode = 1;
+    return;
+  }
+
+  try {
+    const { extract } = await import('@agentix-e/entity-resolver-extract');
+    const intent = parseStringFlag(args, '--intent');
+
+    // Parse --fields flag: "time:time,date:date,title:string"
+    const fieldsRaw = parseStringFlag(args, '--fields');
+    let fields: Array<{ name: string; type: string }>;
+    if (fieldsRaw) {
+      fields = fieldsRaw.split(',').map((f) => {
+        const [name, type] = f.split(':');
+        return { name: name!.trim(), type: type?.trim() ?? 'string' };
+      });
+    } else {
+      // Default fields for general extraction
+      fields = [
+        { name: 'text', type: 'string' },
+      ];
+    }
+
+    const result = extract(text, fields, intent ? { intent } : {});
+
+    console.log(JSON.stringify({
+      values: result.values,
+      provenance: result.provenance,
+      confidence: result.confidence,
+    }, null, 2));
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : String(err));
+    process.exitCode = 1;
+  }
+}
+
+function parseStringFlag(args: string[], flag: string): string | undefined {
+  const idx = args.indexOf(flag);
+  if (idx >= 0 && idx + 1 < args.length) {
+    return args[idx + 1];
+  }
+  return undefined;
+}
+
 function parseFloatFlag(args: string[], flag: string): number | undefined {
   const idx = args.indexOf(flag);
   if (idx >= 0 && idx + 1 < args.length) {
@@ -229,6 +282,12 @@ Commands:
   gazetteer <query> <index> [--threshold N]  Gazetteer matching
   benchmark [dataset]               Run benchmarks (all or specific)
   autoconfigure <file>             Auto-detect field semantics
+  extract --text "<text>" [options]  Extract entities from unstructured text
+
+Extract options:
+  --text "<text>"       Input text to extract entities from
+  --fields field:type   Comma-separated field descriptors (e.g. time:time,date:date)
+  --intent <intent>     Intent name for enhanced extraction (e.g. alarm, reminder)
 
 Options:
   --threshold N    Match threshold (0-1, default 0.5)

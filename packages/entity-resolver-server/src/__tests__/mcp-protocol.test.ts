@@ -111,7 +111,7 @@ describe('MCP Protocol: tools/list', () => {
     resetMcpState();
   });
 
-  it('returns all 7 tools', async () => {
+  it('returns all 8 tools', async () => {
     // Initialize first
     await post({
       jsonrpc: '2.0',
@@ -126,7 +126,7 @@ describe('MCP Protocol: tools/list', () => {
     const res = await post({ jsonrpc: '2.0', id: 2, method: 'tools/list' });
     expect(res.status).toBe(200);
     const body = (await res.json()) as Record<string, any>;
-    expect(body.result.tools.length).toBe(7);
+    expect(body.result.tools.length).toBe(8);
     const names = body.result.tools.map((t: { name: string }) => t.name);
     expect(names).toContain('er_dedupe');
     expect(names).toContain('er_gazetteer');

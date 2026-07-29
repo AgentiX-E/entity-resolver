@@ -479,6 +479,55 @@ export function createApp(config: ServerConfig = {}): Hono {
     return c.json(result);
   });
 
+  // Extract endpoint
+  app.post('/api/v1/extract', async (c: Context) => {
+    const body = await safeJson(c);
+    if (body instanceof Response) return body;
+
+    const schema = z.object({
+      text: z.string(),
+      fields: z.array(z.object({
+        name: z.string(),
+        type: z.string(),
+        description: z.string().optional(),
+        required: z.boolean().optional(),
+      })),
+      intent: z.string().optional(),
+      enableLlm: z.boolean().optional(),
+    });
+
+    const parsed = schema.safeParse(body);
+    if (!parsed.success) {
+      return c.json({ error: 'Validation failed', details: parsed.error.issues }, 400);
+    }
+
+    try {
+      const { extract } = await import('@agentix-e/entity-resolver-extract');
+      const { text, fields, intent, enableLlm } = parsed.data;
+      // Map to clean FieldDescriptor objects matching exactOptionalPropertyTypes
+      const descriptors = fields.map((f) => {
+        const desc: { name: string; type: string; description?: string; required?: boolean } = {
+          name: f.name,
+          type: f.type,
+        };
+        if (f.description) desc.description = f.description;
+        if (f.required) desc.required = f.required;
+        return desc;
+      });
+      const opts: { intent?: string; enableLlm?: boolean } = {};
+      if (intent) opts.intent = intent;
+      if (enableLlm) opts.enableLlm = enableLlm;
+      const result = extract(text, descriptors, opts);
+      return c.json({
+        values: result.values,
+        provenance: result.provenance,
+        confidence: result.confidence,
+      });
+    } catch (err) {
+      return c.json(formatError(err, debug), 500);
+    }
+  });
+
   // MCP tools
   app.get('/api/v1/mcp/tools', (c: Context) => {
     return c.json({ tools: getMcpTools() });

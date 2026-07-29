@@ -117,6 +117,25 @@ export function getMcpTools(): McpTool[] {
         required: ['predictedClusters', 'groundTruth'],
       },
     },
+    {
+      name: 'er_extract',
+      description:
+        'Extract structured entities from unstructured text using pattern-first cascade extraction. Supports email, phone, URL, number, boolean, date, time, and CJK temporal expressions.',
+      parameters: {
+        type: 'object',
+        properties: {
+          text: { type: 'string', description: 'Input text to extract entities from' },
+          fields: {
+            type: 'array',
+            description: 'Array of field descriptors [{name, type, description?, required?}]',
+            items: { type: 'object' },
+          },
+          intent: { type: 'string', description: 'Optional intent name for enhanced extraction' },
+          enableLlm: { type: 'boolean', description: 'Enable LLM fallback (requires DEEPSEEK_API_KEY)' },
+        },
+        required: ['text', 'fields'],
+      },
+    },
   ];
 }
 
@@ -222,6 +241,35 @@ export async function executeMcpTool(
 
       const metrics = evaluateClustering(predMap, refMap);
       return metrics;
+    }
+
+    case 'er_extract': {
+      const text = params.text as string;
+      const rawFields = params.fields as Array<{ name: string; type: string; description?: string; required?: boolean }>;
+      const intent = params.intent as string | undefined;
+      const enableLlm = params.enableLlm as boolean | undefined;
+
+      const { extract } = await import('@agentix-e/entity-resolver-extract');
+      // Map field format: { name, type } → FieldDescriptor
+      const fields = rawFields.map((f) => {
+        const desc: { name: string; type: string; description?: string; required?: boolean } = {
+          name: f.name,
+          type: f.type,
+        };
+        if (f.description) desc.description = f.description;
+        if (f.required) desc.required = f.required;
+        return desc;
+      });
+
+      const opts: { intent?: string; enableLlm?: boolean } = {};
+      if (intent) opts.intent = intent;
+      if (enableLlm) opts.enableLlm = enableLlm;
+      const result = extract(text, fields, opts);
+      return {
+        values: result.values,
+        provenance: result.provenance,
+        confidence: result.confidence,
+      };
     }
 
     default:

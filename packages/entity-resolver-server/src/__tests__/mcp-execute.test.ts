@@ -44,9 +44,9 @@ describe('MCP tools execution', () => {
     await expect(mcp.executeMcpTool('unknown_tool', {})).rejects.toThrow();
   });
 
-  it('tool list contains all 7 tools', () => {
+  it('tool list contains all 8 tools', () => {
     const tools = mcp.getMcpTools();
-    expect(tools.length).toBe(7);
+    expect(tools.length).toBe(8);
     const names = tools.map((t) => t.name);
     expect(names).toContain('er_dedupe');
     expect(names).toContain('er_gazetteer');

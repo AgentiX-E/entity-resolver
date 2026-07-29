@@ -112,6 +112,9 @@ importers:
       '@agentix-e/entity-resolver-core':
         specifier: workspace:*
         version: link:../entity-resolver-core
+      '@agentix-e/entity-resolver-extract':
+        specifier: workspace:*
+        version: link:../entity-resolver-extract
       '@agentix-e/entity-resolver-visual':
         specifier: workspace:*
         version: link:../entity-resolver-visual
@@ -237,6 +240,9 @@ importers:
       '@agentix-e/entity-resolver-core':
         specifier: workspace:*
         version: link:../entity-resolver-core
+      '@agentix-e/entity-resolver-extract':
+        specifier: workspace:*
+        version: link:../entity-resolver-extract
       hono:
         specifier: ^4.12.32
         version: 4.12.32
