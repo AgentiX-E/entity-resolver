@@ -1,0 +1,46 @@
+{
+  "results": [
+    {
+      "records": 130,
+      "engine": "entity-resolver",
+      "time_ms": 66,
+      "rec_per_s": 1970,
+      "clusters": 4,
+      "splink_ms": 200,
+      "ratio": "0.3x"
+    },
+    {
+      "records": 260,
+      "engine": "entity-resolver",
+      "time_ms": 154,
+      "rec_per_s": 1688,
+      "clusters": 21,
+      "splink_ms": 280,
+      "ratio": "0.6x"
+    },
+    {
+      "records": 650,
+      "engine": "entity-resolver",
+      "time_ms": 43,
+      "rec_per_s": 15116,
+      "clusters": 155,
+      "splink_ms": 400,
+      "ratio": "0.1x"
+    },
+    {
+      "records": 1300,
+      "engine": "entity-resolver",
+      "time_ms": 71,
+      "rec_per_s": 18310,
+      "clusters": 314,
+      "splink_ms": 500,
+      "ratio": "0.1x"
+    }
+  ],
+  "splinkReference": {
+    "100": 200,
+    "200": 280,
+    "500": 400,
+    "1000": 500
+  }
+}
