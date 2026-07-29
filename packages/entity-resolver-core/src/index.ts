@@ -172,6 +172,17 @@ export {
 export type { SqlEMOptions, SqlEMResult } from './fellegi-sunter/sql-em.js';
 export { sqlEstimateParameters } from './fellegi-sunter/sql-em.js';
 
+// Parallel Processing
+export type {
+  IWorkerPool,
+  WorkerPoolConfig,
+  WorkerTask,
+  TaskProcessor,
+} from './pipeline/worker-pool.js';
+export { SingleThreadPool } from './pipeline/worker-pool.js';
+export { compareBlocks, groupByBlock } from './pipeline/parallel-scorer.js';
+export type { BatchConfig } from './pipeline/parallel-scorer.js';
+
 // Blocking
 export type {
   CandidatePair,
