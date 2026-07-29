@@ -49,16 +49,23 @@ Implementations:
 ## Package Dependency Graph
 
 ```
-entity-resolver-core  (stateless, zero I/O)
-  ↑                     ↑
-entity-resolver-node  entity-resolver-browser
-  ↑                     
-entity-resolver-server
-  ↑
-entity-resolver (umbrella)
+entity-resolver-core       (stateless, zero I/O — DI interfaces + algorithms)
+  ↑      ↑      ↑      ↑
+  │      │      │      │
+  │      │      │  entity-resolver-visual  (framework-agnostic Web Components)
+  │      │      │
+  │      │  entity-resolver-extract        (pattern + ONNX + LLM cascade)
+  │      │  entity-resolver-link           (gazetteer-first private KB linking)
+  │      │
+  │  entity-resolver-node    entity-resolver-browser
+  │         ↑
+  │  entity-resolver-server  (REST/gRPC/MCP)
+  │         ↑
+  entity-resolver (umbrella facade — re-exports all)
 ```
 
-`entity-resolver-visual` and `entity-resolver-cli` depend only on `entity-resolver-core` (via its types), not on node/browser/server.
+`entity-resolver-cli` depends on `entity-resolver-core` + `entity-resolver-extract`.
+`entity-resolver-visual` depends only on `entity-resolver-core` (type references).
 
 ## WASM Acceleration
 
@@ -94,11 +101,19 @@ High-frequency values (e.g., common surname "Smith") receive reduced match weigh
 
 `exact`, `levenshtein`, `damerauLevenshtein`, `jaro`, `jaroWinkler`, `dice`, `jaccard`, `overlap`, `lcs`, `soundex`, `doubleMetaphone`, `tokenSort`, `tfidfCosine`, `qgramTfIdf`, `ensemble`, `numericDiff`, `dateDiff`, `booleanMatch`, `radial`
 
-## Clustering Algorithms (3)
+## Clustering Algorithms (12)
 
-1. **Connected Components** — Union-Find transitive closure (< 100ms for 1M pairs)
+**Base algorithms (3):**
+1. **Connected Components** — Union-Find transitive closure
 2. **DBSCAN** — Density-based with adaptive epsilon
 3. **Unique Mapping** — Greedy one-to-one assignment
+
+**pyJedAI-ported algorithms (9):**
+Center, Best Match, Merge Center, Correlation, Cut (Gomory-Hu), Markov (MCL), Kiraly MSM, Ricochet SR, Row-Column
+
+## Blocking Strategies (8)
+
+Standard, Token, Sorted Neighborhood, Multi-Pass, Meta-blocking, Suffix Arrays, Extended Q-Grams, TF-IDF
 
 ## Evaluation System (12 Metrics)
 
@@ -110,25 +125,17 @@ All metrics verified against Python ER-Evaluation output (error < 1e-6).
 
 The `entity-resolver-visual` package uses a progressive 3-layer design:
 
-- **Layer 1: Data API** — Pure functions returning typed JSON (`buildWaterfallData()`, `buildHistogramData()`, etc.). Users render with D3/ECharts/Chart.js/Recharts.
-- **Layer 2: Headless Components** — Renderless state machines (`useWaterfall()`, `useHistogram()`, etc.). Users provide their own rendering.
-- **Layer 3: Themeable Web Components** — `<er-waterfall>`, `<er-histogram>`, `<er-cluster-explorer>`, `<er-mu-chart>`, `<er-evaluation-radar>`. ≥20 CSS Custom Properties. Works in React, Vue, Svelte, and vanilla HTML.
+- **Layer 1: Data API** — Pure functions returning typed JSON. Users render with D3/ECharts/Chart.js/Recharts.
+- **Layer 2: Headless Components** — Renderless state machines. Users provide their own rendering.
+- **Layer 3: Themeable Web Components** — `<er-waterfall>`, `<er-histogram>`, `<er-cluster-explorer>`, `<er-mu-chart>`, `<er-evaluation-radar>`. ≥20 CSS Custom Properties. Works in React, Vue, Svelte, vanilla HTML.
+- **Layer 4: Interactive Labeling** — `<er-labeling-session>`, `<er-pair-review>` (via dedicated `entity-resolver-studio` package, depends on core + visual + browser).
 
-## Iteration Plan (11 iterations, 24 weeks)
+## Iteration History (Complete — I0 through I19 + O1-O5)
 
-| Iteration | Focus | Priority |
-|-----------|-------|----------|
-| I0 | Foundation — monorepo scaffold, CI/CD, type system | P0 |
-| I1 | Match Engine + Preprocessing — 19 scorers, FTfy-equivalent Unicode repair | P0 |
-| I2 | FS Core — Fellegi-Sunter EM, Match Weight, TF Adjustment | P0 |
-| I3 | Blocking — 5 strategies | P0 |
-| I4 | Clustering + Evaluation — 3 algorithms, 12 metrics | P0 |
-| I5 | Pipeline + Benchmarks — End-to-end, 8 standard datasets | P0 |
-| I6 | Auto-Config — Zero-config semantic field detection | P0 |
-| I7 | Visual Layer 1 — Data API (pure JSON diagnostic output) | P1 |
-| I8 | Visual Layer 2+3 — Headless + Web Components | P1 |
-| I9 | Diagnostics TUI — CLI terminal diagnostics | P1 |
-| I10 | Active Learning — Uncertainty sampling + labeling loop | P1 |
-| I11 | Production — REST/gRPC/MCP API, entity graph persistence, incremental updates, WASM publish | P2 |
+| Phase | Iterations | Status |
+|-------|-----------|--------|
+| Foundation (I0-I11) | 12 iterations | ✅ Complete |
+| Extract Pipeline (I12-I19) | 8 iterations | ✅ Complete |
+| Enterprise Hardening (O1-O5) | 5 iterations | ✅ Complete |
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development setup and iteration workflow.
+See [BENCHMARKS.md](BENCHMARKS.md) for current benchmark results.

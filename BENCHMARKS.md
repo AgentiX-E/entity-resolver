@@ -117,22 +117,24 @@ _Measured on Node.js 22, AMD64. WASM binaries compiled from Rust via wasm-bindge
 
 ## Test Coverage
 
-| Package                 | Statements | Branches | Functions | Lines  | Tests    |
-| ----------------------- | ---------- | -------- | --------- | ------ | -------- |
-| entity-resolver-core    | 97.85%     | 89.77%   | 98.25%    | 97.85% | 539      |
-| entity-resolver-node    | 88.50%     | 73.95%   | 93.10%    | 88.50% | 48       |
-| entity-resolver-browser | 92.76%     | 82.19%   | 100%      | 92.76% | 37       |
-| entity-resolver-server  | 93.06%     | 81.81%   | 90.00%    | 93.06% | ~100     |
-| entity-resolver-cli     | 72.41%     | 79.66%   | 67.00%    | 72.41% | 36       |
-| entity-resolver-visual  | 94.44%     | 96.05%   | 94.44%    | 94.44% | 49       |
-| **Total**               | —          | —        | —         | —      | **~830** |
+| Package                   | Statements | Branches | Functions | Lines  | Tests    |
+| ------------------------- | ---------- | -------- | --------- | ------ | -------- |
+| entity-resolver-core      | 97.85%     | 89.77%   | 98.25%    | 97.85% | 539      |
+| entity-resolver-extract   | 97.81%     | 93.57%   | 100%      | 97.81% | 342      |
+| entity-resolver-node      | 88.50%     | 73.95%   | 93.10%    | 88.50% | 48       |
+| entity-resolver-browser   | 92.76%     | 82.19%   | 100%      | 92.76% | 37       |
+| entity-resolver-server    | 93.06%     | 81.81%   | 90.00%    | 93.06% | ~55      |
+| entity-resolver-cli       | 72.41%     | 79.66%   | 67.00%    | 72.41% | 31       |
+| entity-resolver-visual    | 94.44%     | 96.05%   | 94.44%    | 94.44% | 49       |
+| entity-resolver-link      | 100%       | 100%     | 100%      | 100%   | 2        |
+| **Total**                 | —          | —        | —         | —      | **~1103**|
 
 ## CI Status
 
 [![CI](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml)
 
 - **Lint**: ESLint strict mode, config active (typescript-eslint installed)
-- **TypeCheck**: TypeScript 5.7 strict mode, 0 errors across all 8 packages
-- **Test**: 830+ tests, coverage thresholds enforced
+- **TypeCheck**: TypeScript 5.7 strict mode, 0 errors across all 9 packages
+- **Test**: 1100+ tests, coverage thresholds enforced (≥95% target)
 - **Format**: Prettier check
 - **E2E**: Playwright Chromium with DuckDB WASM

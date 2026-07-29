@@ -28,6 +28,8 @@ pnpm format     # format check
 ```
 packages/
 ├── entity-resolver-core/      # Stateless computation engine
+├── entity-resolver-extract/   # Schema-driven entity extraction
+├── entity-resolver-link/      # Gazetteer-first KB linking
 ├── entity-resolver-node/      # Node.js adapters
 ├── entity-resolver-browser/   # Browser adapters
 ├── entity-resolver-server/    # HTTP/gRPC/MCP API
