@@ -89,7 +89,6 @@ JOIN ${inputTable} r ON r.__row_id = b.right_id`;
   const compMs = performance.now() - t1;
 
   // Read final scored pairs only (no intermediate materialization)
-  const t2 = performance.now();
   const scoredRows = await backend.query(
     `SELECT left_id, right_id, match_weight FROM ${scoredTable}`,
   );
