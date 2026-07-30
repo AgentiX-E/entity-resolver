@@ -3,16 +3,16 @@
     "dataset": "DBLP-ACM",
     "engine": "entity-resolver-sql",
     "records": 4910,
-    "timeMs": 3449,
-    "timeSec": "3.4",
+    "timeMs": 3545,
+    "timeSec": "3.5",
     "pairs": 1216782
   },
   {
     "dataset": "Amazon-Google",
     "engine": "entity-resolver-sql",
     "records": 4589,
-    "timeMs": 11804,
-    "timeSec": "11.8",
+    "timeMs": 12284,
+    "timeSec": "12.3",
     "pairs": 4499966
   },
   {
