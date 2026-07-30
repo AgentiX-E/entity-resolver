@@ -67,6 +67,33 @@ export async function runSqlPipeline(
     };
   }
 
+  // Stage 1.5: Pre-filter (only for datasets >= 5000 records)
+  // Cheap prefix matching filters ~90% of non-duplicate pairs
+  // without expensive string similarity UDFs
+  let preFilteredTable = blockedTable;
+  let preFilterRows = blockedRows;
+  if (records.length >= 5000) {
+    preFilteredTable = `__er_sql_pf_${Date.now()}`;
+    const prefixFilters = cols
+      .filter((c) => c !== '__row_id')
+      .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
+      .join(' OR ');
+    await backend.exec(
+      `CREATE TABLE ${preFilteredTable} AS SELECT b.left_id, b.right_id FROM ${blockedTable} b JOIN ${inputTable} l ON l.__row_id=b.left_id JOIN ${inputTable} r ON r.__row_id=b.right_id WHERE ${prefixFilters}`,
+    );
+    preFilterRows = await backend.rowCount(preFilteredTable);
+    if (preFilteredTable !== blockedTable) await backend.dropTempTable(blockedTable);
+  }
+
+  if (preFilterRows === 0) {
+    await dropAll(backend, [inputTable, preFilteredTable]);
+    return {
+      pairs: [],
+      timing: { blockingMs: blockMs, comparisonMs: 0, emMs: Math.round(emMs) },
+      stats: { inputRows: records.length, blockedPairs: 0, scoredPairs: 0 },
+    };
+  }
+
   // Stage 2+3: comparison + scoring CTAS with trained weights
   const t1 = performance.now();
   const scoredTable = `__er_sql_sc_${Date.now()}`;
@@ -118,7 +145,7 @@ SELECT b.left_id, b.right_id,
 ${levelParts},
 ${weightParts},
 (${weightSum}) AS match_weight
-FROM ${blockedTable} b
+FROM ${preFilteredTable} b
 JOIN ${inputTable} l ON l.__row_id=b.left_id
 JOIN ${inputTable} r ON r.__row_id=b.right_id`;
 
@@ -129,7 +156,7 @@ JOIN ${inputTable} r ON r.__row_id=b.right_id`;
   );
   const compMs = performance.now() - t1;
 
-  await dropAll(backend, [inputTable, blockedTable, scoredTable]);
+  await dropAll(backend, [inputTable, preFilteredTable, scoredTable]);
 
   return {
     pairs: scoredRows.map((r: SqlRow) => ({
