@@ -31,8 +31,18 @@ export async function runSqlPipeline(
   const cols = Object.keys(records[0] ?? {});
 
   // Stage 0: EM training on a JS sample (fast, in-memory)
+  // Skip for single-level comparisons where defaults (m=0.9/u=0.1) suffice.
+  // Only train when dataset has multi-level comparisons and enough data.
   const tEm = performance.now();
-  const emParams = trainEMOnSample(records, config);
+  const hasMultiLevel = config.comparisons.some((c) => c.levels && c.levels.length > 1);
+  const emParams =
+    records.length >= 2000 && hasMultiLevel
+      ? trainEMOnSample(records, config)
+      : ({
+          lambda: 0.5,
+          mProbabilities: new Map([['default:match', 0.9]]),
+          uProbabilities: new Map([['default:match', 0.1]]),
+        } as unknown as FSParameters);
   const emMs = performance.now() - tEm;
 
   // Load records into DuckDB
