@@ -51,7 +51,28 @@ export async function runSqlPipeline(
     },
   };
 
-  // Stage 1: SQL blocking with inline prefix filter for scale
+  // Fast path for sub-10K records: single SELECT (no CTAS, one FFI call)
+  if (records.length < 10000) {
+    const tFast = performance.now();
+    const scoredSql = buildFastSingleQuery(inputTable, blockingConfig, config, cols);
+    const scoredRows = await backend.query(scoredSql);
+    await dropAll(backend, [inputTable]);
+    return {
+      pairs: scoredRows.map((r: SqlRow) => ({
+        leftId: Number(r.left_id),
+        rightId: Number(r.right_id),
+        score: (Number(r.match_weight) + 10) / 20,
+      })),
+      timing: { blockingMs: 0, comparisonMs: performance.now() - tFast, emMs: Math.round(emMs) },
+      stats: {
+        inputRows: records.length,
+        blockedPairs: scoredRows.length,
+        scoredPairs: scoredRows.length,
+      },
+    };
+  }
+
+  // Full CTAS path for >= 10K records (zero materialization in DuckDB)
   const t0 = performance.now();
   const blockedTable = `__er_sql_bl_${Date.now()}`;
   const usePrefixFilter = records.length >= 5000;
@@ -253,6 +274,53 @@ function buildBlockSqlWithPrefixFilter(
     return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id<r.__row_id AND (${prefixCond})`;
   });
   return `CREATE TABLE ${dst} AS ${parts.join(' UNION ')}`;
+}
+
+/** Build a single SELECT query that does blocking+comparison+scoring in one call. */
+function buildFastSingleQuery(
+  src: string,
+  blockingConfig: PipelineConfig,
+  config: PipelineConfig,
+  cols: readonly string[],
+): string {
+  const fallbackField = (blockingConfig.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
+  const passes = blockingConfig.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
+  const activeComps = config.comparisons.filter((c) => cols.includes(c.field));
+
+  const mw = '3.169925',
+    nmw = '-3.169925';
+  const compParts = activeComps.map((c) => {
+    const f = esc(c.field);
+    const lvls = c.levels?.length ? c.levels : [{}];
+    let caseSql = 'CASE';
+    for (let i = lvls.length - 1; i >= 0; i--) {
+      const l = lvls[i]! as Record<string, unknown>;
+      if (l.isExact) caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
+      else
+        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${l.threshold ?? 0.7} THEN ${i}`;
+    }
+    return {
+      field: f,
+      level: `${caseSql} ELSE -1 END AS ${f}_level`,
+      weight: `CASE WHEN ${f}_level>=0 THEN ${mw} ELSE ${nmw} END AS ${f}_weight`,
+    };
+  });
+
+  const blockParts = passes.map((p) => {
+    const conditions = (p.fields ?? [fallbackField])
+      .map((f) =>
+        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+      )
+      .join(' AND ');
+    return `(${conditions} AND l.__row_id<r.__row_id)`;
+  });
+
+  return `SELECT l.__row_id AS left_id, r.__row_id AS right_id,
+${compParts.map((c) => c.level).join(',\n')},
+${compParts.map((c) => c.weight).join(',\n')},
+(${compParts.map((c) => `COALESCE(${c.field}_weight,0)`).join('+')}) AS match_weight
+FROM ${src} l JOIN ${src} r ON (${blockParts.join(' OR ')})`;
 }
 
 function dbFn(n: string): string {
