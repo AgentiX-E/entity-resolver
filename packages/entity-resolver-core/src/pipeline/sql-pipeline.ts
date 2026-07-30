@@ -55,7 +55,15 @@ export async function runSqlPipeline(
   const t1 = performance.now();
   const compTable = `__er_cp_${Date.now()}`;
   const compSql = buildCompSql(inputTable, blockedTable, compTable, config.comparisons, cols);
-  await backend.exec(compSql);
+  console.error('[SQL-PIPELINE] Comp SQL:', compSql.slice(0, 600));
+  try {
+    await backend.exec(compSql);
+    const rows = await backend.rowCount(compTable);
+    console.error('[SQL-PIPELINE] Comp table rows:', rows);
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e);
+    throw new Error(`Comparison SQL failed: ${msg}\nSQL: ${compSql.slice(0, 300)}`);
+  }
   const compMs = performance.now() - t1;
 
   // Stage 3: EM parameter estimation
