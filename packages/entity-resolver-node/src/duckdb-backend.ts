@@ -47,7 +47,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
 
   async exec(sql: string): Promise<void> {
     const conn = await this._conn();
-    await conn.runAndReadAll(sql);
+    await conn.run(sql); // run() returns immediately, no row serialization
   }
 
   async createTempTable(
