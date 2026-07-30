@@ -55,14 +55,11 @@ export async function runSqlPipeline(
   const t1 = performance.now();
   const compTable = `__er_cp_${Date.now()}`;
   const compSql = buildCompSql(inputTable, blockedTable, compTable, config.comparisons, cols);
-  console.error('[SQL-PIPELINE] Comp SQL:', compSql.slice(0, 600));
   try {
     await backend.exec(compSql);
-    const rows = await backend.rowCount(compTable);
-    console.error('[SQL-PIPELINE] Comp table rows:', rows);
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : String(e);
-    throw new Error(`Comparison SQL failed: ${msg}\nSQL: ${compSql.slice(0, 300)}`);
+    throw new Error(`Comparison SQL failed: ${msg}`);
   }
   const compMs = performance.now() - t1;
 
@@ -75,7 +72,7 @@ export async function runSqlPipeline(
   try {
     const emResult = await sqlEstimateParameters(backend, pairVectors, {
       maxIterations: 10,
-      tableName: compTable,
+      tableName: `__er_em_${Date.now()}`,
     });
     parameters = emResult.parameters;
   } catch {
@@ -90,7 +87,12 @@ export async function runSqlPipeline(
   // Stage 4: SQL scoring
   const t3 = performance.now();
   const scoredSql = buildScoredSql(compTable, config.comparisons, cols, parameters);
-  const scoredRows = await backend.query(scoredSql);
+  let scoredRows: SqlRow[];
+  try {
+    scoredRows = await backend.query(scoredSql);
+  } catch (e: unknown) {
+    throw e;
+  }
   const scoringMs = performance.now() - t3;
 
   await dropAll(backend, [inputTable, blockedTable, compTable]);
