@@ -1,24 +1,34 @@
 /**
- * Node.js DuckDB Backend — ISqlBackend implementation using duckdb npm package.
+ * Node.js DuckDB Backend — ISqlBackend using duckdb npm package.
  *
- * Provides full SQL execution capabilities for the entity-resolver
- * pipeline's DuckDB pushdown mode (sql-pipeline.ts).
+ * Uses CJS interop (duckdb is a CJS module). All SQL operations are
+ * wrapped in async Promises with sequential execution via `db.all()`.
+ *
+ * duckdb npm package: https://www.npmjs.com/package/duckdb
  */
-import duckdb from 'duckdb';
 import type { ISqlBackend, SqlRow, TempTableConfig } from '@agentix-e/entity-resolver-core';
 
-const { Database } = duckdb;
+// duckdb is CJS-only — use createRequire for reliable import
+import { createRequire } from 'module';
+const duckdb = createRequire(import.meta.url)('duckdb') as {
+  Database: new (path: string) => DuckDBInstance;
+};
+
+interface DuckDBInstance {
+  all(sql: string, cb: (err: Error | null, rows: SqlRow[]) => void): void;
+  exec(sql: string, cb: (err: Error | null) => void): void;
+  close(cb: () => void): void;
+}
 
 export class NodeDuckDBBackend implements ISqlBackend {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private db: any;
+  private db: DuckDBInstance;
 
   constructor(connectionString = ':memory:') {
-    this.db = new Database(connectionString);
+    this.db = new duckdb.Database(connectionString);
   }
 
-  async query(sql) {
-    return this._run(sql);
+  async query(sql: string): Promise<SqlRow[]> {
+    return this._all(sql);
   }
 
   async createTempTable(
@@ -27,9 +37,8 @@ export class NodeDuckDBBackend implements ISqlBackend {
   ): Promise<void> {
     const cols = config.columns ?? Object.keys(records[0] ?? {});
     const colDefs = cols.map((c) => `"${c}" VARCHAR`).join(', ');
-    await this.exec(`CREATE TABLE ${config.name} (${colDefs})`);
+    await this._all(`CREATE TABLE ${config.name} (${colDefs})`);
 
-    // Batch insert
     const batchSize = 500;
     for (let i = 0; i < records.length; i += batchSize) {
       const batch = records.slice(i, i + batchSize);
@@ -38,7 +47,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
           (r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`,
         )
         .join(', ');
-      await this.exec(`INSERT INTO ${config.name} VALUES ${values}`);
+      await this._all(`INSERT INTO ${config.name} VALUES ${values}`);
     }
   }
 
@@ -48,15 +57,8 @@ export class NodeDuckDBBackend implements ISqlBackend {
     batchSize = 1000,
   ): Promise<void> {
     const cols = config.columns ?? [];
-    if (cols.length === 0) {
-      for await (const _ of source) {
-        /* dry-run to get columns */
-      }
-      // Fallback: assume first record keys
-    }
-
     const colDefs = cols.map((c) => `"${c}" VARCHAR`).join(', ');
-    await this.exec(`CREATE TABLE ${config.name} (${colDefs})`);
+    await this._all(`CREATE TABLE ${config.name} (${colDefs})`);
 
     const batch: Record<string, unknown>[] = [];
     for await (const record of source) {
@@ -72,30 +74,30 @@ export class NodeDuckDBBackend implements ISqlBackend {
   }
 
   async rowCount(tableName: string): Promise<number> {
-    const rows = await this._run(`SELECT COUNT(*) AS cnt FROM ${tableName}`);
+    const rows = await this._all(`SELECT COUNT(*) AS cnt FROM ${tableName}`);
     return Number(rows[0]?.cnt ?? 0);
   }
 
   async dropTempTable(name: string): Promise<void> {
-    await this.exec(`DROP TABLE IF EXISTS ${name}`);
+    await this._all(`DROP TABLE IF EXISTS ${name}`);
   }
 
-  async _run(sql) {
-    return new Promise((resolve, reject) => {
-      this._run(sql, (err, rows) => {
-        if (err) reject(err);
-        else resolve(rows);
-      });
-    });
-  }
-
-  async exec(sql) {
-    return this._run(sql);
+  async exec(sql: string): Promise<void> {
+    await this._all(sql);
   }
 
   async close(): Promise<void> {
     return new Promise((resolve) => {
       this.db.close(() => resolve());
+    });
+  }
+
+  private _all(sql: string): Promise<SqlRow[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(sql, (err: Error | null, rows: SqlRow[]) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
     });
   }
 
@@ -107,6 +109,6 @@ export class NodeDuckDBBackend implements ISqlBackend {
     const values = records
       .map((r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`)
       .join(', ');
-    await this.exec(`INSERT INTO ${table} VALUES ${values}`);
+    await this._all(`INSERT INTO ${table} VALUES ${values}`);
   }
 }

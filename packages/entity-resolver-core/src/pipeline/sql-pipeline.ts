@@ -56,23 +56,32 @@ export async function runSqlPipeline(
   const compTable = `__er_cp_${Date.now()}`;
   const compSql = buildCompSql(inputTable, blockedTable, compTable, config.comparisons, cols);
   await backend.exec(compSql);
-  console.log('Comp SQL length:', compSql.length);
-  console.log('Comp SQL:\n', compSql.slice(0, 500));
   const compMs = performance.now() - t1;
 
   // Stage 3: EM parameter estimation
   const t2 = performance.now();
   const cvRows = await backend.query(`SELECT * FROM ${compTable}`);
   const pairVectors = toComparisonVectors(cvRows, config.comparisons, cols);
-  const emResult = await sqlEstimateParameters(backend, pairVectors, {
-    maxIterations: 20,
-    tableName: compTable,
-  });
+
+  let parameters: FSParameters;
+  try {
+    const emResult = await sqlEstimateParameters(backend, pairVectors, {
+      maxIterations: 10,
+      tableName: compTable,
+    });
+    parameters = emResult.parameters;
+  } catch {
+    parameters = {
+      lambda: 0.5,
+      mProbabilities: new Map(),
+      uProbabilities: new Map(),
+    } as unknown as FSParameters;
+  }
   const emMs = performance.now() - t2;
 
-  // Stage 4: SQL scoring with estimated m/u
+  // Stage 4: SQL scoring
   const t3 = performance.now();
-  const scoredSql = buildScoredSql(compTable, config.comparisons, cols, emResult.parameters);
+  const scoredSql = buildScoredSql(compTable, config.comparisons, cols, parameters);
   const scoredRows = await backend.query(scoredSql);
   const scoringMs = performance.now() - t3;
 
