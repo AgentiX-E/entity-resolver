@@ -35,9 +35,10 @@ def run_splink(df, label):
     t0 = time.time()
     try: l.training.estimate_parameters_using_expectation_maximisation("last")
     except: pass
-    pairs, elapsed = 0, time.time() - t0
+    pairs = 0
     try: pairs = len(l.inference.predict().as_record_dict())
     except: pass
+    elapsed = time.time() - t0
     return {"tool": "splink", "records": len(df), "timeSec": f"{elapsed:.1f}", "timeMs": int(elapsed*1000), "pairs": pairs}
 
 def run_recordlinkage(df, label):

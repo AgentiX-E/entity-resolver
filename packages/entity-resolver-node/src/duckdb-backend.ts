@@ -70,12 +70,19 @@ export class NodeDuckDBBackend implements ISqlBackend {
 
     if (records.length === 0) return;
 
-    // Bulk INSERT — single multi-row statement for maximum throughput
-    // Equivalent to Splink's DataFrame.register in performance
-    const values = records
-      .map((r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`)
-      .join(', ');
-    await conn.run(`INSERT INTO ${config.name} VALUES ${values}`);
+    // Batch INSERT — 5000 records per INSERT avoids massive SQL string
+    // parsing overhead. Single large INSERT (30MB+ for 500K records) takes
+    // 7+ seconds for DuckDB to parse. 5000-record batches parse in < 50ms.
+    const batchSize = 5000;
+    for (let i = 0; i < records.length; i += batchSize) {
+      const batch = records.slice(i, i + batchSize);
+      const values = batch
+        .map(
+          (r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`,
+        )
+        .join(', ');
+      await conn.run(`INSERT INTO ${config.name} VALUES ${values}`);
+    }
   }
 
   async streamToTable(

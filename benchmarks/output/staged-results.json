@@ -3,7 +3,7 @@
     "tool": "splink",
     "records": 1200,
     "timeSec": "0.0",
-    "timeMs": 28,
+    "timeMs": 40,
     "pairs": 151,
     "scale": "1K"
   },
@@ -11,7 +11,7 @@
     "tool": "recordlinkage",
     "records": 1200,
     "timeSec": "0.0",
-    "timeMs": 27,
+    "timeMs": 13,
     "pairs": 106,
     "scale": "1K"
   },
@@ -19,7 +19,7 @@
     "tool": "splink",
     "records": 12000,
     "timeSec": "0.0",
-    "timeMs": 25,
+    "timeMs": 44,
     "pairs": 1548,
     "scale": "10K"
   },
@@ -27,15 +27,15 @@
     "tool": "recordlinkage",
     "records": 12000,
     "timeSec": "0.0",
-    "timeMs": 16,
+    "timeMs": 10,
     "pairs": 1047,
     "scale": "10K"
   },
   {
     "tool": "splink",
     "records": 60000,
-    "timeSec": "0.0",
-    "timeMs": 47,
+    "timeSec": "0.1",
+    "timeMs": 96,
     "pairs": 8542,
     "scale": "50K"
   },
@@ -43,39 +43,39 @@
     "tool": "recordlinkage",
     "records": 60000,
     "timeSec": "0.1",
-    "timeMs": 123,
+    "timeMs": 56,
     "pairs": 6060,
     "scale": "50K"
   },
   {
     "tool": "splink",
     "records": 120000,
-    "timeSec": "0.0",
-    "timeMs": 48,
+    "timeSec": "0.2",
+    "timeMs": 150,
     "pairs": 18877,
     "scale": "100K"
   },
   {
     "tool": "recordlinkage",
     "records": 120000,
-    "timeSec": "0.3",
-    "timeMs": 297,
+    "timeSec": "0.1",
+    "timeMs": 139,
     "pairs": 14002,
     "scale": "100K"
   },
   {
     "tool": "splink",
     "records": 600000,
-    "timeSec": "0.1",
-    "timeMs": 78,
+    "timeSec": "0.6",
+    "timeMs": 638,
     "pairs": 172402,
     "scale": "500K"
   },
   {
     "tool": "recordlinkage",
     "records": 600000,
-    "timeSec": "1.7",
-    "timeMs": 1748,
+    "timeSec": "1.2",
+    "timeMs": 1216,
     "pairs": 147120,
     "scale": "500K"
   }

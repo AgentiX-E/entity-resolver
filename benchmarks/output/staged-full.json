@@ -3,52 +3,52 @@
     "scale": "1K",
     "engine": "entity-resolver-sql",
     "records": 1200,
-    "timeMs": 118,
+    "timeMs": 115,
     "timeSec": "0.1",
     "pairs": 154,
-    "throughput": 10169
+    "throughput": 10402
   },
   {
     "scale": "10K",
     "engine": "entity-resolver-sql",
     "records": 12000,
-    "timeMs": 178,
+    "timeMs": 194,
     "timeSec": "0.2",
     "pairs": 1527,
-    "throughput": 67564
+    "throughput": 61882
   },
   {
     "scale": "50K",
     "engine": "entity-resolver-sql",
     "records": 60000,
-    "timeMs": 809,
-    "timeSec": "0.8",
+    "timeMs": 654,
+    "timeSec": "0.7",
     "pairs": 8482,
-    "throughput": 74188
+    "throughput": 91720
   },
   {
     "scale": "100K",
     "engine": "entity-resolver-sql",
     "records": 120000,
-    "timeMs": 1864,
-    "timeSec": "1.9",
+    "timeMs": 1250,
+    "timeSec": "1.2",
     "pairs": 18865,
-    "throughput": 64388
+    "throughput": 96001
   },
   {
     "scale": "500K",
     "engine": "entity-resolver-sql",
     "records": 600000,
-    "timeMs": 8830,
-    "timeSec": "8.8",
+    "timeMs": 6585,
+    "timeSec": "6.6",
     "pairs": 173806,
-    "throughput": 67948
+    "throughput": 91111
   },
   {
     "tool": "splink",
     "records": 1200,
     "timeSec": "0.0",
-    "timeMs": 28,
+    "timeMs": 40,
     "pairs": 151,
     "scale": "1K"
   },
@@ -56,7 +56,7 @@
     "tool": "recordlinkage",
     "records": 1200,
     "timeSec": "0.0",
-    "timeMs": 27,
+    "timeMs": 13,
     "pairs": 106,
     "scale": "1K"
   },
@@ -64,7 +64,7 @@
     "tool": "splink",
     "records": 12000,
     "timeSec": "0.0",
-    "timeMs": 25,
+    "timeMs": 44,
     "pairs": 1548,
     "scale": "10K"
   },
@@ -72,15 +72,15 @@
     "tool": "recordlinkage",
     "records": 12000,
     "timeSec": "0.0",
-    "timeMs": 16,
+    "timeMs": 10,
     "pairs": 1047,
     "scale": "10K"
   },
   {
     "tool": "splink",
     "records": 60000,
-    "timeSec": "0.0",
-    "timeMs": 47,
+    "timeSec": "0.1",
+    "timeMs": 96,
     "pairs": 8542,
     "scale": "50K"
   },
@@ -88,39 +88,39 @@
     "tool": "recordlinkage",
     "records": 60000,
     "timeSec": "0.1",
-    "timeMs": 123,
+    "timeMs": 56,
     "pairs": 6060,
     "scale": "50K"
   },
   {
     "tool": "splink",
     "records": 120000,
-    "timeSec": "0.0",
-    "timeMs": 48,
+    "timeSec": "0.2",
+    "timeMs": 150,
     "pairs": 18877,
     "scale": "100K"
   },
   {
     "tool": "recordlinkage",
     "records": 120000,
-    "timeSec": "0.3",
-    "timeMs": 297,
+    "timeSec": "0.1",
+    "timeMs": 139,
     "pairs": 14002,
     "scale": "100K"
   },
   {
     "tool": "splink",
     "records": 600000,
-    "timeSec": "0.1",
-    "timeMs": 78,
+    "timeSec": "0.6",
+    "timeMs": 638,
     "pairs": 172402,
     "scale": "500K"
   },
   {
     "tool": "recordlinkage",
     "records": 600000,
-    "timeSec": "1.7",
-    "timeMs": 1748,
+    "timeSec": "1.2",
+    "timeMs": 1216,
     "pairs": 147120,
     "scale": "500K"
   }
