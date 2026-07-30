@@ -1,0 +1,66 @@
+name: Benchmark
+
+on:
+  push:
+    branches: [master]
+    paths-ignore: ['**.md']
+  workflow_dispatch:
+    inputs:
+      scale:
+        description: 'Scale: 10K, 100K, 1M'
+        default: '100K'
+      competitors:
+        description: 'Include competitors (requires Python)'
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: benchmark-pages
+  cancel-in-progress: true
+
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Run benchmark
+        run: |
+          SCALE=${{ inputs.scale || '100K' }}
+          echo "Running benchmark at scale: $SCALE"
+          node benchmarks/run.mjs $SCALE
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+
+      - name: Generate report
+        run: node benchmarks/report.mjs
+
+      - name: Upload benchmark results
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results
+          path: benchmarks/output/
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
+        with:
+          artifact_name: benchmark-results

@@ -1,0 +1,26 @@
+{
+  "scale": "100K",
+  "timestamp": "2026-07-30T09:59:52.816Z",
+  "results": [
+    {
+      "engine": "entity-resolver-sql",
+      "version": "0.1.0",
+      "records": 120000,
+      "timeMs": 2106,
+      "timeSec": "2.1",
+      "pairs": 20706,
+      "throughput": 56989,
+      "mode": "DuckDB pushdown, inline prefix filter, 2-field jaro_winkler"
+    },
+    {
+      "records": 120000,
+      "timeMs": 206,
+      "timeSec": "0.2",
+      "pairs": 20706,
+      "engine": "splink",
+      "version": "4.0",
+      "throughput": 579933,
+      "mode": "DuckDB Python, 2-field jaro_winkler"
+    }
+  ]
+}
