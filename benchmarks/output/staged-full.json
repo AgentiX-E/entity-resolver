@@ -3,46 +3,46 @@
     "scale": "1K",
     "engine": "entity-resolver-sql",
     "records": 1200,
-    "timeMs": 115,
+    "timeMs": 119,
     "timeSec": "0.1",
     "pairs": 154,
-    "throughput": 10402
+    "throughput": 10052
   },
   {
     "scale": "10K",
     "engine": "entity-resolver-sql",
     "records": 12000,
-    "timeMs": 194,
-    "timeSec": "0.2",
+    "timeMs": 92,
+    "timeSec": "0.1",
     "pairs": 1527,
-    "throughput": 61882
+    "throughput": 130457
   },
   {
     "scale": "50K",
     "engine": "entity-resolver-sql",
     "records": 60000,
-    "timeMs": 654,
-    "timeSec": "0.7",
+    "timeMs": 164,
+    "timeSec": "0.2",
     "pairs": 8482,
-    "throughput": 91720
+    "throughput": 365482
   },
   {
     "scale": "100K",
     "engine": "entity-resolver-sql",
     "records": 120000,
-    "timeMs": 1250,
-    "timeSec": "1.2",
+    "timeMs": 304,
+    "timeSec": "0.3",
     "pairs": 18865,
-    "throughput": 96001
+    "throughput": 394568
   },
   {
     "scale": "500K",
     "engine": "entity-resolver-sql",
     "records": 600000,
-    "timeMs": 6585,
-    "timeSec": "6.6",
+    "timeMs": 1145,
+    "timeSec": "1.1",
     "pairs": 173806,
-    "throughput": 91111
+    "throughput": 523995
   },
   {
     "tool": "splink",
