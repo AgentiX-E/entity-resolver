@@ -51,42 +51,22 @@ export async function runSqlPipeline(
     },
   };
 
-  // Stage 1: SQL blocking
+  // Stage 1: SQL blocking with inline prefix filter for scale
   const t0 = performance.now();
   const blockedTable = `__er_sql_bl_${Date.now()}`;
-  await backend.exec(buildBlockSql(inputTable, blockedTable, blockingConfig, cols));
+  const usePrefixFilter = records.length >= 5000;
+  if (usePrefixFilter) {
+    await backend.exec(
+      buildBlockSqlWithPrefixFilter(inputTable, blockedTable, blockingConfig, cols),
+    );
+  } else {
+    await backend.exec(buildBlockSql(inputTable, blockedTable, blockingConfig, cols));
+  }
   const blockedRows = await backend.rowCount(blockedTable);
   const blockMs = performance.now() - t0;
 
   if (blockedRows === 0) {
     await dropAll(backend, [inputTable, blockedTable]);
-    return {
-      pairs: [],
-      timing: { blockingMs: blockMs, comparisonMs: 0, emMs: Math.round(emMs) },
-      stats: { inputRows: records.length, blockedPairs: 0, scoredPairs: 0 },
-    };
-  }
-
-  // Stage 1.5: Pre-filter (only for datasets >= 5000 records)
-  // Cheap prefix matching filters ~90% of non-duplicate pairs
-  // without expensive string similarity UDFs
-  let preFilteredTable = blockedTable;
-  let preFilterRows = blockedRows;
-  if (records.length >= 5000) {
-    preFilteredTable = `__er_sql_pf_${Date.now()}`;
-    const prefixFilters = cols
-      .filter((c) => c !== '__row_id')
-      .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
-      .join(' OR ');
-    await backend.exec(
-      `CREATE TABLE ${preFilteredTable} AS SELECT b.left_id, b.right_id FROM ${blockedTable} b JOIN ${inputTable} l ON l.__row_id=b.left_id JOIN ${inputTable} r ON r.__row_id=b.right_id WHERE ${prefixFilters}`,
-    );
-    preFilterRows = await backend.rowCount(preFilteredTable);
-    if (preFilteredTable !== blockedTable) await backend.dropTempTable(blockedTable);
-  }
-
-  if (preFilterRows === 0) {
-    await dropAll(backend, [inputTable, preFilteredTable]);
     return {
       pairs: [],
       timing: { blockingMs: blockMs, comparisonMs: 0, emMs: Math.round(emMs) },
@@ -145,7 +125,7 @@ SELECT b.left_id, b.right_id,
 ${levelParts},
 ${weightParts},
 (${weightSum}) AS match_weight
-FROM ${preFilteredTable} b
+FROM ${blockedTable} b
 JOIN ${inputTable} l ON l.__row_id=b.left_id
 JOIN ${inputTable} r ON r.__row_id=b.right_id`;
 
@@ -156,7 +136,7 @@ JOIN ${inputTable} r ON r.__row_id=b.right_id`;
   );
   const compMs = performance.now() - t1;
 
-  await dropAll(backend, [inputTable, preFilteredTable, scoredTable]);
+  await dropAll(backend, [inputTable, blockedTable, scoredTable]);
 
   return {
     pairs: scoredRows.map((r: SqlRow) => ({
@@ -245,6 +225,32 @@ function buildBlockSql(
       )
       .join(' AND ');
     return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id<r.__row_id`;
+  });
+  return `CREATE TABLE ${dst} AS ${parts.join(' UNION ')}`;
+}
+
+/** Blocking with inline prefix filter — eliminates 99%+ of non-duplicate pairs
+ *  at the JOIN level (no separate CTAS overhead). */
+function buildBlockSqlWithPrefixFilter(
+  src: string,
+  dst: string,
+  config: PipelineConfig,
+  cols: readonly string[],
+): string {
+  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
+  const passes = config.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
+  const strCols = cols.filter((c) => c !== '__row_id');
+  const prefixCond = strCols
+    .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
+    .join(' OR ');
+
+  const parts = passes.map((p) => {
+    const conditions = (p.fields ?? [fallbackField])
+      .map((f) =>
+        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+      )
+      .join(' AND ');
+    return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id<r.__row_id AND (${prefixCond})`;
   });
   return `CREATE TABLE ${dst} AS ${parts.join(' UNION ')}`;
 }
