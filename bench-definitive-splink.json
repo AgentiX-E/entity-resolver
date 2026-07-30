@@ -1,0 +1,26 @@
+[
+  {
+    "n": 100,
+    "records": 130,
+    "splink_ms": 94,
+    "splink_pairs": 1532
+  },
+  {
+    "n": 200,
+    "records": 260,
+    "splink_ms": 164,
+    "splink_pairs": 6095
+  },
+  {
+    "n": 500,
+    "records": 650,
+    "splink_ms": 308,
+    "splink_pairs": 38275
+  },
+  {
+    "n": 1000,
+    "records": 1300,
+    "splink_ms": 849,
+    "splink_pairs": 149888
+  }
+]
