@@ -1,0 +1,127 @@
+[
+  {
+    "scale": "1K",
+    "engine": "entity-resolver-sql",
+    "records": 1200,
+    "timeMs": 125,
+    "timeSec": "0.1",
+    "pairs": 154,
+    "throughput": 9606
+  },
+  {
+    "scale": "10K",
+    "engine": "entity-resolver-sql",
+    "records": 12000,
+    "timeMs": 274,
+    "timeSec": "0.3",
+    "pairs": 1527,
+    "throughput": 43785
+  },
+  {
+    "scale": "50K",
+    "engine": "entity-resolver-sql",
+    "records": 60000,
+    "timeMs": 1181,
+    "timeSec": "1.2",
+    "pairs": 8482,
+    "throughput": 50809
+  },
+  {
+    "scale": "100K",
+    "engine": "entity-resolver-sql",
+    "records": 120000,
+    "timeMs": 2397,
+    "timeSec": "2.4",
+    "pairs": 18865,
+    "throughput": 50063
+  },
+  {
+    "scale": "500K",
+    "engine": "entity-resolver-sql",
+    "records": 600000,
+    "timeMs": 11955,
+    "timeSec": "12.0",
+    "pairs": 173806,
+    "throughput": 50187
+  },
+  {
+    "tool": "splink",
+    "records": 1200,
+    "timeSec": "0.0",
+    "timeMs": 28,
+    "pairs": 151,
+    "scale": "1K"
+  },
+  {
+    "tool": "recordlinkage",
+    "records": 1200,
+    "timeSec": "0.0",
+    "timeMs": 27,
+    "pairs": 106,
+    "scale": "1K"
+  },
+  {
+    "tool": "splink",
+    "records": 12000,
+    "timeSec": "0.0",
+    "timeMs": 25,
+    "pairs": 1548,
+    "scale": "10K"
+  },
+  {
+    "tool": "recordlinkage",
+    "records": 12000,
+    "timeSec": "0.0",
+    "timeMs": 16,
+    "pairs": 1047,
+    "scale": "10K"
+  },
+  {
+    "tool": "splink",
+    "records": 60000,
+    "timeSec": "0.0",
+    "timeMs": 47,
+    "pairs": 8542,
+    "scale": "50K"
+  },
+  {
+    "tool": "recordlinkage",
+    "records": 60000,
+    "timeSec": "0.1",
+    "timeMs": 123,
+    "pairs": 6060,
+    "scale": "50K"
+  },
+  {
+    "tool": "splink",
+    "records": 120000,
+    "timeSec": "0.0",
+    "timeMs": 48,
+    "pairs": 18877,
+    "scale": "100K"
+  },
+  {
+    "tool": "recordlinkage",
+    "records": 120000,
+    "timeSec": "0.3",
+    "timeMs": 297,
+    "pairs": 14002,
+    "scale": "100K"
+  },
+  {
+    "tool": "splink",
+    "records": 600000,
+    "timeSec": "0.1",
+    "timeMs": 78,
+    "pairs": 172402,
+    "scale": "500K"
+  },
+  {
+    "tool": "recordlinkage",
+    "records": 600000,
+    "timeSec": "1.7",
+    "timeMs": 1748,
+    "pairs": 147120,
+    "scale": "500K"
+  }
+]
