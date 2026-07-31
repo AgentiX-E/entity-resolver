@@ -604,6 +604,29 @@ describe('EM convergence edge cases', () => {
       expect(mStrong).toBeGreaterThanOrEqual(mNot - 1e-10);
     }
   });
+
+  it('H5: wildcard keys (field:*) are updated after EM training', () => {
+    const pairs: ComparisonVector[][] = [
+      ...Array.from({ length: 50 }, () => makePair(exactMatch('name'))),
+      ...Array.from({ length: 50 }, () => makePair(notMatch('name'))),
+    ];
+    const result = runEM(pairs, { maxIterations: 20 });
+    // Wildcard key should exist
+    const mWild = result.parameters.mProbabilities.get('name:*');
+    const uWild = result.parameters.uProbabilities.get('name:*');
+    expect(mWild).toBeDefined();
+    expect(uWild).toBeDefined();
+    // Wildcard should be between level-specific min and max
+    const mExact = result.parameters.mProbabilities.get('name:exact_match') ?? 0;
+    const mNotMatch = result.parameters.mProbabilities.get('name:not_match') ?? 1;
+    expect(mWild!).toBeGreaterThanOrEqual(Math.min(mExact, mNotMatch) - 1e-10);
+    expect(mWild!).toBeLessThanOrEqual(Math.max(mExact, mNotMatch) + 1e-10);
+    // u wildcard should similarly be bounded by level-specific u values
+    const uExact = result.parameters.uProbabilities.get('name:exact_match') ?? 0;
+    const uNotMatch = result.parameters.uProbabilities.get('name:not_match') ?? 1;
+    expect(uWild!).toBeGreaterThanOrEqual(Math.min(uExact, uNotMatch) - 1e-10);
+    expect(uWild!).toBeLessThanOrEqual(Math.max(uExact, uNotMatch) + 1e-10);
+  });
 });
 
 describe('EM numerical stability helpers', () => {

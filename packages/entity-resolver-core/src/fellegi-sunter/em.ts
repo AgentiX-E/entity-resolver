@@ -345,6 +345,26 @@ function mStep(
     // Without this constraint, EM is not identifiable when all data shares
     // the same comparison level (e.g., all "not_match" pairs).
     enforceLevelOrdering(fieldKeys, state);
+
+    // Update wildcard key (field:*) as fallback for unknown levels.
+    // Computed as unweighted average of all level-specific m/u for the field.
+    const wildKey = `${field}:*`;
+    let mSum = 0;
+    let uSum = 0;
+    let levelCount = 0;
+    for (const key of fieldKeys) {
+      const mVal = state.mProbabilities.get(key);
+      const uVal = state.uProbabilities.get(key);
+      if (mVal !== undefined && uVal !== undefined) {
+        mSum += mVal;
+        uSum += uVal;
+        levelCount++;
+      }
+    }
+    if (levelCount > 0) {
+      state.mProbabilities.set(wildKey, clampProb(mSum / levelCount));
+      state.uProbabilities.set(wildKey, clampProb(uSum / levelCount));
+    }
   }
 
   // Update lambda: mean of per-pair posteriors (standard EM formula)
