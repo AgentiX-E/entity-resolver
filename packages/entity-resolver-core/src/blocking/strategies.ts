@@ -9,12 +9,17 @@ import { applyBlockingTransforms, computeReductionRatio, parseCandidatePairs } f
  * Token Blocking: each token in a field value creates a block.
  * A record can belong to multiple blocks (lazy overlapping blocks).
  *
+ * Blocks exceeding maxBlockSize are skipped to prevent O(n²) explosion
+ * from common tokens (e.g., "the", "and", "of"). Use the config's
+ * `maxBlockSize` to adjust this threshold (default: 1000).
+ *
  * This is the first stage of pyJedAI's multi-stage pipeline.
  */
 export function tokenBlocking(
   records: readonly Record<string, unknown>[],
   config: BlockingConfig,
 ): BlockingResult {
+  const maxBlock = config.maxBlockSize ?? 1000;
   const pairSet = new Set<string>();
   const field = config.fields?.[0] ?? 'name';
 
@@ -36,7 +41,7 @@ export function tokenBlocking(
 
   // Generate pairs within each token block
   for (const [, indices] of tokenBlocks) {
-    if (indices.length < 2 || indices.length > 1000) continue; // Skip oversized blocks
+    if (indices.length < 2 || indices.length > maxBlock) continue; // Skip oversized blocks
     for (let i = 0; i < indices.length; i++) {
       for (let j = i + 1; j < indices.length; j++) {
         const a = indices[i]!;

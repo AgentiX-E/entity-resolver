@@ -275,6 +275,12 @@ export const tfidfCosineScorer: IScorer = {
  * Q-gram TF-IDF: tokenize into q-grams and compute Jaccard on the sets.
  * Best for: pyJedAI-compatible token-based comparisons.
  */
+// NOTE: Despite the "tfidf" name, this scorer computes pure Jaccard
+// similarity on q-gram sets (|intersection| / |union|). There is no
+// term-frequency or inverse-document-frequency weighting applied.
+// This matches pyJedAI's "QGrams TF-IDF" scorer name convention but
+// the implementation is standard q-gram Jaccard. For actual TF-IDF
+// weighted comparison, use the `tfidfCosine` scorer.
 export const qgramTfIdfScorer: IScorer = {
   name: 'qgram_tfidf',
   kernelized: false,
@@ -321,7 +327,17 @@ export const ensembleScorer: IScorer = {
 };
 
 /**
- * Numeric difference scorer: 1.0 if equal, linear decay otherwise.
+ * Numeric difference scorer: 1.0 if equal, linear relative decay otherwise.
+ *
+ * Uses RELATIVE normalization: score = 1 - |a-b| / max(|a|, |b|, 1).
+ * This means a difference of 1 is large for small numbers (1 vs 2 → 0.5)
+ * but negligible for large numbers (100 vs 101 → 0.99). This is the
+ * standard approach for price, quantity, and other magnitude-sensitive
+ * fields — a $1 difference matters more on a $2 item than a $200 item.
+ *
+ * For absolute-threshold comparisons (e.g., "within 5 units"), use
+ * comparison levels with explicit thresholds instead.
+ *
  * Best for: numeric fields (age, quantity, price).
  */
 export const numericDiffScorer: IScorer = {

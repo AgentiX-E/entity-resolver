@@ -17,6 +17,10 @@ export interface BlockingConfig {
   readonly passes?: readonly BlockingPass[];
   /** Window size for sorted neighborhood. */
   readonly windowSize?: number;
+  /** Maximum block size for token-based strategies. Blocks exceeding
+   *  this are skipped to prevent O(n²) explosions from common tokens.
+   *  Default: 1000. */
+  readonly maxBlockSize?: number;
   /** Transforms to apply to blocking keys. */
   readonly transforms?: readonly BlockingTransform[];
 }
@@ -157,6 +161,13 @@ function computeSoundex(value: string): string {
 }
 
 // ─── Metaphone encoding (simplified) ──────────────────────────────
+//
+// NOTE: This is an APPROXIMATE Metaphone — not phonetically accurate.
+// It performs basic consonant extraction (drop vowels, deduplicate
+// adjacent consonants) but does NOT handle the full Metaphone rule set
+// (PH→F, CH→K/X, SCH→SK, GH, etc.). For production phonetic matching,
+// use the `double_metaphone` scorer instead, which delegates to a
+// proper implementation, or consider an npm package like `metaphone`.
 
 function computeMetaphone(value: string): string {
   const s = value.toUpperCase().replace(/[^A-Z]/g, '');

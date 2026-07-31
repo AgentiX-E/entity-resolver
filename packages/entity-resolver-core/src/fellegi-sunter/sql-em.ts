@@ -99,7 +99,13 @@ export async function sqlEstimateParameters(
 
   const tableName = options.tableName ?? '__er_comparison_vectors';
 
-  // Load vectors into SQL table (the data layer)
+  // Load vectors into SQL table for potential SQL-backed EM iterations.
+  // NOTE: Currently runs standard JS EM (estimateParameters) on the full
+  // pairVectors array — the SQL table is preparatory infrastructure for
+  // future SQL-native EM iteration (M-step/E-step pushdown). In the
+  // current implementation, vectors exist in both JS memory AND SQL,
+  // providing zero memory savings. This is intentional scaffolding for
+  // I21+ optimization, not a bug.
   await buildComparisonTable(backend, pairVectors, tableName);
 
   // Run standard JS EM (trusted implementation, mathematically verified)

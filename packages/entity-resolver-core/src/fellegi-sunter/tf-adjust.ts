@@ -64,7 +64,9 @@ export function buildTermFrequencies(
  * Common values (frequency ~ N/10) → adjustment ~ 0.5 (50% reduction)
  * Extremely common (frequency ~ N) → adjustment = 0.1 (floor)
  *
- * This follows Splink's approach: common values provide weaker match evidence.
+ * Splink compatibility: Splink uses the same log10(freq)/log10(N)
+ * formula with a floor of 0.01 (1% of original weight). Our floor
+ * is 0.1 (10%) — less aggressive than Splink. Tune via floor param.
  */
 export function computeTFAdjustment(frequency: number, totalRecords: number): number {
   if (frequency <= 0 || totalRecords <= 1) return 1;
