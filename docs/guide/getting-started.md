@@ -103,3 +103,10 @@ const result = await runPipeline(records, {
 - [Storage Backends](/guide/storage-backends) — Choose the right storage for your deployment
 - [API Reference](/api/core/) — Full type-safe API documentation
 - [Production Deployment](/guide/production) — Docker, mTLS, auth, monitoring
+
+## Known Issues
+
+### DBLP-ACM Benchmark Configuration
+
+DBLP-ACM is a **linkage** (two-source matching) dataset, not a **deduplication** (single-source) dataset. Running dedupe on the combined table produces ~1.2M false-positive pairs. This dataset requires `entity-resolver-link` or Splink `link_only` mode for accurate evaluation. The current benchmark figures for DBLP-ACM pair counts are therefore inflated.
+
