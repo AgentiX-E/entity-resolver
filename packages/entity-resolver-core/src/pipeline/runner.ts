@@ -103,19 +103,27 @@ export async function runPipeline(
   if (options?.sqlBackend) {
     const { runSqlPipeline } = await import('./sql-pipeline.js');
     const sqlResult = await runSqlPipeline(records, config, options.sqlBackend);
-    const clusters = new Map<number, number[]>();
-    for (const pair of sqlResult.pairs) {
-      const key = Math.min(pair.leftId, pair.rightId);
-      if (!clusters.has(key)) clusters.set(key, []);
-      clusters.get(key)!.push(Math.max(pair.leftId, pair.rightId));
-    }
+    // Convert SQL pairs to ScoredPair format for connected components
+    const scoredPairs: ScoredPair[] = sqlResult.pairs.map((p) => ({
+      leftId: p.leftId,
+      rightId: p.rightId,
+      score: p.score,
+      probability: p.score,
+    }));
+
+    // Union-Find connected components — guarantees transitive closure:
+    // (1,2) + (2,3) → single cluster {1,2,3}, not two clusters {1→[2]}+{2→[3]}
+    const clustering = connectedComponents(scoredPairs, records.length, config.matchThreshold);
+
+    const matchedCount =
+      clustering.metadata.numClusters > 0
+        ? records.length - clustering.singletons.length
+        : 0;
+
     return {
-      clusters,
-      scoredPairs: sqlResult.pairs.map((p) => ({
-        leftId: p.leftId,
-        rightId: p.rightId,
-        score: p.score,
-      })),
+      clusters: clustering.clusters,
+      scoredPairs,
+      singletons: clustering.singletons,
       diagnostics: {
         blocking: {
           candidateCount: sqlResult.stats.blockedPairs,
@@ -128,9 +136,13 @@ export async function runPipeline(
       },
       statistics: {
         totalPairs: sqlResult.stats.scoredPairs,
-        matchPairs: sqlResult.stats.scoredPairs,
+        matchedRecords: matchedCount,
+        matchRate: records.length > 0 ? matchedCount / records.length : 0,
+        totalClusters: clustering.metadata.numClusters,
+        averageClusterSize: clustering.metadata.averageClusterSize,
+        maxClusterSize: clustering.metadata.maxClusterSize,
       },
-    } as unknown as PipelineResult;
+    };
   }
 
   const startTime = Date.now();
