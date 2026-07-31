@@ -1,107 +1,119 @@
-# @agentix-e/entity-resolver
+# entity-resolver
 
-**Entity Resolver for Node.js and Browser**
+**Entity resolution for Node.js and the browser — DuckDB-powered, TypeScript-first.**
 
-A stateless, pure-computation entity resolver engine with WASM acceleration. Built for TypeScript first, designed for any JavaScript runtime.
+Identifies duplicate records across datasets without unique identifiers. Runs Fellegi-Sunter probabilistic matching with DuckDB SQL pushdown for linear O(N) scaling at 500K+ records/second.
 
-[![CI](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+```bash
+npm install @agentix-e/entity-resolver-core @agentix-e/entity-resolver-node
+```
 
-## Philosophy
+## Performance
 
-**Entity Resolver is the unified TypeScript entity processing platform.** Three pipelines, one engine:
+| Scale | Records | Time | Throughput |
+|-------|--------|------|-----------|
+| 100K  | 120,000 | 0.3s | 400K rec/s |
+| 500K  | 600,000 | 1.1s | 545K rec/s |
+| **1M** | **1,200,000** | **2.2s** | **545K rec/s** |
 
-1. **extract** — Text → Structured Entities (schema-driven, pattern-first, LLM-optional)
-2. **resolve** — Records → Clusters (probabilistic record linkage + deduplication)
-3. **link** — Entity → KB ID (gazetteer-first private KB linking)
-
-Pure computation. No side effects. No I/O. No internal mutable state. Runs anywhere JavaScript runs.
-
-## Packages
-
-| Package | Description | npm |
-|---------|-------------|-----|
-| `entity-resolver-core` | Stateless computation engine with WASM acceleration and DI interface contracts | `@agentix-e/entity-resolver-core` |
-| `entity-resolver-extract` | Schema-driven entity extraction engine (pattern + ONNX + LLM cascade) | `@agentix-e/entity-resolver-extract` |
-| `entity-resolver-link` | Schema-aware private KB entity linking (gazetteer-first) | `@agentix-e/entity-resolver-link` |
-| `entity-resolver-node` | Node.js adapters (FileDataSource, SqliteEntityStore, FileConfigStore) | `@agentix-e/entity-resolver-node` |
-| `entity-resolver-browser` | Browser adapters (FetchDataSource, IndexedDBEntityStore, LocalStorageConfigStore) | `@agentix-e/entity-resolver-browser` |
-| `entity-resolver-server` | Deployable HTTP/gRPC/MCP API service (stateless by default) | `@agentix-e/entity-resolver-server` |
-| `entity-resolver-cli` | Command-line tool for deduplication, matching, and extraction | `@agentix-e/entity-resolver-cli` |
-| `entity-resolver-visual` | Framework-agnostic, embeddable diagnostic components (3-layer: Data API + Headless + Web Components) | `@agentix-e/entity-resolver-visual` |
-| `entity-resolver` | Umbrella facade — one import, all packages | `@agentix-e/entity-resolver` |
+*2-field jaro_winkler, DuckDB SQL pushdown. See [Benchmarks](benchmarks/).*
 
 ## Quick Start
 
-### Entity Extraction (Text → Structured)
-
-```typescript
-import { extract } from '@agentix-e/entity-resolver-extract';
-
-const result = extract(
-  'Contact john@example.com or call +86-138-0000-0000, price: $99.99',
-  [
-    { name: 'email', type: 'email' },
-    { name: 'phone', type: 'phone' },
-    { name: 'price', type: 'number' },
-  ],
-);
-
-// result.values = { email: 'john@example.com', phone: '+86-138-0000-0000', price: 99.99 }
-// result.provenance = { email: 'pattern', phone: 'pattern', price: 'pattern' }
-```
-
-**Extraction features:**
-- 8 built-in field types: email, phone, url, number, integer, boolean, date, time
-- CJK temporal parsing (Chinese/Japanese/Korean calendar systems)
-- Intent-enhanced mode (alarm/reminder/schedule/message/search)
-- Multi-turn slot inheritance for dialog
-- LLM fallback via DeepSeek API (optional)
-- CLI: `er extract --text "下午3点开会" --fields time:time,title:string --intent meeting`
-
-### Entity Resolution (Deduplication)
-
-```typescript
-// Pure computation — zero I/O, runs anywhere
-import { dedupe } from '@agentix-e/entity-resolver-core';
+```ts
+import { runPipeline, autoConfigure } from '@agentix-e/entity-resolver-core';
+import { NodeDuckDBBackend } from '@agentix-e/entity-resolver-node';
 
 const records = [
-  { name: 'John Smith',  dob: '1990-01-15', city: 'New York' },
-  { name: 'Jon Smyth',   dob: '1990-01-15', city: 'NYC' },
-  { name: 'Jane Doe',    dob: '1985-06-20', city: 'Los Angeles' },
+  { name: 'John Smith', city: 'NYC' },
+  { name: 'Jon Smith',  city: 'NYC' },
+  { name: 'Jane Doe',   city: 'LA'  },
 ];
 
-const result = await dedupe(records);
-// result.clusters:  { clusterId → recordIds }
-// result.scores:    pairwise match probabilities
-// result.diagnostics: waterfall data, histograms, m/u charts
+// Auto-detect fields and blocking strategy
+const config = autoConfigure(records);
+
+// Fast path: in-memory pipeline (<10K records)
+const result = await runPipeline(records, config);
+
+// Scale path: DuckDB SQL pushdown (≥10K records)
+const be = new NodeDuckDBBackend(':memory:');
+const sqlResult = await runPipeline(records, config, { sqlBackend: be });
+await be.close();
 ```
 
-```typescript
-// Node.js — with file I/O and SQLite persistence
-import { dedupeFromFile } from '@agentix-e/entity-resolver-node';
+## Features
 
-const result = await dedupeFromFile('customers.csv', {
-  entityStore: 'sqlite:mydb.sqlite',
-  autoconfigure: true,
-});
-```
+**Pipeline:**
+- Fellegi-Sunter Expectation-Maximization with m/u probability estimation
+- DuckDB SQL pushdown: blocking → comparison → scoring in C++ engine
+- Inline prefix filter prevents O(N²) pair explosion on diverse datasets
+- Automatic configuration detection from dataset field types
+
+**Comparators (5 types):**
+`jaro_winkler` · `levenshtein` · `exact` · `dice` · `soundex`
+
+**Scoring:**
+- WASM Rust scorers (50M ops/s) via `strsimkit`
+- Native JS fallback via `fastest-levenshtein`
+- SQL-native via DuckDB UDFs
+
+**Uniquely Browser-Capable:**
+- DuckDB WASM embedded storage
+- Web Worker pool for parallel scoring
+- Privacy-Preserving Record Linkage (PPRL)
+- MCP integration for AI-assisted matching
+
+## Packages
+
+| Package | Role |
+|---------|------|
+| `entity-resolver-core` | Pipeline, algorithms, types — zero I/O |
+| `entity-resolver-node` | DuckDB Node + PostgreSQL backends |
+| `entity-resolver-browser` | DuckDB WASM + Web Worker pool |
+| `entity-resolver-studio` | Web UI for interactive ER |
+| `entity-resolver-server` | REST API |
+| `entity-resolver-cli` | Command-line interface |
+| `entity-resolver-link` | Pairwise linkage |
+| `entity-resolver-extract` | Feature extraction |
+| `entity-resolver-visual` | Chart components |
 
 ## Architecture
 
-See [ARCHITECTURE.md](ARCHITECTURE.md) for the full architecture document, including:
-- Stateless core design with DI interface contracts
-- Fellegi-Sunter probabilistic model (EM algorithm)
-- 5 blocking strategies + 19 scorers + 3 clustering algorithms
-- 3-layer framework-agnostic visualization system
-- Incremental update engine
-- WASM acceleration via Rust → WASM (auto-fallback to pure JS)
+```
+entity-resolver-core (contracts only)
+    ├── entity-resolver-node     (DuckDB Node · PostgreSQL)
+    └── entity-resolver-browser  (DuckDB WASM · Web Workers)
+            ├── entity-resolver-server
+            ├── entity-resolver-studio
+            └── entity-resolver-cli
+```
+
+## Benchmark
+
+```bash
+node benchmarks/run.mjs 500K     # synthetic benchmark
+node benchmarks/leipzig.mjs       # DBLP-ACM, Amazon-Google
+python3 benchmarks/staged_bench.py  # Splink comparison
+```
+
+| Dataset | Records | ER | Splink |
+|---------|--------|:--:|:--:|
+| DBLP-ACM | 4,910 | 3.5s | 3.8s |
+| Synthetic 500K | 600,000 | 1.1s | 0.6s |
+| Synthetic 1M | 1,200,000 | 2.2s | — |
+
+## vs Splink
+
+| | entity-resolver | Splink |
+|---|---|:--:|
+| Browser/WASM | ✅ | ❌ |
+| PPRL | ✅ | ❌ |
+| MCP | ✅ | ❌ |
+| Comparison types | 5 | 19 |
+| Visual diagnostics | ⏳ | ✅ |
+| Backends | DuckDB + PG | 5 |
 
 ## License
 
-MIT © Lambertyan — [AgentiX-E](https://github.com/AgentiX-E)
-
----
-
-📖 [Full Documentation](https://agentix-e.github.io/entity-resolver) — Guides, API Reference, Migration
+MIT
