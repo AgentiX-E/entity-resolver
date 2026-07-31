@@ -449,9 +449,51 @@ export async function runSqlLinkage(
   };
 }
 
-function dbFn(n: string): string {
-  return n === 'jaro_winkler' ? 'jaro_winkler_similarity' : 'damerau_levenshtein';
+// ══════════════════════════════════════════════════════════════
+// DuckDB scorer function mapping
+//
+// Maps entity-resolver scorer names to DuckDB built-in string
+// similarity functions. DuckDB v1.0+ provides:
+//   - jaro_winkler_similarity(a, b) → [0, 1]
+//   - jaro_similarity(a, b)         → [0, 1]
+//   - damerau_levenshtein(a, b)     → edit distance (int)
+//   - levenshtein(a, b)             → edit distance (int)
+//   - hamming(a, b)                 → edit distance (int)
+//
+// NOTE: DuckDB edit-distance functions return distance, not similarity.
+// The SQL comparison layer normalizes them with threshold checks, so
+// the VALUES from these functions are compared against thresholds
+// rather than used directly as similarity scores.
+// ══════════════════════════════════════════════════════════════
+
+const DUCKDB_SCORER_MAP: Readonly<Record<string, string>> = {
+  jaro_winkler: 'jaro_winkler_similarity',
+  jaro: 'jaro_similarity',
+  levenshtein: 'levenshtein',
+  damerau_levenshtein: 'damerau_levenshtein',
+  exact: 'exact_match',
+  jaccard: 'jaccard',
+  dice: 'dice_coefficient',
+  hamming: 'hamming',
+};
+
+/** Resolve a scorer name to its DuckDB SQL function name.
+ *  Throws if the scorer is not supported in the SQL pipeline. */
+export function resolveSqlScorerFn(n: string): string {
+  const fn = DUCKDB_SCORER_MAP[n];
+  if (!fn) {
+    throw new Error(
+      `Scorer "${n}" is not supported in the SQL pipeline. ` +
+        `Supported scorers: ${Object.keys(DUCKDB_SCORER_MAP).join(', ')}`,
+    );
+  }
+  return fn;
 }
+
+function dbFn(n: string): string {
+  return resolveSqlScorerFn(n);
+}
+
 function esc(n: string): string {
   return n.replace(/"/g, '""');
 }
