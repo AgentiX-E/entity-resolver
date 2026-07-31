@@ -342,6 +342,7 @@ export {
   encodePPRLAsync,
   matchPPRL,
   matchPPRLAsync,
+  sha256Sync,
   sha256Async,
 } from './pprl/bloom.js';
 

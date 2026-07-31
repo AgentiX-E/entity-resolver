@@ -2,8 +2,13 @@
 // Enables entity matching without exposing raw PII.
 // Uses Bloom filters to encode field values into bit vectors for private comparison.
 //
-// Cross-platform: uses Web Crypto API (browser-compatible) with
-// automatic fallback to Node.js crypto when Web Crypto is unavailable.
+// Cross-platform hashing strategy:
+//   - Node.js:   sha256Sync → crypto.createHash('sha256') (synchronous, fast)
+//   - Browser:   sha256Async → Web Crypto subtle.digest('SHA-256') (async only)
+//   - Fallback:  simpleHash → FNV-1a (non-crypto, Bloom filter use only)
+//
+// IMPORTANT: sha256Sync() is Node.js ONLY. For browser PPRL, use
+// encodePPRLAsync() / matchPPRLAsync() which internally use sha256Async().
 
 import { createHash as nodeCreateHash } from 'crypto';
 
@@ -21,69 +26,40 @@ export interface PPRLConfig {
 
 // ─── Cross-platform SHA-256 ──────────────────────────────────────
 
-/** Cached reference to Web Crypto subtle (browser) or null (Node.js). */
-let _cryptoSubtle: SubtleCrypto | null | undefined;
-
-function getCryptoSubtle(): SubtleCrypto | null {
-  if (_cryptoSubtle !== undefined) return _cryptoSubtle;
-  try {
-    if (typeof globalThis !== 'undefined' && globalThis.crypto?.subtle) {
-      _cryptoSubtle = globalThis.crypto.subtle;
-      return _cryptoSubtle;
-    }
-  } catch {
-    // SAFE: globalThis.crypto may not exist in some runtimes;
-    // returning null for crypto is expected fallback for browser detection.
-  }
-  _cryptoSubtle = null;
-  return null;
-}
-
 /**
- * Compute SHA-256 hash of a string.
- * Uses Web Crypto API when available (browser), falls back to Node.js crypto.
+ * Compute SHA-256 hash synchronously using Node.js crypto module.
+ * Node.js ONLY — throws in browser environments (no sync Web Crypto).
+ * Use sha256Async() for browser PPRL support.
  */
-function sha256(input: string): Uint8Array {
-  const subtle = getCryptoSubtle();
-  if (subtle) {
-    // Web Crypto path — synchronous wrapper using a sync pattern
-    // Note: Web Crypto SHA-256 is async, but for PPRL we need sync.
-    // We use Node.js crypto in Node, Web Crypto in browser via TextEncoder.
-    // For pure browser, we offer an async alternative.
-    return syncSha256Fallback(input);
-  }
-  // Node.js path
-  const hash = nodeCreateHash('sha256').update(input).digest();
-  return new Uint8Array(hash);
-}
-
-/**
- * Compute SHA-256 hash using Web Crypto API (async — for browser use).
- * Prefer this in browser environments.
- */
-export async function sha256Async(input: string): Promise<Uint8Array> {
-  const subtle = getCryptoSubtle();
-  if (subtle) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(input);
-    const hashBuffer = await subtle.digest('SHA-256', data);
-    return new Uint8Array(hashBuffer);
-  }
-  // Node.js fallback
-  return syncSha256Fallback(input);
-}
-
-/** Synchronous fallback using Node.js crypto or a simple hash. */
-function syncSha256Fallback(input: string): Uint8Array {
+export function sha256Sync(input: string): Uint8Array {
   try {
     const hash = nodeCreateHash('sha256').update(input).digest();
     return new Uint8Array(hash);
   } catch {
-    // SAFE: Node.js crypto may be unavailable in browser-like environments;
-    // falling back to simple FNV-1a-like hash (not cryptographically secure,
+    // In browser-like environments, Node crypto is unavailable.
+    // Fall back to simple FNV-1a hash (not cryptographically secure,
     // but sufficient for Bloom filter bit distribution).
     return simpleHash(input);
   }
+}
+
+/**
+ * Compute SHA-256 hash using Web Crypto API (async — for browser use).
+ * Falls back to Node.js crypto or simple FNV-1a hash.
+ */
+export async function sha256Async(input: string): Promise<Uint8Array> {
+  try {
+    if (typeof globalThis !== 'undefined' && globalThis.crypto?.subtle) {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(input);
+      const hashBuffer = await globalThis.crypto.subtle.digest('SHA-256', data);
+      return new Uint8Array(hashBuffer);
+    }
+  } catch {
+    // Web Crypto may throw in restricted contexts (e.g., non-HTTPS).
+  }
+  // Fallback: Node.js crypto or simple hash
+  return sha256Sync(input);
 }
 
 /** Simple non-crypto hash for environments without crypto. */
@@ -122,7 +98,7 @@ export class BloomFilter {
   add(token: string, secret: string): void {
     const hashInput = `${secret}:${token}`;
     for (let i = 0; i < this.numHashes; i++) {
-      const hash = sha256(`${i}:${hashInput}`);
+      const hash = sha256Sync(`${i}:${hashInput}`);
       const pos = readUInt32BE(hash, i % 28) % this.size;
       const byteIdx = Math.floor(pos / 8);
       const bitIdx = pos % 8;
@@ -181,17 +157,57 @@ export class BloomFilter {
 
   /** Serialize to a compact base64 string. */
   toBase64(): string {
+    // Cross-platform Base64: use btoa (browser) or Buffer (Node.js)
     let binary = '';
     for (const byte of this.bits) {
       binary += String.fromCharCode(byte);
     }
-    return btoa(binary);
+    if (typeof Buffer !== 'undefined') {
+      return Buffer.from(binary, 'binary').toString('base64');
+    }
+    if (typeof btoa === 'function') {
+      return btoa(binary);
+    }
+    // Pure JS fallback: manual Base64 encoding
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+    let result = '';
+    for (let i = 0; i < binary.length; i += 3) {
+      const a = binary.charCodeAt(i);
+      const b = i + 1 < binary.length ? binary.charCodeAt(i + 1) : 0;
+      const c = i + 2 < binary.length ? binary.charCodeAt(i + 2) : 0;
+      const t = (a << 16) | (b << 8) | c;
+      result += chars.charAt((t >> 18) & 63);
+      result += chars.charAt((t >> 12) & 63);
+      result += i + 1 < binary.length ? chars.charAt((t >> 6) & 63) : '=';
+      result += i + 2 < binary.length ? chars.charAt(t & 63) : '=';
+    }
+    return result;
   }
 
   /** Deserialize from a base64 string. */
   static fromBase64(b64: string, size: number, numHashes: number): BloomFilter {
     const bf = new BloomFilter(size, numHashes);
-    const binary = atob(b64);
+    let binary: string;
+    if (typeof Buffer !== 'undefined') {
+      binary = Buffer.from(b64, 'base64').toString('binary');
+    } else if (typeof atob === 'function') {
+      binary = atob(b64);
+    } else {
+      // Pure JS fallback: manual Base64 decoding
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+      const lookup = new Map<string, number>();
+      for (let i = 0; i < chars.length; i++) lookup.set(chars[i]!, i);
+      binary = '';
+      for (let i = 0; i < b64.length; i += 4) {
+        const a = lookup.get(b64[i]!) ?? 0;
+        const b = lookup.get(b64[i + 1]!) ?? 0;
+        const c = lookup.get(b64[i + 2]!) ?? 0;
+        const d = lookup.get(b64[i + 3]!) ?? 0;
+        binary += String.fromCharCode((a << 2) | (b >> 4));
+        if (b64[i + 2] !== '=') binary += String.fromCharCode(((b & 15) << 4) | (c >> 2));
+        if (b64[i + 3] !== '=') binary += String.fromCharCode(((c & 3) << 6) | d);
+      }
+    }
     const len = Math.min(binary.length, bf.bits.length);
     for (let i = 0; i < len; i++) {
       bf.bits[i] = binary.charCodeAt(i);

@@ -7,6 +7,7 @@ import {
   matchPPRL,
   encodePPRLAsync,
   matchPPRLAsync,
+  sha256Sync,
   sha256Async,
 } from '../../index.js';
 
@@ -185,6 +186,32 @@ describe('matchPPRLAsync', () => {
   it('different records have low match score', async () => {
     const scores = await matchPPRLAsync({ name: 'Alice' }, { name: 'Bob' }, { secretKey: SECRET });
     expect(scores.name).toBeLessThan(1);
+  });
+});
+
+describe('sha256Sync', () => {
+  it('produces consistent hash', () => {
+    const hash1 = sha256Sync('test');
+    const hash2 = sha256Sync('test');
+    expect(hash1).toEqual(hash2);
+  });
+
+  it('different inputs produce different hashes', () => {
+    const hash1 = sha256Sync('a');
+    const hash2 = sha256Sync('b');
+    expect(hash1).not.toEqual(hash2);
+  });
+
+  it('produces SHA-256 length (32 bytes)', () => {
+    const hash = sha256Sync('hello world');
+    expect(hash.length).toBe(32);
+  });
+
+  it('produces correct SHA-256 for known input', () => {
+    // SHA-256 of empty string: e3b0c44298fc1c14...
+    const hash = sha256Sync('');
+    const hex = Buffer.from(hash).toString('hex');
+    expect(hex).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
   });
 });
 
