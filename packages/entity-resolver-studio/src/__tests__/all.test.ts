@@ -321,3 +321,18 @@ describe('session diffFields branches', () => {
     expect(p.fieldScores[0]!.fieldName).toBe('name');
   });
 });
+
+it('session with missing records handles empty objects gracefully', () => {
+  const pair = { leftId: 999, rightId: 998, probability: 0.8, score: 0.8, comparisonVector: [] };
+  const records = [{ first: 'test', last: 'data' }];
+  const session = createStudioSession([pair], records, 10, 100);
+  expect(session.pairs.length).toBe(1);
+  expect(session.pairs[0]!.left).toEqual({});
+  expect(session.pairs[0]!.right).toEqual({});
+});
+
+it('nextBatch on empty totalCount returns 0 progress', () => {
+  const session = createStudioSession([], [], 10, 0);
+  const batch = studioNextBatch(session);
+  expect(batch).toBeNull();
+});
