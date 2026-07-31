@@ -65,13 +65,20 @@ console.log(
 
 // ─── Splink benchmark ────────────────────────────────────────────
 try {
-  const pythonScript = resolve(import.meta.dirname || '.', 'magellan_bench.py');
-  const pyOut = execSync(`python3 ${pythonScript}`, {
-    timeout: 120000,
-    encoding: 'utf-8',
-    maxBuffer: 10 * 1024 * 1024,
-  });
-  console.log(pyOut.trim());
+  const pyOut = execSync('python3 benchmarks/magellan_bench.py', {
+    timeout: 300000, encoding: 'utf-8', maxBuffer: 10 * 1024 * 1024,
+  }).trim();
+  const match = pyOut.match(/Splink:\s+([\d.]+)s,\s+(\d+)\s+pairs/);
+  if (match) {
+    console.log(`Splink:          ${match[1]}s, ${match[2]} pairs`);
+    writeFileSync(resolve(OUT, 'magellan-results.json'), JSON.stringify({
+      dataset: 'Magellan-iTunes-Amazon',
+      records: allRecords.length,
+      er: { timeSec: sec, pairs: r.scoredPairs?.length ?? 0 },
+      splink: { timeSec: match[1], pairs: parseInt(match[2]) },
+      timestamp: new Date().toISOString(),
+    }, null, 2));
+  }
 } catch (e) {
   console.log('Splink: ERR -', e.message?.slice(0, 80));
 }

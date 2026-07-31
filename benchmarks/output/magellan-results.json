@@ -1,0 +1,9 @@
+{
+  "dataset": "Magellan-iTunes-Amazon",
+  "records": 62830,
+  "er": {
+    "timeSec": "21.9",
+    "pairs": 7354942
+  },
+  "timestamp": "2026-07-31T00:38:46.181Z"
+}
