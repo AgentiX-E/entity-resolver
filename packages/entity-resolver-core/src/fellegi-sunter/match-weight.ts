@@ -81,8 +81,14 @@ export function computeAggregateMatchWeight(
 
   for (const vector of vectors) {
     const key = `${vector.field}:${vector.level}`;
-    const m = params.mProbabilities.get(key);
-    const u = params.uProbabilities.get(key);
+    const fallbackKey = `${vector.field}:*`;
+
+    let m = params.mProbabilities.get(key);
+    let u = params.uProbabilities.get(key);
+
+    // Wildcard fallback: if exact key not found, use field:*
+    if (m === undefined) m = params.mProbabilities.get(fallbackKey);
+    if (u === undefined) u = params.uProbabilities.get(fallbackKey);
 
     if (m !== undefined && u !== undefined && m > 0 && u > 0) {
       const fieldWeight = safeLog2(m) - safeLog2(u);

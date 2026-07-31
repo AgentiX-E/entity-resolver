@@ -71,7 +71,7 @@ export async function runSqlPipeline(
       pairs: scoredRows.map((r: SqlRow) => ({
         leftId: Number(r.left_id),
         rightId: Number(r.right_id),
-        score: (Number(r.match_weight) + 10) / 20,
+        score: clampScore(Number(r.match_weight)),
       })),
       timing: { blockingMs: 0, comparisonMs: performance.now() - tFast, emMs: Math.round(emMs) },
       stats: {
@@ -173,7 +173,7 @@ JOIN ${inputTable} r ON r.__row_id=b.right_id`;
     pairs: scoredRows.map((r: SqlRow) => ({
       leftId: Number(r.left_id),
       rightId: Number(r.right_id),
-      score: (Number(r.match_weight) + 10) / 20,
+      score: clampScore(Number(r.match_weight)),
     })),
     timing: { blockingMs: blockMs, comparisonMs: compMs, emMs: Math.round(emMs) },
     stats: { inputRows: records.length, blockedPairs: blockedRows, scoredPairs: scoredRows.length },
@@ -438,7 +438,7 @@ export async function runSqlLinkage(
     pairs: scoredRows.map((r: SqlRow) => ({
       leftId: Number(r.left_id),
       rightId: Number(r.right_id) - leftRecords.length,
-      score: (Number(r.match_weight) + 10) / 20,
+      score: clampScore(Number(r.match_weight)),
     })),
     timing: { blockingMs: blockMs, comparisonMs: compMs, emMs: 0 },
     stats: {
@@ -496,6 +496,14 @@ function dbFn(n: string): string {
 
 function esc(n: string): string {
   return n.replace(/"/g, '""');
+}
+/** Normalize match weight to [0, 1] score with safe clamping.
+ *  Uses logistic transform: score ≈ weightToProbability(weight).
+ *  Weights outside [-20, 20] are clamped to prevent NaN/Inf. */
+function clampScore(weight: number): number {
+  if (!Number.isFinite(weight)) return 0;
+  const clamped = Math.max(-20, Math.min(20, weight));
+  return 1 / (1 + Math.exp(-clamped * Math.LN2));
 }
 async function dropAll(be: ISqlBackend, ts: string[]): Promise<void> {
   for (const t of ts)
