@@ -771,7 +771,8 @@ export function cutClustering(
   }
 
   // --- Push-Relabel max flow with gap heuristic ---
-  function maxFlow(s: number, t: number): number {
+  // Returns flow value and nodes on s-side of the minimum s-t cut.
+  function maxFlow(s: number, t: number): { value: number; sSide: Set<number> } {
     const flow: Map<number, number>[] = Array.from({ length: V }, () => new Map<number, number>());
     const excess = new Float64Array(V);
     const height = new Int32Array(V);
@@ -912,25 +913,86 @@ export function cutClustering(
       }
     }
 
-    return excess[t]!;
+    return {
+      value: excess[t]!,
+      /** BFS from s in residual graph — nodes on the s-side of the min cut. */
+      sSide: (() => {
+        const side = new Set<number>();
+        const q = [s];
+        side.add(s);
+        let hd = 0;
+        while (hd < q.length) {
+          const u = q[hd++]!;
+          for (const [v, c] of cap[u]!) {
+            const f = flow[u]!.get(v) ?? 0;
+            if (c - f > 0 && !side.has(v)) {
+              side.add(v);
+              q.push(v);
+            }
+          }
+        }
+        return side;
+      })(),
+    };
   }
 
-  // --- Gomory-Hu tree ---
-  // parent[v] = parent in tree, treeCap[v] = capacity of (v, parent[v])
+  // --- Gomory-Hu tree (Gusfield simplified algorithm) ---
+  // Reference: Gusfield (1990), "Very Simple Methods for All Pairs
+  // Network Flow Analysis". Constructs an equivalent flow tree by
+  // computing n-1 max-flows on the original graph.
+  //
+  // Algorithm:
+  //   1. Start with star tree rooted at node 0
+  //   2. For s = 1 to V-1:
+  //      t = parent[s]
+  //      Run maxFlow(s, t) → get flow value and s-side of min cut
+  //      For each i ≠ s where parent[i] = t and i ∈ sSide:
+  //        parent[i] = s     (reconnect nodes that moved to s's side)
+  //      If parent[t] ∈ sSide:
+  //        parent[s] = parent[t]; cap(s,parent[s]) = cap(t,parent[t])
+  //        parent[t] = s;         cap(t,s) = flow value
+  //        // Also reconnect all previous children of t to s
+  //        For each i where parent[i] = t: parent[i] = s
+  //        parent[t] = s
+  //      Else:
+  //        parent[s] = t;         cap(s,t) = flow value
+  //
+  // The resulting parent array encodes a Gomory-Hu tree where
+  // min-cut(s, parent[s]) = treeCap[s].
+
   const parent = new Int32Array(V).fill(-1);
   const treeCap = new Float64Array(V);
 
   for (let s = 1; s < V; s++) {
     const t = parent[s]! >= 0 ? parent[s]! : 0;
-    const flowVal = maxFlow(s, t);
+    const { value: flowVal, sSide } = maxFlow(s, t);
 
-    // Find min cut side of s
-    // Note: residual graph from maxFlow is discarded in the closure;
-    // Gomory-Hu tree uses the flow value for edge capacities.
-
-    // Simplified: assign tree edge
     treeCap[s] = flowVal;
-    parent[s] = t;
+
+    // Step 2a: Reassign nodes on s's side whose parent was t
+    for (let i = 0; i < V; i++) {
+      if (i !== s && i !== SINK && parent[i] === t && sSide.has(i)) {
+        parent[i] = s;
+      }
+    }
+
+    // Step 2b: Handle the case where t's parent is also in the s-side
+    if (parent[t]! >= 0 && sSide.has(parent[t]!)) {
+      const pt = parent[t]!;
+      parent[s] = pt;
+      treeCap[s] = treeCap[t]!;
+      parent[t] = s;
+      treeCap[t] = flowVal;
+
+      // All nodes previously parented to t now parent to s
+      for (let i = 0; i < V; i++) {
+        if (i !== s && i !== t && i !== SINK && parent[i] === t) {
+          parent[i] = s;
+        }
+      }
+    } else {
+      parent[s] = t;
+    }
   }
 
   // Build the Gomory-Hu tree edges and find connected components after

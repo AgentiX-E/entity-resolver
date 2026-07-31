@@ -125,22 +125,18 @@ export async function runPipeline(
       scoredPairs,
       singletons: clustering.singletons,
       diagnostics: {
-        blocking: {
-          candidateCount: sqlResult.stats.blockedPairs,
-          reductionRatio:
-            sqlResult.stats.blockedPairs / ((records.length * (records.length - 1)) / 2),
-        },
-        matching: {},
-        clustering: {},
-        timing: sqlResult.timing,
+        muParameters: new Map(),
+        matchWeightDistribution: [],
+        unlinkableCount: 0,
       },
       statistics: {
-        totalPairs: sqlResult.stats.scoredPairs,
+        totalRecords: records.length,
         matchedRecords: matchedCount,
         matchRate: records.length > 0 ? matchedCount / records.length : 0,
         totalClusters: clustering.metadata.numClusters,
         averageClusterSize: clustering.metadata.averageClusterSize,
         maxClusterSize: clustering.metadata.maxClusterSize,
+        executionTimeMs: performance.now(),
       },
     };
   }
