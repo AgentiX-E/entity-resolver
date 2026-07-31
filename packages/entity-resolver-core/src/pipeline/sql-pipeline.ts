@@ -333,6 +333,122 @@ ${compParts.map((c) => c.weight).join(',\n')},
 FROM ${src} l JOIN ${src} r ON (${blockParts.join(' OR ')})`;
 }
 
+// ─── Two-source linkage (left↔right, no self-comparison) ─────────────
+
+/**
+ * Run linkage between two separate record pools. Unlike deduplication
+ * which compares all records in a single pool, linkage only compares
+ * records from the left pool against records from the right pool.
+ *
+ * Use cases: DBLP-ACM, Amazon-Google, Abt-Buy (standard Leipzig datasets).
+ */
+export async function runSqlLinkage(
+  leftRecords: ReadonlyArray<Record<string, unknown>>,
+  rightRecords: ReadonlyArray<Record<string, unknown>>,
+  config: PipelineConfig,
+  backend: ISqlBackend,
+): Promise<SqlPipelineResult> {
+  const cols = Object.keys(leftRecords[0] ?? {});
+  const leftTable = `__er_link_l_${Date.now()}`;
+  const rightTable = `__er_link_r_${Date.now()}`;
+
+  await backend.createTempTable(
+    leftRecords.map((r, i) => ({ __row_id: i, ...r })),
+    { name: leftTable },
+  );
+  await backend.createTempTable(
+    rightRecords.map((r, i) => ({ __row_id: i + leftRecords.length, ...r })),
+    { name: rightTable },
+  );
+
+  const stringFields = cols.filter((c) => c !== '__row_id');
+  const passes =
+    config.blocking?.passes ??
+    stringFields.map((f) => ({ fields: [f], transforms: ['lowercase'] as string[] }));
+
+  // Blocking: cross-join between left and right only
+  const t0 = performance.now();
+  const blockedTable = `__er_link_bl_${Date.now()}`;
+  const blockParts = passes.map((p) => {
+    const conditions = (p.fields ?? [cols[0] ?? '__row_id'])
+      .map((f) =>
+        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+      )
+      .join(' AND ');
+    if (stringFields.length >= 2) {
+      const prefixCond = stringFields
+        .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
+        .join(' OR ');
+      return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${leftTable} l JOIN ${rightTable} r ON (${conditions} AND (${prefixCond}))`;
+    }
+    return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${leftTable} l JOIN ${rightTable} r ON (${conditions})`;
+  });
+  await backend.exec(`CREATE TABLE ${blockedTable} AS ${blockParts.join(' UNION ')}`);
+  const blockedRows = await backend.rowCount(blockedTable);
+  const blockMs = performance.now() - t0;
+
+  if (blockedRows === 0) {
+    await dropAll(backend, [leftTable, rightTable, blockedTable]);
+    return {
+      pairs: [],
+      timing: { blockingMs: blockMs, comparisonMs: 0, emMs: 0 },
+      stats: {
+        inputRows: leftRecords.length + rightRecords.length,
+        blockedPairs: 0,
+        scoredPairs: 0,
+      },
+    };
+  }
+
+  // Comparison + scoring CTAS
+  const t1 = performance.now();
+  const scoredTable = `__er_link_sc_${Date.now()}`;
+  const activeComps = config.comparisons.filter((c) => cols.includes(c.field));
+  const mw = '3.169925',
+    nmw = '-3.169925';
+  const compParts = activeComps.map((c) => {
+    const f = esc(c.field);
+    const lvls = c.levels?.length ? c.levels : [{}];
+    let s = 'CASE';
+    for (let i = lvls.length - 1; i >= 0; i--) {
+      const l = lvls[i]! as Record<string, unknown>;
+      if (l.isExact) s += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      else if (l.isNull) s += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
+      else s += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${l.threshold ?? 0.7} THEN ${i}`;
+    }
+    return {
+      field: f,
+      level: `${s} ELSE -1 END AS ${f}_level`,
+      weight: `CASE WHEN ${f}_level>=0 THEN ${mw} ELSE ${nmw} END AS ${f}_weight`,
+    };
+  });
+
+  await backend.exec(
+    `CREATE TABLE ${scoredTable} AS SELECT b.left_id, b.right_id, ${compParts.map((c) => c.level).join(',\n')}, ${compParts.map((c) => c.weight).join(',\n')}, (${compParts.map((c) => `COALESCE(${c.field}_weight,0)`).join('+')}) AS match_weight FROM ${blockedTable} b JOIN ${leftTable} l ON l.__row_id=b.left_id JOIN ${rightTable} r ON r.__row_id=b.right_id`,
+  );
+
+  const scoredRows = await backend.query(
+    `SELECT left_id, right_id, match_weight FROM ${scoredTable}`,
+  );
+  const compMs = performance.now() - t1;
+
+  await dropAll(backend, [leftTable, rightTable, blockedTable, scoredTable]);
+
+  return {
+    pairs: scoredRows.map((r: SqlRow) => ({
+      leftId: Number(r.left_id),
+      rightId: Number(r.right_id) - leftRecords.length,
+      score: (Number(r.match_weight) + 10) / 20,
+    })),
+    timing: { blockingMs: blockMs, comparisonMs: compMs, emMs: 0 },
+    stats: {
+      inputRows: leftRecords.length + rightRecords.length,
+      blockedPairs: blockedRows,
+      scoredPairs: scoredRows.length,
+    },
+  };
+}
+
 function dbFn(n: string): string {
   return n === 'jaro_winkler' ? 'jaro_winkler_similarity' : 'damerau_levenshtein';
 }

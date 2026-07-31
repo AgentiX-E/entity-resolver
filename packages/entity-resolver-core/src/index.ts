@@ -172,6 +172,9 @@ export {
 export type { SqlEMOptions, SqlEMResult } from './fellegi-sunter/sql-em.js';
 export { sqlEstimateParameters } from './fellegi-sunter/sql-em.js';
 
+export type { SqlPipelineResult } from './pipeline/sql-pipeline.js';
+export { runSqlPipeline, runSqlLinkage } from './pipeline/sql-pipeline.js';
+
 // Parallel Processing
 export type {
   IWorkerPool,
