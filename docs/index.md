@@ -81,5 +81,6 @@ console.log(result.diagnostics);   // waterfall, histograms, m/u charts
 | Evaluation Metrics | 12 (Pairwise, Cluster, B³, ARI, FMI, V-measure) |
 | WASM Kernels | 5 (Rust → WASM, ~5x speedup) |
 | Storage Backends | 4 (Memory, DuckDB, PostgreSQL, DuckDB WASM) |
-| Benchmarked Datasets | 8 (FEBRL, DBLP-ACM, Abt-Buy, Amazon-Google, WDC, iTunes-Amazon, Cora) |
+| Benchmarked Datasets | 5 (FEBRL, DBLP-ACM, Amazon-Google, Magellan, Synthetic 1M) |
+| 1M Throughput | 2.2s, 545K rec/s (DuckDB SQL pushdown) |
 | Test Coverage (core) | 94.4% statements, 87.7% branches |
