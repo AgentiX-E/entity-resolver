@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "apache-arrow": "^21.2.0",
+    "csv-parse": "^7.0.1",
     "fastest-levenshtein": "^1.0.16",
     "murmurhash3js": "^3.0.1",
     "strsimkit": "^0.1.0",

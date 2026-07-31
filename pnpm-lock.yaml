@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      csv-parse:
+        specifier: ^7.0.1
+        version: 7.0.1
       duckdb:
         specifier: ^1.4.4
         version: 1.4.4(encoding@0.1.13)
@@ -141,6 +144,9 @@ importers:
       apache-arrow:
         specifier: ^21.2.0
         version: 21.2.0
+      csv-parse:
+        specifier: ^7.0.1
+        version: 7.0.1
       fastest-levenshtein:
         specifier: ^1.0.16
         version: 1.0.16
@@ -2007,6 +2013,9 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  csv-parse@7.0.1:
+    resolution: {integrity: sha512-+2z7Ar0APQ7Uu6fX4cn+pitRmxjZ1WPBcGmZFKmA74FCyi7Et/XZx8cjNQ5CjbZ4HCOxXCOpRBYvYH08Qa003A==}
 
   data-urls@7.0.0:
     resolution: {integrity: sha512-23XHcCF+coGYevirZceTVD7NdJOqVn+49IHyxgszm+JIiHLoB2TkmPtsYkNWT1pvRSGkc35L6NHs0yHkN2SumA==}
@@ -5471,6 +5480,8 @@ snapshots:
       source-map-js: 1.2.1
 
   csstype@3.2.3: {}
+
+  csv-parse@7.0.1: {}
 
   data-urls@7.0.0:
     dependencies:

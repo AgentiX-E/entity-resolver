@@ -43,6 +43,7 @@
   },
   "packageManager": "pnpm@9.15.0",
   "dependencies": {
+    "csv-parse": "^7.0.1",
     "duckdb": "^1.4.4"
   }
 }
