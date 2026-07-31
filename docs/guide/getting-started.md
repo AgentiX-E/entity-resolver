@@ -97,16 +97,31 @@ const result = await runPipeline(records, {
 // result.diagnostics contains waterfall and charts data
 ```
 
+### Two-Source Linkage (DBLP-ACM, Amazon-Google, etc.)
+
+For datasets where records come from separate sources and should only match across sources (not within), use the linkage API:
+
+```typescript
+import { runSqlLinkage } from '@agentix-e/entity-resolver-core';
+import { NodeDuckDBBackend } from '@agentix-e/entity-resolver-node';
+
+const dblp = [
+  { title: 'Deep Learning', authors: 'Y. LeCun', year: '2015' },
+];
+const acm = [
+  { title: 'Deep Learning Methods', authors: 'Y. LeCun', year: '2015' },
+];
+
+const backend = new NodeDuckDBBackend(':memory:');
+const result = await runSqlLinkage(dblp, acm, config, backend);
+// result.pairs: cross-source pairs only (no dblp↔dblp or acm↔acm)
+await backend.close();
+```
+
 ## Next Steps
 
 - [Core Concepts](/guide/core-concepts) — Deep-dive into FS model, blocking, and scoring
 - [Storage Backends](/guide/storage-backends) — Choose the right storage for your deployment
 - [API Reference](/api/core/) — Full type-safe API documentation
 - [Production Deployment](/guide/production) — Docker, mTLS, auth, monitoring
-
-## Known Issues
-
-### DBLP-ACM Benchmark Configuration
-
-DBLP-ACM is a **linkage** (two-source matching) dataset, not a **deduplication** (single-source) dataset. Running dedupe on the combined table produces ~1.2M false-positive pairs. This dataset requires `entity-resolver-link` or Splink `link_only` mode for accurate evaluation. The current benchmark figures for DBLP-ACM pair counts are therefore inflated.
 

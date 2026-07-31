@@ -84,3 +84,5 @@ console.log(result.diagnostics);   // waterfall, histograms, m/u charts
 | Benchmarked Datasets | 5 (FEBRL, DBLP-ACM, Amazon-Google, Magellan, Synthetic 1M) |
 | 1M Throughput | 2.2s, 545K rec/s (DuckDB SQL pushdown) |
 | Test Coverage (core) | 94.4% statements, 87.7% branches |
+| Studio Coverage | 100% statements, 96.87% branches (42 tests) |
+| Linkage Mode | ✅ Two-source matching for Leipzig clean-clean datasets |
