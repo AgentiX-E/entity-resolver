@@ -313,7 +313,7 @@ function mStep(
       keyNonMatchWeight.set(key, (keyNonMatchWeight.get(key) ?? 0) + antiW);
 
       // Track per-field totals across all pairs
-      const field = key.split(':')[0]!;
+      const field = fieldFromKey(key);
       fieldTotalMatch.set(field, (fieldTotalMatch.get(field) ?? 0) + w);
       fieldTotalNonMatch.set(field, (fieldTotalNonMatch.get(field) ?? 0) + antiW);
     }
@@ -323,7 +323,7 @@ function mStep(
   for (const [, fieldKeys] of fieldToKeys) {
     const numLevels = fieldKeys.length;
     const sampleKey = fieldKeys[0]!;
-    const field = sampleKey.split(':')[0]!;
+    const field = fieldFromKey(sampleKey);
 
     // Total weight across ALL pairs for this field
     const totalW = fieldTotalMatch.get(field) ?? 0;
@@ -354,7 +354,17 @@ function mStep(
 
 // ─── Level ordering constraint ──────────────────────────────────
 
-/** Standard comparison level priority — lower index = stronger evidence. */
+/** Extract field name from composite key "field:level".
+ *  Uses lastIndexOf(':') to handle field names that contain colons
+ *  (e.g., "location:city:exact_match" → "location:city").
+ *  @internal — exported for testing transparency. */
+export function fieldFromKey(key: string): string {
+  const idx = key.lastIndexOf(':');
+  return idx >= 0 ? key.slice(0, idx) : key;
+}
+
+/** Standard comparison level priority — lower index = stronger evidence.
+ *  Custom levels not listed here receive the lowest priority (99). */
 const LEVEL_RANK: Readonly<Record<string, number>> = {
   exact_match: 0,
   strong_match: 1,
@@ -364,9 +374,13 @@ const LEVEL_RANK: Readonly<Record<string, number>> = {
   not_match: 99,
 };
 
-/** Get the priority rank of a comparison level name. */
-function levelRank(level: string): number {
-  return LEVEL_RANK[level] ?? 50;
+/** Get the priority rank of a comparison level name.
+ *  Extracts the level portion from composite key using lastIndexOf(':')
+ *  to handle field names containing colons. */
+function levelRank(key: string): number {
+  const idx = key.lastIndexOf(':');
+  const level = idx >= 0 ? key.slice(idx + 1) : key;
+  return LEVEL_RANK[level] ?? 99;
 }
 
 /**
@@ -382,9 +396,7 @@ function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): voi
   // Sort weakest-first (rank descending) so that the monotonicity constraint
   // m_weak <= m_strong maps naturally to PAVA's non-decreasing enforcement.
   const mLevels = [...fieldKeys].sort((a, b) => {
-    const [, levelA] = a.split(':');
-    const [, levelB] = b.split(':');
-    return levelRank(levelB!) - levelRank(levelA!);
+    return levelRank(b) - levelRank(a);
   });
 
   const mBlocks: { indices: number[]; avgValue: number; totalWeight: number }[] = [];
@@ -420,9 +432,7 @@ function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): voi
   // Sort strongest-first (rank ascending) so that the monotonicity constraint
   // u_strong <= u_weak maps to PAVA's non-decreasing enforcement.
   const uLevels = [...fieldKeys].sort((a, b) => {
-    const [, levelA] = a.split(':');
-    const [, levelB] = b.split(':');
-    return levelRank(levelA!) - levelRank(levelB!);
+    return levelRank(a) - levelRank(b);
   });
 
   const uBlocks: { indices: number[]; avgValue: number; totalWeight: number }[] = [];
