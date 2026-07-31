@@ -208,6 +208,25 @@ describe('session edge cases', () => {
 // ─── State machine edge cases ────────────────────────────────────
 
 describe('state machine edge cases', () => {
+  it('selectNext before start is no-op (batch null)', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'selectNext' });
+    expect(state.selectedIndex).toBe(0);
+  });
+
+  it('selectPrev before start is no-op (batch null)', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'selectPrev' });
+    expect(state.selectedIndex).toBe(0);
+  });
+
+  it('selectNext advances selectedIndex', () => {
+    const { state, dispatch } = createStudioMachine(() => {});
+    dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
+    dispatch({ type: 'selectNext' });
+    expect(state.selectedIndex).toBe(1);
+  });
+
   it('selectNext at last index does not advance past end', () => {
     const { state, dispatch } = createStudioMachine(() => {});
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
