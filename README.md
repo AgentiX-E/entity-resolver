@@ -50,8 +50,8 @@ await be.close();
 - Inline prefix filter prevents O(N²) pair explosion on diverse datasets
 - Automatic configuration detection from dataset field types
 
-**Comparators (5 types):**
-`jaro_winkler` · `levenshtein` · `exact` · `dice` · `soundex`
+**Comparators (19 types):**
+`exact` · `levenshtein` · `damerau_levenshtein` · `jaro` · `jaro_winkler` · `dice` · `jaccard` · `overlap` · `lcs` · `soundex` · `double_metaphone` · `token_sort` · `tfidf_cosine` · `qgram_tfidf` · `ensemble` · `numeric_diff` · `date_diff` · `boolean_match` · `radial`
 
 **Scoring:**
 - WASM Rust scorers (50M ops/s) via `strsimkit`
@@ -110,7 +110,7 @@ python3 benchmarks/staged_bench.py  # Splink comparison
 | Browser/WASM | ✅ | ❌ |
 | PPRL | ✅ | ❌ |
 | MCP | ✅ | ❌ |
-| Comparison types | 5 | 19 |
+| Comparison types | 19 | 19 |
 | Visual diagnostics | ⏳ | ✅ |
 | Backends | DuckDB + PG | 5 |
 
