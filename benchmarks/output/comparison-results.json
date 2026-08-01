@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-01T09:31:33.431Z",
+  "timestamp": "2026-08-01T10:12:39.670Z",
   "entityResolver": [
     {
       "dataset": "DBLP-ACM",
@@ -8,18 +8,53 @@
       "precision": 0.8854307622913847,
       "recall": 0.8826438848920863,
       "f1": 0.8840351272235982,
-      "timeSec": 0.4,
-      "pairs": 2217
+      "timeSec": 0.2,
+      "pairs": 2217,
+      "mode": "linkage"
     },
     {
       "dataset": "Abt-Buy",
       "records": 2173,
       "trueMatches": 1097,
-      "precision": 1,
-      "recall": 0.009115770282588878,
-      "f1": 0.018066847335140017,
+      "precision": 0.02783148058643467,
+      "recall": 0.6298997265268915,
+      "f1": 0.0533076181292189,
+      "timeSec": 0.7,
+      "pairs": 50599,
+      "mode": "linkage-js"
+    },
+    {
+      "dataset": "Amazon-Google",
+      "records": 4589,
+      "trueMatches": 1300,
+      "precision": 0.038302277432712216,
+      "recall": 0.05692307692307692,
+      "f1": 0.04579207920792079,
       "timeSec": 0.2,
-      "pairs": 10
+      "pairs": 1932,
+      "mode": "linkage"
+    },
+    {
+      "dataset": "FEBRL-1000",
+      "records": 1200,
+      "trueMatches": 200,
+      "precision": 0.07792207792207792,
+      "recall": 0.06,
+      "f1": 0.06779661016949153,
+      "timeSec": 0.1,
+      "pairs": 154,
+      "mode": "dedupe"
+    },
+    {
+      "dataset": "FEBRL-5000",
+      "records": 6000,
+      "trueMatches": 1000,
+      "precision": 0.49014454664914586,
+      "recall": 0.373,
+      "f1": 0.42362294151050545,
+      "timeSec": 1.6,
+      "pairs": 761,
+      "mode": "dedupe"
     }
   ],
   "splink": [
