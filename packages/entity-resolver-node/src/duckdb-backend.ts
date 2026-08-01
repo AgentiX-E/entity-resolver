@@ -8,9 +8,10 @@
  * Reference: https://duckdb.org/docs/current/clients/node_neo/overview
  */
 import type { ISqlBackend, SqlRow, TempTableConfig } from '@agentix-e/entity-resolver-core';
-import { DuckDBInstance, DuckDBConnection } from '@duckdb/node-api';
+import type { DuckDBConnection } from '@duckdb/node-api';
+import { DuckDBInstance } from '@duckdb/node-api';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 
 export class NodeDuckDBBackend implements ISqlBackend {
   private instance: DuckDBInstance | null = null;
@@ -78,7 +79,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
       try {
         let csv = cols.join(',') + '\n';
         for (const r of records) {
-          csv += cols.map((c) => `${String(r[c] ?? '')}`).join(',') + '\n';
+          csv += cols.map((c) => String(r[c] ?? '')).join(',') + '\n';
         }
         writeFileSync(csvPath, csv);
         await conn.run(

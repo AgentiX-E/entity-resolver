@@ -21,7 +21,7 @@ export interface LinkResult {
   /** The best-matching entity ID from the knowledge base */
   entityId: string | null;
   /** Ranked candidate list (entityId → score, sorted descending) */
-  candidates: Array<{ entityId: string; score: number }>;
+  candidates: { entityId: string; score: number }[];
   /** Match tier: 'exact' | 'fuzzy' | 'embedding' | 'none' */
   matchTier: 'exact' | 'fuzzy' | 'embedding' | 'none';
   /** Confidence score [0, 1] */

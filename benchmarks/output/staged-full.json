@@ -3,46 +3,67 @@
     "scale": "1K",
     "engine": "entity-resolver-sql",
     "records": 1200,
-    "timeMs": 119,
+    "timeMs": 134,
     "timeSec": "0.1",
+    "timeStddevMs": 8,
     "pairs": 154,
-    "throughput": 10052
+    "throughput": 8980,
+    "iterations": 3
   },
   {
     "scale": "10K",
     "engine": "entity-resolver-sql",
     "records": 12000,
-    "timeMs": 92,
+    "timeMs": 126,
     "timeSec": "0.1",
+    "timeStddevMs": 1,
     "pairs": 1527,
-    "throughput": 130457
+    "throughput": 94996,
+    "iterations": 3
   },
   {
     "scale": "50K",
     "engine": "entity-resolver-sql",
     "records": 60000,
-    "timeMs": 164,
+    "timeMs": 209,
     "timeSec": "0.2",
+    "timeStddevMs": 19,
     "pairs": 8482,
-    "throughput": 365482
+    "throughput": 287665,
+    "iterations": 3
   },
   {
     "scale": "100K",
     "engine": "entity-resolver-sql",
     "records": 120000,
-    "timeMs": 304,
-    "timeSec": "0.3",
+    "timeMs": 376,
+    "timeSec": "0.4",
+    "timeStddevMs": 20,
     "pairs": 18865,
-    "throughput": 394568
+    "throughput": 319342,
+    "iterations": 3
   },
   {
     "scale": "500K",
     "engine": "entity-resolver-sql",
     "records": 600000,
-    "timeMs": 1145,
-    "timeSec": "1.1",
+    "timeMs": 1500,
+    "timeSec": "1.5",
+    "timeStddevMs": 24,
     "pairs": 173806,
-    "throughput": 523995
+    "throughput": 400111,
+    "iterations": 3
+  },
+  {
+    "scale": "1M",
+    "engine": "entity-resolver-sql",
+    "records": 1200000,
+    "timeMs": 3021,
+    "timeSec": "3.0",
+    "timeStddevMs": 162,
+    "pairs": 541951,
+    "throughput": 397157,
+    "iterations": 3
   },
   {
     "tool": "splink",

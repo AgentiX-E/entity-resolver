@@ -89,14 +89,6 @@ The core matching engine implements the Fellegi-Sunter model with EM (Expectatio
 
 High-frequency values (e.g., common surname "Smith") receive reduced match weights to prevent false positives.
 
-## Blocking Strategies (5)
-
-1. **Standard Blocking** — SQL-style `block_on("first_name", "surname")` with multi-rule UNION
-2. **Token Blocking** — Token-based blocks with lazy clustering
-3. **Sorted Neighborhood** — Sliding window over sorted keys, adaptive window size
-4. **Multi-pass Blocking** — Multiple independent passes (exact + soundex + substring)
-5. **Meta-blocking** — Token Blocking → Block Purging → CNP → Meta-blocking pipeline (from pyJedAI)
-
 ## Scorers (19)
 
 `exact`, `levenshtein`, `damerauLevenshtein`, `jaro`, `jaroWinkler`, `dice`, `jaccard`, `overlap`, `lcs`, `soundex`, `doubleMetaphone`, `tokenSort`, `tfidfCosine`, `qgramTfIdf`, `ensemble`, `numericDiff`, `dateDiff`, `booleanMatch`, `radial`

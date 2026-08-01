@@ -13,8 +13,10 @@ import { execSync } from 'child_process';
 const OUT = resolve(import.meta.dirname || '.', 'output');
 
 async function main() {
-  const { runPipeline } = await import('/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js');
-  const { NodeDuckDBBackend } = await import('/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js');
+  const corePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-core/dist/index.js');
+  const nodePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-node/dist/duckdb-backend.js');
+  const { runPipeline } = await import(corePath);
+  const { NodeDuckDBBackend } = await import(nodePath);
 
   mkdirSync(OUT, { recursive: true });
 

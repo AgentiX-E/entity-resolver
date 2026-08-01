@@ -44,7 +44,7 @@ export type TaskProcessor<T = unknown> = (payload: unknown) => Promise<T>;
 export interface IWorkerPool {
   /** Submit a batch of tasks for parallel execution. */
   executeAll<T = unknown>(
-    tasks: Array<{ id: number; payload: unknown }>,
+    tasks: { id: number; payload: unknown }[],
     processor: TaskProcessor<T>,
   ): Promise<Map<number, T>>;
 
@@ -73,7 +73,7 @@ export class SingleThreadPool implements IWorkerPool {
   }
 
   async executeAll<T>(
-    tasks: Array<{ id: number; payload: unknown }>,
+    tasks: { id: number; payload: unknown }[],
     processor: TaskProcessor<T>,
   ): Promise<Map<number, T>> {
     this._active++;

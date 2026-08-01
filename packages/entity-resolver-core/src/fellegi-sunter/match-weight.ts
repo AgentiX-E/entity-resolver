@@ -87,8 +87,8 @@ export function computeAggregateMatchWeight(
     let u = params.uProbabilities.get(key);
 
     // Wildcard fallback: if exact key not found, use field:*
-    if (m === undefined) m = params.mProbabilities.get(fallbackKey);
-    if (u === undefined) u = params.uProbabilities.get(fallbackKey);
+    m ??= params.mProbabilities.get(fallbackKey);
+    u ??= params.uProbabilities.get(fallbackKey);
 
     if (m !== undefined && u !== undefined && m > 0 && u > 0) {
       const fieldWeight = safeLog2(m) - safeLog2(u);

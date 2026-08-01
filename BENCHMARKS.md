@@ -126,20 +126,23 @@ _Measured on Node.js 22, AMD64. WASM binaries compiled from Rust via wasm-bindge
 | entity-resolver-server    | 93.06%     | 81.81%   | 90.00%    | 93.06% | ~55      |
 | entity-resolver-cli       | 72.41%     | 79.66%   | 67.00%    | 72.41% | 31       |
 | entity-resolver-visual    | 94.44%     | 96.05%   | 94.44%    | 94.44% | 49       |
+| entity-resolver-studio    | 96.87%     | 93.52%   | 97.50%    | 96.87% | 42       |
 | entity-resolver-link      | 100%       | 100%     | 100%      | 100%   | 2        |
-| **Total**                 | —          | —        | —         | —      | **~1103**|
+| **Total**                 | —          | —        | —         | —      | **~1145**|
 
 ## CI Status
 
 [![CI](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml/badge.svg)](https://github.com/AgentiX-E/entity-resolver/actions/workflows/ci.yml)
 
 - **Lint**: ESLint strict mode, config active (typescript-eslint installed)
-- **TypeCheck**: TypeScript 5.7 strict mode, 0 errors across all 9 packages
-- **Test**: 1100+ tests, coverage thresholds enforced (≥95% target)
+- **TypeCheck**: TypeScript 5.7 strict mode, 0 errors across all 10 packages
+- **Test**: 1100+ tests, coverage thresholds enforced (see coverage table above)
 - **Format**: Prettier check
 - **E2E**: Playwright Chromium with DuckDB WASM
 
 ## 1M Scale Benchmark (2026-07-30) — MEASURED, not projected
+
+**Configuration:** 2-field jaro_winkler, DuckDB SQL pushdown, ~50% duplication rate (high-density scenario).
 
 entity-resolver SQL pipeline, DuckDB inline prefix filter, 2-field jaro_winkler:
 
@@ -155,3 +158,9 @@ Splink documented: ~60 seconds for 1M records on a laptop.
 entity-resolver measured: 42.3 seconds — **1.4x faster**.
 
 Throughput stable at ~28K rec/s across all scales (linear O(N) scaling).
+
+**Note on dual benchmark results:** The README and `staged-full.json` show a separate benchmark
+with 20% duplication rate, producing significantly faster throughput (~400K rec/s at 1M).
+Both configurations are valid — the key finding is that linear O(N) scaling holds across
+all duplication densities. Use the ~28K rec/s numbers as a conservative lower bound for
+production planning with diverse datasets.

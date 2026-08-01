@@ -43,7 +43,7 @@ export function createStudioMachine(onChange: (state: StudioState) => void): {
     selectedIndex: 0,
   };
 
-  const emit = () => onChange({ ...state });
+  const emit = () => { onChange({ ...state }); };
 
   function currentPair(): StudioBatch['pairs'][number] | null {
     return state.batch?.pairs[state.selectedIndex] ?? null;

@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "text": "@agentix-e/entity-resolver-cli",
+    "collapsed": true,
+    "items": [
+      { "text": "Overview", "link": "/api/cli/" },
+      { "text": "API Reference", "link": "/api/cli/reference" }
+    ]
+  }
+]

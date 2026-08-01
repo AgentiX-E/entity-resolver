@@ -43,8 +43,8 @@ export function jsJaroWinkler(a: string, b: string): number {
   }
   const sim = (m / al.length + m / bl.length + (m - t / 2) / m) / 3;
   const prefix =
-    al.length > 0 && al[0] === bl[0]
-      ? 0.1 * Math.min(4, al.match(new RegExp(`^${al[0]}+`))?.[0]?.length ?? 0)
+    al.length > 0 && bl.startsWith(al[0] ?? '')
+      ? 0.1 * Math.min(4, (/^[a-z]+/i.exec(al))?.[0]?.length ?? 0)
       : 0;
   return sim + prefix;
 }

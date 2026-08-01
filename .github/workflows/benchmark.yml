@@ -26,11 +26,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: pnpm
@@ -45,77 +45,21 @@ jobs:
         id: bench
         run: |
           SCALE="${{ inputs.scale || '500K' }}"
-          SIZES="${
-            if [ "$SCALE" = "1M" ]; then echo "100000 500000 1000000";
-            elif [ "$SCALE" = "500K" ]; then echo "100000 500000";
-            else echo "50000 100000"; fi
-          }"
-          echo "Scales: $SIZES"
-
+          echo "Scale: $SCALE"
           mkdir -p benchmarks/output
-
-          # Run entity-resolver dense benchmark
-          node -e "
-            import { runPipeline } from '/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js';
-            import { writeFileSync, mkdirSync } from 'fs';
-            mkdirSync('benchmarks/output', {recursive:true});
-            const results = [];
-            for (const n of [$SIZES]) {
-              const { NodeDuckDBBackend } = await import('/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js');
-              // Inline data gen (stripped for brevity)
-              const start = Date.now();
-              results.push({scale:n, timeSec: ((Date.now()-start)/1000).toFixed(1)});
-            }
-            writeFileSync('benchmarks/output/results.json', JSON.stringify(results));
-          " 2>/dev/null || echo "Benchmark skipped — runner requires Node 22+"
+          node benchmarks/staged.mjs
 
       - name: Generate HTML report
-        run: |
-          cat > benchmarks/output/index.html << 'HTML'
-          <!DOCTYPE html>
-          <html lang="en">
-          <head>
-          <meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-          <title>entity-resolver Benchmark</title>
-          <style>
-          body{font-family:system-ui,sans-serif;max-width:960px;margin:40px auto;padding:0 20px;background:#fafafa;color:#1f2937}
-          h1{font-size:24px;border-bottom:2px solid #3b82f6;padding-bottom:8px}
-          table{width:100%;border-collapse:collapse;margin:16px 0;background:white;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}
-          th{background:#3b82f6;color:white;padding:10px 16px;text-align:left;font-size:14px}
-          td{padding:10px 16px;border-bottom:1px solid #e5e7eb;font-size:14px;font-variant-numeric:tabular-nums}
-          .winner{background:#16a34a;color:white;padding:12px 20px;border-radius:8px;margin:16px 0;font-weight:600}
-          footer{font-size:12px;color:#9ca3af;margin-top:48px}
-          </style></head>
-          <body>
-          <h1>⚡ entity-resolver Benchmark</h1>
-          <p>DuckDB SQL pushdown | Inline prefix filter | Node 22 | 2-field jaro_winkler</p>
-          <table>
-          <tr><th>Scale</th><th>Records</th><th>Time</th><th>Pairs</th><th>Rec/s</th></tr>
-          <tr><td>100K</td><td>120,000</td><td>0.3s</td><td>18,865</td><td>400,000</td></tr>
-          <tr><td>500K</td><td>600,000</td><td>1.1s</td><td>173,806</td><td>545,455</td></tr>
-          <tr><td><b>1M</b></td><td><b>1,200,000</b></td><td><b>2.2s</b></td><td><b>541,951</b></td><td><b>545,455</b></td></tr>
-          </table>
-          <div class="winner">🏆 Throughput: 545K rec/s — linear O(N) scaling confirmed</div>
-          <h2>vs Competitors</h2>
-          <table>
-          <tr><th>Tool</th><th>Language</th><th>Engine</th><th>500K time</th></tr>
-          <tr><td><b>entity-resolver</b></td><td>TypeScript</td><td>DuckDB (Node)</td><td><b>1.1s</b></td></tr>
-          <tr><td>Splink</td><td>Python</td><td>DuckDB (Python)</td><td>0.6s</td></tr>
-          <tr><td>recordlinkage</td><td>Python</td><td>Pandas/NumPy</td><td>1.2s</td></tr>
-          </table>
-          <footer>entity-resolver v0.1.0 — 10 packages — <a href="https://github.com/AgentiX-E/entity-resolver">GitHub</a></footer>
-          </body></html>
-          HTML
-          echo "Report generated"
+        run: node benchmarks/report.mjs
 
       - name: Setup Pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v6
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v5
         with:
           path: benchmarks/output
 
       - name: Deploy
         id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

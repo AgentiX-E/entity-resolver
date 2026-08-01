@@ -30,5 +30,11 @@
   "modulesFileName": "modules",
   "mergeReadme": false,
   "flattenOutputFiles": true,
-  "entryPointStrategy": "resolve"
+  "entryPointStrategy": "expand",
+  "sidebar": {
+    "autoConfiguration": true,
+    "format": "vitepress",
+    "pretty": true,
+    "collapsed": false
+  }
 }

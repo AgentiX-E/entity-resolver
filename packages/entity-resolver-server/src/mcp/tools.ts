@@ -248,12 +248,12 @@ export async function executeMcpTool(
 
     case 'er_extract': {
       const text = params.text as string;
-      const rawFields = params.fields as Array<{
+      const rawFields = params.fields as {
         name: string;
         type: string;
         description?: string;
         required?: boolean;
-      }>;
+      }[];
       const intent = params.intent as string | undefined;
       const enableLlm = params.enableLlm as boolean | undefined;
 

@@ -18,13 +18,13 @@ import type { ComparisonVector } from '../matching/comparison.js';
 import { standardBlocking } from '../blocking/standard.js';
 
 export interface SqlPipelineResult {
-  pairs: Array<{ leftId: number; rightId: number; score: number }>;
+  pairs: { leftId: number; rightId: number; score: number }[];
   timing: { blockingMs: number; comparisonMs: number; emMs: number };
   stats: { inputRows: number; blockedPairs: number; scoredPairs: number };
 }
 
 export async function runSqlPipeline(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: PipelineConfig,
   backend: ISqlBackend,
 ): Promise<SqlPipelineResult> {
@@ -140,8 +140,8 @@ export async function runSqlPipeline(
         break;
       }
     }
-    const matchW = Math.log2(Number(m) / Number(u)).toFixed(4);
-    const nomatchW = Math.log2((1 - Number(m)) / (1 - Number(u))).toFixed(4);
+    const matchW = Math.log2(m / u).toFixed(4);
+    const nomatchW = Math.log2((1 - m) / (1 - u)).toFixed(4);
     const weightExpr = `CASE WHEN ${f}_level>=0 THEN ${matchW} ELSE ${nomatchW} END AS ${f}_weight`;
 
     return { field: f, levelExpr, weightExpr };
@@ -183,14 +183,14 @@ JOIN ${inputTable} r ON r.__row_id=b.right_id`;
 // ─── EM training on JS sample ─────────────────────────────────────
 
 function trainEMOnSample(
-  records: ReadonlyArray<Record<string, unknown>>,
+  records: readonly Record<string, unknown>[],
   config: PipelineConfig,
 ): FSParameters {
   const defaults: FSParameters = {
     lambda: 0.5,
     mProbabilities: new Map([['default:match', 0.9]]),
     uProbabilities: new Map([['default:match', 0.1]]),
-  } as unknown as FSParameters;
+  };
 
   // Only run EM if we have enough data
   if (records.length < 10) return defaults;
@@ -224,7 +224,7 @@ function trainEMOnSample(
     const b = records[pair.rightId]!;
     if (a && b) {
       vectors.push(
-        generateComparisonVectors(a, b, config.comparisons as never, fieldMeta as never),
+        generateComparisonVectors(a, b, config.comparisons, fieldMeta),
       );
     }
   }
@@ -247,7 +247,7 @@ function buildBlockSql(
   config: PipelineConfig,
   cols: readonly string[],
 ): string {
-  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
+  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = config.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const parts = passes.map((p) => {
     const conditions = (p.fields ?? [fallbackField])
@@ -268,7 +268,7 @@ function buildBlockSqlWithPrefixFilter(
   config: PipelineConfig,
   cols: readonly string[],
 ): string {
-  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
+  const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = config.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const strCols = cols.filter((c) => c !== '__row_id');
   const prefixCond = strCols
@@ -293,7 +293,7 @@ function buildFastSingleQuery(
   config: PipelineConfig,
   cols: readonly string[],
 ): string {
-  const fallbackField = (blockingConfig.blocking?.fields?.[0] ?? cols[0] ?? '__row_id') as string;
+  const fallbackField = (blockingConfig.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = blockingConfig.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const activeComps = config.comparisons.filter((c) => cols.includes(c.field));
 
@@ -343,8 +343,8 @@ FROM ${src} l JOIN ${src} r ON (${blockParts.join(' OR ')})`;
  * Use cases: DBLP-ACM, Amazon-Google, Abt-Buy (standard Leipzig datasets).
  */
 export async function runSqlLinkage(
-  leftRecords: ReadonlyArray<Record<string, unknown>>,
-  rightRecords: ReadonlyArray<Record<string, unknown>>,
+  leftRecords: readonly Record<string, unknown>[],
+  rightRecords: readonly Record<string, unknown>[],
   config: PipelineConfig,
   backend: ISqlBackend,
 ): Promise<SqlPipelineResult> {
@@ -509,5 +509,7 @@ async function dropAll(be: ISqlBackend, ts: string[]): Promise<void> {
   for (const t of ts)
     try {
       await be.dropTempTable(t);
-    } catch {}
+    } catch {
+      // Best-effort cleanup: table may not exist
+    }
 }

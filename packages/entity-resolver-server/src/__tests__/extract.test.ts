@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Hono } from 'hono';
+import type { Hono } from 'hono';
 import { createApp } from '../rest/app.js';
 
 /**

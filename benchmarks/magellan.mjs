@@ -33,12 +33,10 @@ const allRecords = [...itunes, ...amazon].map((r) => {
 console.log(`=== Magellan iTunes-Amazon (${allRecords.length} records: ${itunes.length}+${amazon.length}) ===`);
 
 // ─── entity-resolver benchmark ───────────────────────────────────
-const { runPipeline } = await import(
-  '/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js'
-);
-const { NodeDuckDBBackend } = await import(
-  '/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js'
-);
+const corePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-core/dist/index.js');
+const nodePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-node/dist/duckdb-backend.js');
+const { runPipeline } = await import(corePath);
+const { NodeDuckDBBackend } = await import(nodePath);
 
 const config = {
   comparisons: [

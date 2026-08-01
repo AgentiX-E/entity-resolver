@@ -28,7 +28,7 @@ const config = autoConfigure(records);
 // For < 10,000 records: in-memory JS pipeline (fastest)
 const result = await runPipeline(records, config);
 
-// For >= 10,000 records: DuckDB SQL pushdown (500K+ rec/s)
+// For >= 10,000 records: DuckDB SQL pushdown (linear O(N) scaling, ~400K rec/s at 20% dup)
 const backend = new NodeDuckDBBackend(':memory:');
 const result = await runPipeline(records, config, { sqlBackend: backend });
 await backend.close();

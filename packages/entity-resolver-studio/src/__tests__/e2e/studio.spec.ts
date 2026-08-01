@@ -112,7 +112,7 @@ test.describe('StudioPairReviewElement', () => {
           1,
         );
         el.addEventListener('studio-action', (ev: Event) =>
-          resolve((ev as CustomEvent).detail.action),
+          { resolve((ev as CustomEvent).detail.action); },
         );
         const btn = el.querySelector('#s-btn-y') as HTMLButtonElement;
         btn?.click();
@@ -140,7 +140,7 @@ test.describe('StudioPairReviewElement', () => {
           1,
         );
         el.addEventListener('studio-action', (ev: Event) =>
-          resolve((ev as CustomEvent).detail.action),
+          { resolve((ev as CustomEvent).detail.action); },
         );
         const btn = el.querySelector('#s-btn-n') as HTMLButtonElement;
         btn?.click();
@@ -197,7 +197,7 @@ test.describe('StudioPairReviewElement', () => {
           1,
         );
         el.addEventListener('studio-action', (ev: Event) =>
-          resolve((ev as CustomEvent).detail.action),
+          { resolve((ev as CustomEvent).detail.action); },
         );
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 'n' }));
       });
@@ -224,7 +224,7 @@ test.describe('StudioPairReviewElement', () => {
           1,
         );
         el.addEventListener('studio-action', (ev: Event) =>
-          resolve((ev as CustomEvent).detail.action),
+          { resolve((ev as CustomEvent).detail.action); },
         );
         document.dispatchEvent(new KeyboardEvent('keydown', { key: 's' }));
       });

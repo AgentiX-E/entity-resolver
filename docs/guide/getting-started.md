@@ -123,9 +123,8 @@ await backend.close();
 - [Core Concepts](/guide/core-concepts) — Deep-dive into FS model, blocking, and scoring
 - [Scenario: Customer Deduplication](/guide/scenario-dedupe) — Practical walkthrough with code
 - [Scenario: Product Catalog Linking](/guide/scenario-linkage) — Cross-source matching
-- [Production Deployment](/guide/production) — Server configuration and monitoring
 - [Storage Backends](/guide/storage-backends) — DuckDB, PostgreSQL, WASM
-- [Storage Backends](/guide/storage-backends) — Choose the right storage for your deployment
-- [API Reference](/api/core/) — Full type-safe API documentation
 - [Production Deployment](/guide/production) — Docker, mTLS, auth, monitoring
+- [API Reference](/api/core/) — Full type-safe API documentation
+- [Migrating from Splink](/guide/migration) — Migration guide for Splink users
 

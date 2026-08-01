@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "text": "@agentix-e/entity-resolver-browser",
+    "collapsed": true,
+    "items": [
+      { "text": "Overview", "link": "/api/browser/" },
+      { "text": "API Reference", "link": "/api/browser/reference" }
+    ]
+  }
+]

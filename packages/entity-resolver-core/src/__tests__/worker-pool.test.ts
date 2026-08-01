@@ -68,7 +68,7 @@ describe('SingleThreadPool', () => {
 
   it('terminate is a no-op', () => {
     const pool = new SingleThreadPool();
-    expect(() => pool.terminate()).not.toThrow();
+    expect(() => { pool.terminate(); }).not.toThrow();
   });
 
   it('processes large batch with concurrency', async () => {

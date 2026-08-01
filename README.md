@@ -2,7 +2,7 @@
 
 **Entity resolution for Node.js and the browser — DuckDB-powered, TypeScript-first.**
 
-Identifies duplicate records across datasets without unique identifiers. Runs Fellegi-Sunter probabilistic matching with DuckDB SQL pushdown for linear O(N) scaling at 500K+ records/second.
+Identifies duplicate records across datasets without unique identifiers. Runs Fellegi-Sunter probabilistic matching with DuckDB SQL pushdown. Verified linear O(N) scaling from 1K to 1M records at ~400K rec/s (20% duplication rate).
 
 ```bash
 npm install @agentix-e/entity-resolver-core @agentix-e/entity-resolver-node
@@ -12,11 +12,11 @@ npm install @agentix-e/entity-resolver-core @agentix-e/entity-resolver-node
 
 | Scale | Records | Time | Throughput |
 |-------|--------|------|-----------|
-| 100K  | 120,000 | 0.3s | 400K rec/s |
-| 500K  | 600,000 | 1.1s | 545K rec/s |
-| **1M** | **1,200,000** | **2.2s** | **545K rec/s** |
+| 100K  | 120,000 | 0.4s | 319K rec/s |
+| 500K  | 600,000 | 1.5s | 400K rec/s |
+| **1M** | **1,200,000** | **3.0s** | **397K rec/s** |
 
-*2-field jaro_winkler, DuckDB SQL pushdown. See [Benchmarks](benchmarks/).*
+*2-field jaro_winkler, DuckDB SQL pushdown, 20% duplication rate. Measured with warm-up, 3-iteration mean. Higher duplication rates yield lower throughput (see [BENCHMARKS.md](BENCHMARKS.md) for high-density benchmarks at ~28K rec/s).*
 
 ## Quick Start
 
@@ -54,7 +54,7 @@ await be.close();
 `exact` · `levenshtein` · `damerau_levenshtein` · `jaro` · `jaro_winkler` · `dice` · `jaccard` · `overlap` · `lcs` · `soundex` · `double_metaphone` · `token_sort` · `tfidf_cosine` · `qgram_tfidf` · `ensemble` · `numeric_diff` · `date_diff` · `boolean_match` · `radial`
 
 **Scoring:**
-- WASM Rust scorers (50M ops/s) via `strsimkit`
+- WASM Rust scorers (~5x speedup verified per scorer) via `strsimkit`
 - Native JS fallback via `fastest-levenshtein`
 - SQL-native via DuckDB UDFs
 
@@ -100,8 +100,8 @@ python3 benchmarks/staged_bench.py  # Splink comparison
 | Dataset | Records | ER | Splink |
 |---------|--------|:--:|:--:|
 | DBLP-ACM | 4,910 | 3.5s | 3.8s |
-| Synthetic 500K | 600,000 | 1.1s | 0.6s |
-| Synthetic 1M | 1,200,000 | 2.2s | — |
+| Synthetic 500K (20% dup) | 600,000 | 1.5s | 0.6s |
+| Synthetic 1M (20% dup) | 1,200,000 | 3.0s | — |
 
 ## vs Splink
 

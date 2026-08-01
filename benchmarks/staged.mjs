@@ -39,31 +39,65 @@ const config = {
 };
 
 async function main() {
-  const { runPipeline } = await import('/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js');
-  const { NodeDuckDBBackend } = await import('/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js');
+  const corePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-core/dist/index.js');
+  const nodePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-node/dist/duckdb-backend.js');
+  const { runPipeline } = await import(corePath);
+  const { NodeDuckDBBackend } = await import(nodePath);
 
-  const scales = { '1K': 1000, '10K': 10000, '50K': 50000, '100K': 100000, '500K': 500000 };
+  const scales = { '1K': 1000, '10K': 10000, '50K': 50000, '100K': 100000, '500K': 500000, '1M': 1000000 };
+  const ITERATIONS = 3;
   const results = [];
 
-  console.log('| Scale | Records | ER SQL | ER pairs | Rec/s |');
-  console.log('|-------|---------|--------|----------|-------|');
+  console.log('| Scale | Records | ER SQL | ER pairs | Rec/s (mean±σ) |');
+  console.log('|-------|---------|--------|----------|-----------------|');
+
+  // Warm-up: 1K run to populate DuckDB optimizer caches and JIT
+  console.log('Warm-up...');
+  const warmRecords = genSynthetic(1000, 42);
+  const warmBe = new NodeDuckDBBackend('/tmp/er_warmup.db');
+  await runPipeline(warmRecords, config, { sqlBackend: warmBe });
+  await warmBe.close();
+  try { execSync('rm -f /tmp/er_warmup.db'); } catch {}
+  console.log('Warm-up complete.\n');
 
   for (const [label, n] of Object.entries(scales)) {
     process.stdout.write(label + '... ');
     const records = genSynthetic(n, 42);
+    const runTimes = [];
 
-    const be = new NodeDuckDBBackend('/tmp/er_staged_' + n + '.db');
-    const t0 = performance.now();
-    const r = await runPipeline(records, config, { sqlBackend: be });
-    const ms = performance.now() - t0;
-    await be.close();
+    for (let iter = 0; iter < ITERATIONS; iter++) {
+      const dbPath = `/tmp/er_staged_${n}_${iter}.db`;
+      const be = new NodeDuckDBBackend(dbPath);
+      const t0 = performance.now();
+      const r = await runPipeline(records, config, { sqlBackend: be });
+      const ms = performance.now() - t0;
+      runTimes.push(ms);
+      await be.close();
+      try { execSync(`rm -f ${dbPath}`); } catch {}
 
-    const sec = (ms / 1000).toFixed(1);
-    const rps = Math.round(records.length / (ms / 1000));
-    results.push({ scale: label, engine: 'entity-resolver-sql', records: records.length, timeMs: Math.round(ms), timeSec: sec, pairs: r.scoredPairs?.length ?? 0, throughput: rps });
-    console.log('|', label, '|', records.length, '|', sec + 's', '|', r.scoredPairs?.length ?? 0, '|', rps, '|');
+      // Only store results from first iteration for pair counts
+      if (iter === 0) {
+        var firstResult = r;
+      }
+    }
 
-    try { execSync('rm -f /tmp/er_staged_' + n + '.db'); } catch {}
+    const mean = runTimes.reduce((a, b) => a + b, 0) / runTimes.length;
+    const variance = runTimes.reduce((s, t) => s + (t - mean) ** 2, 0) / runTimes.length;
+    const stddev = Math.sqrt(variance);
+    const sec = (mean / 1000).toFixed(1);
+    const rps = Math.round(records.length / (mean / 1000));
+    results.push({
+      scale: label,
+      engine: 'entity-resolver-sql',
+      records: records.length,
+      timeMs: Math.round(mean),
+      timeSec: sec,
+      timeStddevMs: Math.round(stddev),
+      pairs: firstResult.scoredPairs?.length ?? 0,
+      throughput: rps,
+      iterations: ITERATIONS,
+    });
+    console.log('|', label, '|', records.length, '|', sec + 's', '|', firstResult.scoredPairs?.length ?? 0, '|', rps, '±', Math.round(stddev), 'ms |');
   }
 
   // Load competitor results

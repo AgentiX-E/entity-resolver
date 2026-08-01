@@ -8,7 +8,7 @@
  *   import { renderMatchChart } from './match-chart.js';
  *   renderMatchChart(container, scoredPairs);
  */
-export function renderMatchChart(container: HTMLElement, pairs: Array<{ score: number }>): void {
+export function renderMatchChart(container: HTMLElement, pairs: { score: number }[]): void {
   const bins = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
   const counts = new Array(bins.length - 1).fill(0);
   for (const p of pairs) {

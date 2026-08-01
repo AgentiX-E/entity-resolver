@@ -36,7 +36,7 @@ export class StudioPairReviewElement extends HTMLElement {
       return;
     }
 
-    const fields = pair.fieldScores as readonly FieldScore[];
+    const fields = pair.fieldScores;
     const allNames = [...new Set([...Object.keys(pair.left), ...Object.keys(pair.right)])];
 
     const rows = allNames
@@ -80,9 +80,9 @@ export class StudioPairReviewElement extends HTMLElement {
     `;
 
     // Event wiring
-    this.querySelector('#s-btn-y')?.addEventListener('click', () => this.dispatch('match'));
-    this.querySelector('#s-btn-n')?.addEventListener('click', () => this.dispatch('no-match'));
-    this.querySelector('#s-btn-s')?.addEventListener('click', () => this.dispatch('skip'));
+    this.querySelector('#s-btn-y')?.addEventListener('click', () => { this.dispatch('match'); });
+    this.querySelector('#s-btn-n')?.addEventListener('click', () => { this.dispatch('no-match'); });
+    this.querySelector('#s-btn-s')?.addEventListener('click', () => { this.dispatch('skip'); });
 
     // Keyboard
     const handler = (e: KeyboardEvent) => {

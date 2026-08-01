@@ -313,7 +313,7 @@ describe('session diffFields branches', () => {
   });
 
   it('skips field when both values are undefined', () => {
-    const recsWithUnset: Array<Record<string, unknown>> = [{ name: 'A' }, { name: 'B' }];
+    const recsWithUnset: Record<string, unknown>[] = [{ name: 'A' }, { name: 'B' }];
     const s = createStudioSession([mk(0.85)], recsWithUnset, 10, 100);
     const p = s.pairs[0]!;
     // Only 'name' field should appear

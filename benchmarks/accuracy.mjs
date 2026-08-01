@@ -1,5 +1,5 @@
-import { runPipeline } from '/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js';
-import { NodeDuckDBBackend } from '/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js';
+import { runPipeline } from '../packages/entity-resolver-core/dist/index.js';
+import { NodeDuckDBBackend } from '../packages/entity-resolver-node/dist/duckdb-backend.js';
 
 const CHARS = 'abcdefghijklmnopqrstuvwxyz';
 

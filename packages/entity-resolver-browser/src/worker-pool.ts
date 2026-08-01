@@ -27,7 +27,7 @@ export class BrowserWorkerPool implements IWorkerPool {
   }
 
   async executeAll<T>(
-    tasks: Array<{ id: number; payload: unknown }>,
+    tasks: { id: number; payload: unknown }[],
     processor: TaskProcessor<T>,
   ): Promise<Map<number, T>> {
     this._activeWorkers++;
@@ -68,8 +68,8 @@ export class BrowserWorkerPool implements IWorkerPool {
 
   private async _runOnWorker(
     slotIndex: number,
-    tasks: Array<{ id: number; payload: unknown }>,
-  ): Promise<Array<{ id: number; result: unknown }>> {
+    tasks: { id: number; payload: unknown }[],
+  ): Promise<{ id: number; result: unknown }[]> {
     while (this._workers.length <= slotIndex) {
       this._workers.push(this._createWorker());
     }

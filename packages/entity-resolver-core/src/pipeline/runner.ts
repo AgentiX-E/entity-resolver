@@ -216,7 +216,7 @@ export async function runPipeline(
   });
 
   // Stage 3: Matching — generate comparison vectors
-  let pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
+  const pairVectors = generateComparisonVectorsForPairs(cleaned, candidates, config.comparisons);
 
   // Parallel block scoring: enriches scores without replacing EM vectors
 

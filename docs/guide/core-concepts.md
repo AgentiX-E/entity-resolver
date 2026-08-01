@@ -130,7 +130,7 @@ const probability = weightToProbability(weight.aggregateWeight);
 | 16 | `numeric_diff` | Numeric | Normalized numeric difference |
 | 17 | `date_diff` | Date | Date difference in days |
 | 18 | `boolean_match` | Boolean | Boolean equality |
-| 19 | `llm` | AI | LLM-based boundary-pair resolution |
+| 19 | `radial` | Numeric | Radial distance for geospatial coordinates |
 
 ### ⑤ Clustering
 

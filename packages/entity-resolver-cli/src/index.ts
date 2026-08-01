@@ -228,7 +228,7 @@ async function cmdExtract(args: string[]): Promise<void> {
 
     // Parse --fields flag: "time:time,date:date,title:string"
     const fieldsRaw = parseStringFlag(args, '--fields');
-    let fields: Array<{ name: string; type: string }>;
+    let fields: { name: string; type: string }[];
     if (fieldsRaw) {
       fields = fieldsRaw.split(',').map((f) => {
         const [name, type] = f.split(':');

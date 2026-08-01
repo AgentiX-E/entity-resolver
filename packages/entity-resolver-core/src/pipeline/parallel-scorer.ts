@@ -38,7 +38,7 @@ export interface BatchConfig {
  */
 export async function compareBlocks(
   records: readonly RawRecord[],
-  blocks: Array<readonly { leftId: number; rightId: number }[]>,
+  blocks: (readonly { leftId: number; rightId: number }[])[],
   comparisons: readonly Record<string, unknown>[],
   fieldMeta: Map<string, FieldMetadata>,
   config: BatchConfig = {},
@@ -70,7 +70,7 @@ export async function compareBlocks(
 async function compareBlock(
   block: readonly { leftId: number; rightId: number }[],
   records: readonly RawRecord[],
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   comparisons: readonly Record<string, unknown>[],
   fieldMeta: Map<string, FieldMetadata>,
 ): Promise<ScoredPair[]> {
@@ -83,8 +83,8 @@ async function compareBlock(
     const vecs = generateComparisonVectors(
       a,
       b,
-      comparisons as ReadonlyArray<Record<string, unknown>> as never,
-      fieldMeta as never,
+      comparisons as never,
+      fieldMeta,
     );
 
     // Compute aggregate score from comparison vectors
@@ -112,12 +112,12 @@ async function compareBlock(
 export function groupByBlock(
   candidates: readonly { leftId: number; rightId: number }[],
   minBlockSize = 2,
-): Array<Array<{ leftId: number; rightId: number }>> {
+): { leftId: number; rightId: number }[][] {
   // Simple strategy: chunk into even groups
   const blockSize = Math.max(minBlockSize, Math.ceil(candidates.length / 8));
-  const groups: Array<Array<{ leftId: number; rightId: number }>> = [];
+  const groups: { leftId: number; rightId: number }[][] = [];
   for (let i = 0; i < candidates.length; i += blockSize) {
-    groups.push(candidates.slice(i, i + blockSize) as Array<{ leftId: number; rightId: number }>);
+    groups.push(candidates.slice(i, i + blockSize));
   }
   return groups;
 }

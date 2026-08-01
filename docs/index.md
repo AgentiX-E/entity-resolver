@@ -75,14 +75,15 @@ console.log(result.diagnostics);   // waterfall, histograms, m/u charts
 
 | Metric | Value |
 |--------|-------|
-| Scorers | 19 (12 strsimkit + 7 custom) |
-| Blocking Strategies | 5 (Standard, Token, Sorted Neighborhood, Multi-pass, Meta-blocking) |
-| Clustering Algorithms | 3 (Connected Components, DBSCAN, Unique Mapping) |
+| Packages | 10 |
+| Scorers | 19 (exact, levenshtein, damerau_levenshtein, jaro, jaro_winkler, dice, jaccard, overlap, lcs, soundex, double_metaphone, token_sort, tfidf_cosine, qgram_tfidf, ensemble, numeric_diff, date_diff, boolean_match, radial) |
+| Blocking Strategies | 8 (Standard, Token, Sorted Neighborhood, Multi-pass, Meta-blocking, Suffix Arrays, Extended Q-Grams, TF-IDF) |
+| Clustering Algorithms | 12 (Connected Components, DBSCAN, Unique Mapping + 9 pyJedAI algorithms) |
 | Evaluation Metrics | 12 (Pairwise, Cluster, B³, ARI, FMI, V-measure) |
 | WASM Kernels | 5 (Rust → WASM, ~5x speedup) |
 | Storage Backends | 4 (Memory, DuckDB, PostgreSQL, DuckDB WASM) |
-| Benchmarked Datasets | 5 (FEBRL, DBLP-ACM, Amazon-Google, Magellan, Synthetic 1M) |
-| 1M Throughput | 2.2s, 545K rec/s (DuckDB SQL pushdown) |
-| Test Coverage (core) | 94.4% statements, 87.7% branches |
-| Studio Coverage | 100% statements, 96.87% branches (42 tests) |
+| Benchmarked Datasets | 9 (FEBRL 5000, DBLP-ACM, Abt-Buy, Amazon-Google, WDC Products, WDC Offers, iTunes-Amazon, Cora + Synthetic 1M) |
+| Scalability | Linear O(N) scaling verified 1K→1M at ~400K rec/s (20% dup) |
+| Test Coverage (core) | 97.85% statements, 89.77% branches |
+| Total Tests | 1,100+ across all packages |
 | Linkage Mode | ✅ Two-source matching for Leipzig clean-clean datasets |

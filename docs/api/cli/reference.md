@@ -1,124 +1,18 @@
-## Functions
+# @agentix-e/entity-resolver-cli
 
-### renderWaterfallTUI()
+**Command-line tool** for entity resolution. Deduplication, matching, benchmarking.
 
-```ts
-function renderWaterfallTUI(data, maxWidth?): string;
+## Commands
+
+```bash
+entity-resolver dedupe customers.csv --threshold 0.7
+entity-resolver match left.csv right.csv
+entity-resolver gazetteer queries.csv index.csv
+entity-resolver benchmark [dataset]
+entity-resolver autoconfigure data.csv
+entity-resolver health
 ```
 
-Defined in: [renderers.ts:59](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L59)
+## License
 
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `data` | `WaterfallChartData` | `undefined` |
-| `maxWidth` | `number` | `60` |
-
-#### Returns
-
-`string`
-
-***
-
-### renderHistogramTUI()
-
-```ts
-function renderHistogramTUI(data, maxWidth?): string;
-```
-
-Defined in: [renderers.ts:84](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L84)
-
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `data` | `HistogramData` | `undefined` |
-| `maxWidth` | `number` | `60` |
-
-#### Returns
-
-`string`
-
-***
-
-### renderMuTableTUI()
-
-```ts
-function renderMuTableTUI(data, maxWidth?): string;
-```
-
-Defined in: [renderers.ts:114](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L114)
-
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `data` | `MuChartData` | `undefined` |
-| `maxWidth` | `number` | `72` |
-
-#### Returns
-
-`string`
-
-***
-
-### renderClusterTreeTUI()
-
-```ts
-function renderClusterTreeTUI(data, maxWidth?): string;
-```
-
-Defined in: [renderers.ts:143](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L143)
-
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `data` | `ClusterExplorerData` | `undefined` |
-| `maxWidth` | `number` | `60` |
-
-#### Returns
-
-`string`
-
-***
-
-### renderThresholdTUI()
-
-```ts
-function renderThresholdTUI(
-   threshold, 
-   totalPairs, 
-   aboveThreshold, 
-   maxWidth?): string;
-```
-
-Defined in: [renderers.ts:170](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L170)
-
-#### Parameters
-
-| Parameter | Type | Default value |
-| ------ | ------ | ------ |
-| `threshold` | `number` | `undefined` |
-| `totalPairs` | `number` | `undefined` |
-| `aboveThreshold` | `number` | `undefined` |
-| `maxWidth` | `number` | `50` |
-
-#### Returns
-
-`string`
-
-***
-
-### renderNavHint()
-
-```ts
-function renderNavHint(): string;
-```
-
-Defined in: [renderers.ts:209](https://github.com/AgentiX-E/entity-resolver/blob/e86fcfcf6d7f2b7e3adedb12bb963a8fab7791cc/packages/entity-resolver-cli/src/tui/renderers.ts#L209)
-
-#### Returns
-
-`string`
+MIT © Lambertyan

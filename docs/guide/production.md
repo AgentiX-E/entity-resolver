@@ -74,7 +74,7 @@ const app = createApp({
     "heapUsed": 52428800,
     "heapTotal": 1073741824
   },
-  "version": "0.1.0"
+  "version": "0.0.0"
 }
 ```
 
@@ -158,7 +158,7 @@ const poolConfig = buildPoolConfig({
 
 ```bash
 curl http://localhost:3000/api/health
-# {"status":"ok","uptime":86400,"memory":{...},"version":"0.1.0"}
+# {"status":"ok","uptime":86400,"memory":{...},"version":"0.0.0"}
 ```
 
 ### WASM Initialization Status

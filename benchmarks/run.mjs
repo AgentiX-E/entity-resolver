@@ -42,8 +42,10 @@ function generateData(n, seed = 42) {
 }
 
 async function runER(records) {
-  const { runPipeline } = await import('/workspace/entity-resolver/packages/entity-resolver-core/dist/index.js');
-  const { NodeDuckDBBackend } = await import('/workspace/entity-resolver/packages/entity-resolver-node/dist/duckdb-backend.js');
+  const corePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-core/dist/index.js');
+  const nodePath = resolve(import.meta.dirname || '.', '../packages/entity-resolver-node/dist/duckdb-backend.js');
+  const { runPipeline } = await import(corePath);
+  const { NodeDuckDBBackend } = await import(nodePath);
 
   const config = {
     comparisons: [
@@ -61,7 +63,7 @@ async function runER(records) {
 
   return {
     engine: 'entity-resolver-sql',
-    version: '0.1.0',
+    version: '0.0.0',
     records: records.length,
     timeMs: Math.round(ms),
     timeSec: (ms / 1000).toFixed(1),

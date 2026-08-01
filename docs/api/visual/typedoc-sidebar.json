@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "text": "@agentix-e/entity-resolver-visual",
+    "collapsed": true,
+    "items": [
+      { "text": "Overview", "link": "/api/visual/" },
+      { "text": "API Reference", "link": "/api/visual/reference" }
+    ]
+  }
+]
