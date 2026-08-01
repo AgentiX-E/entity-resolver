@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: entity-resolver-config
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  LOG_LEVEL: "info"
+  RATE_LIMIT_RPM: "600"
+  REQUEST_TIMEOUT_MS: "30000"

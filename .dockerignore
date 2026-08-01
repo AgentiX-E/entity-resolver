@@ -1,18 +1,17 @@
-# Docker build context optimizations
 node_modules
+dist
+coverage
 .git
 .gitignore
+benchmarks/output
+benchmarks/datasets
+test-results
+e2e
+playwright-report
 *.md
 !README.md
-coverage
-dist
+.DS_Store
 *.tsbuildinfo
-.cache
-target
 .env
 .env.*
-!.env.example
-*.log
-.DS_Store
-docs
-.github
+tmp/
