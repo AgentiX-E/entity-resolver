@@ -239,9 +239,13 @@ export function simulateLabeling(
 }
 
 /**
- * Assess labeling quality by detecting contradictory labels.
- * Contradiction: the same pair labeled differently, or a transitive
- * contradiction (A≈B labeled 1, B≈C labeled 1, but A≈C labeled 0).
+ * Assess labeling quality by detecting direct contradictory labels
+ * (the same record pair labeled with conflicting match/non-match values).
+ *
+ * Note: Transitive contradictions (A≈B, B≈C, but A≉C) are NOT detected
+ * by this function. For full transitive consistency checking, use
+ * connected components on the match-labeled graph to verify that
+ * non-match labels do not connect components that should be separate.
  */
 export function detectLabelContradictions(labeled: readonly LabeledPair[]): {
   contradictions: string[];

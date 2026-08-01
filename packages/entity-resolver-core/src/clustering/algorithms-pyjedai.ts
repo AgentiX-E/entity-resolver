@@ -1011,18 +1011,10 @@ export function cutClustering(
     return buildResultFromClusters([nodeList], totalRecords, 'ctc');
   }
 
-  // Add original edges between real nodes as additional connectivity
-  const allTreeEdges: [number, number][] = [...treeEdges];
-  for (const [u, nbrs] of adj) {
-    const ui = nodeIndex.get(u)!;
-    for (const [v] of nbrs) {
-      const vi = nodeIndex.get(v)!;
-      if (ui < vi) allTreeEdges.push([ui, vi]);
-    }
-  }
-
-  // Connected components of the tree mapped back to original IDs
-  const treeComps = connectedComponents(allTreeEdges, N);
+  // Connected components of the GH tree mapped back to original IDs.
+  // The Gomory-Hu tree already encodes min-cut connectivity —
+  // adding original edges would defeat the min-cut clustering purpose.
+  const treeComps = connectedComponents(treeEdges, N);
   const mappedComps = treeComps.map((comp) => comp.map((i) => nodeList[i]!));
 
   return buildResultFromClusters(

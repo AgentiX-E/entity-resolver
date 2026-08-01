@@ -176,13 +176,13 @@ export function crossValidate(
       }
     }
 
-    const trainRecords = [...trainIndices].map((i) => records[i]!);
-    const testRecords = [...testIndices].map((i) => records[i]!);
+    // Run pipeline on FULL dataset (not just training records).
+    // The Fellegi-Sunter EM model trains on all provided records, and
+    // we need predicted clusters containing test-set record IDs to
+    // evaluate against test-set ground truth.
+    // Evaluate only test-set records by filtering both sides below.
+    const result = pipelineFn(records as Record<string, unknown>[]);
 
-    // Run pipeline on training data
-    const result = pipelineFn(trainRecords);
-
-    // Evaluate on test data: compare predicted clusters against ground truth
     // Build reference clusters from ground truth (test set only)
     const refClusters = new Map<EntityId, Cluster>();
     for (const [cid, members] of groundTruth) {
@@ -192,15 +192,21 @@ export function crossValidate(
       }
     }
 
-    // Build predicted clusters (train set only — direct from pipeline)
-    const predClusters = result.clusters;
+    // Filter predicted clusters to test-set records only
+    const predClusters = new Map<EntityId, Cluster>();
+    for (const [pcid, cluster] of result.clusters) {
+      const testMembers = cluster.memberIds.filter((m) => testIndices.has(m));
+      if (testMembers.length > 0) {
+        predClusters.set(pcid, { clusterId: pcid, memberIds: testMembers, cohesion: 0 });
+      }
+    }
 
     const em = evaluateClustering(predClusters, refClusters);
 
     foldResults.push({
       fold,
-      trainingRecords: trainRecords.length,
-      testRecords: testRecords.length,
+      trainingRecords: trainIndices.size,
+      testRecords: testIndices.size,
       pairwisePrecision: em.pairwisePrecision,
       pairwiseRecall: em.pairwiseRecall,
       pairwiseF1: em.pairwiseF1,

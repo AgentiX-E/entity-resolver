@@ -369,17 +369,30 @@ function computeVMeasure(
     hPred -= p * Math.log2(p);
   }
 
+  // Build contingency table: pred_cluster × ref_cluster → count (O(n) single pass)
+  const contingency = new Map<string, Map<string, number>>();
+  for (const id of records) {
+    const pc = pred.get(id)!;
+    const rc = ref.get(id)!;
+    let inner = contingency.get(pc);
+    if (!inner) { inner = new Map(); contingency.set(pc, inner); }
+    inner.set(rc, (inner.get(rc) ?? 0) + 1);
+  }
+
   // Conditional entropy H(ref | pred)
   let hRefGivenPred = 0;
   for (const pc of predClusters) {
     const predTotal = predCounts.get(pc) ?? 0;
     if (predTotal === 0) continue;
     let h = 0;
-    for (const rc of refClusters) {
-      const count = records.filter((id) => pred.get(id) === pc && ref.get(id) === rc).length;
-      if (count > 0) {
-        const p = count / predTotal;
-        h -= p * Math.log2(p);
+    const inner = contingency.get(pc);
+    if (inner) {
+      for (const rc of refClusters) {
+        const count = inner.get(rc) ?? 0;
+        if (count > 0) {
+          const p = count / predTotal;
+          h -= p * Math.log2(p);
+        }
       }
     }
     hRefGivenPred += (predTotal / n) * h;
@@ -392,7 +405,7 @@ function computeVMeasure(
     if (refTotal === 0) continue;
     let h = 0;
     for (const pc of predClusters) {
-      const count = records.filter((id) => ref.get(id) === rc && pred.get(id) === pc).length;
+      const count = contingency.get(pc)?.get(rc) ?? 0;
       if (count > 0) {
         const p = count / refTotal;
         h -= p * Math.log2(p);

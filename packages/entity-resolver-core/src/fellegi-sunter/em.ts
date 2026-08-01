@@ -84,7 +84,10 @@ export function estimateParameters(
   let effectiveVectors: readonly (readonly ComparisonVector[])[];
 
   if (maxPairs && maxPairs > 0 && pairVectors.length > maxPairs) {
-    // Deterministic hash-based sampling: keep pairs where hash(leftId, rightId) < threshold
+    // Position-based deterministic hash sampling for large datasets.
+    // Uses the caller-provided order of pair vectors — reproducible given
+    // a stable input ordering. For full pair-identity-based sampling,
+    // callers should provide pair IDs via the ComparisonVector interface.
     const sampleRatio = maxPairs / pairVectors.length;
     const sampledVectors: ComparisonVector[][] = [];
 
@@ -166,13 +169,15 @@ export function estimateParameters(
   let bestIteration = bestResult.iterations;
 
   // Multi-start: run EM from additional random initializations
-  // and select the result with the highest log-likelihood
+  // and select the result with the highest log-likelihood.
+  // Uses mulberry32 PRNG seeded from options.seed for reproducibility.
   const numRestarts = options.numRestarts ?? 1;
+  const rng = mulberry32(options.seed ?? 42);
   for (let r = 1; r < numRestarts; r++) {
     const restartedState = initializeState(keys, {
-      initialM: 0.7 + Math.random() * 0.2,
-      initialU: 0.05 + Math.random() * 0.15,
-      initialLambda: 0.001 + Math.random() * 0.01,
+      initialM: 0.7 + rng() * 0.2,
+      initialU: 0.05 + rng() * 0.15,
+      initialLambda: 0.001 + rng() * 0.01,
     });
 
     const restartedResult = runEMLoop(restartedState);
@@ -262,7 +267,7 @@ function eStep(pairKeySets: readonly string[][], state: EMState, posteriors: num
 
     for (const key of pairKeys) {
       const m = state.mProbabilities.get(key) ?? 0.5;
-      const u = state.uProbabilities.get(key) ?? 0.1;
+      const u = state.uProbabilities.get(key) ?? 0.5;
       logMatchProb += safeLog(m);
       logNonMatchProb += safeLog(u);
     }
@@ -482,6 +487,28 @@ function enforceLevelOrdering(fieldKeys: readonly string[], state: EMState): voi
       state.uProbabilities.set(uLevels[idx]!, block.avgValue);
     }
   }
+
+  // Re-normalize m/u probabilities for this field after PAVA pooling.
+  // PAVA may create blocks whose average values violate the per-field
+  // probability distribution constraint (∑_k m_k = 1, ∑_k u_k = 1).
+  let mSum = 0;
+  let uSum = 0;
+  for (const key of fieldKeys) {
+    mSum += state.mProbabilities.get(key) ?? 0;
+    uSum += state.uProbabilities.get(key) ?? 0;
+  }
+  if (mSum > 0) {
+    for (const key of fieldKeys) {
+      const mVal = state.mProbabilities.get(key);
+      if (mVal !== undefined) state.mProbabilities.set(key, clampProb(mVal / mSum));
+    }
+  }
+  if (uSum > 0) {
+    for (const key of fieldKeys) {
+      const uVal = state.uProbabilities.get(key);
+      if (uVal !== undefined) state.uProbabilities.set(key, clampProb(uVal / uSum));
+    }
+  }
 }
 
 // ─── Log-likelihood computation ─────────────────────────────────
@@ -502,7 +529,7 @@ function computeLogLikelihood(pairKeySets: readonly string[][], state: EMState):
 
     for (const key of pairKeys) {
       const m = state.mProbabilities.get(key) ?? 0.5;
-      const u = state.uProbabilities.get(key) ?? 0.1;
+      const u = state.uProbabilities.get(key) ?? 0.5;
       logMatchProb += safeLog(m);
       logNonMatchProb += safeLog(u);
     }
@@ -536,12 +563,24 @@ export function clampProb(p: number): number {
   return p;
 }
 
-/** Simple 32-bit hash for deterministic pair sampling (Splink-style). */
+/** Simple 32-bit hash for deterministic pair sampling. */
 function simpleHash32(n: number): number {
   let h = n | 0;
-  h = (h ^ 61 ^ (h >>> 16)) * 9;
+  h = Math.imul(h ^ 61 ^ (h >>> 16), 9) | 0;
   h = h ^ (h >>> 4);
-  h = h * 0x27d4eb2d;
+  h = Math.imul(h, 0x27d4eb2d) | 0;
   h = h ^ (h >>> 15);
   return h >>> 0;
+}
+
+/** Mulberry32 PRNG: seedable 32-bit random number generator.
+ *  @internal Returns a function that produces deterministic values in [0, 1). */
+function mulberry32(seed: number): () => number {
+  let s = seed | 0;
+  return () => {
+    s = (s + 0x6d2b79f5) | 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
 }
