@@ -1,4 +1,4 @@
-name: Benchmark & Deploy
+name: Benchmark
 
 on:
   push:
@@ -11,20 +11,15 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: benchmark-pages
+  group: benchmark-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   benchmark:
     runs-on: ubuntu-latest
     timeout-minutes: 25
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
     steps:
       - uses: actions/checkout@v7
 
@@ -66,14 +61,13 @@ jobs:
       - name: Generate HTML report
         run: node benchmarks/report.mjs
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
+      - name: Upload benchmark artifact
+        uses: actions/upload-artifact@v7
         with:
-          path: benchmarks/output
-
-      - name: Deploy
-        id: deploy
-        uses: actions/deploy-pages@v5
+          name: benchmark-report
+          path: |
+            benchmarks/output/index.html
+            benchmarks/output/comparison-results.json
+            benchmarks/output/staged-full.json
+            benchmarks/output/splink-results.json
+          retention-days: 7
