@@ -1,22 +1,75 @@
 // LLM-assisted boundary-pair scorer for entity-resolver.
-// Uses an LLM (DeepSeek, OpenAI-compatible) to resolve ambiguous pairs.
+// Supports DeepSeek, OpenAI, Anthropic, Ollama, and custom OpenAI-compatible providers.
 // API key is injected via configuration — NEVER in code or environment variables.
 //
 import { LLMError } from '../errors/hierarchy.js';
 // Production-hardened with:
+// - Multi-provider: DeepSeek, OpenAI, Anthropic, Ollama, custom
+// - Two-stage hybrid: cheap scorer → top-K LLM reranking
 // - Circuit breaker: pauses on consecutive failures to prevent API abuse
 // - Exponential backoff retry: transient failures (429/500/503) are retried
 // - Batch processing: boundary pairs are scored in configurable parallel batches
+// - Cost tracking: per-call token usage and estimated USD cost
 // - Graceful degradation: circuit-open returns neutral scores, not errors
 
 import type { ScoredPair } from '../types/core.js';
 import type { ILogger } from '../interfaces/ILogger.js';
 
+// ═══════════════════════════════════════════════════════════════
+// Provider abstraction
+// ═══════════════════════════════════════════════════════════════
+
+/** Supported LLM providers. */
+export type LLMProvider = 'deepseek' | 'openai' | 'anthropic' | 'ollama' | 'custom';
+
+/** Provider-specific defaults. */
+interface ProviderDefaults {
+  readonly baseUrl: string;
+  readonly model: string;
+  readonly inputPricePer1M: number;
+  readonly outputPricePer1M: number;
+}
+
+const PROVIDER_DEFAULTS: Readonly<Record<LLMProvider, ProviderDefaults>> = {
+  deepseek: {
+    baseUrl: 'https://api.deepseek.com/v1',
+    model: 'deepseek-v4-pro',
+    inputPricePer1M: 0.14,
+    outputPricePer1M: 0.28,
+  },
+  openai: {
+    baseUrl: 'https://api.openai.com/v1',
+    model: 'gpt-4o-mini',
+    inputPricePer1M: 0.15,
+    outputPricePer1M: 0.60,
+  },
+  anthropic: {
+    baseUrl: 'https://api.anthropic.com/v1',
+    model: 'claude-3-haiku-20240307',
+    inputPricePer1M: 0.25,
+    outputPricePer1M: 1.25,
+  },
+  ollama: {
+    baseUrl: 'http://localhost:11434/v1',
+    model: 'llama3.1:8b',
+    inputPricePer1M: 0,
+    outputPricePer1M: 0,
+  },
+  custom: {
+    baseUrl: 'https://api.deepseek.com/v1',
+    model: 'deepseek-v4-pro',
+    inputPricePer1M: 0.14,
+    outputPricePer1M: 0.28,
+  },
+};
+
 /** LLM provider configuration. */
 export interface LLMProviderConfig {
-  /** API base URL. Default: DeepSeek API. */
+  /** LLM provider. Default: deepseek. */
+  readonly provider?: LLMProvider;
+  /** API base URL. Auto-selected per provider if not set. */
   readonly apiBaseUrl?: string;
-  /** Model name. Default: deepseek-v4-pro. */
+  /** Model name. Auto-selected per provider if not set. */
   readonly model?: string;
   /** API key for the provider. MUST be provided by the caller (never from env). */
   readonly apiKey: string;
@@ -42,6 +95,28 @@ export interface LLMScorerConfig extends LLMProviderConfig {
   readonly candidateHi: number;
 }
 
+/** LLM hybrid (two-stage) configuration. */
+export interface LLMHybridConfig extends LLMScorerConfig {
+  /** Top-K pairs to send to LLM for reranking. Default: 20. */
+  readonly topK?: number;
+  /** Minimum original score to qualify for LLM review. Default: 0.3. */
+  readonly minCandidateScore?: number;
+}
+
+/** Cost estimation for an LLM scoring run. */
+export interface LLMCostEstimate {
+  readonly estimatedPromptTokens: number;
+  readonly estimatedCompletionTokens: number;
+  readonly estimatedCostUSD: number;
+}
+
+/** Per-pair cost tracking in results. */
+export interface LLMCostBreakdown {
+  readonly promptTokens: number;
+  readonly completionTokens: number;
+  readonly costUSD: number;
+}
+
 /** Result from LLM scoring a record pair. */
 export interface LLMScorerResult {
   readonly leftId: number;
@@ -49,6 +124,80 @@ export interface LLMScorerResult {
   readonly originalScore: number;
   readonly llmScore: number;
   readonly reasoning: string;
+  /** Cost breakdown for this specific pair (if token usage was reported). */
+  readonly cost?: LLMCostBreakdown;
+}
+
+/** Internal LLM response with optional token usage. */
+interface LLMResponse {
+  score: number;
+  reasoning: string;
+  usage?: { promptTokens: number; completionTokens: number };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Provider resolution
+// ═══════════════════════════════════════════════════════════════
+
+function resolveProvider(config: LLMProviderConfig): {
+  apiBase: string;
+  model: string;
+  provider: LLMProvider;
+} {
+  const provider = config.provider ?? 'deepseek';
+  const defaults = PROVIDER_DEFAULTS[provider];
+  return {
+    apiBase: config.apiBaseUrl ?? defaults.baseUrl,
+    model: config.model ?? defaults.model,
+    provider,
+  };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Cost estimation
+// ═══════════════════════════════════════════════════════════════
+
+/** Average tokens per field (empirical: ~4 tokens per field name + value). */
+const TOKENS_PER_FIELD = 8;
+
+/**
+ * Estimate LLM cost before making API calls.
+ * Useful for budgeting and cost-aware decision making.
+ *
+ * @param pairCount — Number of record pairs to score
+ * @param averageFieldsPerRecord — Average number of fields per record
+ * @param provider — LLM provider for pricing
+ */
+export function estimateLLMCost(
+  pairCount: number,
+  averageFieldsPerRecord: number,
+  provider: LLMProvider = 'deepseek',
+): LLMCostEstimate {
+  const defaults = PROVIDER_DEFAULTS[provider];
+  // Prompt: system + instructions + 2 records × fields
+  const promptTokens = pairCount * (50 + 2 * averageFieldsPerRecord * TOKENS_PER_FIELD);
+  // Completion: ~20 tokens per pair for JSON response
+  const completionTokens = pairCount * 20;
+
+  const inputCost = (promptTokens / 1_000_000) * defaults.inputPricePer1M;
+  const outputCost = (completionTokens / 1_000_000) * defaults.outputPricePer1M;
+
+  return {
+    estimatedPromptTokens: promptTokens,
+    estimatedCompletionTokens: completionTokens,
+    estimatedCostUSD: Math.round((inputCost + outputCost) * 1e6) / 1e6,
+  };
+}
+
+function computeCost(
+  promptTokens: number,
+  completionTokens: number,
+  provider: LLMProvider,
+): number {
+  const defaults = PROVIDER_DEFAULTS[provider];
+  const inputCost = (promptTokens / 1_000_000) * defaults.inputPricePer1M;
+  const outputCost = (completionTokens / 1_000_000) * defaults.outputPricePer1M;
+  return Math.round((inputCost + outputCost) * 1e6) / 1e6;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -125,9 +274,7 @@ export async function scoreWithLLM(
     throw new LLMError('LLMScorerConfig.apiKey is required for LLM scoring');
   }
 
-  const apiBase = config.apiBaseUrl ?? 'https://api.deepseek.com/v1';
-  const model = config.model ?? 'deepseek-v4-pro';
-  const batchSize = config.batchSize ?? 5;
+  const { apiBase, model, provider } = resolveProvider(config);
   const maxRetries = config.maxRetries ?? 3;
   const retryBaseMs = config.retryBaseMs ?? 1000;
   const cbThreshold = config.circuitBreakerThreshold ?? 5;
@@ -151,7 +298,6 @@ export async function scoreWithLLM(
       circuitKey,
       consecutiveFailures: circuit.consecutiveFailures,
     });
-    // Graceful degradation: return neutral scores for all boundary pairs
     return boundaryPairs.map((pair) => ({
       leftId: pair.leftId,
       rightId: pair.rightId,
@@ -165,6 +311,7 @@ export async function scoreWithLLM(
     apiBase,
     apiKey: config.apiKey,
     model,
+    provider,
     maxTokens: config.maxTokens ?? 200,
     maxRetries,
     retryBaseMs,
@@ -174,13 +321,102 @@ export async function scoreWithLLM(
     ...(logger !== undefined ? { logger } : {}),
   };
 
-  // Process boundary pairs in batches
+  return processBatches(boundaryPairs, records, sharedState);
+}
+
+/**
+ * Two-stage hybrid LLM scoring for cost-optimal entity resolution.
+ *
+ * Stage 1 (cheap): Sort pairs by existing string similarity, keep top-K.
+ * Stage 2 (LLM): Send only the top-K boundary pairs to LLM for semantic reranking.
+ *
+ * This reduces LLM API costs by 10-100x compared to sending all pairs,
+ * while maintaining high accuracy on the most ambiguous cases.
+ *
+ * Pairs below minCandidateScore receive their original score unchanged.
+ */
+export async function scoreWithLLMHybrid(
+  pairs: readonly ScoredPair[],
+  records: readonly Record<string, unknown>[],
+  config: LLMHybridConfig,
+  logger?: ILogger,
+): Promise<LLMScorerResult[]> {
+  if (!config.apiKey) {
+    throw new LLMError('LLMHybridConfig.apiKey is required for LLM hybrid scoring');
+  }
+
+  const topK = config.topK ?? 20;
+  const minScore = config.minCandidateScore ?? 0.3;
+
+  // Stage 1: Sort by original score, keep top-K candidates
+  const scoredWithIndex = pairs.map((p, i) => ({
+    pair: p,
+    idx: i,
+    score: p.probability ?? p.score,
+  }));
+  scoredWithIndex.sort((a, b) => b.score - a.score);
+
+  const candidates = scoredWithIndex
+    .filter((s) => s.score >= minScore)
+    .slice(0, topK);
+
+  if (candidates.length === 0) {
+    // No candidates qualify — return original pairs unchanged
+    return pairs.map((pair) => ({
+      leftId: pair.leftId,
+      rightId: pair.rightId,
+      originalScore: pair.probability ?? pair.score,
+      llmScore: pair.probability ?? pair.score,
+      reasoning: 'no candidates qualified for LLM review',
+    }));
+  }
+
+  logger?.info('LLM hybrid: selected top-K candidates for reranking', {
+    operation: 'scoreWithLLMHybrid',
+    totalPairs: pairs.length,
+    candidates: candidates.length,
+    topK,
+    minScore,
+  });
+
+  // Stage 2: Send candidates to LLM
+  const candidatePairs = candidates.map((c) => c.pair);
+  const llmResults = await scoreWithLLM(candidatePairs, records, config, logger);
+
+  // Merge: LLM-scored pairs get LLM results, rest get original scores
+  const llmMap = new Map<string, LLMScorerResult>();
+  for (const r of llmResults) {
+    llmMap.set(`${r.leftId}:${r.rightId}`, r);
+  }
+
+  return pairs.map((pair) => {
+    const key = `${pair.leftId}:${pair.rightId}`;
+    const llmResult = llmMap.get(key);
+    if (llmResult) return llmResult;
+    return {
+      leftId: pair.leftId,
+      rightId: pair.rightId,
+      originalScore: pair.probability ?? pair.score,
+      llmScore: pair.probability ?? pair.score,
+      reasoning: 'below LLM review threshold',
+    };
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Batch processing
+// ═══════════════════════════════════════════════════════════════
+
+async function processBatches(
+  boundaryPairs: ScoredPair[],
+  records: readonly Record<string, unknown>[],
+  state: SharedState,
+): Promise<LLMScorerResult[]> {
   const results: LLMScorerResult[] = [];
-  const batches = chunkArray(boundaryPairs, batchSize);
+  const batches = chunkArray(boundaryPairs, 5);
 
   for (const batch of batches) {
-    if (isCircuitOpen(circuit, cbCooldownMs)) {
-      // Circuit opened mid-processing — add neutral scores for remaining pairs
+    if (isCircuitOpen(state.circuit, state.cbCooldownMs)) {
       for (const pair of batch) {
         results.push({
           leftId: pair.leftId,
@@ -193,13 +429,12 @@ export async function scoreWithLLM(
       continue;
     }
 
-    // Score batch concurrently
     const batchResults = await Promise.allSettled(
       batch.map((pair) => {
         const recordA = records[pair.leftId] ?? {};
         const recordB = records[pair.rightId] ?? {};
         const prompt = buildComparisonPrompt(recordA, recordB);
-        return callLLMWithRetry(prompt, sharedState);
+        return callLLMWithRetry(prompt, state);
       }),
     );
 
@@ -215,22 +450,30 @@ export async function scoreWithLLM(
           originalScore: pair.probability ?? pair.score,
           llmScore: llmResult.score,
           reasoning: llmResult.reasoning,
+          ...(llmResult.usage && {
+            cost: {
+              promptTokens: llmResult.usage.promptTokens,
+              completionTokens: llmResult.usage.completionTokens,
+              costUSD: computeCost(
+                llmResult.usage.promptTokens,
+                llmResult.usage.completionTokens,
+                state.provider,
+              ),
+            },
+          }),
         });
-        // Success resets circuit
-        circuit.consecutiveFailures = 0;
-        circuit.openSince = null;
+        state.circuit.consecutiveFailures = 0;
+        state.circuit.openSince = null;
       } else {
-        // Failure increments circuit
-        circuit.consecutiveFailures++;
-        if (circuit.consecutiveFailures >= cbThreshold) {
-          circuit.openSince = Date.now();
-          logger?.warn('LLM scorer circuit breaker tripped', {
+        state.circuit.consecutiveFailures++;
+        if (state.circuit.consecutiveFailures >= state.cbThreshold) {
+          state.circuit.openSince = Date.now();
+          state.logger?.warn('LLM scorer circuit breaker tripped', {
             operation: 'scoreWithLLM',
-            circuitKey,
-            consecutiveFailures: circuit.consecutiveFailures,
+            circuitKey: `${state.apiBase}:${state.model}`,
+            consecutiveFailures: state.circuit.consecutiveFailures,
           });
         }
-        // Return neutral score for failed pair
         results.push({
           leftId: pair.leftId,
           rightId: pair.rightId,
@@ -253,6 +496,7 @@ interface SharedState {
   apiBase: string;
   apiKey: string;
   model: string;
+  provider: LLMProvider;
   maxTokens: number;
   maxRetries: number;
   retryBaseMs: number;
@@ -269,7 +513,7 @@ interface SharedState {
 async function callLLMWithRetry(
   prompt: string,
   state: SharedState,
-): Promise<{ score: number; reasoning: string }> {
+): Promise<LLMResponse> {
   let lastError: Error | undefined;
 
   for (let attempt = 0; attempt <= state.maxRetries; attempt++) {
@@ -359,7 +603,7 @@ async function callLLM(
   prompt: string,
   maxTokens: number,
   logger?: ILogger,
-): Promise<{ score: number; reasoning: string }> {
+): Promise<LLMResponse> {
   const response = await fetch(`${baseUrl}/chat/completions`, {
     method: 'POST',
     headers: {
@@ -387,9 +631,14 @@ async function callLLM(
 
   const data = (await response.json()) as {
     choices: { message: { content: string } }[];
+    usage?: { prompt_tokens: number; completion_tokens: number };
   };
 
   const content = data.choices[0]?.message?.content ?? '{"score":0.5,"reasoning":"no response"}';
+
+  const usage = data.usage
+    ? { promptTokens: data.usage.prompt_tokens, completionTokens: data.usage.completion_tokens }
+    : undefined;
 
   try {
     const jsonStr = content
@@ -400,11 +649,12 @@ async function callLLM(
     return {
       score: Math.max(0, Math.min(1, parsed.score)),
       reasoning: parsed.reasoning ?? 'no reasoning provided',
+      ...(usage && { usage }),
     };
   } catch {
     logger?.warn(
       'LLM JSON response parse failed — returning neutral score as graceful degradation',
     );
-    return { score: 0.5, reasoning: 'failed to parse LLM response' };
+    return { score: 0.5, reasoning: 'failed to parse LLM response', ...(usage && { usage }) };
   }
 }

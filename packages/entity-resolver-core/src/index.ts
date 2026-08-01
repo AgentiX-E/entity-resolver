@@ -347,8 +347,21 @@ export {
 } from './pprl/bloom.js';
 
 // LLM Scorer
-export type { LLMScorerConfig, LLMScorerResult } from './llm/scorer.js';
-export { scoreWithLLM, resetCircuitBreaker } from './llm/scorer.js';
+export {
+  scoreWithLLM,
+  scoreWithLLMHybrid,
+  estimateLLMCost,
+  resetCircuitBreaker,
+} from './llm/scorer.js';
+export type {
+  LLMProvider,
+  LLMProviderConfig,
+  LLMScorerConfig,
+  LLMHybridConfig,
+  LLMScorerResult,
+  LLMCostEstimate,
+  LLMCostBreakdown,
+} from './llm/scorer.js';
 
 // Golden Record Survivorship
 export type {
