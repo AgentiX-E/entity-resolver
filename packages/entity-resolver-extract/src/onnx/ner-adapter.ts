@@ -120,7 +120,7 @@ async function initializeModel(): Promise<void> {
       modelType: 'base',
     });
 
-    const glinerInstance = instance as GlinerInstance;
+    const glinerInstance = instance as unknown as GlinerInstance;
 
     glinerWrapper = {
       extract: async (inputText: string, labels: string[]) => {

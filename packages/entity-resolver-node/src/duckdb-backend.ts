@@ -32,7 +32,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
       const rows = result.getRows(); // 3-10x faster than getRowObjects for large sets
       return rows.map((row: unknown[]) => {
         const obj: SqlRow = {};
-        for (let i = 0; i < cols.length; i++) obj[cols[i]] = row[i];
+        for (let i = 0; i < cols.length; i++) obj[cols[i]!] = row[i];
         return obj;
       });
     } catch {

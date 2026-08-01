@@ -14,10 +14,10 @@ export function renderMatchChart(container: HTMLElement, pairs: { score: number 
   for (const p of pairs) {
     for (let i = 0; i < bins.length - 1; i++) {
       if (p.score >= bins[i]! && p.score < bins[i + 1]!) {
-        counts[i]++;
+        counts[i]!++;
         break;
       }
-      if (i === bins.length - 2 && p.score >= 1.0) counts[i]++;
+      if (i === bins.length - 2 && p.score >= 1.0) counts[i]!++;
     }
   }
 
