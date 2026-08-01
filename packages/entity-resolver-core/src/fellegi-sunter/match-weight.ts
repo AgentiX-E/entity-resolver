@@ -154,6 +154,6 @@ export const MATCH_WEIGHT_INTERPRETATION = {
 // ─── Helpers ────────────────────────────────────────────────────
 
 function safeLog2(x: number): number {
-  if (x <= 0) return -50; // Very negative weight for impossible events
+  if (x <= 0) return -100; // Very negative weight for impossible / near-zero events
   return Math.log2(x);
 }

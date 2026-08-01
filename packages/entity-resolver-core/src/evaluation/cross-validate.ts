@@ -107,6 +107,18 @@ export function trainTestSplit(
     }
   }
 
+  // Guard: ensure both train and test sets are non-empty
+  if (trainIndices.length === 0) {
+    throw new Error(
+      `Train set is empty after split (testFrac=${testFrac}). Reduce testFraction or increase dataset size.`,
+    );
+  }
+  if (testIndices.length === 0) {
+    throw new Error(
+      `Test set is empty after split (testFrac=${testFrac}). Increase testFraction or dataset size.`,
+    );
+  }
+
   const train = trainIndices.map((i) => records[i]!);
   const test = testIndices.map((i) => records[i]!);
 
@@ -218,7 +230,7 @@ export function crossValidate(
 
   const avg = (values: number[]) => values.reduce((s, v) => s + v, 0) / values.length;
   const std = (values: number[], mean: number) =>
-    Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / values.length);
+    Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / (values.length - 1));
 
   const pF1s = foldResults.map((f) => f.pairwiseF1);
   const cF1s = foldResults.map((f) => f.clusterF1);
@@ -237,7 +249,7 @@ export function crossValidate(
 
 /** Seeded PRNG for reproducible splits. */
 function seedRandom(seed: number) {
-  let s = seed | 0;
+  let s = seed <= 0 ? 1 : seed; // Guard against seed=0 producing negative values
   return () => {
     s = (s * 16807 + 0) % 2147483647;
     return (s - 1) / 2147483646;

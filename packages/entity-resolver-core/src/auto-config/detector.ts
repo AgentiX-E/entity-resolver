@@ -179,7 +179,12 @@ export function detectFields(records: readonly RawRecord[]): DetectedField[] {
       confidence,
       cardinality: new Set(nonNull).size,
       nullRatio: values.length > 0 ? (values.length - nonNull.length) / values.length : 0,
-      isNumeric: /^\d+(\.\d+)?$/.test(nonNull[0] ?? ''),
+      isNumeric: (() => {
+        const sample = nonNull.slice(0, 100);
+        if (sample.length === 0) return false;
+        const numericCount = sample.filter(v => /^\d+(\.\d+)?$/.test(v)).length;
+        return numericCount / sample.length > 0.8;
+      })(),
       avgLength: nonNull.reduce((s, v) => s + v.length, 0) / Math.max(nonNull.length, 1),
       sampleValues: nonNull.slice(0, 5),
     });

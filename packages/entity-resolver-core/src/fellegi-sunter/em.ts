@@ -135,7 +135,7 @@ export function estimateParameters(
 
     for (localIter = 0; localIter < maxIterations; localIter++) {
       eStep(pairKeySets, state, localPosteriors);
-      mStep(pairKeySets, fieldToKeys, localPosteriors, state, keys);
+      mStep(pairKeySets, fieldToKeys, localPosteriors, state);
 
       const ll = computeLogLikelihood(pairKeySets, state);
       localLLHistory.push(ll);
@@ -297,7 +297,6 @@ function mStep(
   fieldToKeys: Map<string, string[]>,
   posteriors: readonly number[],
   state: EMState,
-  _keys: readonly string[],
 ): void {
   const N = pairKeySets.length;
   const laplace = 1; // Laplace smoothing (add-1)

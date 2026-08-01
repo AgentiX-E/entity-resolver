@@ -183,14 +183,18 @@ function computeClusterMetrics(
 function isPureCluster(cluster: Cluster, reference: ReadonlyMap<EntityId, Cluster>): boolean {
   const refIds = new Set<EntityId>();
   for (const memberId of cluster.memberIds) {
+    let found = false;
     for (const [refId, refCluster] of reference) {
       if (refCluster.memberIds.includes(memberId)) {
         refIds.add(refId);
+        found = true;
         break;
       }
     }
+    // A member not found in any reference cluster makes the cluster impure
+    if (!found) return false;
   }
-  return refIds.size === 1;
+  return refIds.size <= 1;
 }
 
 // ══════════════════════════════════════════════════════════════

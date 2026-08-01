@@ -19,7 +19,7 @@ export interface ClusteringMetadata {
 
 // Union-Find helper
 function ufFind(parent: number[], x: number): number {
-  // Full path compression: recursive find with root caching
+  if (x < 0 || x >= parent.length) return x; // Out-of-bounds guard for safety
   if (parent[x] !== x && parent[x] !== undefined) {
     parent[x] = ufFind(parent, parent[x]);
   }
@@ -72,7 +72,8 @@ export function dbscanClustering(
 ): ClusteringResult {
   const neighbors = Array.from({ length: totalRecords }, () => [] as number[]);
   for (const pair of pairs) {
-    if (pair.score >= eps) {
+    const effScore = Math.max(pair.score, pair.probability ?? 0);
+    if (effScore >= eps) {
       neighbors[pair.leftId]!.push(pair.rightId);
       neighbors[pair.rightId]!.push(pair.leftId);
     }
@@ -82,6 +83,9 @@ export function dbscanClustering(
   const visitedSet = new Set<number>();
   let clusterId = 0;
 
+  // Note: DBSCAN minPts counts NEIGHBORS only (not self), unlike sklearn's
+  // implementation which includes the point itself. To match sklearn behavior,
+  // pass minPts = sklearn_minPts - 1.
   for (let i = 0; i < totalRecords; i++) {
     if (labels[i] !== -1) continue;
     const nbrs = neighbors[i]!;

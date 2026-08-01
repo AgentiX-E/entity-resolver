@@ -1511,8 +1511,12 @@ export function ricochetSRClustering(
   currentClusters.set(top.id, new Set([top.id]));
   simWithCenter.set(top.id, 1.0);
 
-  // Add top vertex's best neighbor as member
-  const topNeighbor = top.edges.keys().next().value!;
+  // Add top vertex's best neighbor as member (highest similarity, not map order)
+  let topNeighbor: VertexId | undefined;
+  let bestSim = -Infinity;
+  for (const [nb, sim] of top.edges) {
+    if (sim > bestSim) { bestSim = sim; topNeighbor = nb; }
+  }
   if (topNeighbor !== undefined) {
     members.add(topNeighbor);
     centerOf.set(topNeighbor, top.id);
@@ -1713,7 +1717,7 @@ export function rowColumnClustering(
         minCol = col;
       }
     }
-    if (minCol < 0) break;
+    if (minCol < 0) continue; // Skip row, don't terminate scan — later rows may match
     selectedColumn[row] = minCol;
     columnCovered[minCol] = true;
     rowScanCost += minCost;
