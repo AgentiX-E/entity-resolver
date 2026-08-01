@@ -376,9 +376,7 @@ export function applyDefaults(
 ): Record<string, unknown> {
   const merged = { ...values };
   for (const [key, value] of Object.entries(defaults)) {
-    if (merged[key] === undefined || merged[key] === null) {
-      merged[key] = value;
-    }
+    merged[key] ??= value;
   }
   return merged;
 }

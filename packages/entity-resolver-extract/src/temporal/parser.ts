@@ -114,7 +114,6 @@ function parseChineseNumeral(str: string): number | null {
     return parseInt(str.trim(), 10);
   }
 
-  let result = 0;
   let current = 0;
   let section = 0;
 
@@ -139,7 +138,7 @@ function parseChineseNumeral(str: string): number | null {
     }
   }
 
-  result = section + current;
+  const result = section + current;
   return result > 0 ? result : null;
 }
 
@@ -196,7 +195,7 @@ function parseAbsoluteCJKDate(text: string, _now: Date, results: TemporalResult[
   if (!match) return;
 
   const eraStr = match[1] ?? '';
-  let year = parseChineseNumeral(match[2]!) ?? parseInt(match[2]!, 10);
+  const year = parseChineseNumeral(match[2]!) ?? parseInt(match[2]!, 10);
   const month = parseChineseNumeral(match[3]!) ?? parseInt(match[3]!, 10);
   const day = parseChineseNumeral(match[4]!) ?? parseInt(match[4]!, 10);
 
@@ -265,7 +264,7 @@ function parseAbsoluteCJKTime(text: string, _now: Date, results: TemporalResult[
   const timeStr =
     `${String(hours).padStart(2, '0')}:` +
     `${String(minutes).padStart(2, '0')}:` +
-    `${String(seconds).padStart(2, '0')}`;
+    String(seconds).padStart(2, '0');
 
   let confidence = 0.85;
   if (ampmStr) confidence = 0.9;
@@ -286,7 +285,7 @@ function parseAbsoluteCJKTime(text: string, _now: Date, results: TemporalResult[
 // ─── Relative Days ───────────────────────────────────────────────────
 
 function parseRelativeDays(text: string, now: Date, results: TemporalResult[]): void {
-  const patterns: Array<{ pattern: RegExp; days: number; confidence: number }> = [
+  const patterns: { pattern: RegExp; days: number; confidence: number }[] = [
     { pattern: TODAY_PATTERN, days: 0, confidence: 0.95 },
     { pattern: TOMORROW_PATTERN, days: 1, confidence: 0.95 },
     { pattern: YESTERDAY_PATTERN, days: -1, confidence: 0.95 },

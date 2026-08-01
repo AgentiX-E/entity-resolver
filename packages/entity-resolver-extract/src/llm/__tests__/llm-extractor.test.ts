@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { llmExtract, resetLLMCircuitBreaker, getCircuitBreakerState } from '../llm-extractor.js';
 import type { FieldDescriptor } from '../../extractor.js';
 
-const originalEnv = process.env['DEEPSEEK_API_KEY'];
+const originalEnv = process.env.DEEPSEEK_API_KEY;
 
 describe('llmExtract', () => {
   beforeAll(() => {
@@ -11,19 +11,19 @@ describe('llmExtract', () => {
 
   afterAll(() => {
     // Restore env
-    process.env['DEEPSEEK_API_KEY'] = originalEnv;
+    process.env.DEEPSEEK_API_KEY = originalEnv;
   });
 
   // ── Graceful degradation ──────────────────────────────────────────
 
   describe('graceful degradation (no API key)', () => {
     beforeAll(() => {
-      delete process.env['DEEPSEEK_API_KEY'];
+      delete process.env.DEEPSEEK_API_KEY;
       resetLLMCircuitBreaker();
     });
 
     afterAll(() => {
-      process.env['DEEPSEEK_API_KEY'] = originalEnv;
+      process.env.DEEPSEEK_API_KEY = originalEnv;
     });
 
     it('returns not-attempted when no API key is configured', async () => {
@@ -67,14 +67,14 @@ describe('llmExtract', () => {
 
   describe('live DeepSeek extraction', () => {
     beforeAll(() => {
-      if (!process.env['DEEPSEEK_API_KEY']) {
+      if (!process.env.DEEPSEEK_API_KEY) {
         // Restore from .env if not set
         // In CI, this test will skip gracefully
       }
     });
 
     it('extracts name and age from text via DeepSeek', async () => {
-      const hasKey = !!process.env['DEEPSEEK_API_KEY'];
+      const hasKey = !!process.env.DEEPSEEK_API_KEY;
       if (!hasKey) {
         console.log('Skipping live API test — no DEEPSEEK_API_KEY');
         return;
@@ -95,7 +95,7 @@ describe('llmExtract', () => {
     }, 30000);
 
     it('extracts date and time via DeepSeek', async () => {
-      const hasKey = !!process.env['DEEPSEEK_API_KEY'];
+      const hasKey = !!process.env.DEEPSEEK_API_KEY;
       if (!hasKey) {
         return;
       }

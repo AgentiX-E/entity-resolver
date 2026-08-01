@@ -11,6 +11,11 @@
  */
 import type { IWorkerPool, WorkerPoolConfig, TaskProcessor } from '@agentix-e/entity-resolver-core';
 
+interface WorkerResponse {
+  results?: { id: number; result: { score: number; scores: Record<string, number> } }[];
+  error?: string;
+}
+
 export class BrowserWorkerPool implements IWorkerPool {
   readonly maxWorkers: number;
   private _workers: Worker[] = [];
@@ -78,8 +83,9 @@ export class BrowserWorkerPool implements IWorkerPool {
     return new Promise((resolve, reject) => {
       const handler = (e: MessageEvent) => {
         worker.removeEventListener('message', handler);
-        if (e.data?.error) reject(new Error(e.data.error));
-        else resolve(e.data?.results ?? []);
+        const data = e.data as WorkerResponse;
+        if (data.error) reject(new Error(data.error));
+        else resolve(data.results ?? []);
       };
       worker.addEventListener('message', handler);
       worker.postMessage({

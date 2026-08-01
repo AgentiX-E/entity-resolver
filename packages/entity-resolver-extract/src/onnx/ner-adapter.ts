@@ -94,6 +94,15 @@ export function resetOnnxState(): void {
   glinerWrapper = null;
 }
 
+interface GlinerInstance {
+  extract(params: {
+    texts: string[];
+    entities: string[];
+    flatNer: boolean;
+    threshold: number;
+  }): Promise<GlinerEntity[]>;
+}
+
 // ─── Internal initialization ────────────────────────────────────────
 
 async function initializeModel(): Promise<void> {
@@ -101,7 +110,7 @@ async function initializeModel(): Promise<void> {
     // Dynamic import — only loaded when ONNX is needed
     const { Gliner } = await import('gliner');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const instance = new Gliner({
       tokenizerPath: 'https://huggingface.co/urchade/gliner_small-v2.1/resolve/main/tokenizer.json',
       onnxSettings: {
@@ -111,10 +120,11 @@ async function initializeModel(): Promise<void> {
       modelType: 'base',
     });
 
+    const glinerInstance = instance as GlinerInstance;
+
     glinerWrapper = {
       extract: async (inputText: string, labels: string[]) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const result = await (instance as any).extract({
+        const result = await glinerInstance.extract({
           texts: [inputText],
           entities: labels,
           flatNer: true,
@@ -138,6 +148,7 @@ async function initializeModel(): Promise<void> {
   } catch (err) {
     throw new Error(
       `GLiNER model initialization failed: ${err instanceof Error ? err.message : String(err)}`,
+      { cause: err },
     );
   }
 }

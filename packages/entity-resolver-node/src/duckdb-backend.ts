@@ -8,10 +8,8 @@
  * Reference: https://duckdb.org/docs/current/clients/node_neo/overview
  */
 import type { ISqlBackend, SqlRow, TempTableConfig } from '@agentix-e/entity-resolver-core';
-import type { DuckDBConnection } from '@duckdb/node-api';
+import type { DuckDBConnection, DuckDBResultReader } from '@duckdb/node-api';
 import { DuckDBInstance } from '@duckdb/node-api';
-
- 
 
 export class NodeDuckDBBackend implements ISqlBackend {
   private instance: DuckDBInstance | null = null;
@@ -23,27 +21,23 @@ export class NodeDuckDBBackend implements ISqlBackend {
   }
 
   private async _conn(): Promise<DuckDBConnection> {
-    if (!this.instance) {
-      this.instance = await DuckDBInstance.create(this._path);
-    }
-    if (!this.connection) {
-      this.connection = await this.instance.connect();
-    }
+    this.instance ??= await DuckDBInstance.create(this._path);
+    this.connection ??= await this.instance.connect();
     return this.connection;
   }
 
-  private _rows(result: any): SqlRow[] {
+  private _rows(result: DuckDBResultReader): SqlRow[] {
     try {
       const cols = result.columnNames();
       const rows = result.getRows(); // 3-10x faster than getRowObjects for large sets
       return rows.map((row: unknown[]) => {
         const obj: SqlRow = {};
-        for (let i = 0; i < cols.length; i++) obj[cols[i] as string] = row[i];
+        for (let i = 0; i < cols.length; i++) obj[cols[i]] = row[i];
         return obj;
       });
     } catch {
       try {
-        return (result.getRowObjects() as SqlRow[]) || [];
+        return result.getRowObjects() || [];
       } catch {
         return [];
       }
@@ -102,7 +96,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
   }
 
   private async _batchInsert(
-    conn: any,
+    conn: DuckDBConnection,
     table: string,
     records: readonly Record<string, unknown>[],
     cols: readonly string[],

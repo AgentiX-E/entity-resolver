@@ -233,7 +233,7 @@ describe('coerceAll', () => {
   });
 
   it('marks failed coercions', () => {
-    const results = coerceAll({ x: 'hello' }, { x: 'number' as never });
+    const results = coerceAll({ x: 'hello' }, { x: 'number' });
     expect(results.get('x')!.success).toBe(false);
   });
 });

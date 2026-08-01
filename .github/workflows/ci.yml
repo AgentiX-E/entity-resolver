@@ -317,7 +317,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════
   benchmark:
     name: Benchmarks
-    needs: [lint, typecheck]
+    needs: [lint, typecheck, format]
     runs-on: ubuntu-latest
     timeout-minutes: 40
     permissions:
@@ -425,7 +425,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════
   e2e:
     name: E2E (Playwright)
-    needs: [lint, typecheck]
+    needs: [lint, typecheck, format]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -450,7 +450,7 @@ jobs:
   # ═══════════════════════════════════════════════════════════
   deploy-pages:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-    needs: [test-server, test-visual, test-cli, benchmark, e2e]
+    needs: [test-server, test-visual, test-cli, test-heavy, benchmark, e2e]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

@@ -914,7 +914,7 @@ describe('extract() ONNX/LLM injection', () => {
 describe('extract() general mode accuracy', () => {
   function runAccuracyTest(
     _label: string,
-    cases: Array<{ text: string; expected: unknown }>,
+    cases: { text: string; expected: unknown }[],
     field: FieldDescriptor,
   ): { passed: number; total: number; rate: number } {
     let passed = 0;

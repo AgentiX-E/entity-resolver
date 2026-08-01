@@ -10,7 +10,7 @@
  */
 export function renderMatchChart(container: HTMLElement, pairs: { score: number }[]): void {
   const bins = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
-  const counts = new Array(bins.length - 1).fill(0);
+  const counts: number[] = Array.from<number>({ length: bins.length - 1 }).fill(0);
   for (const p of pairs) {
     for (let i = 0; i < bins.length - 1; i++) {
       if (p.score >= bins[i]! && p.score < bins[i + 1]!) {

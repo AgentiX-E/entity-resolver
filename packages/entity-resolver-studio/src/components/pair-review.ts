@@ -4,7 +4,7 @@
  * Renders two records with field-level diff highlighting.
  * Zero framework dependencies. Extends visual package's ErBaseElement pattern.
  */
-import type { StudioPair, FieldScore } from '../session.js';
+import type { StudioPair } from '../session.js';
 
 const MATCH = '#16a34a';
 const NO_MATCH = '#dc2626';

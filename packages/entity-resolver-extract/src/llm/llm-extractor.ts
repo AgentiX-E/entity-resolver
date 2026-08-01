@@ -253,7 +253,7 @@ export async function llmExtract(
 
 function getApiKey(): string | undefined {
   // Only from environment — never hardcoded
-  return process.env['DEEPSEEK_API_KEY'] ?? undefined;
+  return process.env.DEEPSEEK_API_KEY ?? undefined;
 }
 
 async function callDeepSeek(
@@ -264,7 +264,7 @@ async function callDeepSeek(
   model: string,
 ): Promise<string> {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const timeoutId = setTimeout(() => { controller.abort(); }, REQUEST_TIMEOUT_MS);
 
   try {
     const response = await fetch(apiUrl, {
@@ -291,7 +291,7 @@ async function callDeepSeek(
     }
 
     const data = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
+      choices?: { message?: { content?: string } }[];
     };
     const content = data.choices?.[0]?.message?.content;
     if (!content) {

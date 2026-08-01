@@ -74,7 +74,7 @@ export function buildExtractionPrompt(input: PromptInput): PromptOutput {
     (optionalFields ? `- Optional fields: ${optionalFields}\n` : '') +
     `- Preserve the original meaning, do not fabricate values\n` +
     `- For dates/times, use ISO 8601 format (YYYY-MM-DD, HH:MM:SS)\n` +
-    `${intentHint}`;
+    intentHint;
 
   return {
     systemMessage,
@@ -118,7 +118,7 @@ export function parseLLMResponse(response: string): Record<string, unknown> | nu
 
   // Try pure JSON first
   try {
-    const result = JSON.parse(trimmed);
+    const result: unknown = JSON.parse(trimmed);
     if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
       return result as Record<string, unknown>;
     }
@@ -130,7 +130,7 @@ export function parseLLMResponse(response: string): Record<string, unknown> | nu
   const codeBlock = /```(?:json)?\s*\n?([\s\S]*?)```/.exec(trimmed);
   if (codeBlock?.[1]) {
     try {
-      const result = JSON.parse(codeBlock[1].trim());
+      const result: unknown = JSON.parse(codeBlock[1].trim());
       if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
         return result as Record<string, unknown>;
       }
@@ -143,7 +143,7 @@ export function parseLLMResponse(response: string): Record<string, unknown> | nu
   const jsonObject = /\{[\s\S]*\}/.exec(trimmed);
   if (jsonObject) {
     try {
-      const result = JSON.parse(jsonObject[0]);
+      const result: unknown = JSON.parse(jsonObject[0]);
       if (typeof result === 'object' && result !== null && !Array.isArray(result)) {
         return result as Record<string, unknown>;
       }

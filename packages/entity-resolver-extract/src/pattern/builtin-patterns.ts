@@ -207,7 +207,7 @@ const numberMatcher: PatternMatcher = {
  * English: true/false, yes/no, y/n, on/off, 1/0
  * Chinese: �?/�?, �?/�?, �?/�?, �?/�?, 开/�?
  */
-const booleanPatterns: Array<{ pattern: RegExp; value: boolean; lang: string }> = [
+const booleanPatterns: { pattern: RegExp; value: boolean; lang: string }[] = [
   // English
   { pattern: /\b(?:true|yes|y|on)\b/i, value: true, lang: 'en' },
   { pattern: /\b(?:false|no|n|off)\b/i, value: false, lang: 'en' },
@@ -237,7 +237,7 @@ const booleanMatcher: PatternMatcher = {
 
     // Numeric boolean: standalone 1 or 0
     const numericBool = /\b([01])\b/.exec(text);
-    if (numericBool && numericBool[1]) {
+    if (numericBool?.[1]) {
       return [
         {
           value: numericBool[1] === '1',
@@ -261,7 +261,7 @@ const booleanMatcher: PatternMatcher = {
  * NOTE: CJK date parsing (2024�?1�?15�?, 明天, 下周�?) is handled by the temporal
  * parser in I14. This matcher covers Western date formats only.
  */
-const dateRegexes: Array<{ pattern: RegExp; format: string }> = [
+const dateRegexes: { pattern: RegExp; format: string }[] = [
   { pattern: /\b(\d{4})-(\d{2})-(\d{2})\b/, format: 'YYYY-MM-DD' },
   { pattern: /\b(\d{4})\/(\d{2})\/(\d{2})\b/, format: 'YYYY/MM/DD' },
   {
@@ -417,7 +417,7 @@ const timeMatcher: PatternMatcher = {
     const timeStr =
       `${String(hours).padStart(2, '0')}:` +
       `${String(minutes).padStart(2, '0')}:` +
-      `${String(seconds).padStart(2, '0')}`;
+      String(seconds).padStart(2, '0');
 
     let confidence = 0.85;
     if (ampm) confidence = 0.92;

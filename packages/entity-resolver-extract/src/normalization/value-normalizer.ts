@@ -32,5 +32,5 @@ export { repairUnicode, normalizeCJK, normalize, normalizeEmail, normalizePhone 
  * @returns Normalized text ready for pattern matching
  */
 export function normalizeText(text: string): string {
-  return normalize(text) as string;
+  return normalize(text);
 }

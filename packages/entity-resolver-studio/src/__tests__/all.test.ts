@@ -118,35 +118,35 @@ describe('studioVersion', () => {
 
 describe('createStudioMachine', () => {
   it('start creates session and batch', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     expect(state.session).not.toBeNull();
     expect(state.batch).not.toBeNull();
   });
 
   it('match labels current pair as true', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'match' });
     expect(state.session!.pairs[0]!.label).toBe(true);
   });
 
   it('noMatch labels current pair as false', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'noMatch' });
     expect(state.session!.pairs[0]!.label).toBe(false);
   });
 
   it('skip advances selectedIndex', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
     dispatch({ type: 'skip' });
     expect(state.selectedIndex).toBe(1);
   });
 
   it('undo reverts last label', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'match' });
     dispatch({ type: 'undo' });
@@ -154,7 +154,7 @@ describe('createStudioMachine', () => {
   });
 
   it('reset clears all labels', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'match' });
     dispatch({ type: 'reset' });
@@ -162,7 +162,7 @@ describe('createStudioMachine', () => {
   });
 
   it('nextBatch advances', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     const pairs = Array.from({ length: 5 }, () => mk(0.5));
     dispatch({ type: 'start', pairs, records, batchSize: 2 });
     for (let i = 0; i < 2; i++) dispatch({ type: 'match' });
@@ -171,7 +171,7 @@ describe('createStudioMachine', () => {
   });
 
   it('selectPrev goes back', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
     dispatch({ type: 'skip' });
     dispatch({ type: 'selectPrev' });
@@ -209,47 +209,47 @@ describe('session edge cases', () => {
 
 describe('state machine edge cases', () => {
   it('selectNext before start is no-op (batch null)', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'selectNext' });
     expect(state.selectedIndex).toBe(0);
   });
 
   it('selectPrev before start is no-op (batch null)', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'selectPrev' });
     expect(state.selectedIndex).toBe(0);
   });
 
   it('selectNext advances selectedIndex', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85), mk(0.6)], records, batchSize: 10 });
     dispatch({ type: 'selectNext' });
     expect(state.selectedIndex).toBe(1);
   });
 
   it('selectNext at last index does not advance past end', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'selectNext' });
     expect(state.selectedIndex).toBe(0);
   });
 
   it('selectPrev at index 0 stays at 0', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'selectPrev' });
     expect(state.selectedIndex).toBe(0);
   });
 
   it('undo does nothing for unlabeled session', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'undo' });
     expect(state.session!.pairs[0]!.label).toBe(null);
   });
 
   it('skip at last index wraps back for next batch', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'start', pairs: [mk(0.85)], records, batchSize: 10 });
     dispatch({ type: 'skip' });
     // With only 1 pair, skip cannot advance — stays at 0
@@ -261,37 +261,37 @@ describe('state machine edge cases', () => {
 
 describe('state machine coverage edges', () => {
   it('skip with null batch is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'skip' });
     expect(state.session).toBeNull();
   });
 
   it('match with null session is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'match' });
     expect(state.session).toBeNull();
   });
 
   it('noMatch with null session is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'noMatch' });
     expect(state.session).toBeNull();
   });
 
   it('undo with null session is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'undo' });
     expect(state.session).toBeNull();
   });
 
   it('reset with null session is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'reset' });
     expect(state.session).toBeNull();
   });
 
   it('nextBatch with null session is a no-op', () => {
-    const { state, dispatch } = createStudioMachine(() => {});
+    const { state, dispatch } = createStudioMachine(() => undefined);
     dispatch({ type: 'nextBatch' });
     expect(state.session).toBeNull();
   });

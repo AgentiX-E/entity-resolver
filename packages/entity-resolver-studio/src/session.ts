@@ -108,7 +108,7 @@ function diffFields(left: Record<string, unknown>, right: Record<string, unknown
     const lv = left[f] ?? '';
     const rv = right[f] ?? '';
     if (lv === '' && rv === '') continue;
-    let s = 1.0;
+    let s: number;
     if (typeof lv === 'string' && typeof rv === 'string') {
       const a = bigrams(lv.toLowerCase());
       const b = bigrams(rv.toLowerCase());

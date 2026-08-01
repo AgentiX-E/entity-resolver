@@ -67,7 +67,7 @@ describe('Full pipeline: extract → resolve', () => {
       'Jane Doe, jane@example.com, Boston',
     ];
 
-    const records: Array<Record<string, unknown>> = contacts.map((text, i) => {
+    const records: Record<string, unknown>[] = contacts.map((text, i) => {
       const ext = extract(text, [
         { name: 'name', type: 'string' },
         { name: 'email', type: 'email' },
