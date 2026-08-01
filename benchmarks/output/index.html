@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>entity-resolver Benchmarks</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:1100px;margin:40px auto;padding:0 20px;background:#fafafa;color:#1f2937}
+h1{font-size:24px;border-bottom:2px solid #3b82f6;padding-bottom:8px}
+h2{font-size:18px;margin-top:32px}
+table{width:100%;border-collapse:collapse;margin:16px 0;background:white;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+th{background:#3b82f6;color:white;padding:10px 12px;text-align:left;font-size:13px}
+td{padding:8px 12px;border-bottom:1px solid #e5e7eb;font-size:13px;font-variant-numeric:tabular-nums}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:600}
+.badge-er{background:#dbeafe;color:#1d4ed8}
+.badge-splink{background:#fef3c7;color:#92400e}
+.meta{font-size:13px;color:#6b7280;margin-bottom:24px}
+footer{font-size:12px;color:#9ca3af;margin-top:48px;text-align:center;border-top:1px solid #e5e7eb;padding-top:16px}
+</style>
+</head>
+<body>
+<h1>entity-resolver Benchmarks</h1>
+<div class="meta">Generated: 2026-08-01T11:46:37.335Z &mdash; <a href="https://github.com/AgentiX-E/entity-resolver">GitHub</a></div>
+
+<h2>Real Dataset Accuracy (F1 — Ground Truth)</h2><table><thead><tr><th>Dataset</th><th>Mode</th><th>Records</th><th>True</th><th>F1</th><th>P</th><th>R</th><th>Pairs</th><th>Time</th><th>Splink F1</th></tr></thead><tbody><tr><td>DBLP-ACM</td><td>linkage</td><td>4910</td><td>2224</td><td><span class="badge badge-er">0.8840</span></td><td>0.8854</td><td>0.8826</td><td>2217</td><td>0.2s</td><td>0.5763</td></tr><tr><td>Abt-Buy</td><td>linkage-js</td><td>2173</td><td>1097</td><td><span class="badge badge-er">0.0533</span></td><td>0.0278</td><td>0.6299</td><td>50599</td><td>0.7s</td><td>0.0127</td></tr><tr><td>Amazon-Google</td><td>linkage</td><td>4589</td><td>1300</td><td><span class="badge badge-er">0.0458</span></td><td>0.0383</td><td>0.0569</td><td>1932</td><td>0.2s</td><td>0.0046</td></tr><tr><td>FEBRL-1000</td><td>dedupe</td><td>1200</td><td>200</td><td><span class="badge badge-er">0.0678</span></td><td>0.0779</td><td>0.0600</td><td>154</td><td>0.1s</td><td>N/A</td></tr><tr><td>FEBRL-5000</td><td>dedupe</td><td>6000</td><td>1000</td><td><span class="badge badge-er">0.4236</span></td><td>0.4901</td><td>0.3730</td><td>761</td><td>1.6s</td><td>N/A</td></tr></tbody></table>
+<footer>entity-resolver &mdash; 10 packages &mdash; MIT License</footer>
+</body>
+</html>

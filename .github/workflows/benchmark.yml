@@ -21,7 +21,7 @@ concurrency:
 jobs:
   benchmark:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     environment:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
@@ -48,6 +48,20 @@ jobs:
           echo "Scale: $SCALE"
           mkdir -p benchmarks/output
           node benchmarks/staged.mjs
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python deps
+        run: pip install pandas splink
+
+      - name: Run Splink comparison
+        run: python benchmarks/splink_compare.py
+
+      - name: Run accuracy benchmark (real datasets)
+        run: node benchmarks/comparison.mjs
 
       - name: Generate HTML report
         run: node benchmarks/report.mjs
