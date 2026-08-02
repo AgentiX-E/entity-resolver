@@ -15,9 +15,9 @@ describe('ScorerRegistry', () => {
     resetScorerCache();
   });
 
-  it('getScorers returns all 19 scorers', () => {
+  it('getScorers returns all 20 scorer entries (19 unique + 1 legacy alias)', () => {
     const scorers = getScorers();
-    expect(Object.keys(scorers).length).toBe(19);
+    expect(Object.keys(scorers).length).toBe(20);
   });
 
   it('getScorer returns a specific scorer by name', () => {
@@ -29,8 +29,8 @@ describe('ScorerRegistry', () => {
     expect(() => getScorer('nonexistent')).toThrow('Unknown scorer');
   });
 
-  it('scorerCount returns 19', () => {
-    expect(scorerCount()).toBe(19);
+  it('scorerCount returns 20', () => {
+    expect(scorerCount()).toBe(20);
   });
 
   it('caches scorer map after first call', () => {
@@ -46,7 +46,7 @@ describe('ScorerRegistry', () => {
     expect(Object.keys(first)).toEqual(Object.keys(second)); // Different object reference after reset
   });
 
-  it('validateScorerRegistry reports all 19 scorers as valid', () => {
+  it('validateScorerRegistry reports all 20 scorer entries as valid', () => {
     const result = validateScorerRegistry();
     expect(result.valid).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -77,7 +77,7 @@ describe('Registry edge cases', () => {
   it('resetScorerCache and re-validate', () => {
     resetScorerCache();
     const scorers = getScorers();
-    expect(Object.keys(scorers).length).toBe(19);
+    expect(Object.keys(scorers).length).toBe(20);
   });
 
   it('getScorer throws for unknown scorer name', () => {
@@ -94,13 +94,13 @@ describe('initScorers', () => {
     const result = await initScorers();
     // WASM binaries may or may not be available in test env
     expect(['wasm', 'js']).toContain(result);
-    expect(scorerCount()).toBeGreaterThanOrEqual(19);
+    expect(scorerCount()).toBeGreaterThanOrEqual(20);
   });
 
   it('increases scorer count when WASM loaded', async () => {
     const jsCountBefore = scorerCount();
     await initScorers();
-    // After init, count is either 19 (JS) or 24 (19 JS + 5 WASM)
+    // After init, count is either 20 (JS) or 25 (20 JS + 5 WASM)
     const jsCountAfter = scorerCount();
     expect(jsCountAfter).toBeGreaterThanOrEqual(jsCountBefore);
   });
@@ -108,7 +108,7 @@ describe('initScorers', () => {
   it('getScorers returns WASM-preferred entries after init', async () => {
     await initScorers();
     const scorers = getScorers();
-    // Verify all 19 JS scorer names are present
+    // Verify all JS scorer names are present
     expect(scorers.levenshtein).toBeDefined();
     expect(scorers.exact).toBeDefined();
     expect(scorers.soundex).toBeDefined();

@@ -47,18 +47,22 @@ function expectValidScore(scorer: IScorer, a: unknown, b: unknown): number {
 // ─── 19 Scorers Exist ──────────────────────────────────────────
 
 describe('Scorer count', () => {
-  it('should have exactly 19 scorers', () => {
-    expect(IMPLEMENTED_SCORER_COUNT).toBe(19);
-    expect(Object.keys(ALL_SCORERS).length).toBe(19);
+  it('should have exactly 20 scorer keys (19 unique + 1 legacy alias)', () => {
+    // qgram_jaccard replaced qgram_tfidf; the legacy key is kept as an alias
+    expect(IMPLEMENTED_SCORER_COUNT).toBe(20);
+    expect(Object.keys(ALL_SCORERS).length).toBe(20);
   });
 
-  it('every scorer should have a unique name', () => {
+  it('every scorer should have a unique name (19 unique names)', () => {
     const names = Object.values(ALL_SCORERS).map((s) => s.name);
-    expect(new Set(names).size).toBe(names.length);
+    expect(new Set(names).size).toBe(19); // qgram_tfidf alias shares qgram_jaccard's name
   });
 
-  it('every scorer name should match its key', () => {
+  it('non-alias scorer names should match their keys', () => {
+    // Legacy aliases (like qgram_tfidf → qgram_jaccard) are exempt
+    const ALIAS_KEYS = new Set(['qgram_tfidf']);
     for (const [key, scorer] of Object.entries(ALL_SCORERS)) {
+      if (ALIAS_KEYS.has(key)) continue;
       expect(scorer.name).toBe(key);
     }
   });

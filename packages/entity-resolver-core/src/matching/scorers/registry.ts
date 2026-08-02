@@ -7,6 +7,9 @@ import type { ILogger } from '../../interfaces/ILogger.js';
 import { ALL_SCORERS, IMPLEMENTED_SCORER_COUNT } from './js/scorers.js';
 import { tryLoadWasmScorers } from './wasm/loader.js';
 
+/** Scorer keys that are legacy aliases — exempt from name == key validation. */
+const LEGACY_ALIAS_KEYS = new Set(['qgram_tfidf']);
+
 /** Cached scorer map, populated lazily. */
 let _scorers: Readonly<Record<string, IScorer>> | null = null;
 
@@ -109,7 +112,8 @@ export function validateScorerRegistry(): { valid: boolean; errors: string[] } {
   }
 
   for (const [name, scorer] of Object.entries(scorers)) {
-    if (!scorer.name || scorer.name !== name) {
+    // Legacy aliases are exempt from the name == key check
+    if (name !== scorer.name && !LEGACY_ALIAS_KEYS.has(name)) {
       errors.push(`Scorer "${name}" has mismatched name: "${scorer.name}"`);
     }
 
