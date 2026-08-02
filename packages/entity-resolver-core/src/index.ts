@@ -124,6 +124,19 @@ export {
   preprocessRecords,
 } from './preprocessing/cleaner.js';
 
+// CJK-Native preprocessing (I37)
+export {
+  isCJK,
+  hasCJK,
+  cjkTokenize,
+  simplifiedToTraditional,
+  traditionalToSimplified,
+  areSTVariants,
+  parseCJKName,
+  stripCJKHonorifics,
+} from './preprocessing/cjk.js';
+export type { CJKNameParts } from './preprocessing/cjk.js';
+
 // Fellegi-Sunter Probability Model
 export type { FSParameters } from './fellegi-sunter/parameters.js';
 export {
