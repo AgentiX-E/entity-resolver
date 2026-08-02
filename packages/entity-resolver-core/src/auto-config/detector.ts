@@ -191,6 +191,55 @@ export function detectFields(records: readonly RawRecord[]): DetectedField[] {
     });
   }
 
+  // ── I36: Cardinality guard post-processing ──
+  // Fields with near-unique values (≥95% cardinality) cannot be
+  // phone/zip/numeric — they are identifiers. This mirrors GoldenMatch's
+  // cardinality-based reclassification.
+  const n = records.length;
+  const cardinalityFloor = Math.max(0.95, 1 - 1 / Math.sqrt(n));
+  const reclassifiableTypes = new Set<SemanticType>(['phone', 'postcode', 'numeric', 'address']);
+
+  for (const field of result) {
+    const cardRatio = field.cardinality / n;
+    if (reclassifiableTypes.has(field.semanticType) && cardRatio >= cardinalityFloor) {
+      // Mutating readonly interface fields via cast — safe post-processing
+      (field as any).semanticType = 'identifier';
+      (field as any).confidence = 0.85;
+    }
+  }
+
+  // ── I36: Short-code detection ──
+  // Alphanumeric columns with 3-12 char length, ≥50% rows containing
+  // both letters and digits → likely product codes or reference IDs
+  // → use qgram scorer for substring matching.
+  for (const field of result) {
+    if (field.semanticType !== 'text' && field.semanticType !== 'identifier') continue;
+    if (field.avgLength < 3 || field.avgLength > 12) continue;
+
+    const mixedCount = field.sampleValues.filter(
+      (v) => /[a-zA-Z]/.test(v) && /\d/.test(v),
+    ).length;
+    if (mixedCount >= field.sampleValues.length * 0.5) {
+      // Tag as short-code for scorer selection in generateComparisons
+      (field as any)._shortCode = true;
+    }
+  }
+
+  // ── I36: Multi-value name detection ──
+  // Columns with comma/semicolon-delimited values, average >30 chars,
+  // and ≥70% rows containing ≥2 delimiters → multi-valued name fields.
+  for (const field of result) {
+    if (field.semanticType !== 'text' && field.semanticType !== 'name') continue;
+    if (field.avgLength <= 30) continue;
+
+    const withDelims = field.sampleValues.filter(
+      (v) => (v.match(/[,;]/g)?.length ?? 0) >= 2,
+    ).length;
+    if (withDelims >= field.sampleValues.length * 0.7) {
+      (field as any)._multiValue = true;
+    }
+  }
+
   return result;
 }
 
@@ -404,15 +453,28 @@ function generateComparisons(fields: readonly DetectedField[]): ComparisonSpec[]
     .map((f) => {
       let scorer = SCORER_MAP[f.semanticType] ?? 'levenshtein';
 
+      // ── Short-code scorer selection (I36) ──
+      if ((f as any)._shortCode) {
+        scorer = 'qgram_jaccard';
+      }
+
+      // ── Multi-value scorer selection (I36) ──
+      if ((f as any)._multiValue) {
+        scorer = 'token_sort';
+      }
+
       // ── Noise-aware scorer upgrade (I35) ──
-      // When a token_sort field has low cardinality (values are not very diverse),
-      // upgrade to jaro_winkler for better typo tolerance. This mirrors
-      // GoldenMatch's noise-aware scorer refinement.
       if (scorer === 'token_sort' && f.cardinality / f.sampleValues.length < 0.5) {
         scorer = 'jaro_winkler';
       }
 
       const thresholds = computeFieldThresholds(f);
+
+      // ── Confidence-weighted field scoring (I36) ──
+      // Low-confidence (<0.5) classifications are capped at weight 0.3
+      // to prevent them from dominating the aggregate score.
+      const effectiveWeight = f.confidence < 0.5 ? 0.3 : undefined;
+
       return {
         field: f.name,
         scorerName: scorer,
@@ -422,6 +484,7 @@ function generateComparisons(fields: readonly DetectedField[]): ComparisonSpec[]
           { label: 'moderate_match', threshold: thresholds.moderate },
           { label: 'weak_match', threshold: thresholds.weak },
         ],
+        ...(effectiveWeight !== undefined && { weight: effectiveWeight }),
       };
     });
 }
