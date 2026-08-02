@@ -225,14 +225,14 @@ function isSpecificNameMatch(field: string, type: SemanticType): boolean {
 const SCORER_MAP: Readonly<Record<SemanticType, string>> = {
   email: 'exact',
   phone: 'exact',
-  name: 'jaro_winkler',
-  surname: 'jaro_winkler',
-  address: 'token_sort',
+  name: 'ensemble',       // I35: GoldenMatch max(jw, ts, 0.8×sx) — catches typos+reordering+phonetic
+  surname: 'ensemble',    // I35: Same ensemble for surnames — handles spelling variants
+  address: 'token_sort',  // I35: noise-aware — upgraded to jaro_winkler if cardinality < 0.5
   city: 'levenshtein',
   postcode: 'exact',
   date: 'date_diff',
-  company: 'token_sort',
-  product: 'ensemble',
+  company: 'ensemble',    // I35: Company names benefit from ensemble (abbreviations + reordering)
+  product: 'ensemble',    // I35: Already ensemble, maintained
   numeric: 'numeric_diff',
   identifier: 'exact',
   text: 'tfidf_cosine',
@@ -402,8 +402,16 @@ function generateComparisons(fields: readonly DetectedField[]): ComparisonSpec[]
     .filter((f) => f.semanticType !== 'text' || f.confidence > 0.6)
     .slice(0, 6) // Limit to top 6 fields
     .map((f) => {
-      const scorer = SCORER_MAP[f.semanticType] ?? 'levenshtein';
-      // Data-driven thresholds based on field characteristics
+      let scorer = SCORER_MAP[f.semanticType] ?? 'levenshtein';
+
+      // ── Noise-aware scorer upgrade (I35) ──
+      // When a token_sort field has low cardinality (values are not very diverse),
+      // upgrade to jaro_winkler for better typo tolerance. This mirrors
+      // GoldenMatch's noise-aware scorer refinement.
+      if (scorer === 'token_sort' && f.cardinality / f.sampleValues.length < 0.5) {
+        scorer = 'jaro_winkler';
+      }
+
       const thresholds = computeFieldThresholds(f);
       return {
         field: f.name,

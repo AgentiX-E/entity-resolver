@@ -471,10 +471,14 @@ const DUCKDB_SCORER_MAP: Readonly<Record<string, string>> = {
   jaro: 'jaro_similarity',
   levenshtein: 'levenshtein',
   damerau_levenshtein: 'damerau_levenshtein',
-  exact: 'exact_match',
+  exact: '__exact__',   // Handled via isExact flag in SQL generation, not a DB function
   jaccard: 'jaccard',
   dice: 'dice_coefficient',
   hamming: 'hamming',
+  // Composite scorers mapped to best single-function SQL approximation.
+  // The JS pipeline uses the full ensemble (max of 3 signals).
+  ensemble: 'jaro_winkler_similarity',
+  token_sort: 'jaro_winkler_similarity',
 };
 
 /** Resolve a scorer name to its DuckDB SQL function name.

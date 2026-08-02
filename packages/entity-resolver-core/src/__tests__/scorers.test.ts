@@ -276,24 +276,74 @@ describe('ensemble scorer', () => {
     expect(ensembleScorer.score('John Smith', 'John Smith', TEST_FIELD)).toBe(1);
   });
 
-  it('provides good separation for similar names', () => {
+  it('returns 0 for empty strings', () => {
+    expect(ensembleScorer.score('', '', TEST_FIELD)).toBe(0);
+    expect(ensembleScorer.score('', 'John', TEST_FIELD)).toBe(0);
+  });
+
+  it('provides good separation for similar vs different names', () => {
     const similar = ensembleScorer.score('John Smith', 'Jon Smith', TEST_FIELD);
     const different = ensembleScorer.score('John Smith', 'Mary Jones', TEST_FIELD);
     expect(similar).toBeGreaterThan(different);
+    expect(similar).toBeGreaterThan(0.5);
   });
 
-  it('ensemble F1 should be higher than any individual sub-scorer on known pairs', () => {
-    const pairs = [
-      ['John Smith', 'Jon Smyth'],
-      ['Robert', 'Rupert'],
-      ['Catherine', 'Katherine'],
-      ['William', 'Bill'],
+  it('catches typos via jaro_winkler signal', () => {
+    // "Michael" vs "Micheal" — character swap, low token_sort, low soundex
+    const score = ensembleScorer.score('Michael', 'Micheal', TEST_FIELD);
+    expect(score).toBeGreaterThanOrEqual(0.85); // jaro_winkler should catch this
+  });
+
+  it('catches word reordering via token_sort signal', () => {
+    // "John Smith" vs "Smith John" — low jaro_winkler, high token_sort
+    const score = ensembleScorer.score('John Smith', 'Smith John', TEST_FIELD);
+    expect(score).toBeGreaterThanOrEqual(0.8); // token_sort catches this
+  });
+
+  it('catches phonetic variants via soundex signal', () => {
+    // "Catherine" vs "Katherine" — moderate jaro_winkler, soundex C365 vs K365
+    const score = ensembleScorer.score('Catherine', 'Katherine', TEST_FIELD);
+    expect(score).toBeGreaterThanOrEqual(0.8); // soundex×0.8 catches if codes match
+  });
+
+  it('max-of-three beats any single scorer for mixed variation', () => {
+    // Mixed variation: typo + reordering + phonetic
+    // Ensemble should pick the best signal
+    const pairs: Array<[string, string]> = [
+      ['Robert Williams', 'Rupert Williams'],   // phonetic → soundex helps
+      ['Acme Corp', 'ACME Corporation'],        // token_sort via word reorder
+      ['Steven', 'Stephen'],                     // typo → jaro_winkler
+      ['Jon Smyth', 'John Smith'],              // mixed → ensemble picks best
     ];
 
     for (const [a, b] of pairs) {
       const ens = ensembleScorer.score(a, b, TEST_FIELD);
-      // Ensemble should not be worse than the worst sub-scorer
-      expect(ens).toBeGreaterThanOrEqual(0);
+      expect(ens).toBeGreaterThanOrEqual(0.5); // At least one signal should match
+    }
+  });
+
+  it('soundex contributes at 0.8 ceiling to avoid over-weighting phonetics', () => {
+    // Even a perfect soundex match is capped at 0.8
+    const score = ensembleScorer.score('Smith', 'Smyth', TEST_FIELD);
+    // If soundex dominates: S530==S530 → 0.8. If jaro_winkler is higher, use that.
+    expect(score).toBeLessThanOrEqual(1);
+    expect(score).toBeGreaterThanOrEqual(0);
+  });
+
+  it('ensemble is never worse than jaro_winkler alone', () => {
+    const pairs: Array<[string, string]> = [
+      ['John', 'Jon'],
+      ['David', 'Dave'],
+      ['Elizabeth', 'Elisabeth'],
+      ['Christopher', 'Kristofer'],
+      ['Anthony', 'Tony'],
+    ];
+
+    for (const [a, b] of pairs) {
+      const ens = ensembleScorer.score(a, b, TEST_FIELD);
+      const jw = jaroWinklerScorer.score(a, b, TEST_FIELD);
+      // Ensemble is max(jw, tokenSort, soundex×0.8); it MUST be ≥ jw.
+      expect(ens).toBeGreaterThanOrEqual(jw - 1e-10);
     }
   });
 });

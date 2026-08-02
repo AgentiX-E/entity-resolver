@@ -305,8 +305,19 @@ export const qgramJaccardScorer: IScorer = {
 };
 
 /**
- * Ensemble scorer: weighted combination of jaro_winkler + levenshtein + token_sort + dice.
- * Best for: general-purpose name matching (GoldenMatch's recommended ensemble).
+ * Ensemble scorer: GoldenMatch-inspired max-of-three for name matching.
+ *
+ * Instead of weighted averaging (which can be pulled down by one weak signal),
+ * this picks the BEST matching signal across three independent dimensions:
+ *   - jaro_winkler: catches typos and character swaps
+ *   - token_sort:    catches word reordering
+ *   - soundex:       catches phonetic variants (weighted at 0.8 to prevent
+ *                     false positives from common phonetic collisions)
+ *
+ * Best for: name, surname, company, and product fields where different
+ *           types of variation benefit from different similarity measures.
+ *
+ * Reference: GoldenMatch's ensemble strategy in goldenmatch/scoring.py
  */
 export const ensembleScorer: IScorer = {
   name: 'ensemble',
@@ -317,13 +328,13 @@ export const ensembleScorer: IScorer = {
     if (sa === sb && sa !== '') return 1;
     if (sa === '' || sb === '') return 0;
 
+    // Three independent similarity signals
     const jw = jaroWinkler(sa, sb);
-    const lv = levenshteinSimilarity(sa, sb);
     const ts = tokenSortScorer.score(a, b, _field);
-    const dc = dice(sa, sb);
+    const sx = soundex(sa) === soundex(sb) ? 0.8 : 0; // 0.8 weight prevents phonetic FP
 
-    // Weights from GoldenMatch ensemble: jaro_winkler 0.4, levenshtein 0.2, token_sort 0.25, dice 0.15
-    return clamp01(jw * 0.4 + lv * 0.2 + ts * 0.25 + dc * 0.15);
+    // MAX: best signal wins — a strong match on any dimension is a strong match
+    return clamp01(Math.max(jw, ts, sx));
   },
 };
 
