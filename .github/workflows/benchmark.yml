@@ -52,22 +52,17 @@ jobs:
       - name: Install Python deps
         run: pip install pandas splink
 
-      - name: Run Splink comparison
-        run: python benchmarks/splink_compare.py
-
-      - name: Run accuracy benchmark (real datasets)
-        run: node benchmarks/comparison.mjs
-
-      - name: Generate HTML report
-        run: node benchmarks/report.mjs
+      - name: Run unified benchmark suite (I31)
+        run: node --import tsx benchmarks/run.ts
+        env:
+          NODE_OPTIONS: --max-old-space-size=7168
 
       - name: Upload benchmark artifact
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-report
           path: |
-            benchmarks/output/index.html
-            benchmarks/output/comparison-results.json
-            benchmarks/output/staged-full.json
-            benchmarks/output/splink-results.json
+            benchmarks/output/benchmark-report.json
+            benchmarks/output/benchmark-report.html
+            benchmarks/output/benchmark-matrix.csv
           retention-days: 7

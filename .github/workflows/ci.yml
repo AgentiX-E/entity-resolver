@@ -331,64 +331,33 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
 
-      - name: Run benchmarks
-        run: |
-          node --input-type=module -e "
-            import { runAllBenchmarks, formatBenchmarkReport } from './packages/entity-resolver-core/dist/benchmarks/runner.js';
-            import { writeFileSync } from 'node:fs';
-            const r = await runAllBenchmarks();
-            console.log(formatBenchmarkReport(r.results));
-            writeFileSync('benchmark-results.json', JSON.stringify(r, null, 2));
-          "
+      - name: Run unified benchmarks (I31)
+        run: node --import tsx benchmarks/run.ts
         env:
           NODE_OPTIONS: --max-old-space-size=7168
         timeout-minutes: 35
 
-      - name: Generate HTML report
-        run: |
-          node --input-type=module -e "
-            import { readFileSync, writeFileSync } from 'node:fs';
-            const r = JSON.parse(readFileSync('benchmark-results.json','utf-8'));
-            const rows = r.results.map(b => \`
-              <tr>
-                <td>\${b.dataset}</td>
-                <td>\${b.recordCount}</td>
-                <td>\${b.pairCount}</td>
-                <td>\${b.purity?.toFixed(4) ?? '-'}</td>
-                <td>\${b.completeness?.toFixed(4) ?? '-'}</td>
-                <td>\${b.executionTimeMs}ms</td>
-              </tr>
-            \`).join('');
-            writeFileSync('benchmark-report.html', \`<!DOCTYPE html>
-            <html><head><meta charset=utf-8><title>Benchmark Report</title>
-            <style>body{font-family:system-ui;max-width:960px;margin:2em auto}
-            table{border-collapse:collapse;width:100%}
-            th,td{border:1px solid #ddd;padding:8px;text-align:right}
-            th{background:#f5f5f5}td:first-child,td:nth-child(2){text-align:left}
-            .pass{color:green}.fail{color:red}</style></head>
-            <body><h1>Entity Resolver Benchmarks</h1>
-            <table><tr><th>Dataset</th><th>Records</th><th>Pairs</th>
-            <th>Purity</th><th>Completeness</th><th>Time</th></tr>
-            \${rows}</table><p>Generated \${new Date().toISOString()}</p></body></html>\`);
-          "
-
       - name: Compare against baseline
         run: |
-          if [ -f benchmarks/baseline.json ]; then
+          if [ -f benchmarks/output/benchmark-report.json ]; then
             node --input-type=module -e "
               import { readFileSync } from 'node:fs';
-              const cur = JSON.parse(readFileSync('benchmark-results.json','utf-8'));
-              const base = JSON.parse(readFileSync('benchmarks/baseline.json','utf-8'));
+              const cur = JSON.parse(readFileSync('benchmarks/output/benchmark-report.json','utf-8'));
+              const erResults = cur.results.filter(r => r.tool === 'entity-resolver');
+              if (erResults.length === 0) { console.log('No ER results to compare.'); process.exit(0); }
               let regressions = 0;
-              for (const c of cur.results) {
-                const b = base.results.find(x => x.dataset === c.dataset);
-                if (!b) continue;
-                const timeDelta = c.executionTimeMs - b.executionTimeMs;
-                const timeReg = b.executionTimeMs > 0 ? (timeDelta / b.executionTimeMs) * 100 : 0;
-                const purityDelta = c.purity - b.purity;
-                if (timeReg > 20 || purityDelta < -0.02) {
-                  console.error('REGRESSION: ' + c.dataset + ' time=' + timeReg.toFixed(1) + '% purity=' + purityDelta.toFixed(4));
-                  regressions++;
+              if (process.env.BASELINE_JSON) {
+                const base = JSON.parse(process.env.BASELINE_JSON);
+                const baseResults = base.results?.filter(r => r.tool === 'entity-resolver') ?? [];
+                for (const c of erResults) {
+                  const b = baseResults.find(x => x.dataset === c.dataset);
+                  if (!b) continue;
+                  const f1Delta = c.metrics.f1 - b.metrics.f1;
+                  const timeDelta = c.timing.meanMs - b.timing.meanMs;
+                  if (f1Delta < -0.02 || timeDelta > b.timing.meanMs * 0.2) {
+                    console.error('REGRESSION: ' + c.dataset + ' F1=' + f1Delta.toFixed(4) + ' time=' + (timeDelta/b.timing.meanMs*100).toFixed(1) + '%');
+                    regressions++;
+                  }
                 }
               }
               if (regressions > 0) { console.error(regressions + ' regression(s) detected!'); process.exit(1); }
@@ -396,28 +365,14 @@ jobs:
             "
           fi
 
-      - name: Update baseline (push to master only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          mkdir -p benchmarks
-          cp benchmark-results.json benchmarks/baseline.json
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          if git diff --quiet benchmarks/baseline.json; then
-            echo "Baseline unchanged."
-          else
-            git add benchmarks/baseline.json
-            git commit -m "chore: update benchmark baseline [skip ci]"
-            git push origin HEAD:master
-          fi
-
       - name: Upload benchmark artifact
         uses: actions/upload-artifact@v7
         with:
           name: benchmark-report
           path: |
-            benchmark-results.json
-            benchmark-report.html
+            benchmarks/output/benchmark-report.json
+            benchmarks/output/benchmark-report.html
+            benchmarks/output/benchmark-matrix.csv
           retention-days: 7
 
   # ═══════════════════════════════════════════════════════════
@@ -478,6 +433,22 @@ jobs:
       - name: Download benchmark report
         uses: actions/download-artifact@v8
         with: { name: benchmark-report, path: docs/.vitepress/dist/benchmark }
+
+      - name: Update baseline (push to master only)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          if [ -f docs/.vitepress/dist/benchmark/benchmark-report.json ]; then
+            cp docs/.vitepress/dist/benchmark/benchmark-report.json benchmarks/baseline.json
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            if git diff --quiet benchmarks/baseline.json; then
+              echo "Baseline unchanged."
+            else
+              git add benchmarks/baseline.json
+              git commit -m "chore: update benchmark baseline [skip ci]"
+              git push origin HEAD:master
+            fi
+          fi
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
