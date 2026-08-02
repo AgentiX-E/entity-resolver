@@ -60,10 +60,10 @@ async function main() {
   console.log('=== Abt-Buy ===');
   var aL=loadCsv('benchmarks/datasets/Abt-Buy/Abt.csv'), aR=loadCsv('benchmarks/datasets/Abt-Buy/Buy.csv'), aM=loadMapping('benchmarks/datasets/Abt-Buy/abt_buy_perfectMapping.csv');
   var aAll=[...aL,...aR]; t0=performance.now();
-  var aRes=await runPipeline(aAll,{comparisons:[{field:'name',scorerName:'jaro_winkler',levels:[{name:'strong_match',threshold:0.95},{name:'moderate_match',threshold:0.7},{name:'weak_match',threshold:0.4}]},{field:'price',scorerName:'jaro_winkler',levels:[{name:'match'}]}],blocking:{passes:[{fields:['name'],transforms:['lowercase']},{fields:['name'],transforms:['soundex']}]},matchThreshold:0.3});
+  var aRes=await runPipeline(aAll,{comparisons:[{field:'name',scorerName:'jaro_winkler',levels:[{name:'strong_match',threshold:0.95},{name:'moderate_match',threshold:0.7},{name:'weak_match',threshold:0.4}]},{field:'price',scorerName:'jaro_winkler',levels:[{name:'match'}]}],blocking:{passes:[{fields:['name'],transforms:['lowercase']},{fields:['name'],transforms:['soundex']}]},matchThreshold:0.5});
   // For linkage evaluation, only cross-source pairs (left↔right)
   var aPairs=[];
-  for(var pi=0;pi<aRes.scoredPairs.length;pi++){var ap=aRes.scoredPairs[pi];if(ap.leftId<aL.length&&ap.rightId>=aL.length)aPairs.push(ap);}
+  for(var pi=0;pi<aRes.scoredPairs.length;pi++){var ap=aRes.scoredPairs[pi];if(ap.leftId<aL.length&&ap.rightId>=aL.length){aPairs.push({leftId:ap.leftId,rightId:ap.rightId-aL.length,score:ap.score,probability:ap.probability});}}
   var aMtr=computeF1(aPairs,aM,aL,aR,0.3);
   results.push({dataset:'Abt-Buy',records:aL.length+aR.length,trueMatches:aM.size,...aMtr,timeSec:+((performance.now()-t0)/1000).toFixed(1),pairs:aPairs.length,mode:'linkage-js'});
 

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-01T23:31:02.270Z",
+  "timestamp": "2026-08-02T00:16:40.486Z",
   "entityResolver": [
     {
       "dataset": "DBLP-ACM",
@@ -8,7 +8,7 @@
       "precision": 0.8854307622913847,
       "recall": 0.8826438848920863,
       "f1": 0.8840351272235982,
-      "timeSec": 0.3,
+      "timeSec": 0.2,
       "pairs": 2217,
       "mode": "linkage"
     },
@@ -16,9 +16,9 @@
       "dataset": "Abt-Buy",
       "records": 2173,
       "trueMatches": 1097,
-      "precision": 0,
-      "recall": 0,
-      "f1": 0,
+      "precision": 0.02783148058643467,
+      "recall": 0.6298997265268915,
+      "f1": 0.0533076181292189,
       "timeSec": 0.6,
       "pairs": 24828,
       "mode": "linkage-js"
@@ -30,7 +30,7 @@
       "precision": 0.038302277432712216,
       "recall": 0.05692307692307692,
       "f1": 0.04579207920792079,
-      "timeSec": 0.3,
+      "timeSec": 0.2,
       "pairs": 1932,
       "mode": "linkage"
     },
