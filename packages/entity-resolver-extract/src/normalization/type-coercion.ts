@@ -75,6 +75,7 @@ export function coerce(value: unknown, targetType: CoercionTarget): CoercionResu
 
     default:
       // Unknown target type — pass through as string
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string -- type coercion: intentionally converts unknown to string
       return { value: String(value), success: true, rawValue, targetType };
   }
 }

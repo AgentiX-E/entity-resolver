@@ -457,6 +457,7 @@ export function createApp(config: ServerConfig = {}): Hono {
   });
 
   // Benchmark endpoints
+  // eslint-disable-next-line @typescript-eslint/require-await -- Hono route handler signature requires async; benchmarks are sync
   app.get('/api/v1/benchmarks', async (c: Context) => {
     const datasets = loadAllBenchmarks();
     return c.json(

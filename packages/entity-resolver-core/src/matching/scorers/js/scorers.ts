@@ -22,6 +22,7 @@ import {
 /** Ensure input is a string, returning empty string for non-strings. */
 function toString(val: unknown): string {
   if (val == null) return '';
+  // eslint-disable-next-line @typescript-eslint/no-base-to-string -- toString is the stringifier; its entire purpose is converting unknown to string
   return String(val);
 }
 
@@ -275,14 +276,14 @@ export const tfidfCosineScorer: IScorer = {
  * Q-gram TF-IDF: tokenize into q-grams and compute Jaccard on the sets.
  * Best for: pyJedAI-compatible token-based comparisons.
  */
-// NOTE: Despite the "tfidf" name, this scorer computes pure Jaccard
-// similarity on q-gram sets (|intersection| / |union|). There is no
-// term-frequency or inverse-document-frequency weighting applied.
-// This matches pyJedAI's "QGrams TF-IDF" scorer name convention but
-// the implementation is standard q-gram Jaccard. For actual TF-IDF
-// weighted comparison, use the `tfidfCosine` scorer.
-export const qgramTfIdfScorer: IScorer = {
-  name: 'qgram_tfidf',
+// NOTE: This scorer computes pure Jaccard similarity on q-gram sets
+// (|intersection| / |union|). There is no term-frequency or
+// inverse-document-frequency weighting applied. The 'qgram_tfidf' name
+// is kept as a legacy alias for pyJedAI compatibility.
+// Use `qgram_jaccard` for the clearer name.
+// For actual TF-IDF weighted comparison, use the `tfidfCosine` scorer.
+export const qgramJaccardScorer: IScorer = {
+  name: 'qgram_jaccard',
   kernelized: false,
   score(a: unknown, b: unknown, _field: FieldMetadata): number {
     const sa = toString(a).trim().toLowerCase();
@@ -429,7 +430,8 @@ export const ALL_SCORERS: Readonly<Record<string, IScorer>> = Object.freeze({
   double_metaphone: doubleMetaphoneScorer,
   token_sort: tokenSortScorer,
   tfidf_cosine: tfidfCosineScorer,
-  qgram_tfidf: qgramTfIdfScorer,
+  qgram_tfidf: qgramJaccardScorer,  // legacy alias — use qgram_jaccard for clarity
+  qgram_jaccard: qgramJaccardScorer,
   ensemble: ensembleScorer,
   numeric_diff: numericDiffScorer,
   date_diff: dateDiffScorer,

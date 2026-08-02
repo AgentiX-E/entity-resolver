@@ -10,6 +10,22 @@ export type EntityId = string;
 /** A raw record — any object with string-indexable fields. */
 export type RawRecord = Record<string, unknown>;
 
+/**
+ * Safely extract a string value from a RawRecord field.
+ * Returns an empty string if the field is null, undefined, or
+ * not a string-compatible value. This prevents `[object Object]`
+ * from leaking into string comparisons.
+ */
+export function getFieldString(record: RawRecord, field: string): string {
+  const val = record[field];
+  if (val == null) return '';
+  if (typeof val === 'string') return val;
+  if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+  // For objects, arrays, and other non-primitive values,
+  // return empty string instead of `[object Object]`.
+  return '';
+}
+
 /** Metadata describing a data field. */
 export interface FieldMetadata {
   /** Field name as it appears in the data source. */

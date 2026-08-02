@@ -216,7 +216,7 @@ export function buildGoldenRecord(
         let bestPriority = 999;
         for (const v of values) {
           const record = records[v.recordIndex]!;
-          const source = String(record._source ?? 'unknown');
+          const source = typeof record._source === 'string' ? record._source : 'unknown';
           const priority: number = priorities.get(source) ?? 999;
           if (priority < bestPriority) {
             best = v;

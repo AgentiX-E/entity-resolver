@@ -19,6 +19,7 @@
 
 import type { CandidatePair, BlockingResult } from './types.js';
 import { computeReductionRatio } from './types.js';
+import { getFieldString } from '../types/core.js';
 
 /** Tokenize a string into normalized tokens. */
 function tokenize(value: string): string[] {
@@ -124,7 +125,7 @@ export function tfidfBlocking(
   for (const rec of records) {
     const allTokens: string[] = [];
     for (const field of config.fields) {
-      const value = String(rec[field] ?? '');
+      const value = getFieldString(rec, field);
       allTokens.push(...tokenize(value));
     }
     tokenized.push(allTokens.filter((t) => t.length >= minLen));
@@ -184,7 +185,7 @@ export function computeAvgDocLen(
   let total = 0;
   for (const rec of records) {
     for (const field of fields) {
-      total += tokenize(String(rec[field] ?? '')).length;
+      total += tokenize(getFieldString(rec, field)).length;
     }
   }
   return records.length > 0 ? total / records.length : 0;

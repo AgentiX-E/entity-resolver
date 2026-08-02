@@ -121,7 +121,7 @@ export async function runSqlPipeline(
       if (l.isExact) caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
-        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${l.threshold ?? 0.7} THEN ${i}`;
+        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     const levelExpr = `${caseSql} ELSE -1 END AS ${f}_level`;
 
@@ -308,7 +308,7 @@ function buildFastSingleQuery(
       if (l.isExact) caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
-        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${l.threshold ?? 0.7} THEN ${i}`;
+        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     return {
       field: f,
@@ -414,7 +414,7 @@ export async function runSqlLinkage(
       const l = lvls[i]! as Record<string, unknown>;
       if (l.isExact) s += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) s += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
-      else s += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${l.threshold ?? 0.7} THEN ${i}`;
+      else s += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     return {
       field: f,

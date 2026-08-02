@@ -105,8 +105,8 @@ function diffFields(left: Record<string, unknown>, right: Record<string, unknown
   const fields = new Set([...Object.keys(left), ...Object.keys(right)]);
   const scores: FieldScore[] = [];
   for (const f of fields) {
-    const lv = left[f] ?? '';
-    const rv = right[f] ?? '';
+    const lv = typeof left[f] === 'string' ? left[f] : '';
+    const rv = typeof right[f] === 'string' ? right[f] : '';
     if (lv === '' && rv === '') continue;
     let s: number;
     if (typeof lv === 'string' && typeof rv === 'string') {

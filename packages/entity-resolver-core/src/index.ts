@@ -68,7 +68,7 @@ export {
   doubleMetaphoneScorer,
   tokenSortScorer,
   tfidfCosineScorer,
-  qgramTfIdfScorer,
+  qgramJaccardScorer,
   ensembleScorer,
   numericDiffScorer,
   dateDiffScorer,

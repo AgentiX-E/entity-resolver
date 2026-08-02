@@ -32,7 +32,8 @@ export async function tryLoadWasmScorers(
         name,
         kernelized: true,
         score(a: unknown, b: unknown, _field: FieldMetadata): number {
-          return wasmScore(name, String(a ?? ''), String(b ?? ''));
+           
+          return wasmScore(name, String(a), String(b));
         },
       };
     }

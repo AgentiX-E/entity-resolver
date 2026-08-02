@@ -34,6 +34,7 @@ export interface GazetteerConfig {
  *
  * Returns a ranked list of scored pairs from query → index, sorted by score descending.
  */
+// eslint-disable-next-line @typescript-eslint/require-await -- async signature for API consistency; future versions may add async I/O
 export async function gazetteerMatch(
   queryRecords: RawRecord[],
   indexRecords: RawRecord[],
@@ -135,6 +136,7 @@ export interface RecordLinkConfig {
  * This is the standard "record linkage" workflow for joining two tables
  * without a common key.
  */
+// eslint-disable-next-line @typescript-eslint/require-await -- async signature for API consistency; future versions may add async I/O
 export async function linkRecords(
   leftRecords: RawRecord[],
   rightRecords: RawRecord[],

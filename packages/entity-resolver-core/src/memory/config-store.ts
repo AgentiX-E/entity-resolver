@@ -14,6 +14,7 @@ export class MemoryConfigStore implements IConfigStore {
     { config: PipelineConfig; createdAt: string; updatedAt: string }
   >();
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IConfigStore interface; in-memory implementations are synchronous
   async load(name: string): Promise<StoredConfig | null> {
     const entry = this.configs.get(name);
     if (!entry) return null;
@@ -25,6 +26,7 @@ export class MemoryConfigStore implements IConfigStore {
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IConfigStore interface
   async save(name: string, config: PipelineConfig): Promise<void> {
     const now = new Date().toISOString();
     const existing = this.configs.get(name);
@@ -35,10 +37,12 @@ export class MemoryConfigStore implements IConfigStore {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IConfigStore interface
   async list(): Promise<string[]> {
     return Array.from(this.configs.keys());
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IConfigStore interface
   async delete(name: string): Promise<void> {
     this.configs.delete(name);
   }

@@ -9,6 +9,8 @@
  * - Source-mapped stack traces for debugging
  */
 
+import { getFieldString } from '../types/core.js';
+
 /** Structured error context attached to every EntityResolverError. */
 export interface ErrorContext {
   /** The operation that was in progress when the error occurred. */
@@ -201,7 +203,7 @@ const ERROR_CLASS_MAP = new Map<string, ErrorCtor>([
  */
 export function reconstructError(json: Record<string, unknown>): EntityResolverError | Error {
   const code = json.code as string | undefined;
-  const message = String(json.message ?? 'Unknown error');
+  const message = getFieldString(json, 'message') || 'Unknown error';
   const context = (json.context as ErrorContext) ?? {};
 
   if (!code) {

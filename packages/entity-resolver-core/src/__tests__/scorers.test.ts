@@ -16,7 +16,7 @@ import {
   doubleMetaphoneScorer,
   tokenSortScorer,
   tfidfCosineScorer,
-  qgramTfIdfScorer,
+  qgramJaccardScorer,
   ensembleScorer,
   numericDiffScorer,
   dateDiffScorer,
@@ -261,7 +261,7 @@ describe('tfidf_cosine scorer', () => {
 
 describe('qgram_tfidf scorer', () => {
   it('returns 1 for identical strings', () => {
-    expect(qgramTfIdfScorer.score('hello', 'hello', TEST_FIELD)).toBe(1);
+    expect(qgramJaccardScorer.score('hello', 'hello', TEST_FIELD)).toBe(1);
   });
 });
 

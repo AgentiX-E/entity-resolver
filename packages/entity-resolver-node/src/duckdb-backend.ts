@@ -73,6 +73,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
       try {
         let csv = cols.join(',') + '\n';
         for (const r of records) {
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- intentional; r[c] is unknown, stringified for CSV
           csv += cols.map((c) => String(r[c] ?? '')).join(',') + '\n';
         }
         writeFileSync(csvPath, csv);
@@ -106,6 +107,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
       const batch = records.slice(i, i + batchSize);
       const values = batch
         .map(
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- r[c] is unknown; String() for CSV escaping is intentional
           (r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`,
         )
         .join(', ');
@@ -142,6 +144,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
     cols: readonly string[],
   ): Promise<void> {
     const values = records
+      // eslint-disable-next-line @typescript-eslint/no-base-to-string -- r[c] is unknown; String() for CSV escaping is intentional
       .map((r) => `(${cols.map((c) => `'${String(r[c] ?? '').replace(/'/g, "''")}'`).join(', ')})`)
       .join(', ');
     await conn.run(`INSERT INTO ${table} VALUES ${values}`);
@@ -158,6 +161,7 @@ export class NodeDuckDBBackend implements ISqlBackend {
     await conn.run(`DROP TABLE IF EXISTS ${name}`);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by ISqlBackend interface
   async close(): Promise<void> {
     if (this.connection) {
       this.connection.closeSync();

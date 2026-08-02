@@ -44,8 +44,8 @@ export class StudioPairReviewElement extends HTMLElement {
         const info = fields.find((s) => s.fieldName === f);
         const score = info?.score ?? 1.0;
         const bg = score < 0.6 ? MATCH : score < 0.9 ? SKIP : 'transparent';
-        const lv = String(pair.left[f] ?? '');
-        const rv = String(pair.right[f] ?? '');
+        const lv = typeof pair.left[f] === 'string' ? pair.left[f] : '';
+        const rv = typeof pair.right[f] === 'string' ? pair.right[f] : '';
         return `<tr>
         <td style="font-weight:600;font-size:13px;padding:4px 8px;white-space:nowrap">${esc(f)}</td>
         <td style="font-size:13px;padding:4px 8px;background:${lv !== rv ? bg : 'transparent'};word-break:break-word">${esc(lv)}</td>

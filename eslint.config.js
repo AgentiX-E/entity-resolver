@@ -27,9 +27,13 @@ export default tseslint.config(
       // Allow inferrable types for clarity.
       '@typescript-eslint/no-inferrable-types': 'off',
       // Known debt (I12+): tighten these rules progressively.
-      '@typescript-eslint/require-await': 'off',
-      '@typescript-eslint/no-base-to-string': 'off',
-      '@typescript-eslint/no-unnecessary-condition': 'off',
+      // I33: require-await and no-base-to-string now enforced as errors.
+      // no-unnecessary-condition set to warn — it flags defensive ?. and ??
+      // patterns that are type-safe but intentionally guarded at runtime.
+      // Tracked for periodic manual review.
+      '@typescript-eslint/require-await': 'error',
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/no-unnecessary-condition': 'warn',
       'no-control-regex': 'off',
       'no-useless-escape': 'off',
     },
@@ -50,18 +54,11 @@ export default tseslint.config(
       '@typescript-eslint/unbound-method': 'off',
     },
   },
-  // Server package — tsconfig references removed to avoid tsx/playwright
-  // resolution failures in CI. Suppress type-dependent rules that require
-  // cross-package type resolution.
+  // Server package — I33: no-unsafe-* rules now enabled.
+  // Production code must have full type safety.
   {
     files: ['packages/entity-resolver-server/src/**/*.ts'],
-    rules: {
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-    },
+    rules: {},
   },
   {
     ignores: ['dist/', 'coverage/', '*.config.*', 'vitest.*', 'e2e/', '**/scorers/wasm/scorers/*.js', '**/scorers/wasm/scorers/*.d.ts', 'packages/*/dist/'],

@@ -14,6 +14,7 @@
 
 import type { ComparisonSpec, ComparisonLevel, ComparisonVector } from './comparison.js';
 import type { SqlRow } from '../interfaces/ISqlBackend.js';
+import { getFieldString } from '../types/core.js';
 
 // ══════════════════════════════════════════════════════════════
 // Scorer → SQL expression mapping
@@ -177,7 +178,7 @@ export function parseComparisonRows(
       const scoreKey = `${spec.field}__score`;
       const levelKey = `${spec.field}__level`;
       const score = Number(row[scoreKey] ?? 0);
-      const level = String(row[levelKey] ?? 'not_match');
+      const level = getFieldString(row, levelKey) || 'not_match';
       vectors.push({
         field: spec.field,
         level,

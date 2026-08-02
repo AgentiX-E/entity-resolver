@@ -3,6 +3,7 @@
 
 import type { BlockingConfig, BlockingPass, BlockingResult } from './types.js';
 import { applyBlockingTransforms, computeReductionRatio, parseCandidatePairs } from './types.js';
+import { getFieldString } from '../types/core.js';
 
 /**
  * Standard blocking: groups records by blocking key and produces
@@ -67,7 +68,7 @@ export function standardBlocking(
 function buildBlockingKey(record: Record<string, unknown>, pass: BlockingPass): string {
   const parts: string[] = [];
   for (const field of pass.fields) {
-    const raw = String(record[field] ?? '').trim();
+    const raw = getFieldString(record, field).trim();
     if (raw === '') return ''; // Skip records with empty blocking keys
     const transformed = applyBlockingTransforms(raw, pass.transforms);
     if (transformed === '') return '';

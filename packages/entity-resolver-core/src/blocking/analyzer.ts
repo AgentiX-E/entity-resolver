@@ -2,6 +2,7 @@
 
 import type { CandidatePair, BlockingPass } from './types.js';
 import { applyBlockingTransforms, computeReductionRatio } from './types.js';
+import { getFieldString } from '../types/core.js';
 
 /**
  * Result of blocking rule analysis.
@@ -136,7 +137,7 @@ export function verifyBlockingRecall(
 function buildBlockingKey(record: Record<string, unknown>, pass: BlockingPass): string {
   const parts: string[] = [];
   for (const field of pass.fields) {
-    const raw = String(record[field] ?? '').trim();
+    const raw = getFieldString(record, field).trim();
     if (raw === '') return '';
     const transformed = applyBlockingTransforms(raw, pass.transforms);
     if (transformed === '') return '';

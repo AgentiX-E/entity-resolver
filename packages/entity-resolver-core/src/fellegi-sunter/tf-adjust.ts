@@ -1,6 +1,8 @@
 // Term Frequency Adjustment — reduces match weights for high-frequency values.
 // Prevents false positives from common values (e.g., surname "Smith").
 
+import { getFieldString } from '../types/core.js';
+
 /**
  * Term frequency statistics for a single field-value pair.
  */
@@ -31,7 +33,7 @@ export function buildTermFrequencies(
     const totalRecords = records.length;
 
     for (const record of records) {
-      const value = String(record[field] ?? '')
+      const value = getFieldString(record, field)
         .trim()
         .toLowerCase();
       if (value === '') continue;
@@ -115,7 +117,7 @@ export class TFAdjustmentLookup {
    * Returns 1.0 (no adjustment) if the value is not in the lookup.
    */
   getAdjustment(field: string, value: unknown): number {
-    const normalized = String(value ?? '')
+    const normalized = getFieldString({_v: value}, '_v')
       .trim()
       .toLowerCase();
     if (normalized === '') return 1;

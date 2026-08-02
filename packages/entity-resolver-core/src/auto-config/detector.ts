@@ -4,6 +4,7 @@
 import type { BlockingPass } from '../blocking/types.js';
 import type { ComparisonSpec } from '../matching/comparison.js';
 import type { PipelineConfig } from '../pipeline/runner.js';
+import { getFieldString } from '../types/core.js';
 import type { RawRecord } from '../types/core.js';
 
 /** Semantic type inferred for a field. */
@@ -139,7 +140,7 @@ export function detectFields(records: readonly RawRecord[]): DetectedField[] {
   const result: DetectedField[] = [];
 
   for (const field of fields) {
-    const values = records.map((r) => String(r[field] ?? ''));
+    const values = records.map((r) => getFieldString(r, field));
     const nonNull = values.filter((v) => v.length > 0);
     const nameType = detectByName(field);
     const valueResult = detectByValue(values);

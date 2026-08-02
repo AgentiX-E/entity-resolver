@@ -102,6 +102,7 @@ export class DuckDbSqlBackend implements ISqlBackend {
             const val = rec[col];
             if (val === null || val === undefined) return 'NULL';
             // Escape single quotes
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string -- intentional stringification of unknown values for SQL escaping
             const str = String(val).replace(/'/g, "''");
             return `'${str}'`;
           });
@@ -202,6 +203,7 @@ export class DuckDbSqlBackend implements ISqlBackend {
         const vals = columns.map((col) => {
           const val = rec[col];
           if (val === null || val === undefined) return 'NULL';
+          // eslint-disable-next-line @typescript-eslint/no-base-to-string -- intentional; stringifies unknown values for SQL
           const str = String(val).replace(/'/g, "''").replace(/\\/g, '\\\\');
           return `'${str}'`;
         });
@@ -263,6 +265,7 @@ export class DuckDbSqlBackend implements ISqlBackend {
   private escapeValue(value: unknown): string {
     if (value === null || value === undefined) return 'NULL';
     if (typeof value === 'number') return String(value);
+    // eslint-disable-next-line @typescript-eslint/no-base-to-string -- intentional; stringifies unknown values for SQL
     return `'${String(value).replace(/'/g, "''")}'`;
   }
 }

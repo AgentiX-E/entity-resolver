@@ -2,6 +2,7 @@
 
 import type { CandidatePair, BlockingConfig, BlockingResult, BlockingTransform } from './types.js';
 import { applyBlockingTransforms, computeReductionRatio, parseCandidatePairs } from './types.js';
+import { getFieldString } from '../types/core.js';
 
 // ─── Token Blocking (pyJedAI-style) ────────────────────────────
 
@@ -27,7 +28,7 @@ export function tokenBlocking(
   const tokenBlocks = new Map<string, number[]>();
 
   for (let i = 0; i < records.length; i++) {
-    const raw = String(records[i]![field] ?? '')
+    const raw = getFieldString(records[i]!, field)
       .toLowerCase()
       .trim();
     const tokens = new Set(raw.split(/[\s,._\-:;]+/).filter(Boolean));
@@ -78,7 +79,7 @@ export function sortedNeighborhood(
   // Build sort keys
   const indexed = records.map((rec, i) => ({
     index: i,
-    key: applyBlockingTransforms(String(rec[field] ?? '').trim(), transforms),
+    key: applyBlockingTransforms(getFieldString(rec, field).trim(), transforms),
   }));
 
   // Sort by key
@@ -169,7 +170,7 @@ function buildPassKey(
 ): string {
   const parts: string[] = [];
   for (const field of pass.fields) {
-    const raw = String(record[field] ?? '').trim();
+    const raw = getFieldString(record, field).trim();
     if (raw === '') return '';
     const transformed = applyBlockingTransforms(raw, pass.transforms);
     if (transformed === '') return '';
@@ -244,7 +245,7 @@ export function metaBlocking(
   // Stage 1: Token Blocking
   const tokenBlocks = new Map<string, number[]>();
   for (let i = 0; i < records.length; i++) {
-    const raw = String(records[i]![field] ?? '')
+    const raw = getFieldString(records[i]!, field)
       .toLowerCase()
       .trim();
     const tokens = new Set(

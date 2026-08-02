@@ -1,6 +1,8 @@
 // Field independence analysis for Fellegi-Sunter model diagnostics.
 // FS assumes fields are independent — this module detects violations.
 
+import { getFieldString } from '../types/core.js';
+
 /**
  * Correlation warning for a pair of fields.
  */
@@ -80,10 +82,10 @@ function computeCramersV(
   const table = new Map<string, Map<string, number>>();
 
   for (const record of records) {
-    const a = String(record[fieldA] ?? '')
+    const a = getFieldString(record, fieldA)
       .trim()
       .toLowerCase();
-    const b = String(record[fieldB] ?? '')
+    const b = getFieldString(record, fieldB)
       .trim()
       .toLowerCase();
     if (a === '' || b === '') continue;

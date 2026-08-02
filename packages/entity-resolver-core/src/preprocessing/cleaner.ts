@@ -2,6 +2,8 @@
 // Provides Unicode repair (ftfy-equivalent), CJK normalization,
 // and field-type-aware cleaning.
 
+import { getFieldString } from '../types/core.js';
+
 // ═══════════════════════════════════════════════════════════════
 // Unicode repair — Western confusables + mojibake
 // ═══════════════════════════════════════════════════════════════
@@ -148,7 +150,7 @@ export function normalizeCJK(value: string): string {
  * - Lowercase + whitespace collapse
  */
 export function normalize(value: unknown): string {
-  const str = String(value ?? '');
+  const str = getFieldString({_v: value}, '_v');
   const repaired = repairUnicode(str);
   const cjkNormalized = normalizeCJK(repaired);
   return cjkNormalized.toLowerCase().replace(/\s+/g, ' ').trim();
@@ -158,7 +160,7 @@ export function normalize(value: unknown): string {
  * Normalize an email address.
  */
 export function normalizeEmail(value: unknown): string {
-  const str = String(value ?? '')
+  const str = getFieldString({_v: value}, '_v')
     .trim()
     .toLowerCase();
   if (!str.includes('@')) return str;
@@ -171,7 +173,7 @@ export function normalizeEmail(value: unknown): string {
  * Normalize a phone number — strip non-digits.
  */
 export function normalizePhone(value: unknown): string {
-  return String(value ?? '').replace(/\D/g, '');
+  return getFieldString({_v: value}, '_v').replace(/\D/g, '');
 }
 
 /**

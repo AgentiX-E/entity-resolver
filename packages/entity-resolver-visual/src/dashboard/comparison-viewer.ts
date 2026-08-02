@@ -9,6 +9,8 @@
  *   not_match → red
  */
 
+/* eslint-disable @typescript-eslint/no-base-to-string -- Record<string,unknown> field values intentionally stringified for HTML display */
+
 import type { PipelineResult, RawRecord } from '@agentix-e/entity-resolver-core';
 import { escapeHtml } from '../components/web/elements.js';
 

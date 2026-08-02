@@ -18,11 +18,13 @@ interface InternalEntity {
 export class MemoryEntityStore implements IEntityStore {
   private entities = new Map<EntityId, InternalEntity>();
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async getEntity(id: EntityId): Promise<EntityRecord | null> {
     const e = this.entities.get(id);
     return e ? { clusterId: e.id, memberIds: e.memberIds, cohesion: e.cohesion } : null;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async queryNeighbors(id: EntityId, hops: number = 1): Promise<EntityRecord[]> {
     const start = this.entities.get(id);
     if (!start) return [];
@@ -81,6 +83,7 @@ export class MemoryEntityStore implements IEntityStore {
     return result;
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async upsertEntity(entity: EntityRecord): Promise<void> {
     this.entities.set(entity.clusterId, {
       id: entity.clusterId,
@@ -89,10 +92,12 @@ export class MemoryEntityStore implements IEntityStore {
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async deleteEntity(id: EntityId): Promise<void> {
     this.entities.delete(id);
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async applyMerge(from: EntityId, into: EntityId): Promise<void> {
     const fromE = this.entities.get(from);
     const intoE = this.entities.get(into);
@@ -102,6 +107,7 @@ export class MemoryEntityStore implements IEntityStore {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await -- async required by IEntityStore interface; in-memory implementations are synchronous
   async applySplit(entityId: EntityId, memberGroups: EntityId[][]): Promise<void> {
     this.entities.delete(entityId);
     for (let i = 0; i < memberGroups.length; i++) {
