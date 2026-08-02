@@ -307,41 +307,88 @@ function recommendBlockingPasses(fields: readonly DetectedField[]): BlockingPass
   const passes: BlockingPass[] = [];
   const used = new Set<string>();
 
-  // Primary: email or identifier
+  // ── Strategy 1: Exact match on strong identifiers ──
+  // Emails, phone numbers, and structured IDs are near-unique —
+  // block on them first with exact matching (no transforms needed).
   for (const f of candidates) {
-    if (f.semanticType === 'email' || f.semanticType === 'identifier') {
+    if (f.semanticType === 'email' || f.semanticType === 'phone' || f.semanticType === 'identifier') {
       passes.push({ fields: [f.name], transforms: ['strip', 'lowercase'] });
       used.add(f.name);
       break;
     }
   }
 
-  // Secondary: name + surname combination
+  // ── Strategy 2: Name + surname combination ──
+  // Most entity resolution datasets benefit from blocking on name fields.
+  // Use exact+phonetic alternation for robustness against typos.
   const nameFields = candidates.filter(
     (f) => (f.semanticType === 'name' || f.semanticType === 'surname') && !used.has(f.name),
   );
   if (nameFields.length >= 2) {
+    // Two name fields: block on both (exact match)
     passes.push({
       fields: nameFields.slice(0, 2).map((f) => f.name),
       transforms: ['strip', 'lowercase'],
     });
+    // Also add soundex pass on single name field for typo resilience
+    passes.push({
+      fields: [nameFields[0]!.name],
+      transforms: ['strip', 'lowercase', 'soundex'],
+    });
     nameFields.forEach((f) => used.add(f.name));
   } else if (nameFields.length === 1) {
+    // Single name: exact + phonetic + token passes
+    passes.push({ fields: [nameFields[0]!.name], transforms: ['strip', 'lowercase'] });
     passes.push({ fields: [nameFields[0]!.name], transforms: ['strip', 'lowercase', 'soundex'] });
     used.add(nameFields[0]!.name);
   }
 
-  // Tertiary: date or city
+  // ── Strategy 3: Location fields ──
+  // Cities, states, and postcodes provide geographic blocking.
   for (const f of candidates) {
     if (used.has(f.name)) continue;
-    if (f.semanticType === 'date' || f.semanticType === 'city' || f.semanticType === 'postcode') {
+    if (f.semanticType === 'city' || f.semanticType === 'postcode') {
       passes.push({ fields: [f.name], transforms: ['strip', 'lowercase'] });
       used.add(f.name);
       break;
     }
   }
 
-  // Fallback: use highest-cardinality field
+  // ── Strategy 4: Product title blocking (for e-commerce) ──
+  const productFields = candidates.filter(
+    (f) => (f.semanticType === 'product') && !used.has(f.name),
+  );
+  if (productFields.length > 0) {
+    // Product titles: use soundex for phonetic variant matching
+    // across different retailer naming conventions.
+    passes.push({
+      fields: [productFields[0]!.name],
+      transforms: ['strip', 'lowercase', 'soundex'],
+    });
+    used.add(productFields[0]!.name);
+  }
+
+  // ── Strategy 5: Date blocking ──
+  for (const f of candidates) {
+    if (used.has(f.name)) continue;
+    if (f.semanticType === 'date') {
+      passes.push({ fields: [f.name], transforms: ['strip'] });
+      used.add(f.name);
+      break;
+    }
+  }
+
+  // ── Strategy 6: Remaining high-cardinality fields ──
+  const remaining = candidates.filter((f) => !used.has(f.name));
+  if (remaining.length > 0) {
+    passes.push({
+      fields: [remaining[0]!.name],
+      transforms: ['strip', 'lowercase', 'soundex'],
+    });
+    used.add(remaining[0]!.name);
+  }
+
+  // ── Fallback: highest-cardinality field, exact match ──
   if (passes.length === 0 && candidates.length > 0) {
     passes.push({ fields: [candidates[0]!.name], transforms: ['strip', 'lowercase'] });
   }
@@ -355,17 +402,41 @@ function generateComparisons(fields: readonly DetectedField[]): ComparisonSpec[]
     .slice(0, 6) // Limit to top 6 fields
     .map((f) => {
       const scorer = SCORER_MAP[f.semanticType] ?? 'levenshtein';
+      // Data-driven thresholds based on field characteristics
+      const thresholds = computeFieldThresholds(f);
       return {
         field: f.name,
         scorerName: scorer,
         levels: [
-          { label: 'exact_match', threshold: 0.99 },
-          { label: 'strong_match', threshold: 0.85 },
-          { label: 'moderate_match', threshold: 0.7 },
-          { label: 'weak_match', threshold: 0.5 },
+          { label: 'exact_match', threshold: thresholds.exact },
+          { label: 'strong_match', threshold: thresholds.strong },
+          { label: 'moderate_match', threshold: thresholds.moderate },
+          { label: 'weak_match', threshold: thresholds.weak },
         ],
       };
     });
+}
+
+/** Compute per-field threshold levels based on field statistics. */
+interface FieldThresholds {
+  exact: number;
+  strong: number;
+  moderate: number;
+  weak: number;
+}
+
+function computeFieldThresholds(f: DetectedField): FieldThresholds {
+  // Short fields (avg < 5 chars): tighter thresholds — small differences matter more
+  // Very short fields (avg < 3 chars): use exact-only matching
+  if (f.avgLength < 3 || f.semanticType === 'postcode' || f.semanticType === 'numeric') {
+    return { exact: 0.95, strong: 0.90, moderate: 0.80, weak: 0.65 };
+  }
+  // Medium-length name/address fields: standard thresholds
+  if (f.avgLength < 8 || f.semanticType === 'name' || f.semanticType === 'surname') {
+    return { exact: 0.95, strong: 0.85, moderate: 0.70, weak: 0.50 };
+  }
+  // Long text/product fields: relaxed thresholds — large strings can differ significantly
+  return { exact: 0.95, strong: 0.80, moderate: 0.60, weak: 0.35 };
 }
 
 function computeAutoThreshold(fields: readonly DetectedField[]): number {

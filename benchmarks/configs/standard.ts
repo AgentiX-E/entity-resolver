@@ -85,40 +85,80 @@ export function generateFebrlRecords(scale: number, seed: number): {
   records: Array<Record<string, string>>;
   groundTruth: Set<string>;
 } {
-  const chars = 'abcdefghijklmnopqrstuvwxyz';
   let r = seed;
   const nf = (): number => {
     r = (r * 16807) % 2147483647;
     return (r - 1) / 2147483646;
   };
 
-  // Generate base records
-  // Build records with stable unique IDs assigned BEFORE shuffling.
-  // This ensures that ground truth pairs are tracked by immutable identity
-  // rather than positional index, which is correct even after Fisher-Yates.
+  // Realistic given name pool
+  const firstNames = [
+    'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda',
+    'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica',
+    'Thomas', 'Sarah', 'Charles', 'Karen', 'Christopher', 'Nancy', 'Daniel', 'Lisa',
+    'Matthew', 'Betty', 'Anthony', 'Margaret', 'Mark', 'Sandra', 'Donald', 'Ashley',
+    'Steven', 'Dorothy', 'Paul', 'Kimberly', 'Andrew', 'Emily', 'Joshua', 'Donna',
+    'Kenneth', 'Michelle', 'Kevin', 'Carol', 'Brian', 'Amanda', 'George', 'Melissa',
+  ];
+
+  // Realistic surname pool
+  const lastNames = [
+    'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
+    'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
+    'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin', 'Lee', 'Perez', 'Thompson',
+    'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson', 'Walker',
+    'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill',
+    'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell',
+  ];
+
+  const pick = (arr: readonly string[]): string => arr[Math.floor(nf() * arr.length)]!;
+
+  // Generate base records with stable unique IDs assigned BEFORE shuffling.
   const records: Array<Record<string, string> & { _er_id: number }> = [];
   for (let i = 0; i < scale; i++) {
-    let first = '';
-    let last = '';
-    for (let j = 0; j < 4 + Math.floor(nf() * 5); j++) first += chars[Math.floor(nf() * 26)];
-    for (let j = 0; j < 5 + Math.floor(nf() * 6); j++) last += chars[Math.floor(nf() * 26)];
     records.push({
       _er_id: i,
-      first: first.charAt(0).toUpperCase() + first.slice(1),
-      last: last.charAt(0).toUpperCase() + last.slice(1),
+      first: pick(firstNames),
+      last: pick(lastNames),
     });
   }
 
-  // Generate duplicates — each is a noisy copy of a base record.
-  // Duplicate IDs are scale + duplicateIndex so they are disjoint from base IDs.
+  // Generate duplicates — realistic variations of original records.
   const dupCount = Math.floor(scale * 0.2);
   for (let i = 0; i < dupCount; i++) {
     const orig = records[i % scale]!;
-    records.push({
-      _er_id: scale + i,
-      first: nf() < 0.5 ? orig.first.slice(0, 3) + 'x' : orig.first,
-      last: orig.last + (nf() < 0.5 ? 'son' : ''),
-    });
+    const variationType = Math.floor(nf() * 5);
+
+    let first: string;
+    let last: string;
+
+    switch (variationType) {
+      case 0: // Typo: swap two adjacent characters
+        first = orig.first.length > 3
+          ? orig.first.slice(0, 1) + orig.first.charAt(2) + orig.first.charAt(1) + orig.first.slice(3)
+          : orig.first + 'x';
+        last = orig.last.length > 3
+          ? orig.last.slice(0, -2) + orig.last.charAt(orig.last.length - 1) + orig.last.charAt(orig.last.length - 2)
+          : orig.last;
+        break;
+      case 1: // Single character deletion
+        first = orig.first.length > 2 ? orig.first.slice(0, -1) : orig.first;
+        last = orig.last;
+        break;
+      case 2: // Single character insertion
+        first = orig.first + 'abcdefghijklmnopqrstuvwxyz'[Math.floor(nf() * 26)];
+        last = orig.last;
+        break;
+      case 3: // Nickname (first 3 chars only)
+        first = orig.first.slice(0, 3);
+        last = orig.last;
+        break;
+      default: // Truncation of last name
+        first = orig.first;
+        last = orig.last.slice(0, Math.max(3, orig.last.length - 2));
+    }
+
+    records.push({ _er_id: scale + i, first, last });
   }
 
   // Fisher-Yates shuffle — records move, but _er_id stays attached.

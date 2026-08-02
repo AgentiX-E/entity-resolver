@@ -8,6 +8,8 @@ import { getScorer } from './scorers/registry.js';
 export interface ComparisonLevel {
   /** Label for diagnostics (e.g., "exact_match", "levenshtein<2"). */
   readonly label: string;
+  /** @deprecated Use `label` instead. Kept for backwards compatibility. */
+  readonly name?: string;
   /** Score threshold for this level. Values >= threshold are assigned to this level. */
   readonly threshold: number;
 }
@@ -61,11 +63,14 @@ export function generateComparisonVectors(
 
     const rawScore = scorer.score(recordA[spec.field], recordB[spec.field], meta);
 
-    // Find the first level where the score meets the threshold
+    // Find the first level where the score meets the threshold.
+    // Supports both `label` (new API) and `name` (legacy configs).
     let matchedLevel = 'not_match';
     for (const level of spec.levels) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+      const levelName = (level.label as string | undefined) ?? (level.name as string | undefined) ?? 'unknown';
       if (rawScore >= level.threshold) {
-        matchedLevel = level.label;
+        matchedLevel = levelName;
         break;
       }
     }
