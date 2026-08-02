@@ -6,6 +6,7 @@
  * All results are collected into BenchmarkReport format.
  */
 import { performance } from 'node:perf_hooks';
+import { execSync } from 'node:child_process';
 import type {
   DatasetResult,
   DatasetConfig,
@@ -41,7 +42,7 @@ export async function runEntityResolverAccuracyBenchmarks(
 
   const core = await import(coreUrl.href) as any;
   const nodeMod = await import(nodeBackendUrl.href) as any;
-  const { runPipeline, runSqlLinkage } = core;
+  const { runPipeline, runSqlLinkage, autoConfigure } = core;
   const { NodeDuckDBBackend } = nodeMod;
 
   // --- Real linkage datasets ---
@@ -56,12 +57,18 @@ export async function runEntityResolverAccuracyBenchmarks(
       : [];
     const groundTruth = loadGroundTruth(ds.mappingPath);
 
-    // Add 'id' field for ID-based F1 mapping
+    // Ensure records have an 'id' field for F1 mapping.
+    // If the CSV already has an 'id' column (e.g., DBLP-ACM), preserve it.
+    // Otherwise assign positional indices.
     for (let i = 0; i < leftRecords.length; i++) {
-      (leftRecords[i] as any).id = String(i);
+      if ((leftRecords[i] as any).id === undefined) {
+        (leftRecords[i] as any).id = String(i);
+      }
     }
     for (let i = 0; i < rightRecords.length; i++) {
-      (rightRecords[i] as any).id = String(i + leftRecords.length);
+      if ((rightRecords[i] as any).id === undefined) {
+        (rightRecords[i] as any).id = String(i + leftRecords.length);
+      }
     }
 
     const leftIds = leftRecords.map((r: any) => String(r.id ?? ''));
@@ -156,17 +163,11 @@ export async function runEntityResolverAccuracyBenchmarks(
       console.log(`  Run ${run + 1}/${RUNS}...`);
       const t0 = performance.now();
 
+      // Use autoConfigure for smart field detection and blocking
+      const { config: autoCfg } = autoConfigure(febRecords);
+
       const result = await runPipeline(febRecords, {
-        comparisons: [
-          { field: 'first', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-          { field: 'last', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-        ],
-        blocking: {
-          passes: [
-            { fields: ['first'], transforms: ['lowercase'] },
-            { fields: ['last'], transforms: ['lowercase'] },
-          ],
-        },
+        ...autoCfg,
         matchThreshold: DEFAULT_THRESHOLD,
       });
 
@@ -220,7 +221,6 @@ function loadCsvViaPython(
   encoding: string,
   renames?: Record<string, string>,
 ): Array<Record<string, string>> {
-  const { execSync } = require('node:child_process') as typeof import('node:child_process');
   let code = `import pandas as pd,json; d=pd.read_csv('${path}',encoding='${encoding}',dtype=str).fillna('')`;
   if (renames) {
     for (const [k, v] of Object.entries(renames)) {

@@ -1,0 +1,12 @@
+dataset,tool,precision,recall,f1,f1_stddev,time_mean_ms,pairs
+DBLP-ACM,entity-resolver,0,0,0,0,197,2217
+Abt-Buy,entity-resolver,0,0,0,0,83,10
+Amazon-Google,entity-resolver,0,0,0,0,206,1932
+FEBRL-1000,entity-resolver,0.002952716094325123,0.365,0.0058580427717369495,0,117,24723
+FEBRL-5000,entity-resolver,0.0006198434045748651,0.383,0.0012376837540273196,0,2316,617898
+DBLP-ACM,splink,0,0,0,0,0,0
+Abt-Buy,splink,0,0,0,0,0,0
+Amazon-Google,splink,0,0,0,0,0,0
+DBLP-ACM,goldenmatch,0,0,0,0,0,0
+Abt-Buy,goldenmatch,0,0,0,0,0,0
+Amazon-Google,goldenmatch,0,0,0,0,0,0

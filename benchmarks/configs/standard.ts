@@ -11,11 +11,13 @@ import type { DatasetConfig } from '../lib/types.js';
 
 /** Resolve a repo-relative path using import.meta.url. */
 function repoPath(relative: string): string {
-  // this file: .../entity-resolver/benchmarks/configs/standard.ts
-  const configsDir = import.meta.url.substring(0, import.meta.url.lastIndexOf('/'));
-  // .../entity-resolver/benchmarks
+  // import.meta.url = 'file:///workspace/.../benchmarks/configs/standard.ts'
+  // Strip 'file://' prefix to get a plain filesystem path
+  const url = import.meta.url.startsWith('file://')
+    ? import.meta.url.slice('file://'.length)
+    : import.meta.url;
+  const configsDir = url.substring(0, url.lastIndexOf('/'));
   const benchmarksDir = configsDir.substring(0, configsDir.lastIndexOf('/'));
-  // .../entity-resolver
   const repoRoot = benchmarksDir.substring(0, benchmarksDir.lastIndexOf('/'));
   return `${repoRoot}/${relative}`;
 }
@@ -91,7 +93,8 @@ export function generateFebrlRecords(scale: number, seed: number): {
     return (r - 1) / 2147483646;
   };
 
-  // Realistic given name pool
+  const pick = <T>(arr: readonly T[]): T => arr[Math.floor(nf() * arr.length)]!;
+
   const firstNames = [
     'James', 'Mary', 'John', 'Patricia', 'Robert', 'Jennifer', 'Michael', 'Linda',
     'William', 'Elizabeth', 'David', 'Barbara', 'Richard', 'Susan', 'Joseph', 'Jessica',
@@ -100,8 +103,6 @@ export function generateFebrlRecords(scale: number, seed: number): {
     'Steven', 'Dorothy', 'Paul', 'Kimberly', 'Andrew', 'Emily', 'Joshua', 'Donna',
     'Kenneth', 'Michelle', 'Kevin', 'Carol', 'Brian', 'Amanda', 'George', 'Melissa',
   ];
-
-  // Realistic surname pool
   const lastNames = [
     'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis',
     'Rodriguez', 'Martinez', 'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson',
@@ -110,30 +111,35 @@ export function generateFebrlRecords(scale: number, seed: number): {
     'Young', 'Allen', 'King', 'Wright', 'Scott', 'Torres', 'Nguyen', 'Hill',
     'Flores', 'Green', 'Adams', 'Nelson', 'Baker', 'Hall', 'Rivera', 'Campbell',
   ];
+  const cities = [
+    'New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia',
+    'San Antonio', 'San Diego', 'Dallas', 'Austin', 'Boston', 'Seattle', 'Denver',
+    'Portland', 'Atlanta', 'Miami', 'Detroit', 'Minneapolis', 'Tampa', 'Orlando',
+  ];
 
-  const pick = (arr: readonly string[]): string => arr[Math.floor(nf() * arr.length)]!;
-
-  // Generate base records with stable unique IDs assigned BEFORE shuffling.
+  // Build base records with unique IDs + unique-per-record email for blocking
   const records: Array<Record<string, string> & { _er_id: number }> = [];
   for (let i = 0; i < scale; i++) {
     records.push({
       _er_id: i,
       first: pick(firstNames),
       last: pick(lastNames),
+      city: pick(cities),
+      email: `user${i}@example.com`,
+      dob: `${String(1950 + Math.floor(nf() * 50)).padStart(4, '0')}-${String(1 + Math.floor(nf() * 12)).padStart(2, '0')}-${String(1 + Math.floor(nf() * 28)).padStart(2, '0')}`,
     });
   }
 
-  // Generate duplicates — realistic variations of original records.
+  // Generate duplicates — realistic variation types
   const dupCount = Math.floor(scale * 0.2);
   for (let i = 0; i < dupCount; i++) {
     const orig = records[i % scale]!;
-    const variationType = Math.floor(nf() * 5);
-
+    const vt = Math.floor(nf() * 5);
     let first: string;
     let last: string;
 
-    switch (variationType) {
-      case 0: // Typo: swap two adjacent characters
+    switch (vt) {
+      case 0: // Adjacent character transposition
         first = orig.first.length > 3
           ? orig.first.slice(0, 1) + orig.first.charAt(2) + orig.first.charAt(1) + orig.first.slice(3)
           : orig.first + 'x';
@@ -141,33 +147,40 @@ export function generateFebrlRecords(scale: number, seed: number): {
           ? orig.last.slice(0, -2) + orig.last.charAt(orig.last.length - 1) + orig.last.charAt(orig.last.length - 2)
           : orig.last;
         break;
-      case 1: // Single character deletion
+      case 1: // Drop last character
         first = orig.first.length > 2 ? orig.first.slice(0, -1) : orig.first;
         last = orig.last;
         break;
-      case 2: // Single character insertion
+      case 2: // Insert extra char
         first = orig.first + 'abcdefghijklmnopqrstuvwxyz'[Math.floor(nf() * 26)];
         last = orig.last;
         break;
-      case 3: // Nickname (first 3 chars only)
+      case 3: // Nickname (shortened)
         first = orig.first.slice(0, 3);
         last = orig.last;
         break;
-      default: // Truncation of last name
+      default: // Truncated last name
         first = orig.first;
         last = orig.last.slice(0, Math.max(3, orig.last.length - 2));
     }
 
-    records.push({ _er_id: scale + i, first, last });
+    // Duplicates share the same email and DOB (strong matching clues)
+    records.push({
+      _er_id: scale + i,
+      first,
+      last,
+      city: orig.city,
+      email: orig.email,
+      dob: orig.dob,
+    });
   }
 
-  // Fisher-Yates shuffle — records move, but _er_id stays attached.
+  // Fisher-Yates shuffle
   for (let i = records.length - 1; i > 0; i--) {
     const j = Math.floor(nf() * (i + 1));
     [records[i], records[j]] = [records[j]!, records[i]!];
   }
 
-  // Ground truth: base record i is a match with its duplicate at scale+i.
   const groundTruth = new Set<string>();
   for (let i = 0; i < dupCount; i++) {
     groundTruth.add(`${i % scale}|${scale + i}`);

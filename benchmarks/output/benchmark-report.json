@@ -1,0 +1,540 @@
+{
+  "timestamp": "2026-08-02T11:04:37.186Z",
+  "entityResolverVersion": "0.1.0-beta",
+  "competitorVersions": {
+    "splink": "4.0.16",
+    "goldenmatch": "3.10.0"
+  },
+  "results": [
+    {
+      "dataset": "DBLP-ACM",
+      "mode": "linkage",
+      "tool": "entity-resolver",
+      "recordCount": 4910,
+      "trueMatchCount": 2224,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 2217,
+        "falseNegatives": 2224,
+        "predictedPairs": 2217,
+        "truePairs": 2224,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 3,
+        "f1Values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 197,
+        "stdDevMs": 11,
+        "minMs": 186,
+        "maxMs": 209,
+        "runs": 3,
+        "perRunMs": [
+          209,
+          197,
+          186
+        ]
+      },
+      "candidatePairs": 2217,
+      "configFingerprint": "er-DBLP-ACM-v1",
+      "toolVersion": "0.1.0-beta"
+    },
+    {
+      "dataset": "Abt-Buy",
+      "mode": "linkage",
+      "tool": "entity-resolver",
+      "recordCount": 2173,
+      "trueMatchCount": 1097,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 10,
+        "falseNegatives": 1097,
+        "predictedPairs": 10,
+        "truePairs": 1097,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 3,
+        "f1Values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 83,
+        "stdDevMs": 4,
+        "minMs": 79,
+        "maxMs": 88,
+        "runs": 3,
+        "perRunMs": [
+          88,
+          79,
+          83
+        ]
+      },
+      "candidatePairs": 10,
+      "configFingerprint": "er-Abt-Buy-v1",
+      "toolVersion": "0.1.0-beta"
+    },
+    {
+      "dataset": "Amazon-Google",
+      "mode": "linkage",
+      "tool": "entity-resolver",
+      "recordCount": 4589,
+      "trueMatchCount": 1300,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 1932,
+        "falseNegatives": 1300,
+        "predictedPairs": 1932,
+        "truePairs": 1300,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 3,
+        "f1Values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 206,
+        "stdDevMs": 6,
+        "minMs": 201,
+        "maxMs": 212,
+        "runs": 3,
+        "perRunMs": [
+          201,
+          203,
+          212
+        ]
+      },
+      "candidatePairs": 1932,
+      "configFingerprint": "er-Amazon-Google-v1",
+      "toolVersion": "0.1.0-beta"
+    },
+    {
+      "dataset": "FEBRL-1000",
+      "mode": "dedupe",
+      "tool": "entity-resolver",
+      "recordCount": 1200,
+      "trueMatchCount": 200,
+      "metrics": {
+        "precision": 0.002952716094325123,
+        "recall": 0.365,
+        "f1": 0.0058580427717369495,
+        "truePositives": 73,
+        "falsePositives": 24650,
+        "falseNegatives": 127,
+        "predictedPairs": 24723,
+        "truePairs": 200,
+        "f1StdDev": 0,
+        "precisionStdDev": 5.311484201212962e-19,
+        "recallStdDev": 0,
+        "runs": 3,
+        "f1Values": [
+          0.0058580427717369495,
+          0.0058580427717369495,
+          0.0058580427717369495
+        ]
+      },
+      "timing": {
+        "meanMs": 117,
+        "stdDevMs": 41,
+        "minMs": 90,
+        "maxMs": 165,
+        "runs": 3,
+        "perRunMs": [
+          165,
+          90,
+          97
+        ]
+      },
+      "candidatePairs": 24723,
+      "configFingerprint": "er-FEBRL-1000-synthetic-seed42",
+      "toolVersion": "0.1.0-beta"
+    },
+    {
+      "dataset": "FEBRL-5000",
+      "mode": "dedupe",
+      "tool": "entity-resolver",
+      "recordCount": 6000,
+      "trueMatchCount": 1000,
+      "metrics": {
+        "precision": 0.0006198434045748651,
+        "recall": 0.383,
+        "f1": 0.0012376837540273196,
+        "truePositives": 383,
+        "falsePositives": 617515,
+        "falseNegatives": 617,
+        "predictedPairs": 617898,
+        "truePairs": 1000,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 3,
+        "f1Values": [
+          0.0012376837540273196,
+          0.0012376837540273196,
+          0.0012376837540273196
+        ]
+      },
+      "timing": {
+        "meanMs": 2316,
+        "stdDevMs": 60,
+        "minMs": 2247,
+        "maxMs": 2359,
+        "runs": 3,
+        "perRunMs": [
+          2341,
+          2247,
+          2359
+        ]
+      },
+      "candidatePairs": 617898,
+      "configFingerprint": "er-FEBRL-5000-synthetic-seed42",
+      "toolVersion": "0.1.0-beta"
+    },
+    {
+      "dataset": "DBLP-ACM",
+      "mode": "linkage",
+      "tool": "splink",
+      "recordCount": 4910,
+      "trueMatchCount": 2224,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 2224,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "splink-zero-config",
+      "toolVersion": "4.0.16"
+    },
+    {
+      "dataset": "Abt-Buy",
+      "mode": "linkage",
+      "tool": "splink",
+      "recordCount": 2173,
+      "trueMatchCount": 1097,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 1097,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "splink-zero-config",
+      "toolVersion": "4.0.16"
+    },
+    {
+      "dataset": "Amazon-Google",
+      "mode": "linkage",
+      "tool": "splink",
+      "recordCount": 4589,
+      "trueMatchCount": 1300,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 1300,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "splink-zero-config",
+      "toolVersion": "4.0.16"
+    },
+    {
+      "dataset": "DBLP-ACM",
+      "mode": "linkage",
+      "tool": "goldenmatch",
+      "recordCount": 4910,
+      "trueMatchCount": 2224,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 2224,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "goldenmatch-zero-config",
+      "toolVersion": "3.10.0"
+    },
+    {
+      "dataset": "Abt-Buy",
+      "mode": "linkage",
+      "tool": "goldenmatch",
+      "recordCount": 2173,
+      "trueMatchCount": 1097,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 1097,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "goldenmatch-zero-config",
+      "toolVersion": "3.10.0"
+    },
+    {
+      "dataset": "Amazon-Google",
+      "mode": "linkage",
+      "tool": "goldenmatch",
+      "recordCount": 4589,
+      "trueMatchCount": 1300,
+      "metrics": {
+        "precision": 0,
+        "recall": 0,
+        "f1": 0,
+        "truePositives": 0,
+        "falsePositives": 0,
+        "falseNegatives": 0,
+        "predictedPairs": 0,
+        "truePairs": 1300,
+        "f1StdDev": 0,
+        "precisionStdDev": 0,
+        "recallStdDev": 0,
+        "runs": 1,
+        "f1Values": [
+          0
+        ]
+      },
+      "timing": {
+        "meanMs": 0,
+        "stdDevMs": 0,
+        "minMs": 0,
+        "maxMs": 0,
+        "runs": 1,
+        "perRunMs": [
+          0
+        ]
+      },
+      "candidatePairs": 0,
+      "configFingerprint": "goldenmatch-zero-config",
+      "toolVersion": "3.10.0"
+    }
+  ],
+  "comparisonMatrix": {
+    "datasets": [
+      "DBLP-ACM",
+      "Abt-Buy",
+      "Amazon-Google",
+      "FEBRL-1000",
+      "FEBRL-5000"
+    ],
+    "tools": [
+      "entity-resolver",
+      "splink",
+      "goldenmatch"
+    ],
+    "rows": {
+      "DBLP-ACM": {
+        "entity-resolver": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 197
+        },
+        "splink": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        },
+        "goldenmatch": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        }
+      },
+      "Abt-Buy": {
+        "entity-resolver": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 83
+        },
+        "splink": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        },
+        "goldenmatch": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        }
+      },
+      "Amazon-Google": {
+        "entity-resolver": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 206
+        },
+        "splink": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        },
+        "goldenmatch": {
+          "f1": 0,
+          "f1StdDev": 0,
+          "precision": 0,
+          "recall": 0,
+          "timeMeanMs": 0
+        }
+      },
+      "FEBRL-1000": {
+        "entity-resolver": {
+          "f1": 0.0058580427717369495,
+          "f1StdDev": 0,
+          "precision": 0.002952716094325123,
+          "recall": 0.365,
+          "timeMeanMs": 117
+        }
+      },
+      "FEBRL-5000": {
+        "entity-resolver": {
+          "f1": 0.0012376837540273196,
+          "f1StdDev": 0,
+          "precision": 0.0006198434045748651,
+          "recall": 0.383,
+          "timeMeanMs": 2316
+        }
+      }
+    }
+  }
+}
