@@ -527,3 +527,176 @@ describe('scoreWithLLM integration (real API)', () => {
     expect(results[0]!.reasoning).toContain('LLM API error');
   });
 });
+
+// ═══════════════════════════════════════════════════════════════
+// Schema-informed prompt and calibration tests (I34)
+// ═══════════════════════════════════════════════════════════════
+
+import {
+  buildSchemaPrompt,
+  fieldHintsFromDetectedFields,
+  calibrateThreshold,
+} from '../../index.js';
+import type { FieldHint, SchemaPromptConfig, LLMScorerResult } from '../../index.js';
+
+describe('fieldHintsFromDetectedFields', () => {
+  it('generates hints for common semantic types', () => {
+    const hints = fieldHintsFromDetectedFields([
+      { name: 'email', semanticType: 'email' },
+      { name: 'full_name', semanticType: 'name' },
+      { name: 'city', semanticType: 'city' },
+    ]);
+
+    expect(hints).toHaveLength(3);
+    expect(hints[0]!.hint).toContain('Exact match');
+    expect(hints[1]!.hint).toContain('Fuzzy match');
+    expect(hints[2]!.hint).toContain('abbreviations');
+  });
+
+  it('preserves field names and types', () => {
+    const hints = fieldHintsFromDetectedFields([
+      { name: 'phone_number', semanticType: 'phone' },
+    ]);
+    expect(hints[0]!.name).toBe('phone_number');
+    expect(hints[0]!.semanticType).toBe('phone');
+  });
+
+  it('returns generic hint for unknown type', () => {
+    const hints = fieldHintsFromDetectedFields([
+      { name: 'unknown_field', semanticType: 'custom_type' },
+    ]);
+    expect(hints[0]!.hint).toContain('General string similarity');
+  });
+
+  it('returns empty array for empty input', () => {
+    const hints = fieldHintsFromDetectedFields([]);
+    expect(hints).toHaveLength(0);
+  });
+});
+
+describe('buildSchemaPrompt', () => {
+  const sampleHints: FieldHint[] = [
+    { name: 'name', semanticType: 'name', hint: 'Fuzzy match' },
+    { name: 'email', semanticType: 'email', hint: 'Exact match' },
+  ];
+  const recordA = { name: 'John Smith', email: 'john@acme.com' };
+  const recordB = { name: 'Jon Smith', email: 'john@acme.com' };
+
+  it('builds chain-of-thought prompt by default', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints };
+    const prompt = buildSchemaPrompt(recordA, recordB, config);
+    expect(prompt).toContain('fieldAnalysis');
+    expect(prompt).toContain('finalScore');
+    expect(prompt).toContain('John Smith');
+    expect(prompt).toContain('Jon Smith');
+    expect(prompt).toContain('john@acme.com');
+    expect(prompt).toContain('Fuzzy match');
+    expect(prompt).toContain('Exact match');
+  });
+
+  it('builds simple prompt when chainOfThought is false', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints, chainOfThought: false };
+    const prompt = buildSchemaPrompt(recordA, recordB, config);
+    expect(prompt).not.toContain('fieldAnalysis');
+    expect(prompt).toContain('Record A');
+    expect(prompt).toContain('Record B');
+    expect(prompt).toContain('"score"');
+  });
+
+  it('includes domain context when provided', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints, domainContext: 'customer records' };
+    const prompt = buildSchemaPrompt(recordA, recordB, config);
+    expect(prompt).toContain('customer records');
+  });
+
+  it('handles missing field values gracefully', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints };
+    const prompt = buildSchemaPrompt({}, {}, config);
+    expect(prompt).toContain('A: ');
+    expect(prompt).toContain('B: ');
+  });
+
+  it('omits domain context line when not provided', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints };
+    const prompt = buildSchemaPrompt(recordA, recordB, config);
+    expect(prompt).not.toContain('Domain context');
+  });
+
+  it('includes all field hints in output', () => {
+    const config: SchemaPromptConfig = { fieldHints: sampleHints };
+    const prompt = buildSchemaPrompt(recordA, recordB, config);
+    expect(prompt).toContain('name (name)');
+    expect(prompt).toContain('email (email)');
+  });
+});
+
+describe('calibrateThreshold', () => {
+  const leftIds = ['a', 'b', 'c'];
+  const rightIds = ['a', 'b', 'c'];
+
+  it('finds optimal threshold for perfect predictions', () => {
+    const scores: LLMScorerResult[] = [
+      { leftId: 0, rightId: 0, originalScore: 0.8, llmScore: 0.95, reasoning: '' },
+      { leftId: 1, rightId: 1, originalScore: 0.8, llmScore: 0.9, reasoning: '' },
+    ];
+    const truth = new Set(['a|a', 'b|b']);
+    const result = calibrateThreshold(scores, truth, leftIds, rightIds);
+    expect(result.optimalF1).toBe(1);
+    expect(result.curve.length).toBeGreaterThan(10);
+  });
+
+  it('handles mixed scores correctly', () => {
+    const scores: LLMScorerResult[] = [
+      { leftId: 0, rightId: 0, originalScore: 0.5, llmScore: 0.9, reasoning: '' },
+      { leftId: 0, rightId: 1, originalScore: 0.5, llmScore: 0.7, reasoning: '' },
+    ];
+    const truth = new Set(['a|a']); // only first pair is true match
+    const result = calibrateThreshold(scores, truth, leftIds, rightIds);
+    // At threshold 0.8: only first pair → P=1, R=1, F1=1
+    expect(result.optimalF1).toBe(1);
+  });
+
+  it('returns zero F1 when no predictions match', () => {
+    const scores: LLMScorerResult[] = [
+      { leftId: 0, rightId: 0, originalScore: 0.5, llmScore: 0.1, reasoning: '' },
+    ];
+    const truth = new Set(['a|a']);
+    const result = calibrateThreshold(scores, truth, leftIds, rightIds);
+    // At threshold 0.1: passes, TP=1 → F1=1
+    expect(result.optimalF1).toBe(1);
+  });
+
+  it('handles empty scores gracefully', () => {
+    const result = calibrateThreshold([], new Set(['a|a']), leftIds, rightIds);
+    expect(result.curve.length).toBeGreaterThan(10);
+    expect(result.optimalF1).toBe(0);
+  });
+
+  it('produces monotonic threshold curve', () => {
+    const scores: LLMScorerResult[] = [
+      { leftId: 0, rightId: 0, originalScore: 0.5, llmScore: 0.3, reasoning: '' },
+      { leftId: 0, rightId: 1, originalScore: 0.5, llmScore: 0.6, reasoning: '' },
+      { leftId: 1, rightId: 0, originalScore: 0.5, llmScore: 0.9, reasoning: '' },
+    ];
+    const truth = new Set(['a|a', 'a|b']);
+    const result = calibrateThreshold(scores, truth, leftIds, rightIds);
+    // Verify thresholds are ascending
+    for (let i = 1; i < result.curve.length; i++) {
+      expect(result.curve[i]!.threshold).toBeGreaterThan(result.curve[i - 1]!.threshold);
+    }
+  });
+
+  it('calibration point fields are all populated', () => {
+    const scores: LLMScorerResult[] = [
+      { leftId: 0, rightId: 0, originalScore: 0.5, llmScore: 0.85, reasoning: '' },
+    ];
+    const truth = new Set(['a|a']);
+    const result = calibrateThreshold(scores, truth, leftIds, rightIds);
+    for (const point of result.curve) {
+      expect(typeof point.f1).toBe('number');
+      expect(typeof point.precision).toBe('number');
+      expect(typeof point.recall).toBe('number');
+      expect(typeof point.threshold).toBe('number');
+    }
+  });
+});

@@ -352,6 +352,9 @@ export {
   scoreWithLLMHybrid,
   estimateLLMCost,
   resetCircuitBreaker,
+  buildSchemaPrompt,
+  fieldHintsFromDetectedFields,
+  calibrateThreshold,
 } from './llm/scorer.js';
 export type {
   LLMProvider,
@@ -361,6 +364,9 @@ export type {
   LLMScorerResult,
   LLMCostEstimate,
   LLMCostBreakdown,
+  FieldHint,
+  SchemaPromptConfig,
+  CalibrationPoint,
 } from './llm/scorer.js';
 
 // Golden Record Survivorship

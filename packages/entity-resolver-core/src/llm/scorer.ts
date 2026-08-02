@@ -13,6 +13,7 @@ import { LLMError } from '../errors/hierarchy.js';
 // - Graceful degradation: circuit-open returns neutral scores, not errors
 
 import type { ScoredPair } from '../types/core.js';
+import { getFieldString } from '../types/core.js';
 import type { ILogger } from '../interfaces/ILogger.js';
 
 // ═══════════════════════════════════════════════════════════════
@@ -657,4 +658,176 @@ async function callLLM(
     );
     return { score: 0.5, reasoning: 'failed to parse LLM response', ...(usage && { usage }) };
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Schema-informed chain-of-thought prompting (I34)
+// ═══════════════════════════════════════════════════════════════
+
+/** Field-level hint for schema-informed LLM prompts. */
+export interface FieldHint {
+  readonly name: string;
+  readonly semanticType: string;
+  readonly hint: string;
+}
+
+/** Schema-informed prompt template with chain-of-thought reasoning. */
+export interface SchemaPromptConfig {
+  readonly fieldHints: readonly FieldHint[];
+  readonly chainOfThought?: boolean;
+  readonly domainContext?: string;
+}
+
+/**
+ * Build a schema-informed comparison prompt for the LLM with optional
+ * chain-of-thought reasoning. Field hints derived from auto-config
+ * detection provide domain-aware entity resolution context.
+ */
+export function buildSchemaPrompt(
+  recordA: Record<string, unknown>,
+  recordB: Record<string, unknown>,
+  config: SchemaPromptConfig,
+): string {
+  const { fieldHints, chainOfThought = true, domainContext } = config;
+
+  const fieldComparisons = fieldHints
+    .map((hint) => {
+      const valA = getFieldString(recordA, hint.name);
+      const valB = getFieldString(recordB, hint.name);
+      return `  ${hint.name} (${hint.semanticType}):
+    A: ${valA}
+    B: ${valB}
+    Hint: ${hint.hint}`;
+    })
+    .join('\n\n');
+
+  const domainLine = domainContext ? `Domain context: ${domainContext}\n` : '';
+
+  if (chainOfThought) {
+    return `Determine if these two records refer to the same real-world entity.
+${domainLine}
+Analyze each field step by step, then give a final score.
+
+Fields:
+${fieldComparisons}
+
+Respond with JSON:
+{
+  "fieldAnalysis": {
+    "<fieldName>": {"match": <true|false>, "confidence": <0-1>, "reasoning": "<why>"}
+  },
+  "finalScore": <0-1>,
+  "overallReasoning": "<summary>"
+}
+
+Score: 1 = definitely same entity, 0 = definitely different.`;
+  }
+
+  const simpleFieldsA = fieldHints
+    .map((h) => `  ${h.name}: ${getFieldString(recordA, h.name)}`)
+    .join('\n');
+  const simpleFieldsB = fieldHints
+    .map((h) => `  ${h.name}: ${getFieldString(recordB, h.name)}`)
+    .join('\n');
+
+  return `Determine if these two records refer to the same real-world entity.
+${domainLine}
+Record A:
+${simpleFieldsA}
+
+Record B:
+${simpleFieldsB}
+
+Respond with JSON: {"score": <0-1>, "reasoning": "<brief>"}
+Score: 1 = definitely same entity, 0 = definitely different.`;
+}
+
+/** Builder for schema hints from auto-config detected fields. */
+export function fieldHintsFromDetectedFields(
+  fields: readonly { readonly name: string; readonly semanticType: string }[],
+): FieldHint[] {
+  return fields.map((f) => ({
+    name: f.name,
+    semanticType: f.semanticType,
+    hint: getHintForType(f.semanticType),
+  }));
+}
+
+const SEMANTIC_HINTS: Readonly<Record<string, string>> = {
+  email: 'Exact match required — emails are unique identifiers',
+  phone: 'Digits-only comparison; accept format variations (+1, dashes)',
+  name: 'Fuzzy match: typos, nicknames, and transpositions are common',
+  surname: 'Fuzzy match: accept spelling variants and suffixes (Jr, Sr)',
+  address: 'Token-order independent; accept abbreviations (St=Street)',
+  city: 'Accept common abbreviations and alternate names',
+  postcode: 'Exact or near-exact match; accept ZIP+4 variations',
+  date: 'Accept small differences (1-2 days) and format variations',
+  company: 'Accept abbreviations (Inc, Ltd, Corp) and word-order changes',
+  product: 'Accept word-order changes, abbreviations, and model variants',
+  numeric: 'Exact numeric match required; accept rounding variations',
+  identifier: 'Exact match required — identifiers are unique',
+  text: 'General string similarity; accept minor variations',
+};
+
+function getHintForType(semanticType: string): string {
+  return SEMANTIC_HINTS[semanticType] ?? 'General string similarity comparison';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Score calibration (I34)
+// ═══════════════════════════════════════════════════════════════
+
+/** Calibration point mapping a threshold to F1 metrics. */
+export interface CalibrationPoint {
+  readonly threshold: number;
+  readonly precision: number;
+  readonly recall: number;
+  readonly f1: number;
+  readonly truePositives: number;
+  readonly falsePositives: number;
+  readonly falseNegatives: number;
+}
+
+/**
+ * Calibrate LLM scores against ground truth to find the optimal
+ * classification threshold. Sweeps thresholds 0.1–0.95 in 0.05 steps.
+ */
+export function calibrateThreshold(
+  scores: readonly LLMScorerResult[],
+  groundTruth: Set<string>,
+  leftIds: readonly string[],
+  rightIds: readonly string[],
+): { optimalThreshold: number; optimalF1: number; curve: readonly CalibrationPoint[] } {
+  const curve: CalibrationPoint[] = [];
+
+  for (let t = 0.1; t <= 0.95; t += 0.05) {
+    const threshold = Math.round(t * 100) / 100;
+    let tp = 0;
+    const predicted = new Set<string>();
+
+    for (const s of scores) {
+      if (s.llmScore >= threshold) {
+        const lId = leftIds[s.leftId] ?? String(s.leftId);
+        const rId = rightIds[s.rightId] ?? String(s.rightId);
+        const key = `${lId}|${rId}`;
+        predicted.add(key);
+        if (groundTruth.has(key)) tp++;
+      }
+    }
+
+    const fp = predicted.size - tp;
+    const fn = groundTruth.size - tp;
+    const precision = predicted.size > 0 ? tp / predicted.size : 0;
+    const recall = groundTruth.size > 0 ? tp / groundTruth.size : 0;
+    const f1 = tp > 0 ? (2 * tp) / (2 * tp + fp + fn) : 0;
+
+    curve.push({ threshold, precision, recall, f1, truePositives: tp, falsePositives: fp, falseNegatives: fn });
+  }
+
+  let optimal = curve[0]!;
+  for (const point of curve) {
+    if (point.f1 > optimal.f1) optimal = point;
+  }
+
+  return { optimalThreshold: optimal.threshold, optimalF1: optimal.f1, curve };
 }
