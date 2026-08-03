@@ -151,6 +151,49 @@ export const MATCH_WEIGHT_INTERPRETATION = {
   VERY_STRONG: 7,
 } as const;
 
+// ═══════════════════════════════════════════════════════════════
+// Positive-evidence gate (I42 — GoldenMatch pattern)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Positive-evidence gate: refuse to link pairs where the net
+ * log-likelihood ratio is ≤ 0 (i.e., evidence against match is
+ * stronger than evidence for match).
+ *
+ * This mirrors GoldenMatch's "positive evidence gate" which
+ * is ON by default and refuses to link pairs where the
+ * cumulative weight indicates the pair is more likely a
+ * non-match than a match.
+ *
+ * @returns true if the pair passes the evidence gate
+ */
+export function passesEvidenceGate(totalWeight: number): boolean {
+  return totalWeight > 0;
+}
+
+/**
+ * Compute blocking-field match weights with linear spacing.
+ *
+ * GoldenMatch uses fixed weights for blocking fields (which are
+ * always conditioned — every pair is in the same block):
+ *   -3.0 for 2-level fields, linearly spaced to +3.0
+ *
+ * This prevents blocking fields from dominating non-blocking
+ * field evidence while still contributing to the total weight.
+ *
+ * @param numLevels — number of comparison levels for the blocking field
+ * @returns array of weights [weakest_level_weight, ..., strongest_level_weight]
+ */
+export function blockingFieldWeights(numLevels: number): readonly number[] {
+  if (numLevels < 2) return [0];
+  const weights: number[] = [];
+  for (let k = 0; k < numLevels; k++) {
+    // Linearly spaced from -3.0 to +3.0
+    weights.push(-3.0 + (6.0 * k) / (numLevels - 1));
+  }
+  return weights;
+}
+
 // ─── Helpers ────────────────────────────────────────────────────
 
 function safeLog2(x: number): number {

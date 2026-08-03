@@ -158,6 +158,8 @@ export {
   probabilityToWeight,
   priorWeight,
   MATCH_WEIGHT_INTERPRETATION,
+  passesEvidenceGate,
+  blockingFieldWeights,
 } from './fellegi-sunter/match-weight.js';
 
 export type { TermFrequency } from './fellegi-sunter/tf-adjust.js';

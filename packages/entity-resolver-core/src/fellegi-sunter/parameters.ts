@@ -85,8 +85,9 @@ export function createDefaultParameters(
 
     for (let k = 0; k < sorted.length; k++) {
       const key = sorted[k]!;
-      mProbabilities.set(key, (powers[k]! / total) + SMOOTH * n);
-      uProbabilities.set(key, initialU + SMOOTH);
+      const rawM = (powers[k]! / total) + SMOOTH * n;
+      mProbabilities.set(key, Math.min(rawM, 1.0 - SMOOTH));
+      uProbabilities.set(key, Math.max(initialU + SMOOTH, SMOOTH));
     }
   }
 

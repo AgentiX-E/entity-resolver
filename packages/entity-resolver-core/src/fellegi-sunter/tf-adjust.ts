@@ -60,15 +60,50 @@ export function buildTermFrequencies(
 /**
  * Compute the term frequency adjustment factor for a value.
  *
- * Formula: adjustment = max(0.1, 1 - log10(frequency) / log10(totalRecords))
+ * I42: Splink-equivalent formula:
+ *   adjusted_u = max(min_u, u * (1 + log10(GREATEST(tf_l, tf_r) / N)))
  *
- * Rare values (frequency ~ 1) → adjustment ~ 1.0 (no reduction)
- * Common values (frequency ~ N/10) → adjustment ~ 0.5 (50% reduction)
- * Extremely common (frequency ~ N) → adjustment = 0.1 (floor)
+ * This adjusts the u-probability BEFORE log₂, which is mathematically
+ * correct in the Fellegi-Sunter framework. The previous heuristic
+ * (1 - log₁₀(f)/log₁₀(N)) multiplied weights after log₂, which broke
+ * calibration.
  *
- * Splink compatibility: Splink uses the same log10(freq)/log10(N)
- * formula with a floor of 0.01 (1% of original weight). Our floor
- * is 0.1 (10%) — less aggressive than Splink. Tune via floor param.
+ * Parameters:
+ *   leftFreq  — frequency in left dataset
+ *   rightFreq — frequency in right dataset
+ *   totalRecords — total records in the union
+ *   baseU — baseline u-probability before TF adjustment
+ *   minU — floor for adjusted u (default 1e-6)
+ *
+ * Returns: adjusted u-probability with TF correction applied
+ */
+export function computeTFAdjustmentSplink(
+  leftFreq: number,
+  rightFreq: number,
+  totalRecords: number,
+  baseU: number,
+  minU = 1e-6,
+): number {
+  // Edge cases
+  if (totalRecords <= 0 || baseU <= 0) return baseU;
+  if (leftFreq <= 0 && rightFreq <= 0) return baseU;
+
+  // Splink: use the MORE common value
+  const freq = Math.max(leftFreq, rightFreq);
+  const freqRatio = freq / totalRecords;
+
+  // Splink formula: adjusted_u = max(min_u, u * (1 + log10(tf_ratio)))
+  // log10(tf_ratio) is negative for rare values (penalizes LESS)
+  // log10(tf_ratio) is near 0 for common values (penalizes MORE)
+  const tfFactor = 1 + Math.log10(Math.max(freqRatio, minU));
+
+  return Math.max(minU, baseU * Math.max(tfFactor, 0.01));
+}
+
+/**
+ * Compute the term frequency adjustment factor for a value (legacy).
+ *
+ * @deprecated I42: Use computeTFAdjustmentSplink() for proper u-level adjustment
  */
 export function computeTFAdjustment(frequency: number, totalRecords: number): number {
   if (frequency <= 0 || totalRecords <= 1) return 1;
