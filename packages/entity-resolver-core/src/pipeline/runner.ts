@@ -41,6 +41,33 @@ export interface PipelineConfig {
   readonly tfFields?: readonly string[];
   /** Whether to run auto-configure (simplified in I5). */
   readonly autoConfigure?: boolean;
+  /**
+   * I43: LLM re-ranking configuration.
+   * When set, ambiguous boundary pairs are sent to an LLM for
+   * semantic judgment, improving precision on hard cases.
+   */
+  readonly llmRerank?: LLMRerankConfig;
+}
+
+/** I43: Configuration for LLM-based pair re-ranking. */
+export interface LLMRerankConfig {
+  /** API key for the LLM provider. MUST be injected, never hardcoded. */
+  readonly apiKey: string;
+  /** LLM provider (default: deepseek). */
+  readonly provider?: 'deepseek' | 'openai' | 'custom';
+  /** Model name (provider-dependent default). */
+  readonly model?: string;
+  /** API base URL. */
+  readonly apiBaseUrl?: string;
+  /** Top-K boundary pairs to send to LLM (default: 20). */
+  readonly topK?: number;
+  /** Minimum string-similarity score to qualify for LLM review (default: 0.3). */
+  readonly minCandidateScore?: number;
+  /** Score band [lo, hi] — pairs with scores in this range are boundary. */
+  readonly candidateLo?: number;
+  readonly candidateHi?: number;
+  /** Use ComEM-style selecting instead of binary matching (default: true). */
+  readonly useSelecting?: boolean;
 }
 
 /** Pipeline execution options. */
@@ -263,6 +290,24 @@ export async function runPipeline(
     pairVectors,
   );
 
+  // I43: LLM re-ranking of boundary pairs
+  if (config.llmRerank && config.llmRerank.apiKey) {
+    const llmScored = await rerankWithLLM(
+      scoredPairs,
+      cleaned.map((r) => r as Record<string, unknown>),
+      config.llmRerank,
+      logger,
+    );
+    // Merge LLM scores back into scoredPairs
+    for (const pair of scoredPairs) {
+      const llmResult = llmScored.get(`${pair.leftId}:${pair.rightId}`);
+      if (llmResult !== undefined) {
+        (pair as { probability: number; score: number }).probability = llmResult;
+        (pair as { probability: number; score: number }).score = llmResult;
+      }
+    }
+  }
+
   // Stage 4: Clustering
   const clustering = connectedComponents(scoredPairs, records.length, config.matchThreshold);
 
@@ -476,4 +521,68 @@ function buildDiagnostics(
     matchWeightDistribution: weightBins,
     unlinkableCount: 0,
   };
+}
+
+// ═══════════════════════════════════════════════════════════════
+// I43: LLM re-ranking boundary pairs
+// ═══════════════════════════════════════════════════════════════
+
+async function rerankWithLLM(
+  scoredPairs: ScoredPair[],
+  records: Record<string, unknown>[],
+  config: LLMRerankConfig,
+  logger?: ILogger,
+): Promise<Map<string, number>> {
+  const result = new Map<string, number>();
+
+  try {
+    const llm = await import('../llm/scorer.js');
+    const { scoreWithLLM } = llm;
+
+    const lo = config.candidateLo ?? 0.3;
+    const hi = config.candidateHi ?? 0.7;
+    const topK = config.topK ?? 20;
+    const minScore = config.minCandidateScore ?? 0.3;
+
+    const boundary = scoredPairs
+      .map((p) => ({ pair: p, score: p.probability ?? p.score }))
+      .filter((s) => s.score >= minScore)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, topK);
+
+    if (boundary.length === 0) return result;
+
+    logger?.info('LLM rerank: selected boundary pairs', {
+      operation: 'rerankWithLLM',
+      totalPairs: scoredPairs.length,
+      boundaryPairs: boundary.length,
+    });
+
+    const llmConfig: Record<string, unknown> = {
+      apiKey: config.apiKey,
+      candidateLo: lo,
+      candidateHi: hi,
+    };
+    if (config.provider) (llmConfig as any).provider = config.provider;
+    if (config.model) (llmConfig as any).model = config.model;
+    if (config.apiBaseUrl) (llmConfig as any).apiBaseUrl = config.apiBaseUrl;
+
+    const llmResults = await scoreWithLLM(
+      boundary.map((b) => b.pair),
+      records,
+      llmConfig as any,
+      logger,
+    );
+
+    for (const r of llmResults) {
+      result.set(`${r.leftId}:${r.rightId}`, r.llmScore);
+    }
+  } catch (err: unknown) {
+    logger?.warn('LLM rerank failed, returning original scores', {
+      operation: 'rerankWithLLM',
+      cause: err instanceof Error ? err.message : String(err),
+    });
+  }
+
+  return result;
 }
