@@ -243,18 +243,14 @@ function getDatasetPipelineConfig(name: string): any {
         comparisons: [
           {
             field: 'title',
-            scorerName: 'ensemble',
+            scorerName: 'jaro_winkler',
             levels: [
               { name: 'strong_match', threshold: 0.95 },
               { name: 'moderate_match', threshold: 0.8 },
               { name: 'weak_match', threshold: 0.6 },
             ],
           },
-          {
-            field: 'year',
-            scorerName: 'exact',
-            levels: [{ name: 'match', isExact: true as any }],
-          },
+          { field: 'year', scorerName: 'exact', levels: [{ name: 'match', isExact: true as any }] },
         ],
         blocking: { passes: [{ fields: ['title'], transforms: ['lowercase'] }] },
       };

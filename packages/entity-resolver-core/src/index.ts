@@ -32,7 +32,7 @@ export type {
 } from './interfaces/ISqlBackend.js';
 
 // Error Hierarchy
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   EntityResolverError,
   ValidationError,
   ConfigurationError,
@@ -54,7 +54,7 @@ export {
 export type { ErrorCode, ErrorContext } from './errors/hierarchy.js';
 
 // Scorers
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   exactScorer,
   levenshteinScorer,
   damerauLevenshteinScorer,
@@ -80,7 +80,7 @@ export {
 
 // Scorer Registry
 export type { ScorerInitResult } from './matching/scorers/registry.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   initScorers,
   getScorers,
   getScorer,
@@ -92,7 +92,7 @@ export {
 // Comparison System
 export type { ComparisonLevel, ComparisonSpec, ComparisonVector } from './matching/comparison.js';
 
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   generateComparisonVectors,
   COMPARISON_LEVELS,
   nameComparisonSpec,
@@ -102,7 +102,7 @@ export {
 
 // SQL Comparison
 export type { SqlComparisonConfig, ScorerFn } from './matching/sql-comparison.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   buildComparisonQuery,
   parseComparisonRows,
   requiresUdf,
@@ -115,7 +115,7 @@ export {
 export { tryLoadWasmScorers } from './matching/scorers/wasm/loader.js';
 
 // Preprocessing
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   repairUnicode,
   normalize,
   normalizeCJK,
@@ -125,7 +125,7 @@ export {
 } from './preprocessing/cleaner.js';
 
 // CJK-Native preprocessing (I37)
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   isCJK,
   hasCJK,
   cjkTokenize,
@@ -139,7 +139,7 @@ export type { CJKNameParts } from './preprocessing/cjk.js';
 
 // Fellegi-Sunter Probability Model
 export type { FSParameters } from './fellegi-sunter/parameters.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   createDefaultParameters,
   extractComparisonKeys,
   cloneParametersMutable,
@@ -151,7 +151,7 @@ export type { EMOptions, EMResult } from './fellegi-sunter/em.js';
 export { estimateParameters, fieldFromKey, calibrateLinear, computePairWeights } from './fellegi-sunter/em.js';
 
 export type { MatchWeightResult } from './fellegi-sunter/match-weight.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   computeMatchWeight,
   computeAggregateMatchWeight,
   weightToProbability,
@@ -163,7 +163,7 @@ export {
 } from './fellegi-sunter/match-weight.js';
 
 export type { TermFrequency } from './fellegi-sunter/tf-adjust.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   buildTermFrequencies,
   computeTFAdjustment,
   adjustWeightByTF,
@@ -174,7 +174,7 @@ export type { CorrelationWarning, CorrelationReport } from './fellegi-sunter/fie
 export { analyzeFieldCorrelations } from './fellegi-sunter/field-independence.js';
 
 // Interactive Diagnostics & Enhanced TF (I39)
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   buildWaterfallChart,
   computeROCCurve,
   extractMUParameters,
@@ -189,7 +189,7 @@ export type {
 } from './fellegi-sunter/diagnostics.js';
 
 // Identity Graph (I40) — durable entity identity with provenance
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   generateUUIDv7,
   buildRecordId,
   computeContentHash,
@@ -206,7 +206,7 @@ export type {
 } from './identity/identity-store.js';
 
 // Privacy-Preserving Record Linkage (I45)
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   tokenizeForCLK,
   encodeBloomFilter,
   encodeBloomFilters,
@@ -220,7 +220,7 @@ export type { BloomFilterConfig } from './pprl/bloom.js';
 
 // Model Serialization
 export type { SerializedModel, DeserializedModel } from './fellegi-sunter/model-serialization.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   MODEL_VERSION,
   serializeModel,
   serializeFSParamsToJSON,
@@ -256,7 +256,7 @@ export type {
 } from './blocking/types.js';
 export { computeReductionRatio, applyBlockingTransforms } from './blocking/types.js';
 export { standardBlocking, blockOn, blockOnSoundex } from './blocking/standard.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   tokenBlocking,
   sortedNeighborhood,
   multiPassBlocking,
@@ -270,7 +270,7 @@ export type {
   ExtendedSuffixArraysConfig,
   ExtendedQGramsConfig,
 } from './blocking/strategies-pyjedai.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   suffixArraysBlocking,
   extendedSuffixArraysBlocking,
   extendedQGramsBlocking,
@@ -285,7 +285,7 @@ export { metaBlockingFull } from './blocking/meta-blocking.js';
 
 // Blocking Analysis
 export type { BlockingAnalysisResult } from './blocking/analyzer.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   analyzeBlockingRule,
   recommendBlockingRules,
   verifyBlockingRecall,
@@ -314,7 +314,7 @@ export type {
   RicochetSROptions,
   RowColumnClusteringOptions,
 } from './clustering/algorithms-pyjedai.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   centerClustering,
   bestMatchClustering,
   mergeCenterClustering,
@@ -347,7 +347,7 @@ export type { SqlPipelineConfig } from './pipeline/sql-runner.js';
 export { runPipelineFromSqlSource } from './pipeline/sql-runner.js';
 
 // SettingsCreator (I38) — declarative config builder, Splink-inspired
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   SettingsCreator,
   dedupeSettings,
   linkageSettings,
@@ -360,7 +360,7 @@ export type { LinkType, PipelineSettings } from './pipeline/settings.js';
 
 // Benchmarks
 export type { BenchmarkDataset, BenchmarkResult } from './benchmarks/datasets.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   loadFebrl,
   loadDblpAcm,
   loadAbtBuy,
@@ -383,7 +383,7 @@ export type {
   ActiveLearningSession,
   LogisticClassifier,
 } from './active-learning/learner.js';
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   selectUncertainPairs,
   selectDiverseUncertainPairs,
   trainLogisticClassifier,
@@ -407,19 +407,8 @@ export { MemoryEntityStore } from './memory/entity-store.js';
 export { MemoryConfigStore } from './memory/config-store.js';
 
 // PPRL
-export type { PPRLConfig } from './pprl/bloom.js';
-export {
-  BloomFilter,
-  encodePPRL,
-  encodePPRLAsync,
-  matchPPRL,
-  matchPPRLAsync,
-  sha256Sync,
-  sha256Async,
-} from './pprl/bloom.js';
-
 // LLM Scorer
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   scoreWithLLM,
   scoreWithLLMHybrid,
   estimateLLMCost,
@@ -463,7 +452,7 @@ export type {
 export { computeGraphMetrics, detectBridges } from './clustering/graph-metrics.js';
 
 // Composable Blocking
-export {
+export type { BloomFilterConfig } from ./pprl/bloom.js; export {
   blockOnAll,
   andBlocking,
   orBlocking,
