@@ -1,0 +1,86 @@
+{
+  "timestamp": "2026-08-03T03:49:00.255Z",
+  "dataset": "DBLP-ACM",
+  "records": 4910,
+  "trueMatches": 2224,
+  "runs": 3,
+  "results": [
+    {
+      "config": "A_Baseline",
+      "f1": 0.8840351272235983,
+      "f1StdDev": 0,
+      "precision": 0.8854307622913847,
+      "recall": 0.8826438848920862,
+      "pairs": 2217,
+      "timeMs": 226,
+      "f1Delta": 0,
+      "description": "Pre-I35: jaro_winkler on title, title blocking only"
+    },
+    {
+      "config": "B_Ensemble",
+      "f1": 0.8840351272235983,
+      "f1StdDev": 0,
+      "precision": 0.8854307622913847,
+      "recall": 0.8826438848920862,
+      "pairs": 2217,
+      "timeMs": 206,
+      "f1Delta": 0,
+      "description": "+I35: ensemble scorer on title, exact year"
+    },
+    {
+      "config": "C_Cardinality",
+      "f1": 0.007377026070025359,
+      "f1StdDev": 0,
+      "precision": 0.003702168531900408,
+      "recall": 1,
+      "pairs": 600729,
+      "timeMs": 1804,
+      "f1Delta": -0.876658101153573,
+      "description": "+I36: cardinality guard + short-code detection (autoConfigure)"
+    },
+    {
+      "config": "D_Combined",
+      "f1": 0.8188376753507014,
+      "f1StdDev": 0,
+      "precision": 0.7386117136659435,
+      "recall": 0.9186151079136691,
+      "pairs": 2766,
+      "timeMs": 213,
+      "f1Delta": -0.06519745187289694,
+      "description": "+I35+I36: ensemble + cardinality guard + token_sort on authors + soundex blocking"
+    },
+    {
+      "config": "E_AutoConfigure",
+      "f1": 0.007377026070025359,
+      "f1StdDev": 0,
+      "precision": 0.003702168531900408,
+      "recall": 1,
+      "pairs": 600729,
+      "timeMs": 1762,
+      "f1Delta": -0.876658101153573,
+      "description": "Full autoConfigure (I35+I36+I37): 3 comparisons, 3 passes"
+    },
+    {
+      "config": "GoldenMatch v3.10",
+      "f1": 0.9641,
+      "f1StdDev": 0,
+      "precision": 0.891,
+      "recall": 0.945,
+      "pairs": 2359,
+      "timeMs": 6200,
+      "f1Delta": 0.08006487277640162,
+      "description": "Zero-config auto mode (published benchmark)"
+    },
+    {
+      "config": "Splink v4.0.16",
+      "f1": 0.728,
+      "f1StdDev": 0,
+      "precision": 0.646,
+      "recall": 0.834,
+      "pairs": 2870,
+      "timeMs": 3400,
+      "f1Delta": -0.15603512722359836,
+      "description": "Default SettingsCreator with JaroWinklerAtThresholds"
+    }
+  ]
+}

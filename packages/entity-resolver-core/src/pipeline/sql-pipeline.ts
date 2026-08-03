@@ -118,7 +118,10 @@ export async function runSqlPipeline(
     let caseSql = 'CASE';
     for (let i = lvls.length - 1; i >= 0; i--) {
       const l = lvls[i]! as Record<string, unknown>;
-      if (l.isExact) caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      if (l.isExact || c.scorerName === 'exact') {
+        // Exact comparison: use SQL equality, not a DuckDB function
+        caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      }
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
         caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
@@ -305,7 +308,7 @@ function buildFastSingleQuery(
     let caseSql = 'CASE';
     for (let i = lvls.length - 1; i >= 0; i--) {
       const l = lvls[i]! as Record<string, unknown>;
-      if (l.isExact) caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      if (l.isExact || c.scorerName === 'exact') caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
         caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
@@ -412,7 +415,7 @@ export async function runSqlLinkage(
     let s = 'CASE';
     for (let i = lvls.length - 1; i >= 0; i--) {
       const l = lvls[i]! as Record<string, unknown>;
-      if (l.isExact) s += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
+      if (l.isExact || c.scorerName === 'exact') s += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) s += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else s += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
@@ -471,12 +474,12 @@ const DUCKDB_SCORER_MAP: Readonly<Record<string, string>> = {
   jaro: 'jaro_similarity',
   levenshtein: 'levenshtein',
   damerau_levenshtein: 'damerau_levenshtein',
-  exact: '__exact__',   // Handled via isExact flag in SQL generation, not a DB function
   jaccard: 'jaccard',
   dice: 'dice_coefficient',
   hamming: 'hamming',
   // Composite scorers mapped to best single-function SQL approximation.
   // The JS pipeline uses the full ensemble (max of 3 signals).
+  exact: '__exact__',   // Uses l.f=r.f SQL equality — not a function call
   ensemble: 'jaro_winkler_similarity',
   token_sort: 'jaro_winkler_similarity',
 };
