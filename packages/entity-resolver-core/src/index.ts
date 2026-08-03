@@ -171,6 +171,21 @@ export {
 export type { CorrelationWarning, CorrelationReport } from './fellegi-sunter/field-independence.js';
 export { analyzeFieldCorrelations } from './fellegi-sunter/field-independence.js';
 
+// Interactive Diagnostics & Enhanced TF (I39)
+export {
+  buildWaterfallChart,
+  computeROCCurve,
+  extractMUParameters,
+  computeTFAdjustmentSplink,
+} from './fellegi-sunter/diagnostics.js';
+export type {
+  WaterfallChart,
+  ROCCurve,
+  CurvePoint,
+  MUPoint,
+  TFAdjustmentConfig,
+} from './fellegi-sunter/diagnostics.js';
+
 // Model Serialization
 export type { SerializedModel, DeserializedModel } from './fellegi-sunter/model-serialization.js';
 export {
