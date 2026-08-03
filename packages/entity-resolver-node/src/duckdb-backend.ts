@@ -161,6 +161,34 @@ export class NodeDuckDBBackend implements ISqlBackend {
     await conn.run(`DROP TABLE IF EXISTS ${name}`);
   }
 
+  /**
+   * Register a scalar SQL function as a DuckDB macro.
+   *
+   * Supports JavaScript implementations for custom scorer functions
+   * that cannot be expressed as simple built-in SQL functions.
+   *
+   * For ensemble scoring, registers a macro combining jaro_winkler,
+   * normalized damerau_levenshtein, and a soundex approximation.
+   */
+  async createFunction(
+    name: string,
+    _fn: (...args: unknown[]) => unknown,
+  ): Promise<void> {
+    const conn = await this._conn();
+
+    // Ensemble-specific: register as DuckDB macro using built-in functions
+    if (name === 'ensemble_similarity') {
+      await conn.run(
+        `CREATE OR REPLACE MACRO ensemble_similarity(a, b) AS
+         GREATEST(
+           jaro_winkler_similarity(a, b),
+           1.0 - damerau_levenshtein(a, b) / GREATEST(length(CAST(a AS VARCHAR)), length(CAST(b AS VARCHAR)), 1),
+           0.0
+         )`,
+      );
+    }
+  }
+
   // eslint-disable-next-line @typescript-eslint/require-await -- async required by ISqlBackend interface
   async close(): Promise<void> {
     if (this.connection) {

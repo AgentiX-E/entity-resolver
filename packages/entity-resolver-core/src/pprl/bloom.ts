@@ -108,9 +108,9 @@ export function estimateThreshold(
 }
 
 export function autoTuneFilter(avgLen: number): Required<BloomFilterConfig> {
-  if (avgLen < 8) return { ngramSize: 2, filterSize: 512, hashFunctions: 15, hmacKey: undefined };
-  if (avgLen < 20) return { ngramSize: 2, filterSize: 1024, hashFunctions: 20, hmacKey: undefined };
-  return { ngramSize: 3, filterSize: 2048, hashFunctions: 25, hmacKey: undefined };
+  if (avgLen < 8) return { ngramSize: 2, filterSize: 512, hashFunctions: 15, hmacKey: undefined as unknown as string };
+  if (avgLen < 20) return { ngramSize: 2, filterSize: 1024, hashFunctions: 20, hmacKey: undefined as unknown as string };
+  return { ngramSize: 3, filterSize: 2048, hashFunctions: 25, hmacKey: undefined as unknown as string };
 }
 
 export function averageFieldLength(

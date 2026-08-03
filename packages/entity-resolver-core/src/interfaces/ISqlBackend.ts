@@ -82,4 +82,18 @@ export interface ISqlBackend {
    * Close the backend and release all resources.
    */
   close(): Promise<void>;
+
+  /**
+   * Register a scalar SQL function in the engine.
+   *
+   * Used for custom scorer functions (e.g., ensemble_similarity)
+   * that cannot be expressed as simple built-in function calls.
+   *
+   * @param name — function name in SQL
+   * @param fn — JavaScript implementation (args) => result
+   */
+  createFunction?(
+    name: string,
+    fn: (...args: unknown[]) => unknown,
+  ): Promise<void>;
 }

@@ -355,6 +355,14 @@ export async function runSqlLinkage(
   const leftTable = `__er_link_l_${Date.now()}`;
   const rightTable = `__er_link_r_${Date.now()}`;
 
+  // Register custom SQL functions if backend supports it
+  if (backend.createFunction) {
+    const hasEnsemble = config.comparisons.some((c) => c.scorerName === 'ensemble');
+    if (hasEnsemble) {
+      await backend.createFunction('ensemble_similarity', () => {});
+    }
+  }
+
   await backend.createTempTable(
     leftRecords.map((r, i) => ({ __row_id: i, ...r })),
     { name: leftTable },
@@ -480,7 +488,7 @@ const DUCKDB_SCORER_MAP: Readonly<Record<string, string>> = {
   // Composite scorers mapped to best single-function SQL approximation.
   // The JS pipeline uses the full ensemble (max of 3 signals).
   exact: '__exact__',   // Uses l.f=r.f SQL equality — not a function call
-  ensemble: 'jaro_winkler_similarity',
+  ensemble: 'ensemble_similarity',
   token_sort: 'jaro_winkler_similarity',
 };
 
