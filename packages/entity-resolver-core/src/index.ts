@@ -186,6 +186,23 @@ export type {
   TFAdjustmentConfig,
 } from './fellegi-sunter/diagnostics.js';
 
+// Identity Graph (I40) — durable entity identity with provenance
+export {
+  generateUUIDv7,
+  buildRecordId,
+  computeContentHash,
+  IdentityStore,
+} from './identity/identity-store.js';
+export type {
+  EntityStatus,
+  IdentityNode,
+  SourceRecord,
+  EvidenceEdge,
+  IdentityEvent,
+  EventKind,
+  ClaimType,
+} from './identity/identity-store.js';
+
 // Model Serialization
 export type { SerializedModel, DeserializedModel } from './fellegi-sunter/model-serialization.js';
 export {
