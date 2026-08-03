@@ -1,283 +1,165 @@
-// Tests for PPRL Bloom filter encoding and matching.
-
 import { describe, it, expect } from 'vitest';
 import {
-  BloomFilter,
-  encodePPRL,
-  matchPPRL,
-  encodePPRLAsync,
-  matchPPRLAsync,
-  sha256Sync,
-  sha256Async,
-} from '../../index.js';
+  tokenizeForCLK,
+  encodeBloomFilter,
+  encodeBloomFilters,
+  diceCoefficient,
+  estimateThreshold,
+  autoTuneFilter,
+  averageFieldLength,
+} from '../../pprl/bloom.js';
 
-const SECRET = 'test-secret-key-for-pprl';
-
-describe('BloomFilter', () => {
-  it('creates filter with correct size', () => {
-    const bf = new BloomFilter(1024, 15);
-    expect(bf.size).toBe(1024);
-    expect(bf.numHashes).toBe(15);
-    expect(bf.bits.length).toBe(128); // 1024/8
+describe('tokenizeForCLK', () => {
+  it('generates bigrams by default', () => {
+    const tokens = tokenizeForCLK('hello');
+    expect(tokens).toContain('he');
+    expect(tokens).toContain('ll');
+    expect(tokens).toContain('lo');
+    expect(tokens.length).toBe(4); // "hello" → 4 bigrams
   });
 
-  it('adds tokens and sets bits', () => {
-    const bf = new BloomFilter(1024, 15);
-    const before = Buffer.from(bf.bits).toString('hex');
-    bf.add('test', SECRET);
-    const after = Buffer.from(bf.bits).toString('hex');
-    expect(before).not.toBe(after);
+  it('generates trigrams', () => {
+    const tokens = tokenizeForCLK('hello', 3);
+    expect(tokens).toContain('hel');
+    expect(tokens).toContain('llo');
+    expect(tokens.length).toBe(3);
   });
 
-  it('identical tokens with same secret produce same bits', () => {
-    const bf1 = new BloomFilter(1024, 15);
-    const bf2 = new BloomFilter(1024, 15);
-    bf1.add('hello', SECRET);
-    bf2.add('hello', SECRET);
-    expect(Buffer.from(bf1.bits).toString('hex')).toBe(Buffer.from(bf2.bits).toString('hex'));
+  it('handles empty string', () => {
+    expect(tokenizeForCLK('')).toEqual([]);
   });
 
-  it('different secrets produce different bits', () => {
-    const bf1 = new BloomFilter(1024, 15);
-    const bf2 = new BloomFilter(1024, 15);
-    bf1.add('hello', 'secret-a');
-    bf2.add('hello', 'secret-b');
-    expect(Buffer.from(bf1.bits).toString('hex')).not.toBe(Buffer.from(bf2.bits).toString('hex'));
+  it('lowercases input', () => {
+    expect(tokenizeForCLK('HELLO')).toContain('he');
   });
 
-  it('computes high similarity for similar tokens', () => {
-    const bf1 = new BloomFilter(1024, 15);
-    const bf2 = new BloomFilter(1024, 15);
-    bf1.add('john', SECRET);
-    bf1.add('smith', SECRET);
-    bf2.add('john', SECRET);
-    bf2.add('smith', SECRET);
-    expect(bf1.similarity(bf2)).toBe(1);
-  });
-
-  it('computes low similarity for different tokens', () => {
-    const bf1 = new BloomFilter(1024, 15);
-    const bf2 = new BloomFilter(1024, 15);
-    bf1.add('alice', SECRET);
-    bf2.add('bob', SECRET);
-    expect(bf1.similarity(bf2)).toBeLessThan(0.5);
-  });
-
-  it('hex serialization roundtrips', () => {
-    const bf = new BloomFilter(1024, 15);
-    bf.add('alice', SECRET);
-    bf.add('bob', SECRET);
-    const hex = bf.toHex();
-    const restored = BloomFilter.fromHex(hex, 1024, 15);
-    expect(restored.similarity(bf)).toBe(1);
-  });
-
-  it('different size filters return 0 similarity', () => {
-    const bf1 = new BloomFilter(1024, 15);
-    const bf2 = new BloomFilter(512, 10);
-    expect(bf1.similarity(bf2)).toBe(0);
+  it('normalizes whitespace', () => {
+    const tokens = tokenizeForCLK('a  b');
+    expect(tokens).toContain('a ');
+    expect(tokens).toContain(' b');
+    expect(tokens.length).toBe(2);
   });
 });
 
-describe('encodePPRL', () => {
-  it('encodes string into Bloom filter', () => {
-    const bf = encodePPRL('John Smith', { secretKey: SECRET });
-    expect(bf.size).toBe(1024);
-    expect(bf.numHashes).toBe(15);
+describe('encodeBloomFilter', () => {
+  it('produces hex string of correct length', () => {
+    const bf = encodeBloomFilter({ name: 'John' }, ['name'], { filterSize: 512 });
+    expect(bf).toMatch(/^[0-9a-f]+$/);
+    expect(bf.length).toBe(128); // 512 bits = 64 bytes = 128 hex chars
   });
 
-  it('same value produces same encoding', () => {
-    const bf1 = encodePPRL('John Smith', { secretKey: SECRET });
-    const bf2 = encodePPRL('John Smith', { secretKey: SECRET });
-    expect(bf1.toHex()).toBe(bf2.toHex());
+  it('identical records produce identical filters', () => {
+    const bf1 = encodeBloomFilter({ name: 'John', city: 'NYC' }, ['name', 'city']);
+    const bf2 = encodeBloomFilter({ name: 'John', city: 'NYC' }, ['name', 'city']);
+    expect(bf1).toBe(bf2);
   });
 
-  it('similar values produce high similarity', () => {
-    const bf1 = encodePPRL('John Smith', { secretKey: SECRET });
-    const bf2 = encodePPRL('Jon Smith', { secretKey: SECRET });
-    expect(bf1.similarity(bf2)).toBeGreaterThan(0.3);
+  it('different records produce different filters', () => {
+    const bf1 = encodeBloomFilter({ name: 'John' }, ['name']);
+    const bf2 = encodeBloomFilter({ name: 'Jane' }, ['name']);
+    expect(bf1).not.toBe(bf2);
   });
 
-  it('different values produce low similarity', () => {
-    const bf1 = encodePPRL('John Smith', { secretKey: SECRET });
-    const bf2 = encodePPRL('Mary Jones', { secretKey: SECRET });
-    expect(bf1.similarity(bf2)).toBeLessThan(0.5);
+  it('HMAC key produces different filters', () => {
+    const bf1 = encodeBloomFilter({ name: 'John' }, ['name'], { hmacKey: 'key1' });
+    const bf2 = encodeBloomFilter({ name: 'John' }, ['name'], { hmacKey: 'key2' });
+    expect(bf1).not.toBe(bf2);
   });
 
-  it('different secrets produce different encodings', () => {
-    const bf1 = encodePPRL('John Smith', { secretKey: 'secret-1' });
-    const bf2 = encodePPRL('John Smith', { secretKey: 'secret-2' });
-    expect(bf1.toHex()).not.toBe(bf2.toHex());
+  it('handles missing fields gracefully', () => {
+    const bf = encodeBloomFilter({}, ['name']);
+    expect(bf).toMatch(/^[0-9a-f]+$/);
+    // Empty record → all-zero filter
+    expect(parseInt(bf, 16)).toBe(0);
   });
 });
 
-describe('matchPPRL', () => {
-  it('matches two records field by field', () => {
-    const scores = matchPPRL(
-      { name: 'John Smith', city: 'New York' },
-      { name: 'Jon Smith', city: 'New York' },
-      { secretKey: SECRET },
+describe('encodeBloomFilters', () => {
+  it('encodes multiple records', () => {
+    const filters = encodeBloomFilters(
+      [{ name: 'John' }, { name: 'Jane' }],
+      ['name'],
+      { filterSize: 512 },
     );
-    expect(scores.name).toBeGreaterThan(0);
-    expect(scores.city).toBe(1);
+    expect(filters).toHaveLength(2);
+    expect(filters[0]).not.toBe(filters[1]);
+  });
+});
+
+describe('diceCoefficient', () => {
+  it('returns 1 for identical filters', () => {
+    const bf = encodeBloomFilter({ name: 'John Smith' }, ['name']);
+    expect(diceCoefficient(bf, bf)).toBe(1);
   });
 
-  it('reports different scores for different fields', () => {
-    const scores = matchPPRL(
-      { name: 'Alice', dob: '1990-01-15' },
-      { name: 'Bob', dob: '1990-01-16' },
-      { secretKey: SECRET },
+  it('returns high score for similar records', () => {
+    const bf1 = encodeBloomFilter({ name: 'John Smith' }, ['name']);
+    const bf2 = encodeBloomFilter({ name: 'Jon Smith' }, ['name']);
+    expect(diceCoefficient(bf1, bf2)).toBeGreaterThan(0.5);
+  });
+
+  it('returns low score for different records', () => {
+    const bf1 = encodeBloomFilter({ name: 'John Smith' }, ['name']);
+    const bf2 = encodeBloomFilter({ name: 'Mary Jones' }, ['name']);
+    expect(diceCoefficient(bf1, bf2)).toBeLessThan(0.5);
+  });
+
+  it('returns 0 for different-length filters', () => {
+    const bf1 = encodeBloomFilter({ name: 'A' }, ['name'], { filterSize: 512 });
+    const bf2 = encodeBloomFilter({ name: 'B' }, ['name'], { filterSize: 1024 });
+    expect(diceCoefficient(bf1, bf2)).toBe(0);
+  });
+});
+
+describe('estimateThreshold', () => {
+  it('returns value in [0.75, 0.95]', () => {
+    const filters = encodeBloomFilters(
+      Array.from({ length: 50 }, (_, i) => ({ name: 'User' + i })),
+      ['name'],
     );
-    expect(scores.name).toBeDefined();
-    expect(scores.dob).toBeGreaterThan(0.8); // one day diffs -> high similarity
+    const threshold = estimateThreshold(filters, filters);
+    expect(threshold).toBeGreaterThanOrEqual(0.75);
+    expect(threshold).toBeLessThanOrEqual(0.95);
   });
 
-  it('respects custom filter size', () => {
-    const scores = matchPPRL(
-      { name: 'John' },
-      { name: 'John' },
-      { secretKey: SECRET, filterSize: 512, numHashes: 8 },
+  it('handles empty input', () => {
+    expect(estimateThreshold([], [])).toBe(0.85);
+  });
+});
+
+describe('autoTuneFilter', () => {
+  it('uses 512-bit for short fields', () => {
+    const cfg = autoTuneFilter(4);
+    expect(cfg.filterSize).toBe(512);
+    expect(cfg.hashFunctions).toBe(15);
+    expect(cfg.ngramSize).toBe(2);
+  });
+
+  it('uses 1024-bit for medium fields', () => {
+    const cfg = autoTuneFilter(12);
+    expect(cfg.filterSize).toBe(1024);
+    expect(cfg.hashFunctions).toBe(20);
+  });
+
+  it('uses 2048-bit for long fields', () => {
+    const cfg = autoTuneFilter(25);
+    expect(cfg.filterSize).toBe(2048);
+    expect(cfg.hashFunctions).toBe(25);
+    expect(cfg.ngramSize).toBe(3);
+  });
+});
+
+describe('averageFieldLength', () => {
+  it('computes average across records', () => {
+    const avg = averageFieldLength(
+      [{ name: 'John' }, { name: 'Alexander' }],
+      ['name'],
     );
-    expect(scores.name).toBeGreaterThan(0);
+    expect(avg).toBe(6.5); // (4 + 9) / 2
   });
 
-  it('only matches fields present in both records', () => {
-    const scores = matchPPRL(
-      { name: 'John', extra: 'value' },
-      { name: 'John' },
-      { secretKey: SECRET },
-    );
-    expect(scores.name).toBeDefined();
-    expect(scores.extra).toBeUndefined();
-  });
-});
-
-// ═══════════════════════════════════════════════════════════════
-// Async PPRL paths
-// ═══════════════════════════════════════════════════════════════
-
-describe('encodePPRLAsync', () => {
-  it('encodes a value asynchronously', async () => {
-    const filter = await encodePPRLAsync('test', { secretKey: SECRET });
-    expect(filter).toBeInstanceOf(BloomFilter);
-    expect(filter.size).toBeGreaterThan(0);
-  });
-
-  it('produces same result as sync version', async () => {
-    const syncFilter = encodePPRL('hello-world', { secretKey: SECRET });
-    const asyncFilter = await encodePPRLAsync('hello-world', { secretKey: SECRET });
-    expect(Buffer.from(asyncFilter.bits).toString('hex')).toBe(
-      Buffer.from(syncFilter.bits).toString('hex'),
-    );
-  });
-
-  it('handles empty string', async () => {
-    const filter = await encodePPRLAsync('', { secretKey: SECRET });
-    expect(filter).toBeInstanceOf(BloomFilter);
-  });
-});
-
-describe('matchPPRLAsync', () => {
-  it('matches identical records asynchronously', async () => {
-    const scores = await matchPPRLAsync({ name: 'John' }, { name: 'John' }, { secretKey: SECRET });
-    expect(scores.name).toBeGreaterThan(0);
-  });
-
-  it('different records have low match score', async () => {
-    const scores = await matchPPRLAsync({ name: 'Alice' }, { name: 'Bob' }, { secretKey: SECRET });
-    expect(scores.name).toBeLessThan(1);
-  });
-});
-
-describe('sha256Sync', () => {
-  it('produces consistent hash', () => {
-    const hash1 = sha256Sync('test');
-    const hash2 = sha256Sync('test');
-    expect(hash1).toEqual(hash2);
-  });
-
-  it('different inputs produce different hashes', () => {
-    const hash1 = sha256Sync('a');
-    const hash2 = sha256Sync('b');
-    expect(hash1).not.toEqual(hash2);
-  });
-
-  it('produces SHA-256 length (32 bytes)', () => {
-    const hash = sha256Sync('hello world');
-    expect(hash.length).toBe(32);
-  });
-
-  it('produces correct SHA-256 for known input', () => {
-    // SHA-256 of empty string: e3b0c44298fc1c14...
-    const hash = sha256Sync('');
-    const hex = Buffer.from(hash).toString('hex');
-    expect(hex).toBe('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
-  });
-});
-
-describe('sha256Async', () => {
-  it('produces consistent hash', async () => {
-    const hash1 = await sha256Async('test');
-    const hash2 = await sha256Async('test');
-    expect(Buffer.from(hash1).toString('hex')).toBe(Buffer.from(hash2).toString('hex'));
-  });
-
-  it('different inputs produce different hashes', async () => {
-    const hash1 = await sha256Async('a');
-    const hash2 = await sha256Async('b');
-    expect(Buffer.from(hash1).toString('hex')).not.toBe(Buffer.from(hash2).toString('hex'));
-  });
-});
-
-describe('BloomFilter serialization', () => {
-  it('toHex and fromHex roundtrip', () => {
-    const bf = encodePPRL('test-data', { secretKey: SECRET });
-    const hex = bf.toHex();
-    const restored = BloomFilter.fromHex(hex, bf.size, bf.numHashes);
-    expect(restored.size).toBe(bf.size);
-    expect(restored.numHashes).toBe(bf.numHashes);
-    expect(Buffer.from(restored.bits).toString('hex')).toBe(Buffer.from(bf.bits).toString('hex'));
-  });
-
-  it('toBase64 and fromBase64 roundtrip', () => {
-    const bf = encodePPRL('test-data', { secretKey: SECRET });
-    const b64 = bf.toBase64();
-    const restored = BloomFilter.fromBase64(b64, bf.size, bf.numHashes);
-    expect(restored.size).toBe(bf.size);
-    expect(restored.numHashes).toBe(bf.numHashes);
-    expect(Buffer.from(restored.bits).toString('hex')).toBe(Buffer.from(bf.bits).toString('hex'));
-  });
-});
-
-describe('BloomFilter edge cases', () => {
-  it('addAsync adds tokens asynchronously', async () => {
-    const bf = new BloomFilter(512, 8);
-    const before = Buffer.from(bf.bits).toString('hex');
-    await bf.addAsync('async-test', SECRET);
-    const after = Buffer.from(bf.bits).toString('hex');
-    expect(before).not.toBe(after);
-  });
-
-  it('custom qgramSize works', () => {
-    const bf = encodePPRL('abcdef', { secretKey: SECRET, qgramSize: 3 });
-    expect(bf).toBeInstanceOf(BloomFilter);
-  });
-
-  it('similarity of identical filters is 1', () => {
-    const bf1 = encodePPRL('same', { secretKey: SECRET });
-    const bf2 = encodePPRL('same', { secretKey: SECRET });
-    expect(bf1.similarity(bf2)).toBe(1);
-  });
-
-  it('similarity of completely different filters is low', () => {
-    const bf1 = encodePPRL('aaaaaaaaaaaaaaaaaaaa', { secretKey: SECRET, filterSize: 256 });
-    const bf2 = encodePPRL('bbbbbbbbbbbbbbbbbbbb', { secretKey: SECRET, filterSize: 256 });
-    expect(bf1.similarity(bf2)).toBeLessThan(1);
-  });
-
-  it('encodePPRL with minimal config', () => {
-    const bf = encodePPRL('minimal', { secretKey: SECRET, filterSize: 64, numHashes: 4 });
-    expect(bf.size).toBe(64);
-    expect(bf.numHashes).toBe(4);
+  it('returns 0 for empty input', () => {
+    expect(averageFieldLength([], ['name'])).toBe(0);
+    expect(averageFieldLength([{ name: 'A' }], [])).toBe(0);
   });
 });

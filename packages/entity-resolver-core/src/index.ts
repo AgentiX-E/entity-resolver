@@ -205,6 +205,19 @@ export type {
   ClaimType,
 } from './identity/identity-store.js';
 
+// Privacy-Preserving Record Linkage (I45)
+export {
+  tokenizeForCLK,
+  encodeBloomFilter,
+  encodeBloomFilters,
+  diceCoefficient,
+  diceMatrix,
+  estimateThreshold,
+  autoTuneFilter,
+  averageFieldLength,
+} from './pprl/bloom.js';
+export type { BloomFilterConfig } from './pprl/bloom.js';
+
 // Model Serialization
 export type { SerializedModel, DeserializedModel } from './fellegi-sunter/model-serialization.js';
 export {
