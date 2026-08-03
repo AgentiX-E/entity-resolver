@@ -243,7 +243,7 @@ function getDatasetPipelineConfig(name: string): any {
         comparisons: [
           {
             field: 'title',
-            scorerName: 'jaro_winkler',
+            scorerName: 'ensemble',
             levels: [
               { name: 'strong_match', threshold: 0.95 },
               { name: 'moderate_match', threshold: 0.8 },

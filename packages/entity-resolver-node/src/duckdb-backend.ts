@@ -164,11 +164,10 @@ export class NodeDuckDBBackend implements ISqlBackend {
   /**
    * Register a scalar SQL function as a DuckDB macro.
    *
-   * Supports JavaScript implementations for custom scorer functions
-   * that cannot be expressed as simple built-in SQL functions.
-   *
-   * For ensemble scoring, registers a macro combining jaro_winkler,
-   * normalized damerau_levenshtein, and a soundex approximation.
+   * For ensemble scoring, registers three macros:
+   *   1. token_sort_similarity — jaro_winkler on sorted word tokens
+   *   2. dl_normalized_similarity — normalized damerau-levenshtein
+   *   3. ensemble_similarity — max of all three signals
    */
   async createFunction(
     name: string,
@@ -176,14 +175,30 @@ export class NodeDuckDBBackend implements ISqlBackend {
   ): Promise<void> {
     const conn = await this._conn();
 
-    // Ensemble-specific: register as DuckDB macro using built-in functions
     if (name === 'ensemble_similarity') {
+      // Helper: token_sort via word split → sort → aggregate → jaro_winkler
+      await conn.run(
+        `CREATE OR REPLACE MACRO token_sort_similarity(a, b) AS
+         jaro_winkler_similarity(
+           array_to_string(list_sort(str_split(CAST(a AS VARCHAR), ' ')), ' '),
+           array_to_string(list_sort(str_split(CAST(b AS VARCHAR), ' ')), ' ')
+         )`,
+      );
+
+      // Helper: normalized damerau_levenshtein similarity
+      await conn.run(
+        `CREATE OR REPLACE MACRO dl_normalized_similarity(a, b) AS
+         1.0 - damerau_levenshtein(CAST(a AS VARCHAR), CAST(b AS VARCHAR))
+            / GREATEST(length(CAST(a AS VARCHAR)), length(CAST(b AS VARCHAR)), 1)`,
+      );
+
+      // Full ensemble: max of three independent similarity signals
       await conn.run(
         `CREATE OR REPLACE MACRO ensemble_similarity(a, b) AS
          GREATEST(
-           jaro_winkler_similarity(a, b),
-           1.0 - damerau_levenshtein(a, b) / GREATEST(length(CAST(a AS VARCHAR)), length(CAST(b AS VARCHAR)), 1),
-           0.0
+           jaro_winkler_similarity(CAST(a AS VARCHAR), CAST(b AS VARCHAR)),
+           token_sort_similarity(CAST(a AS VARCHAR), CAST(b AS VARCHAR)),
+           dl_normalized_similarity(CAST(a AS VARCHAR), CAST(b AS VARCHAR))
          )`,
       );
     }
