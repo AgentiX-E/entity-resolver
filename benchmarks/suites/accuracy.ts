@@ -241,18 +241,23 @@ function getDatasetPipelineConfig(name: string): any {
     case 'DBLP-ACM':
       return {
         comparisons: [
-          {
-            field: 'title',
-            scorerName: 'ensemble',
-            levels: [
-              { name: 'strong_match', threshold: 0.95 },
-              { name: 'moderate_match', threshold: 0.8 },
-              { name: 'weak_match', threshold: 0.6 },
-            ],
-          },
+          { field: 'title', scorerName: 'jaro_winkler', levels: [
+            { name: 'strong_match', threshold: 0.95 },
+            { name: 'moderate_match', threshold: 0.8 },
+            { name: 'weak_match', threshold: 0.6 },
+          ]},
+          { field: 'venue', scorerName: 'jaro_winkler', levels: [
+            { name: 'strong_match', threshold: 0.9 },
+            { name: 'moderate_match', threshold: 0.6 },
+          ]},
           { field: 'year', scorerName: 'exact', levels: [{ name: 'match', isExact: true as any }] },
         ],
-        blocking: { passes: [{ fields: ['title'], transforms: ['lowercase'] }] },
+        blocking: {
+          passes: [
+            { fields: ['title'], transforms: ['lowercase'] },
+            { fields: ['venue'], transforms: ['lowercase'] },
+          ],
+        },
       };
     case 'Abt-Buy':
       return {
