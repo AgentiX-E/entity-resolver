@@ -30,7 +30,16 @@ export interface FSParameters {
 
 /**
  * Default/initial parameters for EM algorithm.
- * Uses reasonable defaults based on Fellegi-Sunter literature.
+ *
+ * I41: Uses GoldenMatch-style exponential m-priors where higher-agreement
+ * levels get exponentially more weight. This biases the EM toward
+ * treating high-agreement observations as strong match evidence,
+ * which is the correct prior for entity resolution.
+ *
+ * m[k] = 2^k / Σ(2^k)  where k=0 is the weakest level
+ *
+ * E.g., for 4 levels (exact, strong, moderate, weak):
+ *   m = [1/15, 2/15, 4/15, 8/15] ≈ [0.067, 0.133, 0.267, 0.533]
  */
 export function createDefaultParameters(
   comparisonKeys: readonly string[],
@@ -40,14 +49,45 @@ export function createDefaultParameters(
     readonly initialU?: number;
   },
 ): FSParameters {
-  const { initialLambda = 0.001, initialM = 0.9, initialU = 0.1 } = options ?? {};
+  const { initialLambda = 0.001, initialM: _, initialU = 0.1 } = options ?? {};
+
+  // I41: Group keys by field for per-field exponential m-priors
+  const fieldLevels = new Map<string, string[]>();
+  for (const key of comparisonKeys) {
+    const colonIdx = key.indexOf(':');
+    const field = colonIdx >= 0 ? key.slice(0, colonIdx) : key;
+    const levels = fieldLevels.get(field) ?? [];
+    levels.push(key);
+    fieldLevels.set(field, levels);
+  }
 
   const mProbabilities = new Map<string, number>();
   const uProbabilities = new Map<string, number>();
 
-  for (const key of comparisonKeys) {
-    mProbabilities.set(key, initialM);
-    uProbabilities.set(key, initialU);
+  // Laplace additive smoothing (I41: 1e-6, GoldenMatch standard)
+  const SMOOTH = 1e-6;
+
+  for (const [_field, keys] of fieldLevels) {
+    const n = keys.length;
+
+    // Exponential m-priors per field: m[k] = 2^k / Σ(2^k) + smoothing
+    // Sort keys so that not_match (or weakest level) gets k=0
+    const sorted = [...keys].sort((a, b) => {
+      const aIsNot = a.endsWith(':not_match') || a.endsWith(':*');
+      const bIsNot = b.endsWith(':not_match') || b.endsWith(':*');
+      if (aIsNot && !bIsNot) return -1;
+      if (!aIsNot && bIsNot) return 1;
+      return 0;
+    });
+
+    const powers = sorted.map((_, k) => 2 ** k);
+    const total = powers.reduce((s, p) => s + p, 0);
+
+    for (let k = 0; k < sorted.length; k++) {
+      const key = sorted[k]!;
+      mProbabilities.set(key, (powers[k]! / total) + SMOOTH * n);
+      uProbabilities.set(key, initialU + SMOOTH);
+    }
   }
 
   return {

@@ -148,7 +148,7 @@ export {
 } from './fellegi-sunter/parameters.js';
 
 export type { EMOptions, EMResult } from './fellegi-sunter/em.js';
-export { estimateParameters, fieldFromKey } from './fellegi-sunter/em.js';
+export { estimateParameters, fieldFromKey, calibrateLinear, computePairWeights } from './fellegi-sunter/em.js';
 
 export type { MatchWeightResult } from './fellegi-sunter/match-weight.js';
 export {

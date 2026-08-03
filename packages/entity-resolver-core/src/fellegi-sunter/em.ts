@@ -199,6 +199,65 @@ export function estimateParameters(
   };
 }
 
+// ═══════════════════════════════════════════════════════════════
+// Linear score calibration (I41 — GoldenMatch pattern)
+// ═══════════════════════════════════════════════════════════════
+
+/**
+ * Calibrate raw Fellegi-Sunter match weights to [0, 1] probability range.
+ *
+ * Uses linear calibration: score = (W - W_min) / (W_max - W_min).
+ * This is the GoldenMatch approach — measured better than posterior
+ * probability calibration on DBLP-ACM benchmark.
+ *
+ * W = sum of per-field log₂(m_k / u_k) for each pair.
+ *
+ * @param scores — raw match weights
+ * @returns calibrated scores in [0, 1]
+ */
+export function calibrateLinear(scores: readonly number[]): number[] {
+  if (scores.length === 0) return [];
+  if (scores.length === 1) return [0.5]; // Single pair: neutral
+
+  let wMin = Infinity;
+  let wMax = -Infinity;
+
+  for (const w of scores) {
+    if (w < wMin) wMin = w;
+    if (w > wMax) wMax = w;
+  }
+
+  const range = wMax - wMin;
+  if (range === 0) return scores.map(() => 0.5);
+
+  return scores.map((w) => {
+    const calibrated = (w - wMin) / range;
+    return Math.max(0, Math.min(1, calibrated));
+  });
+}
+
+/**
+ * Extract per-pair match weights from comparison vectors and
+ * calibrated FS parameters.
+ *
+ * weight = Σ log₂(m_k / u_k) for each field:level in the pair.
+ */
+export function computePairWeights(
+  pairVectors: readonly (readonly ComparisonVector[])[],
+  params: FSParameters,
+): number[] {
+  return pairVectors.map((vectors) => {
+    let weight = 0;
+    for (const v of vectors) {
+      const key = `${v.field}:${v.level}`;
+      const m = params.mProbabilities.get(key) ?? params.mProbabilities.get(`${v.field}:*`) ?? 0.9;
+      const u = params.uProbabilities.get(key) ?? params.uProbabilities.get(`${v.field}:*`) ?? 0.1;
+      weight += Math.log2(m / u);
+    }
+    return weight;
+  });
+}
+
 // ─── Initialization ─────────────────────────────────────────────
 
 function initializeState(
