@@ -198,6 +198,12 @@ function trainEMOnSample(
   // Only run EM if we have enough data
   if (records.length < 10) return defaults;
 
+  // B1+B3 FIX: Estimate u from random non-match pairs (GoldenMatch standard)
+  // Blocked pairs have artificially high agreement → u biased upward
+  // Random pairs are overwhelmingly non-matches → unbiased u estimate
+  const randomU = estimateUFromRandomPairs(records, config.comparisons, 5000);
+
+  // Generate comparison vectors from blocked pairs for m estimation
   const sampleSize = Math.min(2000, records.length);
   const blockResult = standardBlocking(records.slice(0, sampleSize), {
     fields: Object.keys(records[0] ?? {}).filter((k) => k !== '__row_id'),
@@ -207,40 +213,85 @@ function trainEMOnSample(
 
   if (candidates.length < 10) return defaults;
 
-  // Generate comparison vectors for EM
-  const fieldMeta = new Map<
-    string,
-    { name: string; semanticType: string; cardinality: number; isNumeric: boolean }
-  >();
+  const fieldMeta = new Map<string, any>();
   for (const c of config.comparisons) {
-    fieldMeta.set(c.field, {
-      name: c.field,
-      semanticType: 'text',
-      cardinality: 10,
-      isNumeric: false,
-    });
+    fieldMeta.set(c.field, { name: c.field, semanticType: 'text', cardinality: 10, isNumeric: false });
   }
 
   const vectors: ComparisonVector[][] = [];
   for (const pair of candidates) {
     const a = records[pair.leftId]!;
     const b = records[pair.rightId]!;
-    if (a && b) {
-      vectors.push(
-        generateComparisonVectors(a, b, config.comparisons, fieldMeta),
-      );
-    }
+    if (a && b) vectors.push(generateComparisonVectors(a, b, config.comparisons, fieldMeta));
   }
 
   if (vectors.length < 5) return defaults;
 
   try {
-    const emResult = estimateParameters(vectors, { maxIterations: 20, epsilon: 1e-4 });
-    return emResult.parameters;
+    const emResult = estimateParameters(vectors, { maxIterations: 20, epsilon: 1e-4, seed: 42 });
+    // Merge: m from EM, u from random pairs (GoldenMatch pattern)
+    const mergedM = new Map(emResult.parameters.mProbabilities);
+    for (const [key] of randomU) {
+      if (!mergedM.has(key)) mergedM.set(key, 0.9);
+    }
+    return {
+      lambda: emResult.parameters.lambda,
+      mProbabilities: mergedM,
+      uProbabilities: randomU,
+    };
   } catch {
     return defaults;
   }
 }
+
+/** B1 FIX: Estimate u-probabilities from random non-match pairs. */
+function estimateUFromRandomPairs(
+  records: readonly Record<string, unknown>[],
+  comparisons: readonly any[],
+  sampleSize: number,
+): Map<string, number> {
+  const counts = new Map<string, number>();
+  const n = records.length;
+  if (n < 2) return counts;
+
+  let rng = 42;
+  const rand = () => { rng = (rng * 16807) % 2147483647; return (rng - 1) / 2147483646; };
+
+  let totalObserved = 0;
+  const actual = Math.min(sampleSize, Math.floor(n * (n - 1) / 2));
+
+  for (let i = 0; i < actual; i++) {
+    const a = Math.floor(rand() * n);
+    let b = Math.floor(rand() * n);
+    while (b === a) b = Math.floor(rand() * n);
+
+    for (const comp of comparisons) {
+      const valA = String(records[a]?.[comp.field] ?? '');
+      const valB = String(records[b]?.[comp.field] ?? '');
+      if (valA === '' || valB === '') continue;
+      const levels = comp.levels ?? [{ label: 'match' }];
+      for (const level of levels) {
+        const key = comp.field + ':' + level.label;
+        const match = valA === valB ? 1.0 : (approxJaro(valA, valB) >= (level.threshold ?? 0.7) ? 1.0 : 0.0);
+        if (match > 0) counts.set(key, (counts.get(key) ?? 0) + 1);
+        totalObserved++;
+      }
+    }
+  }
+  const uProbs = new Map<string, number>();
+  for (const [key, count] of counts) {
+    uProbs.set(key, Math.max(1e-6, count / Math.max(totalObserved, 1)));
+  }
+  return uProbs;
+}
+
+function approxJaro(a: string, b: string): number {
+  if (a === b) return 1;
+  const matches = [...a].filter((c) => b.includes(c)).length;
+  if (matches === 0) return 0;
+  return (matches / a.length + matches / b.length) / 2;
+}
+
 
 // ─── SQL generators ────────────────────────────────────────────────
 
@@ -295,16 +346,27 @@ function buildFastSingleQuery(
   blockingConfig: PipelineConfig,
   config: PipelineConfig,
   cols: readonly string[],
+  emParams?: FSParameters,
 ): string {
   const fallbackField = (blockingConfig.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = blockingConfig.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const activeComps = config.comparisons.filter((c) => cols.includes(c.field));
 
-  const mw = '3.169925',
-    nmw = '-3.169925';
   const compParts = activeComps.map((c) => {
     const f = esc(c.field);
     const lvls = c.levels?.length ? c.levels : [{}];
+    // B3 FIX: compute per-level weights from trained EM params
+    const levelWeights: string[] = [];
+    for (let i = 0; i < lvls.length; i++) {
+      const key = c.field + ':' + (lvls[i] as Record<string,unknown>).label;
+      const m = emParams?.mProbabilities.get(key) ?? 0.9;
+      const u = emParams?.uProbabilities.get(key) ?? 0.1;
+      const mw = Math.log2(Math.max(m, 1e-6) / Math.max(u, 1e-6)).toFixed(6);
+      levelWeights.push(`WHEN ${f}_level=${i} THEN ${mw}`);
+    }
+    const defaultMw = Math.log2(0.9 / 0.1).toFixed(6);
+    const mwExpr = `CASE ${levelWeights.join(' ')} ELSE ${defaultMw} END`;
+
     let caseSql = 'CASE';
     for (let i = lvls.length - 1; i >= 0; i--) {
       const l = lvls[i]! as Record<string, unknown>;
@@ -316,7 +378,7 @@ function buildFastSingleQuery(
     return {
       field: f,
       level: `${caseSql} ELSE -1 END AS ${f}_level`,
-      weight: `CASE WHEN ${f}_level>=0 THEN ${mw} ELSE ${nmw} END AS ${f}_weight`,
+      weight: `${mwExpr} AS ${f}_weight`,
     };
   });
 
