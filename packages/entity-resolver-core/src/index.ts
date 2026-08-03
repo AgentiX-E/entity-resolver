@@ -299,6 +299,18 @@ export { runPipeline, runPipelineFromSource } from './pipeline/runner.js';
 export type { SqlPipelineConfig } from './pipeline/sql-runner.js';
 export { runPipelineFromSqlSource } from './pipeline/sql-runner.js';
 
+// SettingsCreator (I38) — declarative config builder, Splink-inspired
+export {
+  SettingsCreator,
+  dedupeSettings,
+  linkageSettings,
+  autoSettings,
+  toPipelineConfig,
+  fromPipelineConfig,
+  settingsFromJSON,
+} from './pipeline/settings.js';
+export type { LinkType, PipelineSettings } from './pipeline/settings.js';
+
 // Benchmarks
 export type { BenchmarkDataset, BenchmarkResult } from './benchmarks/datasets.js';
 export {
