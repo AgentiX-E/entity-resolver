@@ -222,27 +222,3 @@ fn token_sort_ratio(a: &str, b: &str) -> f64 {
     ta.sort(); tb.sort();
     wasm_jaro_winkler(&ta.join(" "), &tb.join(" "), 0.1)
 }
-
-#[wasm_bindgen]
-pub fn wasm_soundex_match(a: &str, b: &str) -> f64 {
-    if wasm_soundex(a) == wasm_soundex(b) { 1.0 } else { 0.0 }
-}
-
-fn wasm_soundex(s: &str) -> String {
-    let chars: Vec<char> = s.to_uppercase().chars().collect();
-    if chars.is_empty() { return String::new(); }
-    let first = chars[0];
-    let mapping: HashMap<char, char> = [
-        ('B','1'),('F','1'),('P','1'),('V','1'),('C','2'),('G','2'),('J','2'),
-        ('K','2'),('Q','2'),('S','2'),('X','2'),('Z','2'),('D','3'),('T','3'),
-        ('L','4'),('M','5'),('N','5'),('R','6'),
-    ].iter().cloned().collect();
-    let mut code = String::from(first); let mut prev = None;
-    for &c in &chars[1..] {
-        if let Some(&cc) = mapping.get(&c) {
-            if prev != Some(cc) { code.push(cc); prev = Some(cc); }
-        } else if !matches!(c, 'A'|'E'|'I'|'O'|'U'|'H'|'W'|'Y') { prev = None; }
-    }
-    while code.len() < 4 { code.push('0'); }
-    code[..4].to_string()
-}
