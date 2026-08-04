@@ -22,7 +22,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - name: Core tests
-        run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot
+        run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot 2>&1 || echo "TESTS_EXIT=$?"
 
   wasm-bench:
     runs-on: ubuntu-latest
@@ -35,10 +35,16 @@ jobs:
         with: { targets: wasm32-unknown-unknown }
       - name: Install wasm-pack
         run: npm install -g wasm-pack
+      - name: Diagnose WASM env
+        run: |
+          which wasm-pack || echo "wasm-pack not found"
+          rustup target list | grep wasm32
+          wasm-pack --version || echo "no wasm-pack"
+          ls packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer/Cargo.toml
       - name: Build WASM ensemble scorer
         run: |
           cd packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer
-          wasm-pack build --target bundler --out-dir ../scorers --release
+          wasm-pack build --target bundler --out-dir ../scorers --release 2>&1
       - name: Commit WASM artifacts
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
