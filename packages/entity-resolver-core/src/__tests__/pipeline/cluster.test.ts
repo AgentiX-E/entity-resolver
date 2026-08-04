@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { verifiedMergeClustering } from '../../pipeline/cluster.js';
-import type { ScoredPair } from '../../../types/core.js';
+import type { ScoredPair } from '../../types/core.js';
 
 describe('verifiedMergeClustering', () => {
   it('creates clusters for matching pairs', () => {

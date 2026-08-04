@@ -17,7 +17,7 @@
  */
 
 import type { ScoredPair } from '../types/core.js';
-import type { UnifiedScoredPair, VerifiedCluster } from './unified.js';
+import type { VerifiedCluster } from './unified.js';
 
 // ═══════════════════════════════════════════════════════════════
 // Verified Merge Clustering
@@ -130,7 +130,7 @@ export function verifiedMergeClustering(
 
   // Process cross-cluster edges: merge clusters only if ALL representative
   // pairs pass the threshold (single veto blocks the merge)
-  const mergeGraph = new Map<number, Set<number>>(); // cluster → mergeable clusters
+  // Merge safety: process cross-cluster edges with representative verification
   const blockedPairs = new Set<string>(); // "c1:c2" pairs already assessed
 
   for (const edge of crossClusterEdges) {
