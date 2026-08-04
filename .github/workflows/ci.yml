@@ -18,6 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: 'pnpm' }
       - run: pnpm install
+      - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm lint
       - name: Core tests
@@ -33,7 +34,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with: { targets: wasm32-unknown-unknown }
       - name: Install wasm-pack
-        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+        run: npm install -g wasm-pack
       - name: Build WASM ensemble scorer
         run: |
           cd packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer
