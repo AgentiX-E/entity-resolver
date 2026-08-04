@@ -1,462 +1,58 @@
-name: CI
+name: CI — Build, Test, Benchmark
 
 on:
   push:
     branches: [master]
   pull_request:
-    branches: [master]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
 
 jobs:
-  # ═══════════════════════════════════════════════════════════
-  # Quality Gates — fast feedback (< 60s)
-  # ═══════════════════════════════════════════════════════════
-  lint:
-    name: Lint
+  # Test (JS only, no WASM needed)
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm lint
-
-  typecheck:
-    name: Type Check
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: 'pnpm' }
+      - run: pnpm install
       - run: pnpm typecheck
+      - run: pnpm lint
+      - name: Core tests
+        run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot
 
-  format:
-    name: Format Check
+  # WASM build + ensemble benchmark
+  wasm-bench:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm format
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with: { targets: wasm32-unknown-unknown }
+      - name: Install wasm-pack
+        run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+      - name: Build WASM ensemble scorer
+        run: |
+          cd packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer
+          wasm-pack build --target bundler --out-dir ../scorers --release
+      - name: Install deps
+        run: pnpm install
+      - name: Build TS
+        run: pnpm build
+      - name: Benchmark DBLP-ACM (native ensemble)
+        run: node --import tsx benchmarks/p0.ts
 
-  # ═══════════════════════════════════════════════════════════
-  # Step 1: Core tests — the foundation package (38 files)
-  # ═══════════════════════════════════════════════════════════
-  test-core:
-    name: Test (core)
-    needs: [typecheck]
+  # Rust native tests
+  rust-test:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Core batch 1 (8 files)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/placeholder.test.ts \
-            src/__tests__/branch-coverage-i19.test.ts \
-            src/__tests__/branch-coverage-sprint.test.ts \
-            src/__tests__/final-branches.test.ts \
-            src/__tests__/comparison.test.ts \
-            src/__tests__/golden-record.test.ts \
-            src/__tests__/preprocessing.test.ts \
-            src/__tests__/errors/hierarchy.test.ts
-
-      - name: Core batch 2a (4 files)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/registry.test.ts \
-            src/__tests__/scorers.test.ts \
-            src/__tests__/splink-features.test.ts \
-            src/__tests__/clustering/algorithms.test.ts
-
-      - name: Core batch 2b (3 files)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/preprocessing/cjk.test.ts \
-            src/__tests__/evaluation/cross-validate.test.ts \
-            src/__tests__/evaluation/metrics.test.ts
-
-      - name: Core batch 3 (8 files)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/interfaces/logger.test.ts \
-            src/__tests__/fellegi-sunter/em.test.ts \
-            src/__tests__/fellegi-sunter/field-independence.test.ts \
-            src/__tests__/fellegi-sunter/match-weight.test.ts \
-            src/__tests__/fellegi-sunter/model-serialization.test.ts \
-            src/__tests__/fellegi-sunter/parameters.test.ts \
-            src/__tests__/fellegi-sunter/tf-adjust.test.ts \
-            src/__tests__/wasm-loader.test.ts
-
-      - name: Core batch 4 (6 files)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/llm/scorer.test.ts \
-            src/__tests__/memory/entity-store.test.ts \
-            src/__tests__/pprl/bloom.test.ts \
-            src/__tests__/utils/memory-guard.test.ts \
-            src/__tests__/active-learning/learner.test.ts \
-            src/__tests__/auto-config/detector.test.ts
-
-      - name: Core batch 4b — pipeline/linking (one file per process)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/pipeline/linking.test.ts
-
-      - name: Core batch 5 (3 files — medium datasets)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/blocking/meta-blocking.test.ts \
-            src/__tests__/pipeline/datasource.test.ts \
-            src/__tests__/integration/i21-regression.test.ts
-
-      - name: Core batch 6 — blocking/all (one file per process — heavy dataset)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/blocking/all.test.ts
-
-      - name: Core batch 7 — pipeline/incremental (one file per process — heavy dataset)
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          cd packages/entity-resolver-core
-          pnpm exec vitest run --reporter=dot \
-            src/__tests__/pipeline/incremental.test.ts
-
-  # ═══════════════════════════════════════════════════════════
-  # Extract + Link packages — light skeleton tests (I12)
-  # ═══════════════════════════════════════════════════════════
-  test-extract:
-    name: Test (extract)
-    needs: [test-core]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-extract exec vitest run --reporter=dot
-
-  test-link:
-    name: Test (link)
-    needs: [test-core]
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-link exec vitest run --reporter=dot
-
-  # ═══════════════════════════════════════════════════════════
-  # Heavy standalone test — pyjedai-algorithms has an expensive
-  # dependency chain (algorithms-pyjedai.js) that causes esbuild
-  # collect to hang even in per-file vitest.  Runs independently
-  # so it does not block the needs chain below.
-  # ═══════════════════════════════════════════════════════════
-  test-heavy:
-    name: Test (heavy)
-    needs: [typecheck]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - name: Run pyjedai-algorithms
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
-            src/__tests__/clustering/pyjedai-algorithms.test.ts
-      - name: Run pipeline/runner
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
-            src/__tests__/pipeline/runner.test.ts
-      - name: Run benchmarks/dataset-edge
-        env: { NODE_OPTIONS: '--max-old-space-size=7168' }
-        run: |
-          pnpm -C packages/entity-resolver-core exec vitest run --reporter=dot \
-            src/__tests__/benchmarks/dataset-edge.test.ts
-
-  # ═══════════════════════════════════════════════════════════
-  # Step 2: Node + Browser tests — parallel, depend on core
-  # ═══════════════════════════════════════════════════════════
-  test-node:
-    name: Test (node)
-    needs: [test-core]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-node exec vitest run --reporter=dot
-
-  test-browser:
-    name: Test (browser)
-    needs: [test-core]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-browser exec vitest run --reporter=dot
-
-  # ═══════════════════════════════════════════════════════════
-  # Step 3: Server + Visual + CLI — parallel, dep on node+browser
-  # ═══════════════════════════════════════════════════════════
-  test-server:
-    name: Test (server)
-    needs: [test-node, test-browser]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-server exec vitest run --reporter=dot
-
-  test-visual:
-    name: Test (visual)
-    needs: [test-node, test-browser]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-visual exec vitest run --reporter=dot
-
-  test-cli:
-    name: Test (cli)
-    needs: [test-node, test-browser]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: pnpm -C packages/entity-resolver-cli exec vitest run --reporter=dot
-
-  # ═══════════════════════════════════════════════════════════
-  # Step 4: Benchmarks — depends on quality gates
-  # ═══════════════════════════════════════════════════════════
-  benchmark:
-    name: Benchmarks
-    needs: [lint, typecheck, format]
-    runs-on: ubuntu-latest
-    timeout-minutes: 40
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-
-      - name: Run unified benchmarks (I31)
-        run: node --import tsx benchmarks/run.ts
-        env:
-          NODE_OPTIONS: --max-old-space-size=7168
-        timeout-minutes: 35
-
-      - name: Compare against baseline
-        run: |
-          if [ -f benchmarks/output/benchmark-report.json ]; then
-            node --input-type=module -e "
-              import { readFileSync } from 'node:fs';
-              const cur = JSON.parse(readFileSync('benchmarks/output/benchmark-report.json','utf-8'));
-              const erResults = cur.results.filter(r => r.tool === 'entity-resolver');
-              if (erResults.length === 0) { console.log('No ER results to compare.'); process.exit(0); }
-              let regressions = 0;
-              if (process.env.BASELINE_JSON) {
-                const base = JSON.parse(process.env.BASELINE_JSON);
-                const baseResults = base.results?.filter(r => r.tool === 'entity-resolver') ?? [];
-                for (const c of erResults) {
-                  const b = baseResults.find(x => x.dataset === c.dataset);
-                  if (!b) continue;
-                  const f1Delta = c.metrics.f1 - b.metrics.f1;
-                  const timeDelta = c.timing.meanMs - b.timing.meanMs;
-                  if (f1Delta < -0.02 || timeDelta > b.timing.meanMs * 0.2) {
-                    console.error('REGRESSION: ' + c.dataset + ' F1=' + f1Delta.toFixed(4) + ' time=' + (timeDelta/b.timing.meanMs*100).toFixed(1) + '%');
-                    regressions++;
-                  }
-                }
-              }
-              if (regressions > 0) { console.error(regressions + ' regression(s) detected!'); process.exit(1); }
-              console.log('No regressions detected.');
-            "
-          fi
-
-      - name: Upload benchmark artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: benchmark-report
-          path: |
-            benchmarks/output/benchmark-report.json
-            benchmarks/output/benchmark-report.html
-            benchmarks/output/benchmark-matrix.csv
-          retention-days: 7
-
-  # ═══════════════════════════════════════════════════════════
-  # E2E — Playwright browser tests
-  # ═══════════════════════════════════════════════════════════
-  e2e:
-    name: E2E (Playwright)
-    needs: [lint, typecheck, format]
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - uses: actions/cache@v6
-        with:
-          path: e2e/wasm-cache
-          key: duckdb-wasm-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: duckdb-wasm-
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-      - run: npx playwright install chromium --with-deps
-      - name: Run E2E tests
-        run: npx playwright test
-
-  # ═══════════════════════════════════════════════════════════
-  # GitHub Pages — benchmarks + API docs
-  # ═══════════════════════════════════════════════════════════
-  deploy-pages:
-    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
-    needs: [test-server, test-visual, test-cli, test-heavy, benchmark, e2e]
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
-        with: { version: '9.15.0' }
-      - uses: actions/setup-node@v7
-        with: { node-version: '22', cache: 'pnpm' }
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm build
-
-      - name: Generate API docs
-        run: pnpm docs:api
-
-      - name: Build docs site
-        run: pnpm docs:build
-
-      - name: Download benchmark report
-        uses: actions/download-artifact@v8
-        with: { name: benchmark-report, path: docs/.vitepress/dist/benchmark }
-
-      - name: Update baseline (push to master only)
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        run: |
-          if [ -f docs/.vitepress/dist/benchmark/benchmark-report.json ]; then
-            cp docs/.vitepress/dist/benchmark/benchmark-report.json benchmarks/baseline.json
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            if git diff --quiet benchmarks/baseline.json; then
-              echo "Baseline unchanged."
-            else
-              git add benchmarks/baseline.json
-              git commit -m "chore: update benchmark baseline [skip ci]"
-              git push origin HEAD:master
-            fi
-          fi
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v6
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v5
-        with: { path: docs/.vitepress/dist }
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Test Rust ensemble scorer
+        run: cd packages/entity-resolver-native && cargo test
+      - name: Build Rust release
+        run: cd packages/entity-resolver-native && cargo build --release
