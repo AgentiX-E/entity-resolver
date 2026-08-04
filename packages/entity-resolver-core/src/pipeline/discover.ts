@@ -102,7 +102,7 @@ function classifyFieldStatistically(
 async function classifyFieldsWithLLM(
   fields: readonly string[],
   profiles: Record<string, FieldProfile>,
-  sample: readonly Record<string, unknown>[],
+  _sample: readonly Record<string, unknown>[],
   config: DiscoverConfig,
 ): Promise<Record<string, string>> {
   // Build context for the LLM
