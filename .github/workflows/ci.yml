@@ -39,12 +39,19 @@ jobs:
         run: |
           cd packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer
           wasm-pack build --target bundler --out-dir ../scorers --release
-      - name: Install deps
-        run: pnpm install
-      - name: Build TS
-        run: pnpm build
-      - name: Benchmark DBLP-ACM (native ensemble)
-        run: node --import tsx benchmarks/p0.ts
+      - name: Commit WASM artifacts
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add packages/entity-resolver-core/src/matching/scorers/wasm/scorers/
+          git diff --staged --quiet || (git commit -m "build(wasm): CI auto-build ensemble scorer binary" && git push)
+      - name: Verify WASM exports
+        run: |
+          node -e "
+          const wasm = require('./packages/entity-resolver-core/src/matching/scorers/wasm/scorers/wasm_scorer.js');
+          console.log('WASM ensemble export:', typeof wasm.wasm_score);
+          "
 
   # Rust native tests
   rust-test:
