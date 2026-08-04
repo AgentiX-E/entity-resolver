@@ -194,4 +194,55 @@ mod tests {
         assert_eq!(wasm_soundex_match("Robert", "Rupert"), 1.0);
         assert_eq!(wasm_soundex_match("Robert", "Michael"), 0.0);
     }
+
+    #[test]
+    fn test_ensemble() {
+        let score = wasm_ensemble("John Smith", "Smith John");
+        assert!(score > 0.8, "token_sort should catch reordering: {}", score);
+        let score2 = wasm_ensemble("Michael", "Micheal");
+        assert!(score2 > 0.8, "jaro_winkler should catch typo: {}", score2);
+    }
+}
+
+// ─── I45/P1: Ensemble Scorer (max of three signals) ───
+
+use std::collections::HashMap;
+
+#[wasm_bindgen]
+pub fn wasm_ensemble(a: &str, b: &str) -> f64 {
+    let jw = wasm_jaro_winkler(a, b, 0.1);
+    let ts = token_sort_ratio(a, b);
+    let sx = if wasm_soundex_match(a, b) > 0.5 { 0.8 } else { 0.0 };
+    jw.max(ts).max(sx)
+}
+
+fn token_sort_ratio(a: &str, b: &str) -> f64 {
+    let mut ta: Vec<&str> = a.split_whitespace().collect();
+    let mut tb: Vec<&str> = b.split_whitespace().collect();
+    ta.sort(); tb.sort();
+    wasm_jaro_winkler(&ta.join(" "), &tb.join(" "), 0.1)
+}
+
+#[wasm_bindgen]
+pub fn wasm_soundex_match(a: &str, b: &str) -> f64 {
+    if wasm_soundex(a) == wasm_soundex(b) { 1.0 } else { 0.0 }
+}
+
+fn wasm_soundex(s: &str) -> String {
+    let chars: Vec<char> = s.to_uppercase().chars().collect();
+    if chars.is_empty() { return String::new(); }
+    let first = chars[0];
+    let mapping: HashMap<char, char> = [
+        ('B','1'),('F','1'),('P','1'),('V','1'),('C','2'),('G','2'),('J','2'),
+        ('K','2'),('Q','2'),('S','2'),('X','2'),('Z','2'),('D','3'),('T','3'),
+        ('L','4'),('M','5'),('N','5'),('R','6'),
+    ].iter().cloned().collect();
+    let mut code = String::from(first); let mut prev = None;
+    for &c in &chars[1..] {
+        if let Some(&cc) = mapping.get(&c) {
+            if prev != Some(cc) { code.push(cc); prev = Some(cc); }
+        } else if !matches!(c, 'A'|'E'|'I'|'O'|'U'|'H'|'W'|'Y') { prev = None; }
+    }
+    while code.len() < 4 { code.push('0'); }
+    code[..4].to_string()
 }

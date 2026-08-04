@@ -25,7 +25,7 @@ export async function tryLoadWasmScorers(
 
     const scorers: Record<string, IScorer> = {};
 
-    const names = ['levenshtein', 'jaro', 'jaro_winkler', 'dice', 'soundex'];
+    const names = ['levenshtein', 'jaro', 'jaro_winkler', 'dice', 'soundex', 'ensemble'];
 
     for (const name of names) {
       scorers[name] = {
