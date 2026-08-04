@@ -7,16 +7,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write  # Required for auto-commit of WASM binary
+  contents: write
 
 jobs:
-  # Test (JS only, no WASM needed)
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 10 }
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: 'pnpm' }
       - run: pnpm install
@@ -25,17 +23,14 @@ jobs:
       - name: Core tests
         run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot
 
-  # WASM build + ensemble benchmark
   wasm-bench:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with: { version: 10 }
       - uses: actions/setup-node@v4
-        with: { node-version: 22 }
-      - name: Setup Rust
-        uses: dtolnay/rust-toolchain@stable
+        with: { node-version: 22, cache: 'pnpm' }
+      - uses: dtolnay/rust-toolchain@stable
         with: { targets: wasm32-unknown-unknown }
       - name: Install wasm-pack
         run: curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
@@ -50,14 +45,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add packages/entity-resolver-core/src/matching/scorers/wasm/scorers/
           git diff --staged --quiet || (git commit -m "build(wasm): CI auto-build ensemble scorer binary" && git push)
-      - name: Verify WASM exports
-        run: |
-          node -e "
-          const wasm = require('./packages/entity-resolver-core/src/matching/scorers/wasm/scorers/wasm_scorer.js');
-          console.log('WASM ensemble export:', typeof wasm.wasm_score);
-          "
 
-  # Rust native tests
   rust-test:
     runs-on: ubuntu-latest
     steps:
