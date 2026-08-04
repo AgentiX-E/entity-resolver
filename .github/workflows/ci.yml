@@ -22,7 +22,7 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - name: Core tests
-        run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot 2>&1 || echo "TESTS_EXIT=$?"
+        run: cd packages/entity-resolver-core && pnpm vitest run --reporter=dot
 
   wasm-bench:
     runs-on: ubuntu-latest
@@ -33,18 +33,14 @@ jobs:
         with: { node-version: 22, cache: 'pnpm' }
       - uses: dtolnay/rust-toolchain@stable
         with: { targets: wasm32-unknown-unknown }
-      - name: Install wasm-pack
-        run: npm install -g wasm-pack
-      - name: Diagnose WASM env
-        run: |
-          which wasm-pack || echo "wasm-pack not found"
-          rustup target list | grep wasm32
-          wasm-pack --version || echo "no wasm-pack"
-          ls packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer/Cargo.toml
+      - name: Install wasm-pack (cargo)
+        run: cargo install wasm-pack
       - name: Build WASM ensemble scorer
         run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
           cd packages/entity-resolver-core/src/matching/scorers/wasm/rust-scorer
-          wasm-pack build --target bundler --out-dir ../scorers --release 2>&1
+          cargo build --target wasm32-unknown-unknown --release --lib 2>&1 | tail -5
+          wasm-pack build --target bundler --out-dir ../scorers --release 2>&1 | tail -5
       - name: Commit WASM artifacts
         if: github.event_name == 'push' && github.ref == 'refs/heads/master'
         run: |
