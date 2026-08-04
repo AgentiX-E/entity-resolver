@@ -4,6 +4,10 @@ on:
   push:
     branches: [master]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Required for auto-commit of WASM binary
 
 jobs:
   # Test (JS only, no WASM needed)
