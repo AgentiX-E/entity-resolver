@@ -1,20 +1,12 @@
-// ApiEmbeddingProvider — generic REST-API embedding backend.
-// Zero coupling to any provider. Strategy-pattern adapters.
+// ApiEmbeddingProvider — generic REST-API embedding via node:http/https.
+// Adapters shared with browser via @agentix-e/entity-resolver-core.
 import type { IEmbeddingProvider } from '@agentix-e/entity-resolver-core';
+import type { ApiEmbeddingConfig } from '@agentix-e/entity-resolver-core';
 
 export type EmbedRequestBuilder = (texts: readonly string[]) => Record<string, unknown>;
 export type EmbedResponseParser = (json: Record<string, unknown>) => Float32Array[];
-
-export interface ApiEmbeddingConfig {
-  readonly name: string;
-  readonly endpoint: string;
-  readonly dimensions: number;
-  readonly headers: Record<string, string>;
-  readonly buildRequest: EmbedRequestBuilder;
-  readonly parseResponse: EmbedResponseParser;
-  readonly maxBatchSize?: number;
-  readonly timeoutMs?: number;
-}
+export type { ApiEmbeddingConfig };
+export { openAICompatibleAdapter, vertexAIAdapter } from '@agentix-e/entity-resolver-core';
 
 export class ApiEmbeddingProvider implements IEmbeddingProvider {
   readonly name: string;
@@ -57,50 +49,17 @@ export class ApiEmbeddingProvider implements IEmbeddingProvider {
       const url = new URL(this._endpoint);
       const mod = url.protocol === 'https:' ? require('node:https') : require('node:http');
       const req = mod.request(url, {
-        method: 'POST',
-        headers: this._headers,
-        timeout: this._timeout,
+        method: 'POST', headers: this._headers, timeout: this._timeout,
       }, (res: any) => {
         let data = '';
         res.on('data', (c: Buffer) => data += c.toString());
-        res.on('end', () => {
-          try { resolve(JSON.parse(data)); } catch (e) { reject(e); }
-        });
+        res.on('end', () => { try { resolve(JSON.parse(data)); } catch (e) { reject(e); } });
       });
       req.on('error', reject);
       req.on('timeout', () => { req.destroy(); reject(new Error('API timeout')); });
-      req.write(body);
-      req.end();
+      req.write(body); req.end();
     });
   }
 
   async dispose(): Promise<void> { this._ok = false; }
-}
-
-// Pre-built adapters
-
-export function openAICompatibleAdapter(model: string): {
-  buildRequest: EmbedRequestBuilder; parseResponse: EmbedResponseParser;
-} {
-  return {
-    buildRequest: (texts) => ({ model, input: texts }),
-    parseResponse: (json) => {
-      const data = (json as any).data as Array<{ embedding: number[] }>;
-      if (!Array.isArray(data)) throw new Error('Missing data[].embedding');
-      return data.map((d) => new Float32Array(d.embedding));
-    },
-  };
-}
-
-export function vertexAIAdapter(): {
-  buildRequest: EmbedRequestBuilder; parseResponse: EmbedResponseParser;
-} {
-  return {
-    buildRequest: (texts) => ({ instances: texts.map((t) => ({ content: t })) }),
-    parseResponse: (json) => {
-      const p = (json as any).predictions as Array<{ embeddings: { values: number[] } }>;
-      if (!Array.isArray(p)) throw new Error('Missing predictions');
-      return p.map((d) => new Float32Array(d.embeddings.values));
-    },
-  };
 }

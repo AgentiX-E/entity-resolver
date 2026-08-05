@@ -463,3 +463,7 @@ export {
   subtractPairs,
 } from './blocking/composable.js';
 export type { BlockingPredicate } from './blocking/composable.js';
+
+// Embedding
+export type { EmbedRequestBuilder, EmbedResponseParser, ApiEmbeddingConfig } from './embedding/adapters.js';
+export { openAICompatibleAdapter, vertexAIAdapter } from './embedding/adapters.js';

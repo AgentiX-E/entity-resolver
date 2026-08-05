@@ -23,5 +23,5 @@ export { PgSqlBackend } from './storage/pg-sql-backend.js';
 export { TransformersEmbeddingProvider } from './embedding/transformers-provider.js';
 export type { TransformersEmbeddingsConfig } from './embedding/transformers-provider.js';
 
-export { ApiEmbeddingProvider, openAICompatibleAdapter, vertexAIAdapter } from './embedding/api-provider.js';
-export type { ApiEmbeddingConfig, EmbedRequestBuilder, EmbedResponseParser } from './embedding/api-provider.js';
+
+export { ApiEmbeddingProvider } from './embedding/api-provider.js';
