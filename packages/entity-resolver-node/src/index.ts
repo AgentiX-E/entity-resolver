@@ -18,3 +18,7 @@ export type { DuckDbSqlBackendConfig } from './storage/duckdb-sql-backend.js';
 export { DuckDbSqlBackend } from './storage/duckdb-sql-backend.js';
 export type { PgSqlBackendConfig } from './storage/pg-sql-backend.js';
 export { PgSqlBackend } from './storage/pg-sql-backend.js';
+// Embedding providers
+
+export { TransformersEmbeddingProvider } from './embedding/transformers-provider.js';
+export type { TransformersEmbeddingsConfig } from './embedding/transformers-provider.js';

@@ -24,6 +24,7 @@ export type { IConfigStore, StoredConfig } from './interfaces/IConfigStore.js';
 export type { ILogger, LogLevel, LogContext } from './interfaces/ILogger.js';
 export { NoopLogger } from './interfaces/ILogger.js';
 export type { IDataSource, ReadOptions } from './interfaces/IDataSource.js';
+export type { IEmbeddingProvider } from './interfaces/IEmbeddingProvider.js';
 export type {
   ISqlBackend,
   SqlRow,

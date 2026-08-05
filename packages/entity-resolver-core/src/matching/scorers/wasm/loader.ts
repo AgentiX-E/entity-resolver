@@ -17,7 +17,7 @@ export async function tryLoadWasmScorers(
     // Map scorer names to their wasm functions
     const fnMap: Record<string, (a: string, b: string) => number> = {
       levenshtein: (a,b) => wasm.wasm_levenshtein_similarity(a,b),
-      jaro: (a,b) => wasm.wasm_jaro(a,b,0.1),
+      jaro: (a,b) => wasm.wasm_jaro(a,b),
       jaro_winkler: (a,b) => wasm.wasm_jaro_winkler(a,b,0.1),
       dice: (a,b) => wasm.wasm_dice(a,b),
       soundex: (a,b) => wasm.wasm_soundex_match(a,b),
