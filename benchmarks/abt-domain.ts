@@ -57,7 +57,7 @@ async function main(){
   console.log('Scored '+pairs.length+' pairs in '+((performance.now()-tScore)/1000).toFixed(1)+'s');
 
   // DEEPSEEK RE-RANK with active sampling (uncertainty-based)
-  const boundary=top.filter(p=>p.score>=0.4&&p.score<=0.85).slice(0,60);
+  const boundary=pairs.filter(p=>p.score>=0.45const boundary=top.filter(p=>p.score>=0.4&&p.score<=0.85).slice(0,60);const boundary=top.filter(p=>p.score>=0.4&&p.score<=0.85).slice(0,60);p.score<=0.75).slice(0,200)
   const llmBoost=new Map<string,number>();
   let llmCount=0;
 
