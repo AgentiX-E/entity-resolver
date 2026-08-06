@@ -25,3 +25,15 @@ export type { TransformersEmbeddingsConfig } from './embedding/transformers-prov
 
 
 export { ApiEmbeddingProvider } from './embedding/api-provider.js';
+
+// LLM Adapter
+export { LLMAdapter } from './pipeline/llm-adapter.js';
+export type { ILLMAdapter, LLMModelConfig, LMPair, LMPairVerdict } from '@agentix-e/entity-resolver-core';
+export {
+  simpleMatchPrompt,
+  fewShotMatchPrompt,
+  standardMatchParser,
+  deepSeekV4FlashConfig,
+  glm4Config,
+  glm4FlashConfig,
+} from '@agentix-e/entity-resolver-core';

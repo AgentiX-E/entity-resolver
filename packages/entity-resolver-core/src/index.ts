@@ -467,3 +467,22 @@ export type { BlockingPredicate } from './blocking/composable.js';
 // Embedding
 export type { EmbedRequestBuilder, EmbedResponseParser, ApiEmbeddingConfig } from './embedding/adapters.js';
 export { openAICompatibleAdapter, vertexAIAdapter } from './embedding/adapters.js';
+
+
+// LLM Adapter — model-agnostic review pipeline
+export type {
+  ILLMAdapter,
+  LMPair,
+  LMPairVerdict,
+  LMParseResponse,
+  LMPromptBuilder,
+  LLMModelConfig,
+} from './pipeline/llm-adapter.js';
+export {
+  simpleMatchPrompt,
+  fewShotMatchPrompt,
+  standardMatchParser,
+  deepSeekV4FlashConfig,
+  glm4Config,
+  glm4FlashConfig,
+} from './pipeline/llm-adapter.js';
