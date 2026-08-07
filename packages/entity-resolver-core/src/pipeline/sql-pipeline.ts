@@ -53,7 +53,8 @@ export async function runSqlPipeline(
   );
 
   // Multi-field blocking
-  const stringFields = cols.filter((c) => c !== '__row_id');
+  const allFields = cols.filter((c) => c !== '__row_id');
+  const stringFields = config.comparisons?.map((c) => c.field).filter((c) => allFields.includes(c)) ?? allFields;
   const blockingConfig = {
     ...config,
     blocking: config.blocking ?? {
@@ -325,7 +326,10 @@ function buildBlockSqlWithPrefixFilter(
   const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = config.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const strCols = cols.filter((c) => c !== '__row_id');
-  const prefixCond = strCols
+  // Only apply LOWER() to configured comparison fields — numeric column safety
+  const cmpFields = config.comparisons?.map((c) => c.field) ?? strCols;
+  const prefixCols = cmpFields.filter((c) => strCols.includes(c));
+  const prefixCond = prefixCols
     .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
     .join(' OR ');
 
@@ -434,7 +438,8 @@ export async function runSqlLinkage(
     { name: rightTable },
   );
 
-  const stringFields = cols.filter((c) => c !== '__row_id');
+  const allFields = cols.filter((c) => c !== '__row_id');
+  const stringFields = config.comparisons?.map((c) => c.field).filter((c) => allFields.includes(c)) ?? allFields;
   const passes =
     config.blocking?.passes ??
     stringFields.map((f) => ({ fields: [f], transforms: ['lowercase'] as string[] }));

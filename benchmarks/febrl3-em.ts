@@ -106,8 +106,7 @@ const config = {
   ],
   blocking: {
     passes: [
-      { fields: ['surname*
-    fields: ['surname', 'given_name']'] },
+      { fields: ['surname', 'given_name'] },
     ],
   },
 }
