@@ -65,7 +65,7 @@ export async function runSqlPipeline(
   // Fast path for sub-10K records: single SELECT (no CTAS, one FFI call)
   if (records.length < 10000) {
     const tFast = performance.now();
-    const scoredSql = buildFastSingleQuery(inputTable, blockingConfig, config, cols);
+    const scoredSql = buildFastSingleQuery(inputTable, blockingConfig, config, cols, emParams);
     const scoredRows = await backend.query(scoredSql);
     await dropAll(backend, [inputTable]);
     return {
@@ -115,6 +115,19 @@ export async function runSqlPipeline(
     const f = esc(c.field);
     const lvls = c.levels?.length ? c.levels : [{}];
 
+    // Lookup helper: find m/u for a specific field:level key
+    const findM = (label: string): number => {
+      const key = `${c.field}:${label}`;
+      return emParams.mProbabilities.get(key) ?? emParams.mProbabilities.get(`${c.field}:*`) ?? 0.9;
+    };
+    const findU = (label: string): number => {
+      const key = `${c.field}:${label}`;
+      return emParams.uProbabilities.get(key) ?? emParams.uProbabilities.get(`${c.field}:*`) ?? 0.1;
+    };
+    // Clamp m,u to (1e-6, 1-1e-6) to avoid log2(0) or division by zero
+    const safeM = (label: string) => Math.max(1e-6, Math.min(1 - 1e-6, findM(label)));
+    const safeU = (label: string) => Math.max(1e-6, Math.min(1 - 1e-6, findU(label)));
+
     // Build CASE WHEN for comparison levels
     let caseSql = 'CASE';
     for (let i = lvls.length - 1; i >= 0; i--) {
@@ -125,28 +138,25 @@ export async function runSqlPipeline(
       }
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
-        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
+        caseSql += ` WHEN ${dbFn(c.scorerName)}(CAST(l."${f}" AS VARCHAR),CAST(r."${f}" AS VARCHAR))>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     const levelExpr = `${caseSql} ELSE -1 END AS ${f}_level`;
 
-    // Extract trained m/u for this field (EM uses "field:level" keys)
-    let m = 0.9,
-      u = 0.1;
-    for (const [key, val] of emParams.mProbabilities.entries()) {
-      if (key.startsWith(c.field + ':')) {
-        m = val;
-        break;
-      }
+    // Level-specific weights: weight = log2(m_level / u_level) per comparison level
+    const levelWeightCases: string[] = [];
+    for (let i = 0; i < lvls.length; i++) {
+      const label = ((lvls[i] as Record<string, unknown>).label as string) ?? 'match';
+      const m_val = safeM(label);
+      const u_val = safeU(label);
+      levelWeightCases.push(`WHEN ${i} THEN ${Math.log2(m_val / u_val).toFixed(4)}`);
     }
-    for (const [key, val] of emParams.uProbabilities.entries()) {
-      if (key.startsWith(c.field + ':')) {
-        u = val;
-        break;
-      }
-    }
-    const matchW = Math.log2(m / u).toFixed(4);
-    const nomatchW = Math.log2((1 - m) / (1 - u)).toFixed(4);
-    const weightExpr = `CASE WHEN ${f}_level>=0 THEN ${matchW} ELSE ${nomatchW} END AS ${f}_weight`;
+    // Fallback for level=-1 (not_match) — always included even if not in configured levels
+    const nm_m = safeM('not_match');
+    const nm_u = safeU('not_match');
+    const notMatchW = Math.log2(nm_m / nm_u).toFixed(4);
+    const weightExpr = levelWeightCases.length > 0
+      ? `CASE ${f}_level ${levelWeightCases.join(' ')} ELSE ${notMatchW} END AS ${f}_weight`
+      : `CASE WHEN ${f}_level>=0 THEN ${Math.log2(0.9 / 0.1).toFixed(4)} ELSE ${Math.log2(0.1 / 0.9).toFixed(4)} END AS ${f}_weight`;
 
     return { field: f, levelExpr, weightExpr };
   });
@@ -204,13 +214,24 @@ function trainEMOnSample(
   // Random pairs are overwhelmingly non-matches → unbiased u estimate
   const randomU = estimateUFromRandomPairs(records, config.comparisons, 5000);
 
-  // Generate comparison vectors from blocked pairs for m estimation
+  // Generate comparison vectors from blocked pairs for m estimation.
+  // Use pipeline blocking passes for realistic candidate pairs; falls back
+  // to single-column comparison fields if no passes are configured.
+  // Prior bug: standardBlocking on ALL columns (incl. unique IDs) produced
+  // zero candidates, causing EM to return useless defaults (m=0.9, u=0.1).
   const sampleSize = Math.min(2000, records.length);
-  const blockResult = standardBlocking(records.slice(0, sampleSize), {
-    fields: Object.keys(records[0] ?? {}).filter((k) => k !== '__row_id'),
-    transforms: ['lowercase'],
-  });
-  const candidates = blockResult.pairs.slice(0, 3000);
+  // Reuse pipeline blocking for EM candidate generation; fallback to single-column passes
+  const emBlockingConfig = (config.blocking?.passes?.length ?? 0) > 0
+    ? { passes: config.blocking!.passes! }
+    : {
+        passes: config.comparisons.map((c) => ({
+          fields: [c.field] as const,
+          transforms: ['lowercase'] as const,
+        })),
+      };
+  const blockResult = standardBlocking(records.slice(0, sampleSize), emBlockingConfig as any);
+  // B3 FIX: use enough pairs for stable EM — ensure minimum 500 candidates
+  const candidates = blockResult.pairs.slice(0, Math.max(3000, blockResult.pairs.length));
 
   if (candidates.length < 10) return defaults;
 
@@ -307,7 +328,7 @@ function buildBlockSql(
   const parts = passes.map((p) => {
     const conditions = (p.fields ?? [fallbackField])
       .map((f) =>
-        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+        p.transforms?.[0] === 'lowercase' ? `LOWER(CAST(l."${f}" AS VARCHAR))=LOWER(CAST(r."${f}" AS VARCHAR))` : `l."${f}"=r."${f}"`,
       )
       .join(' AND ');
     return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id<r.__row_id`;
@@ -326,17 +347,15 @@ function buildBlockSqlWithPrefixFilter(
   const fallbackField = (config.blocking?.fields?.[0] ?? cols[0] ?? '__row_id');
   const passes = config.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const strCols = cols.filter((c) => c !== '__row_id');
-  // Only apply LOWER() to configured comparison fields — numeric column safety
-  const cmpFields = config.comparisons?.map((c) => c.field) ?? strCols;
-  const prefixCols = cmpFields.filter((c) => strCols.includes(c));
-  const prefixCond = prefixCols
-    .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
+  // CAST to VARCHAR before LOWER/LEFT avoids Binder Error on DuckDB-inferred numeric types
+  const prefixCond = strCols
+    .map((c) => `LEFT(CAST(l."${c}" AS VARCHAR),3)=LEFT(CAST(r."${c}" AS VARCHAR),3)`)
     .join(' OR ');
 
   const parts = passes.map((p) => {
     const conditions = (p.fields ?? [fallbackField])
       .map((f) =>
-        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+        p.transforms?.[0] === 'lowercase' ? `LOWER(CAST(l."${f}" AS VARCHAR))=LOWER(CAST(r."${f}" AS VARCHAR))` : `l."${f}"=r."${f}"`,
       )
       .join(' AND ');
     return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${src} l JOIN ${src} r ON (${conditions}) WHERE l.__row_id<r.__row_id AND (${prefixCond})`;
@@ -356,10 +375,10 @@ function buildFastSingleQuery(
   const passes = blockingConfig.blocking?.passes ?? [{ fields: [fallbackField], transforms: [] }];
   const activeComps = config.comparisons.filter((c) => cols.includes(c.field));
 
-  const compParts = activeComps.map((c) => {
+    const compParts = activeComps.map((c) => {
     const f = esc(c.field);
     const lvls = c.levels?.length ? c.levels : [{}];
-    // B3 FIX: compute per-level weights from trained EM params
+    // Per-level weights from trained EM params
     const levelWeights: string[] = [];
     for (let i = 0; i < lvls.length; i++) {
       const key = c.field + ':' + (lvls[i] as Record<string,unknown>).label;
@@ -368,7 +387,11 @@ function buildFastSingleQuery(
       const mw = Math.log2(Math.max(m, 1e-6) / Math.max(u, 1e-6)).toFixed(6);
       levelWeights.push(`WHEN ${f}_level=${i} THEN ${mw}`);
     }
-    const defaultMw = Math.log2(0.9 / 0.1).toFixed(6);
+    // not_match fallback from EM or defaults
+    const nmKey = c.field + ':not_match';
+    const nmM = emParams?.mProbabilities.get(nmKey) ?? 0.1;
+    const nmU = emParams?.uProbabilities.get(nmKey) ?? 0.9;
+    const defaultMw = Math.log2(Math.max(nmM, 1e-6) / Math.max(nmU, 1e-6)).toFixed(6);
     const mwExpr = `CASE ${levelWeights.join(' ')} ELSE ${defaultMw} END`;
 
     let caseSql = 'CASE';
@@ -377,7 +400,7 @@ function buildFastSingleQuery(
       if (l.isExact || c.scorerName === 'exact') caseSql += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) caseSql += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
       else
-        caseSql += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
+        caseSql += ` WHEN ${dbFn(c.scorerName)}(CAST(l."${f}" AS VARCHAR),CAST(r."${f}" AS VARCHAR))>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     return {
       field: f,
@@ -389,7 +412,7 @@ function buildFastSingleQuery(
   const blockParts = passes.map((p) => {
     const conditions = (p.fields ?? [fallbackField])
       .map((f) =>
-        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+        p.transforms?.[0] === 'lowercase' ? `LOWER(CAST(l."${f}" AS VARCHAR))=LOWER(CAST(r."${f}" AS VARCHAR))` : `l."${f}"=r."${f}"`,
       )
       .join(' AND ');
     return `(${conditions} AND l.__row_id<r.__row_id)`;
@@ -450,12 +473,12 @@ export async function runSqlLinkage(
   const blockParts = passes.map((p) => {
     const conditions = (p.fields ?? [cols[0] ?? '__row_id'])
       .map((f) =>
-        p.transforms?.[0] === 'lowercase' ? `LOWER(l."${f}")=LOWER(r."${f}")` : `l."${f}"=r."${f}"`,
+        p.transforms?.[0] === 'lowercase' ? `LOWER(CAST(l."${f}" AS VARCHAR))=LOWER(CAST(r."${f}" AS VARCHAR))` : `l."${f}"=r."${f}"`,
       )
       .join(' AND ');
     if (stringFields.length >= 2) {
       const prefixCond = stringFields
-        .map((c) => `LEFT(LOWER(l."${c}"),3)=LEFT(LOWER(r."${c}"),3)`)
+        .map((c) => `LEFT(CAST(l."${c}" AS VARCHAR),3)=LEFT(CAST(r."${c}" AS VARCHAR),3)`)
         .join(' OR ');
       return `SELECT DISTINCT l.__row_id left_id, r.__row_id right_id FROM ${leftTable} l JOIN ${rightTable} r ON (${conditions} AND (${prefixCond}))`;
     }
@@ -492,7 +515,7 @@ export async function runSqlLinkage(
       const l = lvls[i]! as Record<string, unknown>;
       if (l.isExact || c.scorerName === 'exact') s += ` WHEN l."${f}"=r."${f}" THEN ${i}`;
       else if (l.isNull) s += ` WHEN l."${f}" IS NULL OR r."${f}" IS NULL THEN ${i}`;
-      else s += ` WHEN ${dbFn(c.scorerName)}(l."${f}",r."${f}")>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
+      else s += ` WHEN ${dbFn(c.scorerName)}(CAST(l."${f}" AS VARCHAR),CAST(r."${f}" AS VARCHAR))>=${Number(l.threshold ?? 0.7)} THEN ${i}`;
     }
     return {
       field: f,
@@ -584,8 +607,10 @@ function esc(n: string): string {
  *  Weights outside [-20, 20] are clamped to prevent NaN/Inf. */
 function clampScore(weight: number): number {
   if (!Number.isFinite(weight)) return 0;
-  const clamped = Math.max(-20, Math.min(20, weight));
-  return 1 / (1 + Math.exp(-clamped * Math.LN2));
+  // Return raw weight — caller normalizes via min-max scaling across all pairs.
+  // Prior sigmoid clamp saturated for weights > 5, losing all discrimination
+  // when level-specific log2(m/u) weights exceed 10 (e.g., postcode=10.54).
+  return Math.max(-20, Math.min(20, weight));
 }
 async function dropAll(be: ISqlBackend, ts: string[]): Promise<void> {
   for (const t of ts)

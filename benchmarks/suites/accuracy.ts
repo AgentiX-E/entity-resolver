@@ -250,7 +250,7 @@ function getDatasetPipelineConfig(name: string): any {
             { name: 'strong_match', threshold: 0.9 },
             { name: 'moderate_match', threshold: 0.6 },
           ]},
-          { field: 'year', scorerName: 'exact', levels: [{ name: 'match', isExact: true as any }] },
+          { field: 'year', scorerName: 'exact', levels: [{ label: 'match', isExact: true as any }] },
         ],
         blocking: {
           passes: [
@@ -271,7 +271,7 @@ function getDatasetPipelineConfig(name: string): any {
               { name: 'weak_match', threshold: 0.4 },
             ],
           },
-          { field: 'price', scorerName: 'exact', levels: [{ name: 'match', isExact: true as any }] },
+          { field: 'price', scorerName: 'exact', levels: [{ label: 'match', isExact: true as any }] },
         ],
         blocking: {
           passes: [
@@ -293,7 +293,7 @@ function getDatasetPipelineConfig(name: string): any {
               { name: 'weak_match', threshold: 0.6 },
             ],
           },
-          { field: 'manufacturer', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
+          { field: 'manufacturer', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
         ],
         blocking: {
           passes: [
@@ -304,7 +304,7 @@ function getDatasetPipelineConfig(name: string): any {
       };
     default:
       return {
-        comparisons: [{ field: 'name', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] }],
+        comparisons: [{ field: 'name', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] }],
         blocking: { passes: [{ fields: ['name'], transforms: ['lowercase'] }] },
       };
   }

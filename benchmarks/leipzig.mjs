@@ -30,8 +30,8 @@ async function main() {
     },
     {
       comparisons: [
-        { field: 'title', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-        { field: 'year', scorerName: 'exact', levels: [{ name: 'match' }] },
+        { field: 'title', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
+        { field: 'year', scorerName: 'exact', levels: [{ label: 'match' }] },
       ],
       blocking: { passes: [{ fields: ['title'], transforms: ['lowercase'] }, { fields: ['year'], transforms: [] }] },
     },
@@ -47,8 +47,8 @@ async function main() {
     },
     {
       comparisons: [
-        { field: 'title', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-        { field: 'manufacturer', scorerName: 'exact', levels: [{ name: 'match' }] },
+        { field: 'title', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
+        { field: 'manufacturer', scorerName: 'exact', levels: [{ label: 'match' }] },
       ],
       blocking: { passes: [{ fields: ['title'], transforms: ['lowercase'] }, { fields: ['manufacturer'], transforms: [] }] },
     },

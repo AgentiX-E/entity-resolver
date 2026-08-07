@@ -40,8 +40,8 @@ const { NodeDuckDBBackend } = await import(nodePath);
 
 const config = {
   comparisons: [
-    { field: 'Song_Name', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-    { field: 'Artist_Name', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
+    { field: 'Song_Name', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
+    { field: 'Artist_Name', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
   ],
   blocking: {
     passes: [

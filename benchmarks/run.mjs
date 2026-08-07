@@ -49,8 +49,8 @@ async function runER(records) {
 
   const config = {
     comparisons: [
-      { field: 'first', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
-      { field: 'last', scorerName: 'jaro_winkler', levels: [{ name: 'match' }] },
+      { field: 'first', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
+      { field: 'last', scorerName: 'jaro_winkler', levels: [{ label: 'match' }] },
     ],
     blocking: { passes: [{ fields: ['first'], transforms: ['lowercase'] }, { fields: ['last'], transforms: ['lowercase'] }] },
   };

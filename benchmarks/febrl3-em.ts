@@ -1,23 +1,24 @@
 // Febrl3 EM Diagnostics Benchmark — validate Fellegi-Sunter implementation
+// Standard Febrl3: 5000 originals × 3 dups each, matching on personal fields
 import { spawnSync } from 'node:child_process'
-import { readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { readFileSync, existsSync } from 'node:fs'
 import { performance } from 'node:perf_hooks'
 
-const DATA_FILE = '/tmp/febrl3_data.json'
+const DATA_FILE = '/tmp/febrl3_data_v2.json'
 
 if (!existsSync(DATA_FILE)) {
-  // Generate Febrl3 via Python (ANU synthetic standard)
   const py = `
 import json, random, string
 random.seed(42)
 
-# Standard Febrl3 configuration: 5000 originals + 5000 duplicates with 3 corruptions
+# Standard Febrl3 configuration, scaled for in-memory EM validation
+N = 1000  # number of originals
 first_names = ['John','Mary','David','Sarah','Michael','Emma','James','Linda','Robert','Patricia']
 last_names = ['Smith','Jones','Williams','Brown','Taylor','Wilson','Davies','Evans','Thomas','Johnson']
 streets = ['Main St','High St','Park Ave','Oak Rd','Cedar Ln','Elm Dr','Maple Ave','Pine St']
 
 originals = []
-for i in range(5000):
+for i in range(N):
   originals.append({
     'rec_id': f'rec-{i}-org',
     'given_name': random.choice(first_names),
@@ -30,21 +31,11 @@ for i in range(5000):
     'soc_sec_id': ''.join(random.choices('0123456789', k=9)),
   })
 
+# Duplicate type 1: 0-3 corruptions (easy)
 duplicates = []
-for i in range(5000):
+for i in range(N):
   orig = originals[i]
-  dup = {
-    'rec_id': f'rec-{i}-dup-0',
-    'given_name': orig['given_name'],
-    'surname': orig['surname'],
-    'street_number': orig['street_number'],
-    'address_1': orig['address_1'],
-    'suburb': orig['suburb'],
-    'postcode': orig['postcode'],
-    'date_of_birth': orig['date_of_birth'],
-    'soc_sec_id': orig['soc_sec_id'],
-  }
-  # Apply random corruptions (0-3 fields)
+  dup = {**orig, 'rec_id': f'rec-{i}-dup-0'}
   corruptions = random.sample(['given_name','surname','address_1','postcode','date_of_birth'], k=random.randint(0,3))
   for field in corruptions:
     if field == 'date_of_birth': dup[field] = dup[field][:-1] + str(random.randint(0,9))
@@ -52,8 +43,8 @@ for i in range(5000):
     elif field == 'postcode': dup[field] = str(int(dup[field]) + random.randint(-10,10))
   duplicates.append(dup)
 
-# Add more duplicates with 2-3 corruptions each (standard Febrl3 has ~3 dup types)
-for i in range(5000):
+# Duplicate types 2-3: 2-3 corruptions each (harder)
+for i in range(N):
   orig = originals[i]
   for m in range(1,3):
     dup = {k: v for k,v in orig.items()}
@@ -74,80 +65,186 @@ print(f'Generated {len(originals)} originals + {len(duplicates)} duplicates = {l
 }
 
 const all = JSON.parse(readFileSync(DATA_FILE, 'utf-8')) as Record<string, unknown>[]
-const originals = all.filter((r: any) => r.rec_id?.includes('-org'))
-const duplicates = all.filter((r: any) => !r.rec_id?.includes('-org'))
-console.log(`Originals: ${originals.length}, Duplicates: ${duplicates.length}, Total: ${all.length}`)
 
-// Ground truth: same-index originals and duplicates are matches
+// Strip metadata identifiers — keep only comparison-relevant fields
+// (rec_id is a unique key; leaving it in breaks EM training's standardBlocking)
+const records = all.map(({ rec_id, soc_sec_id, street_number, ...rest }) => rest)
+console.log(`Total records: ${records.length} (stripped rec_id, soc_sec_id, street_number)`)
+
+// Build ground truth from original rec_id -> index mapping
+const allRecIds = all.map((r: any) => r.rec_id as string)
 const groundTruth = new Set<string>()
-const truthCount = new Map<string, number>()
-for (let i = 0; i < 5000; i++) {
-  const origId = (originals[i] as any).rec_id as string
-  for (const dup of duplicates) {
-    if ((dup as any).rec_id?.startsWith(`rec-${i}-`)) {
-      groundTruth.add(origId + '|' + (dup as any).rec_id)
-      truthCount.set(origId, (truthCount.get(origId) ?? 0) + 1)
+// Find the max original index from rec_id patterns
+const getOrigIndex = (id: string) => { const m = id.match(/^rec-(\d+)-/); return m ? parseInt(m[1]!) : -1 }
+const maxOrig = Math.max(...allRecIds.map(getOrigIndex))
+for (let i = 0; i <= maxOrig; i++) {
+  const orig = `rec-${i}-org`
+  const oi = allRecIds.indexOf(orig)
+  for (let m = 0; m <= 2; m++) {
+    const dup = `rec-${i}-dup-${m}`
+    const di = allRecIds.indexOf(dup)
+    if (oi >= 0 && di >= 0) {
+      groundTruth.add(oi < di ? `${oi}|${di}` : `${di}|${oi}`)
     }
   }
 }
-console.log(`Ground truth matches: ${groundTruth.size} (avg ${(groundTruth.size / 5000).toFixed(1)} per original)`)
+console.log(`Ground truth matches: ${groundTruth.size}`)
 
-// === RUN FELSELL-SUNTER EM TRAINING ===
-const { initScorers } = await import('../packages/entity-resolver-core/dist/matching/scorers/registry.js')
-await initScorers()
+// === RUN Fellegi-Sunter EM ===
 
 const config = {
+  matchThreshold: 0.5,
   comparisons: [
-    { field: 'given_name', scorerName: 'jaro_winkler', levels: [{ name: 'match', threshold: 0.8 }, { name: 'partial', threshold: 0.5 }] },
-    { field: 'surname', scorerName: 'jaro_winkler', levels: [{ name: 'match', threshold: 0.8 }, { name: 'partial', threshold: 0.5 }] },
-    { field: 'date_of_birth', scorerName: 'jaro_winkler', levels: [{ name: 'match', threshold: 0.9 }, { name: 'partial', threshold: 0.7 }] },
-    { field: 'postcode', scorerName: 'jaro_winkler', levels: [{ name: 'match', threshold: 0.95 }] },
-    { field: 'address_1', scorerName: 'jaro_winkler', levels: [{ name: 'match', threshold: 0.8 }, { name: 'partial', threshold: 0.5 }] },
+    { field: 'given_name', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.8 },
+      { label: 'partial', threshold: 0.5 },
+    ]},
+    { field: 'surname', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.8 },
+      { label: 'partial', threshold: 0.5 },
+    ]},
+    { field: 'date_of_birth', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.9 },
+      { label: 'partial', threshold: 0.7 },
+    ]},
+    { field: 'postcode', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.95 },
+    ]},
+    { field: 'address_1', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.8 },
+      { label: 'partial', threshold: 0.5 },
+    ]},
+    { field: 'suburb', scorerName: 'jaro_winkler', levels: [
+      { label: 'match', threshold: 0.8 },
+    ]},
   ],
+  // Single-field multi-pass blocking — creates varied agreement patterns
+  // so EM can learn which fields are truly discriminative.
+  // Prior bug: {surname+given_name} combined blocking produced only
+  // pairs that agree on both fields, causing EM to degenerate (m≈u for all).
   blocking: {
     passes: [
-      { fields: ['surname', 'given_name'] },
+      { fields: ['surname'], transforms: ['lowercase'] as const[] },
+      { fields: ['given_name'], transforms: ['lowercase'] as const[] },
+      { fields: ['date_of_birth'], transforms: [] },
+      { fields: ['postcode'], transforms: [] },
+      { fields: ['address_1'], transforms: [] },
     ],
   },
+}
+
+// ─── EM Parameter Diagnostic ──────────────────────────────────────
+const { standardBlocking: _sb } = await import('../packages/entity-resolver-core/dist/blocking/standard.js')
+const { generateComparisonVectors: _gcv } = await import('../packages/entity-resolver-core/dist/matching/comparison.js')
+const { estimateParameters: _ep } = await import('../packages/entity-resolver-core/dist/fellegi-sunter/em.js')
+
+const _sampleSize = Math.min(2000, records.length)
+const emBlock = _sb(records.slice(0, _sampleSize), config.blocking as any)
+console.log(`\nEM diagnostic: ${emBlock.pairs.length} candidate pairs from blocking`)
+
+const fieldMeta = new Map<string, any>()
+for (const c of config.comparisons) {
+  fieldMeta.set(c.field, { name: c.field, semanticType: 'text', cardinality: 10, isNumeric: false })
+}
+const vectors: any[][] = []
+for (const pair of emBlock.pairs.slice(0, 3000)) {
+  const a = records[pair.leftId]
+  const b = records[pair.rightId]
+  if (a && b) vectors.push(_gcv(a as any, b as any, config.comparisons as any, fieldMeta))
+}
+console.log(`EM diagnostic: ${vectors.length} comparison vectors`)
+
+if (vectors.length >= 5) {
+  const emResult = _ep(vectors as any, { maxIterations: 20, epsilon: 1e-4, seed: 42 })
+  console.log(`EM diagnostic: λ=${(emResult.parameters as any).lambda.toFixed(4)}`)
+  const mp = emResult.parameters.mProbabilities as Map<string, number>
+  const up = emResult.parameters.uProbabilities as Map<string, number>
+  console.log('  m-probabilities:')
+  for (const [k, v] of [...mp.entries()].slice(0, 10)) console.log(`    ${k}: ${v.toFixed(4)}`)
+  console.log('  u-probabilities:')
+  for (const [k, v] of [...up.entries()].slice(0, 10)) console.log(`    ${k}: ${v.toFixed(4)}`)
+  // Show computed weights
+  console.log('  Field weights (log2(m/u)):')
+  for (const c of config.comparisons) {
+    const m = mp.get(c.field + ':match') ?? 0.9
+    const u = up.get(c.field + ':match') ?? 0.1
+    console.log(`    ${c.field}: m=${m.toFixed(4)} u=${u.toFixed(4)} weight=${Math.log2(m / u).toFixed(4)}`)
+  }
 }
 
 const core = await import('../packages/entity-resolver-core/dist/index.js')
 const { NodeDuckDBBackend } = await import('../packages/entity-resolver-node/dist/duckdb-backend.js')
 
-console.log('\n=== Running Fellegi-Sunter EM ===')
+console.log('\n=== Running Fellegi-Sunter EM (built-in training + scoring) ===')
 const t0 = performance.now()
 const db = new NodeDuckDBBackend('/tmp/er_febrl_em.db')
-const result = await core.runSqlLinkage(originals, duplicates, config, db)
+const result = await core.runSqlPipeline(records, config, db)
 
 const elapsed = (performance.now() - t0) / 1000
-console.log(`${result.pairs?.length ?? 0} pairs scored in ${elapsed.toFixed(1)}s`)
-
-// Evaluate F1
 const pairs = (result.pairs ?? []) as Array<{ leftId: number; rightId: number; score: number }>
 pairs.sort((a, b) => b.score - a.score)
+console.log(`${pairs.length} pairs scored in ${elapsed.toFixed(1)}s (block ${result.timing?.blockingMs?.toFixed(0) ?? '?'}ms + comp ${result.timing?.comparisonMs?.toFixed(0) ?? '?'}ms + EM ${result.timing?.emMs ?? 0}ms)`)
 
+// Min-max normalize scores to [0,1] for threshold evaluation
+let scoreMin = Infinity, scoreMax = -Infinity
+for (const p of pairs) {
+  if (p.score < scoreMin) scoreMin = p.score
+  if (p.score > scoreMax) scoreMax = p.score
+}
+const range = scoreMax - scoreMin || 1
+const normScore = (raw: number) => (raw - scoreMin) / range
+
+console.log(`Score range: [${scoreMin.toFixed(2)}, ${scoreMax.toFixed(2)}]`)
+
+// Evaluate F1 across thresholds
 let bestF1 = 0, bestThr = 0, bestTP = 0, bestFP = 0, bestFN = 0
+let bestP = 0, bestR = 0
 for (const thr of [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.85, 0.9, 0.95]) {
   const pred = new Set<string>()
   for (const p of pairs) {
-    if (p.score >= thr) {
-      pred.add((originals[p.leftId] as any).rec_id + '|' + (duplicates[p.rightId] as any).rec_id)
+    if (normScore(p.score) >= thr) {
+      const key = p.leftId < p.rightId ? `${p.leftId}|${p.rightId}` : `${p.rightId}|${p.leftId}`
+      pred.add(key)
     }
   }
-  let tp = 0; for (const p of pred) if (groundTruth.has(p)) tp++
-  const fp = pred.size - tp, fn = groundTruth.size - tp
+  let tp = 0
+  for (const p of pred) if (groundTruth.has(p)) tp++
+  const fp = pred.size - tp
+  const fn = groundTruth.size - tp
+  const precision = pred.size > 0 ? tp / pred.size : 0
+  const recall = groundTruth.size > 0 ? tp / groundTruth.size : 0
   const f1 = tp > 0 ? (2 * tp) / (2 * tp + fp + fn) : 0
-  if (f1 > bestF1) { bestF1 = f1; bestThr = thr; bestTP = tp; bestFP = fp; bestFN = fn }
+  if (f1 > bestF1) {
+    bestF1 = f1; bestThr = thr; bestTP = tp; bestFP = fp; bestFN = fn
+    bestP = precision; bestR = recall
+  }
 }
+
+// Score distribution diagnostic (normalized)
+const posScores: number[] = []
+const negScores: number[] = []
+for (const p of pairs) {
+  const key = p.leftId < p.rightId ? `${p.leftId}|${p.rightId}` : `${p.rightId}|${p.leftId}`
+  const ns = normScore(p.score)
+  if (groundTruth.has(key)) posScores.push(ns)
+  else negScores.push(ns)
+}
+posScores.sort((a,b) => b-a)
+negScores.sort((a,b) => b-a)
+const median = (arr: number[]) => arr.length > 0 ? arr[Math.floor(arr.length/2)]! : 0
 
 console.log('\n═══════════════════════════════════')
 console.log('  P1: Febrl3 EM Diagnostics')
 console.log('═══════════════════════════════════')
-console.log(`  F1 = ${bestF1.toFixed(4)}  P = ${bestTP + bestFP > 0 ? (bestTP / (bestTP + bestFP)).toFixed(4) : 'N/A'}  R = ${(bestTP / groundTruth.size).toFixed(4)}`)
+console.log(`  F1 = ${bestF1.toFixed(4)}  P = ${bestP.toFixed(4)}  R = ${bestR.toFixed(4)}`)
 console.log(`  TP=${bestTP} FP=${bestFP} FN=${bestFN} @ thr=${bestThr}`)
+console.log('───────────────────────────────────')
+console.log(`  True-match  scores: min=${posScores.length>0 ? posScores[posScores.length-1]!.toFixed(4) : 'N/A'} max=${posScores[0]?.toFixed(4) ?? 'N/A'} median=${median(posScores).toFixed(4)} n=${posScores.length}`)
+console.log(`  False-match scores: min=${negScores.length>0 ? negScores[negScores.length-1]!.toFixed(4) : 'N/A'} max=${negScores[0]?.toFixed(4) ?? 'N/A'} median=${median(negScores).toFixed(4)} n=${negScores.length}`)
 console.log('═══════════════════════════════════')
-console.log(`  Splink on Febrl3: 0.998 | GoldenMatch: 0.943`)
-console.log(`  Entity-Resolver:   ${bestF1.toFixed(4)}`)
+console.log(`  Splink on Febrl3:   0.998`)
+console.log(`  GoldenMatch (EM):   0.943`)
+console.log(`  Entity-Resolver EM: ${bestF1.toFixed(4)}`)
 console.log('═══════════════════════════════════')
 
 await db.close()

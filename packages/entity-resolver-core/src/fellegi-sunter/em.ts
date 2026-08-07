@@ -450,10 +450,12 @@ export function fieldFromKey(key: string): string {
  *  Custom levels not listed here receive the lowest priority (99). */
 const LEVEL_RANK: Readonly<Record<string, number>> = {
   exact_match: 0,
+  match: 0,           // same rank as exact_match (our default label)
   strong_match: 1,
   moderate_match: 2,
   within_30_days: 2,
   weak_match: 3,
+  partial: 3,         // same rank as weak_match (our partial label)
   not_match: 99,
 };
 
