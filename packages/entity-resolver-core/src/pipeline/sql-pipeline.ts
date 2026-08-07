@@ -212,14 +212,15 @@ function trainEMOnSample(
   // B1+B3 FIX: Estimate u from random non-match pairs (GoldenMatch standard)
   // Blocked pairs have artificially high agreement → u biased upward
   // Random pairs are overwhelmingly non-matches → unbiased u estimate
-  const randomU = estimateUFromRandomPairs(records, config.comparisons, 5000);
+  const randomU = estimateUFromRandomPairs(records, config.comparisons, 10000);
 
   // Generate comparison vectors from blocked pairs for m estimation.
   // Use pipeline blocking passes for realistic candidate pairs; falls back
   // to single-column comparison fields if no passes are configured.
   // Prior bug: standardBlocking on ALL columns (incl. unique IDs) produced
   // zero candidates, causing EM to return useless defaults (m=0.9, u=0.1).
-  const sampleSize = Math.min(2000, records.length);
+  // P1: Larger sample (5000) for better convergence with Febrl3-scale data.
+  const sampleSize = Math.min(5000, records.length);
   // Reuse pipeline blocking for EM candidate generation; fallback to single-column passes
   const emBlockingConfig = (config.blocking?.passes?.length ?? 0) > 0
     ? { passes: config.blocking!.passes! }
@@ -250,7 +251,8 @@ function trainEMOnSample(
   if (vectors.length < 5) return defaults;
 
   try {
-    const emResult = estimateParameters(vectors, { maxIterations: 20, epsilon: 1e-4, seed: 42 });
+    // P1: 50 iterations + 3 restarts for better convergence on large datasets
+    const emResult = estimateParameters(vectors, { maxIterations: 50, epsilon: 1e-6, seed: 42, numRestarts: 3 });
     // Merge: m from EM, u from random pairs (GoldenMatch pattern)
     const mergedM = new Map(emResult.parameters.mProbabilities);
     for (const [key] of randomU) {
