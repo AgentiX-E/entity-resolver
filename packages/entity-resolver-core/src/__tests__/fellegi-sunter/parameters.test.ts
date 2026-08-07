@@ -12,10 +12,13 @@ import type { ComparisonVector } from '../../matching/comparison.js';
 
 describe('createDefaultParameters', () => {
   it('creates params with expected structure', () => {
-    const params = createDefaultParameters(['name:exact_match', 'dob:strong_match']);
+    // Two levels on same field → exponential prior: higher k gets higher m
+    const params = createDefaultParameters(['name:exact_match', 'name:strong_match']);
     expect(params.lambda).toBe(0.001);
-    expect(params.mProbabilities.get('name:exact_match')).toBe(0.9);
-    expect(params.uProbabilities.get('dob:strong_match')).toBe(0.1);
+    // P1: exponential priors replace uniform 0.9 — per-field 2^k distribution
+    expect(params.mProbabilities.get('name:exact_match')).toBeCloseTo(0.333, 2);
+    expect(params.mProbabilities.get('name:strong_match')).toBeCloseTo(0.667, 2);
+    expect(params.uProbabilities.get('name:strong_match')).toBeCloseTo(0.1, 1);
   });
 
   it('accepts custom initial values', () => {
@@ -25,8 +28,9 @@ describe('createDefaultParameters', () => {
       initialU: 0.05,
     });
     expect(params.lambda).toBe(0.01);
-    expect(params.mProbabilities.get('test:*')).toBe(0.8);
-    expect(params.uProbabilities.get('test:*')).toBe(0.05);
+    // P1: initialM is ignored — exponential priors always used; single key → 1-ε
+    expect(params.mProbabilities.get('test:*')).toBeCloseTo(1.0, 5);
+    expect(params.uProbabilities.get('test:*')).toBeCloseTo(0.05, 1);
   });
 });
 
@@ -99,6 +103,7 @@ describe('freezeParameters', () => {
     const mutable = cloneParametersMutable(createDefaultParameters(['test:*']));
     const frozen = freezeParameters(mutable);
     mutable.mProbabilities.set('test:*', 0.5);
-    expect(frozen.mProbabilities.get('test:*')).toBe(0.9); // Frozen unchanged
+    // P1: single-key exponential prior → m ≈ 1.0, frozen copy unchanged
+    expect(frozen.mProbabilities.get('test:*')).toBeCloseTo(1.0, 5); // Frozen unchanged
   });
 });

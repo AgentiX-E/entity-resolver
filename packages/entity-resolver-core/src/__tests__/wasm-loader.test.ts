@@ -7,7 +7,7 @@ describe('WASM loader', () => {
   it('loads WASM scorers successfully', async () => {
     const scorers = await tryLoadWasmScorers();
     expect(scorers).not.toBeNull();
-    expect(Object.keys(scorers!).length).toBe(5);
+    expect(Object.keys(scorers!).length).toBe(6);
   });
 
   it('WASM levenshtein matches JS output', async () => {
@@ -66,7 +66,7 @@ describe('WASM loader', () => {
     ).toBe(0);
   });
 
-  it('all 5 WASM scorers return [0, 1]', async () => {
+  it('all 6 WASM scorers return [0, 1]', async () => {
     const scorers = await tryLoadWasmScorers();
     for (const [, scorer] of Object.entries(scorers!)) {
       const score = scorer.score('hello', 'world', {

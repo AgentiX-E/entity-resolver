@@ -21,8 +21,9 @@ describe('resolveSqlScorerFn', () => {
     expect(resolveSqlScorerFn('damerau_levenshtein')).toBe('damerau_levenshtein');
   });
 
-  it('maps exact to exact_match', () => {
-    expect(resolveSqlScorerFn('exact')).toBe('exact_match');
+  it('maps exact to __exact__ (SQL equality sentinel)', () => {
+    // P1: exact scorer uses SQL l."f"=r."f" equality — not a DuckDB function
+    expect(resolveSqlScorerFn('exact')).toBe('__exact__');
   });
 
   it('maps jaccard to jaccard', () => {
@@ -44,10 +45,9 @@ describe('resolveSqlScorerFn', () => {
     );
   });
 
-  it('throws for unsupported scorer token_sort', () => {
-    expect(() => resolveSqlScorerFn('token_sort')).toThrow(
-      'Scorer "token_sort" is not supported in the SQL pipeline',
-    );
+  it('maps token_sort to jaro_winkler_similarity (composite fallback)', () => {
+    // P1: token_sort is now supported — maps to jaro_winkler_similarity
+    expect(resolveSqlScorerFn('token_sort')).toBe('jaro_winkler_similarity');
   });
 
   it('throws for unsupported scorer double_metaphone', () => {
