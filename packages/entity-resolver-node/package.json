@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@agentix-e/entity-resolver-core": "workspace:*",
-    "@duckdb/node-api": "1.5.5-r.2",
+    "@duckdb/node-api": "1.5.5-r.3",
     "pg": "^8.22.0"
   },
   "devDependencies": {
